@@ -1,11 +1,10 @@
 # RickCV - Dynamic Resume & Cover Letter Template
-
      _____  _      _     _______      __
     |  __ \(_)    | |   / ____\ \    / /
     | |__) |_  ___| | _| |     \ \  / / 
     |  _  /| |/ __| |/ / |      \ \/ /  
     | | \ \| | (__|   <| |____   \  /   
-    |_|  \_\_|\___|_|\_\\_____|   \/  
+    |_|  \_\_|\___|_|\_\\_____|   \/  [rɪk-si-vi]
     A dynamic template for your resume and cover letter
 
 See an example in action at codesandbox: https://hw8733.csb.app/
@@ -49,7 +48,7 @@ git clone https://github.com/rickintoplace/RickCV.git
 ```
 ### 2. Install Dependencies
 
-While RickCV is simple to run, we recommend using **Visual Studio Code** (VSCode) for editing. Additionally, install the **Live Server** extension for a seamless development experience. This extension will allow you to see live updates in your browser as you make changes to the code.
+While RickCV is simple to run, I recommend using **Visual Studio Code** (VSCode) for editing. Additionally, install the **Live Server** extension for a seamless development experience. This extension will allow you to see live updates in your browser as you make changes to the code.
 
 ### 3. Edit Your Data
 
@@ -125,7 +124,7 @@ Here are some optional customizations that you can make to further personalize y
 
 ## Contributing
 
-If you’d like to contribute to the development of RickCV, feel free to fork the repository, make your changes, and create a pull request. We welcome any improvements or new features that could enhance this template.
+If you’d like to contribute to the development of RickCV, feel free to fork the repository, make your changes, and create a pull request. I welcome any improvements or new features that could enhance this template.
 
 ## License
 
