@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<!-- 
+
+     ______ _      _ _          _                         _ _             
+    |  ____(_)    (_) |        | |                       (_) |            
+    | |__   _ _ __ _| | ___   _| |_   _ _ __ ___   __   ___| |_ __ _  ___ 
+ ████████████████████████████████████████████████████████████████████████████
+    | |____| | |  | |   <| |_| | | |_| | | | | | |  \ V /| | || (_| |  __/
+    |______|_|_|  |_|_|\_\\__,_|_|\__,_|_| |_| |_|   \_/ |_|\__\__,_|\___|
+    A dynam
+
+
+     _____  _      _                          __ 
+    |  __ \(_)    | |                        /_/ 
+    | |__) |_  ___| | _____ _   _ _ __ ___   ___ 
+ ████████████████████████████████████████████████████
+    | | \ \| | (__|   <\__ \ |_| | | | | | |  __/
+    |_|  \_\_|\___|_|\_\___/\__,_|_| |_| |_|\___|
+    A dynamic templ
+    
+
+     _____  _      _     _______      __
+    |  __ \(_)    | |   / ____\ \    / /
+    | |__) |_  ___| | _| |     \ \  / / 
+    |  _  /| |/ __| |/ / |      \ \/ /  
+    | | \ \| | (__|   <| |____   \  /   
+    |_|  \_\_|\___|_|\_\\_____|   \/  
+    A dynamic template for your resume and cover letter
+
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Lebenslauf und Anschreiben</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    
+    <div class="document">
+
+      
+      <div id="CV">
+        <div class="resume_wrapper">
+          <div id="ats" class="ats"></div>
+          <div class="resume_left">
+            <div class="resume_image profile-image-container">
+              <div class="resume_image">
+                <img src="url" alt="Profilbild" />
+              </div>
+            </div>
+            <div class="resume_bottom">
+              <div class="resume_item resume_profile">
+                <div class="resume_title">Profil</div>
+                <div class="resume_info profile-container">
+                  <!-- Container für das Profil. Wird mit JS überschrieben -->
+                  <div class="resume_info">
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                    sed do eiusmod tempor incididunt ut labore et dolore magna
+                    aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                    ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                  </div>
+                </div>
+              </div>
+              <div class="resume_item resume_contact">
+                <div class="resume_title">Kontakt</div>
+                <div class="resume_info">
+                  <div class="contact_container">
+                    <!-- Container für die Kontaktdaten. Wird mit JS überschrieben -->
+                    <div class="resume_subinfo">
+                      <i class="material-icons">home</i>
+                      <div class="address-wrapper">
+                        <div class="contact-info" data-info="address"></div>
+                        <div class="contact-info" data-info="city"></div>
+                      </div>
+                    </div>
+                    <div class="resume_subinfo">
+                      <i class="material-icons">mail</i>
+                      <div class="contact-info" data-info="email">
+                        email@gmail.com
+                      </div>
+                    </div>
+                    <div class="resume_subinfo">
+                      <i class="material-icons">phone</i>
+                      <div class="contact-info" data-info="phone">
+                        +49 123456789
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="resume_item resume_language">
+                <div class="resume_title">Sprachen</div>
+                <div class="language_container"></div>
+              </div>
+              <div class="resume_item resume_mobilitySB">
+                <div class="resume_title">Mobilität</div>
+                <div class="resume_info">
+                  <div class="mobilitySB_container">
+                    <!-- Container für Mobilität. Wird mit JS überschrieben -->
+                    <div class="resume_subinfo">
+                      <span class="material-symbols-outlined">directions_car_filled</span
+                      >Führerschein Klasse B
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="resume_item resume_interests">
+                <div class="resume_title">Interessen</div>
+                <div class="resume_info">
+                  <div class="interests_container">
+                    <!-- Container für die Interessen. Wird mit JS überschrieben -->
+                    <div class="resume_subinfo">
+                      <span class="material-symbols-outlined">mindfulness</span
+                      >Achtsamkeit
+                    </div>
+                    <div class="resume_subinfo">
+                      <span class="material-symbols-outlined">nutrition</span
+                      >Ernährung
+                    </div>
+                    <div class="resume_subinfo">
+                      <span class="material-symbols-outlined">music_note</span
+                      >Musikproduktion
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="resume_item resume_projects">
+                <div class="resume_title">Projekte</div>
+                <div class="resume_info projects_container">
+                  <!-- Container für die Projekte. Wird mit JS überschrieben -->
+                  <div class="resume_info project">
+                    <div class="project-img-holder">
+                      <a href="https://url-to-project.com/"
+                        ><img src="img.jpg" alt="projectimage"
+                      /></a>
+                    </div>
+                    <div class="project-txt">
+                      <a href="https://url-to-project.com/">
+                        <h3 class="project-title">Projekttitel</h3></a
+                      >
+                      <span>Beschreibung des Projekts</span>
+                    </div>
+                  </div>
+                  <div class="resume_info project">
+                    <div class="project-img-holder">
+                      <a href="https://url-to-project2.com">
+                        <img
+                          src="img.png"
+                          alt="Pflanzengruppe"
+                        />
+                      </a>
+                    </div>
+                    <div class="project-txt">
+                      <a href="https://url-to-project2.com">
+                        <h3 class="project-title">Projekt 2</h3>
+                      </a>
+                      <span>Beschreibung des Projekts</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Rechte Seite. Infos werden mit JS überschrieben -->
+          <div class="resume_right">
+            <div class="resume_item resume_namerole">
+              <div class="name" data-info="name">Name Nachname</div>
+              <div class="role" data-info="role"></div>
+            </div>
+            <div class="resume_item timeline-container" id="education-section">
+              <div class="resume_title">
+                <i class="material-icons">school</i>Ausbildung
+              </div>
+              <div
+                class="timeline timeline-education"
+                id="education_timeline"
+              ></div>
+            </div>
+
+            <div class="resume_item timeline-container" id="experience-section">
+              <div class="resume_title">
+                <i class="material-icons">work</i>Berufserfahrung
+              </div>
+              <div
+                class="timeline timeline-experience"
+                id="experience_timeline"
+              ></div>
+            </div>
+
+            <div class="resume_item timeline-container" id="volunteer-section">
+              <div class="resume_title">
+                <i class="material-icons">volunteer_activism</i>Ehrenamt
+              </div>
+              <div
+                class="timeline timeline-volunteer"
+                id="volunteer_timeline"
+              ></div>
+            </div>
+
+            <div class="resume_item resmue_skills">
+              <div class="resume_title">
+                <i class="material-icons">star</i>Kenntnisse
+              </div>
+              <div
+                id="skills-container"
+                class="resume_info skills-container"
+              ></div>
+            </div>
+            <div class="resume_item resmue_mobility">
+              <div class="resume_title">
+                <i class="material-icons">directions_car_filled</i>Mobilität
+              </div>
+              <div class="resume_info mobility-container">
+                Führerschein Klasse B
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Ende CV-->
+      <!--Ab hier Cover Letter-->
+      <div class="cover-letter">
+        <div class="cover-letter_wrapper">
+          <div class="cover-letter-header">
+            <div class="cover-letter-sender">
+              <div class="resume_item resume_namerole">
+                <h1 class="contact-info" data-info="name"></h1>
+                <div
+                  class="cover-letter-role contact-info"
+                  data-info="role"
+                ></div>
+              </div>
+              <div class="header-contact-section">
+                <div class="resume_subinfo">
+                  <i class="material-icons">phone</i>
+                  <div class="contact-info" data-info="phone">
+                    +49 123456789
+                  </div>
+                </div>
+                <div class="resume_subinfo">
+                  <i class="material-icons">home</i>
+                  <div class="address-wrapper">
+                    <div class="contact-info" data-info="address"></div>
+                    <div class="contact-info" data-info="city"></div>
+                  </div>
+                </div>
+                <div class="resume_subinfo">
+                  <i class="material-icons">mail</i>
+                  <div class="contact-info" data-info="email">
+                    email@gmail.com
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="cover-letter-content">
+            <br />
+            <br />
+            <br />
+            <div class="cover-letter-recipient">
+              Firma Beispiel GmbH<br />
+              Ansprechpartner Beate Beispiel<br />
+              Beispielstraße 2<br />
+              54321 Beispielstadt
+            </div>
+            <br />
+            <br />
+            <div class="cover-letter-date">Musterstadt, 01. Januar 2025</div>
+            <br />
+            <br />
+            <div class="cover-letter-regard textblock">
+              Bewerbung als Zugbegleiter
+            </div>
+            <br />
+            <br />
+            <div class="cover-letter-salutation textblock">
+              Sehr geehrte Damen und Herren,
+            </div>
+            <div class="cover-letter-body textblock">
+              <p>
+                hiermit bewerbe ich mich um die Stelle des Zugbegleiters und Fahrkartenkontrolleurs bei der Deutschen Bahn.
+              </p>
+            </div>
+            <div class="cover-letter-body textblock">
+              <p>
+                Als begeisterter Modelleisenbahnkenner habe ich bereits Erfahrung in diesem Bereich und bin überzeugt, dass ich eine wertvolle Ergänzung für Ihr Team sein kann. 
+              </p> 
+            </div>
+            <div class="cover-letter-body textblock">
+              <p>
+                Gern überzeuge ich Sie bei einem anregenden Glas Wein persönlich von meiner Kompetenz und erkläre Ihnen, warum die 9 seit der Grundschule meine Lieblingszahl ist.
+              </p>
+            </div>
+            <div class="cover-letter-closing textblock">
+              Mit freundlichen Grüßen<br />
+              <div class="signature">
+                <img
+                  src="https://i.ibb.co/khDQHKh/photo-2025-01-02-15-00-30.jpg"
+                  alt="Unterschrift"
+                  style="height: 2rlh"
+                />
+                <!--setzt die Unterschrifthöhe auf 2 * Lineheight-->
+              </div>
+              <span class="contact-info" data-info="name"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Ende Document-->
+    <script src="./index.mjs" type="module"></script>
+  </body>
+</html>
