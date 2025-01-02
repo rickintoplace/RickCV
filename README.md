@@ -1,4 +1,4 @@
-# RickCV
+# RickCV - Dynamic Resume & Cover Letter Template
 
      _____  _      _     _______      __
     |  __ \(_)    | |   / ____\ \    / /
@@ -10,9 +10,6 @@
 
 See an example in action at codesandbox: https://hw8733.csb.app/
 
-
-# RickCV - Dynamic Resume & Cover Letter Template
-
 Welcome to **RickCV** – a dynamic template designed to create customizable and professional resumes and cover letters. This project is built using HTML, CSS, and JavaScript, offering a clean, modern layout that is fully adjustable for your needs. It also includes features to optimize your resume for Applicant Tracking Systems (ATS), making it easy to tailor your content for both human and machine readers.
 
 ## Features
@@ -22,6 +19,8 @@ Welcome to **RickCV** – a dynamic template designed to create customizable and
 - **Multiple Layouts:** Choose from different layouts to fit your personal style, including 'clean', 'icons', and 'dynaline'.
 - **Customizable Styling:** Fully customizable color themes, fonts, margins, and profile image options.
 - **Export to PDF:** Export your finalized resume and cover letter as a PDF for easy printing or sharing.
+
+![alt text](https://github.com/rickintoplace/RickCV/blob/main/examples/preview.png?raw=true)
 
 ## How to Use
 
