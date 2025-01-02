@@ -14,8 +14,8 @@ Welcome to **RickCV** – a dynamic template designed to create customizable and
 ## Preview
 
 <p align="center">
-<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/preview1.png?raw=true" width="500">
-<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/preview2.png?raw=true" width="500">
+<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/preview1.png?raw=true" width="48%">
+<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/preview2.png?raw=true" width="48%">
 </p>
 
 Two A4 pages are generated and saved as a PDF file that can be read by both people and machines.
@@ -33,8 +33,8 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 
 ### Customize icons, sections, timeline and chronology
 <p align="center">
-<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/example%20dynaline.png?raw=true" width="500">
-<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/example%20%20icons.png?raw=true" width="500">
+<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/example%20dynaline.png?raw=true" width="48%">
+<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/example%20%20icons.png?raw=true" width="48%">
 </p>
 
 ## How to Use
