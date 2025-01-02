@@ -12,6 +12,15 @@ See an example in action at codesandbox: https://hw8733.csb.app/
 
 Welcome to **RickCV** – a dynamic template designed to create customizable and professional resumes and cover letters. This project is built using HTML, CSS, and JavaScript, offering a clean, modern layout that is fully adjustable for your needs. It also includes features to optimize your resume for Applicant Tracking Systems (ATS), making it easy to tailor your content for both human and machine readers.
 
+## Preview
+
+<p align="center">
+<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/preview1.png?raw=true" width="500">
+<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/preview2.png?raw=true" width="500">
+</p>
+
+Two A4 pages are generated and saved as a PDF file that can be read by both people and machines.
+
 ## Features
 
 - **Dynamic Content:** Easily adjust your resume's layout, profile, and contact details, along with other sections like languages, skills, education, and projects.
@@ -20,7 +29,14 @@ Welcome to **RickCV** – a dynamic template designed to create customizable and
 - **Customizable Styling:** Fully customizable color themes, fonts, margins, and profile image options.
 - **Export to PDF:** Export your finalized resume and cover letter as a PDF for easy printing or sharing.
 
-![alt text](https://github.com/rickintoplace/RickCV/blob/main/examples/preview.png?raw=true)
+### Dynamically change the color
+![color changes](https://github.com/rickintoplace/RickCV/blob/main/examples/dynamic%20accent%20color.png?raw=true)
+
+### Customize icons, sections, timeline and chronology
+<p align="center">
+<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/example%20dynaline.png?raw=true" width="500">
+<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/example%20%20icons.png?raw=true" width="500">
+</p>
 
 ## How to Use
 
