@@ -1,0 +1,44 @@
+# Veroeffentlicht RickCV bei jedem Push auf GitHub Pages.
+#
+# Einmalige Einrichtung im Repository:
+#   Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
+#
+# Danach ist der Baukasten erreichbar unter
+#   https://<benutzername>.github.io/<repository>/
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Laufende Deployments nicht abbrechen, aber auch nicht doppelt starten.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # RickCV ist eine statische Seite: es wird nichts gebaut,
+      # der Ordner wird unveraendert hochgeladen.
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

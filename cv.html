@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!--
+     _____  _      _     _______      __
+    |  __ \(_)    | |   / ____\ \    / /
+    | |__) |_  ___| | _| |     \ \  / /
+    |  _  /| |/ __| |/ / |      \ \/ /
+    | | \ \| | (__|   <| |____   \  /
+    |_|  \_\_|\___|_|\_\\_____|   \/
+
+    cv.html – das eigentliche Dokument (Lebenslauf + Anschreiben).
+    Wird vom Builder in einem iframe angezeigt und per postMessage befuellt.
+    Laesst sich auch direkt oeffnen: dann kommen die Daten aus dem Browser-
+    Speicher, sonst aus den Beispieldaten.
+-->
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lebenslauf und Anschreiben</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+      /* Im Vorschaurahmen sollen die Seiten untereinander stehen. */
+      body {
+        background: #c4c4c4;
+      }
+      .document {
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        padding: 24px 0;
+      }
+      .resume_wrapper,
+      .cover-letter_wrapper {
+        margin: 0 !important;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+        flex-shrink: 0;
+      }
+      @media print {
+        body {
+          background: #fff;
+        }
+        .document {
+          gap: 0;
+          padding: 0;
+        }
+        .resume_wrapper,
+        .cover-letter_wrapper {
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="document"></div>
+
+    <script src="defaults.js"></script>
+    <script src="render.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        var STORAGE_KEY = "rickcv.data.v2";
+
+        function paint(data) {
+          try {
+            RickCVRender.render(document, data);
+          } catch (error) {
+            console.error("RickCV Render-Fehler:", error);
+            parent.postMessage(
+              { type: "rickcv:error", message: String(error && error.message) },
+              "*"
+            );
+          }
+        }
+
+        function reportHeight() {
+          parent.postMessage(
+            {
+              type: "rickcv:height",
+              height: document.documentElement.scrollHeight,
+            },
+            "*"
+          );
+        }
+
+        window.addEventListener("message", function (event) {
+          var message = event.data;
+          if (!message || typeof message !== "object") return;
+
+          if (message.type === "rickcv:data") {
+            paint(message.data);
+            requestAnimationFrame(function () {
+              requestAnimationFrame(reportHeight);
+            });
+          } else if (message.type === "rickcv:print") {
+            window.focus();
+            window.print();
+          }
+        });
+
+        // Direktaufruf ohne Builder: gespeicherte Daten oder Beispiel anzeigen.
+        var initial = null;
+        try {
+          var stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) initial = JSON.parse(stored);
+        } catch (error) {
+          /* localStorage nicht verfuegbar – dann eben die Beispieldaten */
+        }
+        paint(initial || window.RickCVDefaults);
+
+        window.addEventListener("load", reportHeight);
+        parent.postMessage({ type: "rickcv:ready" }, "*");
+      })();
+    </script>
+  </body>
+</html>

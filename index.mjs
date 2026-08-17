@@ -34,7 +34,7 @@ let contactInfo = {
 };
 
 // Möglichkeit, Sprachkenntnisse anzugeben, inklusive eines optionalen Niveaus "level", das visuell im Balken dargestellt wird.
-let showLanguages = 1; // 1 für anzeigen, 0 für ausblenden
+let showLanguages = 0 // 1 für anzeigen, 0 für ausblenden
 let lang = [
   { name: "Deutsch", percentage: 100 },
   { name: "Klingonisch", percentage: 60, level: "B2" },

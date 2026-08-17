@@ -23,11 +23,18 @@
     );  /* dynamische helle Färbung der Sidebar sieht gut aus */
   --sidebar-font-color: #33333b; /*Die Schriftfarbe der Sidebar. Je nach Farbe der Sidebar anpassen, z.B. #33333b bei heller Sidebar und #f5f5f5 bei dunkler Sidebar*/
 
-  /*Positionierung des Profilbildes*/
-  --img-position-x: 12px;
-  --img-position-y: center;
+  /*Positionierung des Profilbildes. Wird im Builder ueber den Bild-Editor gesetzt.*/
+  --img-position-x: 50%;
+  --img-position-y: 50%;
+  --img-scale: 1;
+  --img-height: 7cm; /*Hoehe des Bildbereichs. "auto" nutzt die Originalproportion.*/
+  --img-radius: 0;
 
-  --img-scale: 1.2;
+  /*Schriftart des gesamten Dokuments*/
+  --font-family: "Open Sans", sans-serif;
+
+  /*Farbe der nicht ausgefuellten Skill-Punkte*/
+  --color-empty: #d9d9d9;
 
 
 
@@ -67,10 +74,15 @@
   padding: 0;
   list-style: none;
   box-sizing: border-box;
-  font-family: "Roboto", sans-serif;
-  /*font-family: Gill Sans, Gill Sans MT, Calibri, sans-serif;*/
-  font-family: "Open Sans";
-  /*font-family: 'Ubuntu';*/
+  font-family: var(--font-family);
+}
+
+/*Icon-Fonts duerfen nicht von der gewaehlten Schriftart ueberschrieben werden*/
+.material-icons {
+  font-family: "Material Icons" !important;
+}
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined" !important;
 }
 
 body {
@@ -150,6 +162,12 @@ a {
   display: flex;
   align-items: flex-start;
   width: max-content;
+
+  /*  Das Datum steht absolut positioniert daneben und ist zwei Zeilen hoch.
+      Ohne Mindesthoehe wuerde ein kurzer Eintrag (nur Titel, keine Firma)
+      niedriger als sein Datum und die Eintraege wuerden sich ueberlappen. */
+  min-height: 44px;
+  min-height: calc(2lh + 4px);
 }
 
 .event-company {
@@ -281,21 +299,35 @@ a {
 
 .resume_wrapper .resume_left .resume_image {
   width: 100%;
-  display: inline-block;
+  height: var(--img-height);
+  display: block;
   overflow: hidden;
+  flex-shrink: 0;
+  border-radius: var(--img-radius);
 }
 
 .resume_wrapper .resume_left .resume_image img {
   width: 100%;
+  height: 100%;
   display: block;
   padding: var(--img-border);
-  /* max-height: 7cm; */
   object-fit: cover;
   object-position: var(--img-position-x) var(--img-position-y);
   position: relative;
   margin: auto;
-  /* inline-size: 120%; */
-  transform:  scale(var(--img-scale)) scaleX(1);
+  transform: scale(var(--img-scale));
+}
+
+/*Bildform: Band ueber die volle Sidebarbreite (Standard), abgerundet oder Kreis*/
+body.photo-rounded .resume_wrapper .resume_left .resume_image,
+body.photo-circle .resume_wrapper .resume_left .resume_image {
+  width: var(--img-height);
+  height: var(--img-height);
+  margin: 1.2em auto 0;
+}
+
+body.photo-circle .resume_wrapper .resume_left .resume_image {
+  border-radius: 50%;
 }
 
 .resume_wrapper .resume_left .resume_title {
@@ -589,6 +621,7 @@ a {
   margin-left: 0.5em;
 }
 
+.rank,
 #rank {
   --color-full: var(--accent-color);
   --color-empty: #26252d45;
@@ -610,6 +643,7 @@ a {
   display: inline-block;
 }
 
+.rank::before,
 #rank::before {
   content: "●●●●●";
   position: absolute;
@@ -622,6 +656,7 @@ a {
   z-index: 1; /* Damit das Pseudoelement oben ist */
 }
 
+.rank::after,
 #rank::after {
   content: "";
   color: var(--color-empty);
@@ -746,14 +781,35 @@ a {
   padding-top: 0;
 }
 
+/*  Abstaende nach DIN 5008. Frueher standen dafuer <br>-Ketten im HTML,
+    jetzt macht das Stylesheet den Satzspiegel. */
+
+.cover-letter-recipient {
+  margin-top: 3em; /* Anschriftenfeld */
+  white-space: pre-line;
+  min-height: 4lh;
+}
+
 .cover-letter-date {
-  /* font-weight: bold; */
-  /* margin-bottom: 10px; */
   text-align: right;
+  margin-top: 1.5em;
 }
 
 .cover-letter-regard {
   font-weight: bold;
+  margin-top: 2.5em;
+}
+
+.cover-letter-salutation {
+  margin-top: 1.5em;
+}
+
+.cover-letter-body {
+  margin-top: 1em;
+}
+
+.cover-letter-closing {
+  margin-top: 2em;
 }
 
 .cover-letter-recipient,
@@ -1108,16 +1164,39 @@ a {
 
 /*Für PDF Export (Seite mit Chrome öffnen, drucken, als PDF speichern, A4, Ränder: keine)*/
 
+@page {
+  size: A4;
+  margin: 0;
+}
+
 @media print {
-  * {
-  }
-  .document {
-    -webkit-print-color-adjust: exact;
+  html,
+  body {
+    background: #fff;
+    width: 21cm;
   }
 
-  .resume_wrapper, .cover-letter_wrapper {
+  .document {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    display: block;
+  }
+
+  .resume_wrapper,
+  .cover-letter_wrapper {
     margin: 0 !important;
-    /* padding: 0 !important; */
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  /*Nach der letzten Seite keine Leerseite erzeugen*/
+  .document > *:last-child .resume_wrapper,
+  .document > *:last-child .cover-letter_wrapper {
+    break-after: auto;
+    page-break-after: auto;
   }
 
   iframe {
