@@ -22,33 +22,23 @@
     />
     <link rel="stylesheet" href="builder.css" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,100..700,0..1,-50..200"
       rel="stylesheet"
     />
   </head>
   <body>
     <header class="app-header">
-      <div class="brand">RickCV <small>Lebenslauf-Baukasten</small></div>
+      <div class="brand">RickCV <small id="brand-tagline">Lebenslauf-Baukasten</small></div>
 
       <div class="header-spacer"></div>
 
       <div class="header-actions">
-        <button class="btn" id="btn-example" title="Beispieldaten laden">
-          Beispiel
-        </button>
-        <button class="btn" id="btn-reset" title="Leer neu beginnen">Neu</button>
-        <button class="btn" id="btn-import" title="Gespeicherte JSON-Datei laden">
-          Importieren
-        </button>
-        <button class="btn" id="btn-export" title="Daten als JSON sichern">
-          Exportieren
-        </button>
-        <button class="btn" id="btn-open" title="Dokument in neuem Tab öffnen">
-          Neuer Tab
-        </button>
-        <button class="btn btn-primary" id="btn-print" title="Als PDF speichern">
-          Als PDF speichern
-        </button>
+        <button class="btn" id="btn-example">Beispiel</button>
+        <button class="btn" id="btn-reset">Neu</button>
+        <button class="btn" id="btn-import">Importieren</button>
+        <button class="btn" id="btn-export">Exportieren</button>
+        <button class="btn" id="btn-open">Neuer Tab</button>
+        <button class="btn btn-primary" id="btn-print">Als PDF speichern</button>
       </div>
     </header>
 
@@ -59,40 +49,44 @@
 
     <main class="app-main">
       <aside class="editor" id="editor"></aside>
-      <div class="resizer" id="resizer" title="Breite ziehen"></div>
+      <div class="resizer" id="resizer"></div>
 
       <section class="preview">
         <div class="preview-bar">
-          <label for="zoom">Zoom</label>
+          <label for="zoom" id="zoom-label">Zoom</label>
           <select id="zoom">
             <option value="fit">Einpassen</option>
             <option value="0.5">50 %</option>
             <option value="0.75">75 %</option>
             <option value="1">100 %</option>
           </select>
+          <span class="page-count" id="page-count"></span>
+          <span class="browser-warn" id="browser-warn" hidden></span>
           <span class="status" id="status">Bereit</span>
         </div>
 
         <div class="preview-scroll" id="preview-scroll">
           <div class="preview-canvas" id="preview-canvas">
             <div class="preview-stage" id="preview-stage">
-              <iframe
-                id="preview-frame"
-                src="cv.html"
-                title="Vorschau des Lebenslaufs"
-              ></iframe>
+              <iframe id="preview-frame" src="cv.html" title="Vorschau"></iframe>
             </div>
           </div>
         </div>
       </section>
     </main>
 
-    <div class="toast" id="toast"></div>
-    <datalist id="material-icons"></datalist>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <input type="file" id="import-file" accept="application/json,.json" hidden />
 
-    <script src="defaults.js"></script>
-    <script src="render.js"></script>
-    <script src="builder.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/icon-data.js"></script>
+    <script src="js/icons.js"></script>
+    <script src="js/icon-picker.js"></script>
+    <script src="js/model.js"></script>
+    <script src="js/ats.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/fields.js"></script>
+    <script src="js/sections.js"></script>
+    <script src="js/builder.js"></script>
   </body>
 </html>

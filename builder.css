@@ -695,3 +695,307 @@ textarea {
   margin-top: 4px;
   margin-bottom: 0;
 }
+
+/* ================================================================ Hinweise */
+
+.note {
+  font-size: 12.5px;
+  line-height: 1.5;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0 0 12px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-panel-2);
+}
+
+.note-info {
+  border-left: 3px solid var(--ui-accent);
+}
+
+.note-warn {
+  border-left: 3px solid var(--ui-danger);
+  background: color-mix(in oklab, var(--ui-danger), transparent 92%);
+}
+
+/* ---------------------------------------------------------- Unterblöcke */
+
+.sub-block {
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  margin-bottom: 12px;
+  background: var(--ui-panel-2);
+  overflow: hidden;
+}
+
+.sub-block > summary {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  list-style: none;
+}
+
+.sub-block > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sub-block > summary::before {
+  content: "▸ ";
+  color: var(--ui-muted);
+  font-size: 10px;
+}
+
+.sub-block[open] > summary::before {
+  content: "▾ ";
+}
+
+.sub-block-body {
+  padding: 10px;
+  border-top: 1px solid var(--ui-line);
+  background: var(--ui-panel);
+}
+
+/* ------------------------------------------------------------ Icon-Feld */
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 9px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: var(--ui-panel-2);
+  cursor: pointer;
+  text-align: left;
+}
+
+.icon-button:hover {
+  border-color: var(--ui-accent);
+  background: var(--ui-accent-soft);
+}
+
+.icon-button-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--ui-accent);
+}
+
+.icon-button-preview .rc-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.icon-button-preview .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.icon-button-name {
+  font-size: 12.5px;
+  color: var(--ui-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shade-custom {
+  margin-top: 8px;
+  width: 100%;
+  height: 32px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: var(--ui-panel-2);
+  padding: 2px;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------- Icon-Picker */
+
+body.picker-open {
+  overflow: hidden;
+}
+
+.picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 15, 19, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+
+.picker-overlay[hidden] {
+  display: none;
+}
+
+.picker-panel {
+  width: min(640px, 100%);
+  max-height: min(680px, 90vh);
+  display: flex;
+  flex-direction: column;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.picker-head {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.picker-search {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: var(--ui-panel-2);
+  font-size: 14px;
+}
+
+.picker-search:focus {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: -1px;
+}
+
+.picker-sets {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px 0;
+}
+
+.picker-set {
+  padding: 5px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 999px;
+  background: var(--ui-panel-2);
+  cursor: pointer;
+  font-size: 12.5px;
+}
+
+.picker-set.is-active {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.picker-note {
+  margin: 8px 12px 0;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.picker-grid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 6px;
+  align-content: start;
+}
+
+.picker-group {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+  padding: 10px 2px 2px;
+}
+
+.picker-item {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--ui-panel-2);
+  cursor: pointer;
+  color: var(--ui-text);
+}
+
+.picker-item:hover {
+  background: var(--ui-accent-soft);
+  border-color: var(--ui-accent);
+}
+
+.picker-item:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 1px;
+}
+
+.picker-item.is-current {
+  border-color: var(--ui-accent);
+  background: var(--ui-accent-soft);
+}
+
+.picker-item .rc-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.picker-item .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.picker-empty {
+  grid-column: 1 / -1;
+  color: var(--ui-muted);
+  text-align: center;
+  padding: 32px 0;
+}
+
+/* ---------------------------------------------------------- Seitenzahl */
+
+.page-count {
+  font-size: 12px;
+  color: var(--ui-muted);
+  border: 1px solid var(--ui-line);
+  border-radius: 999px;
+  padding: 1px 9px;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------- ATS-Textfeld */
+
+.ats-preview {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ats-preview[readonly] {
+  color: var(--ui-muted);
+  background: var(--ui-panel-2);
+}
+
+/* Hinweis für Browser, deren Druckausgabe vom Layout abweicht */
+
+.browser-warn {
+  font-size: 12px;
+  color: var(--ui-danger);
+  border: 1px solid color-mix(in oklab, var(--ui-danger), transparent 60%);
+  background: color-mix(in oklab, var(--ui-danger), transparent 92%);
+  border-radius: 999px;
+  padding: 1px 10px;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.browser-warn[hidden] {
+  display: none;
+}

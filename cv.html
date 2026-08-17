@@ -1,27 +1,22 @@
 <!DOCTYPE html>
 <!--
-     _____  _      _     _______      __
-    |  __ \(_)    | |   / ____\ \    / /
-    | |__) |_  ___| | _| |     \ \  / /
-    |  _  /| |/ __| |/ / |      \ \/ /
-    | | \ \| | (__|   <| |____   \  /
-    |_|  \_\_|\___|_|\_\\_____|   \/
+    cv.html – das eigentliche Dokument (Lebenslauf, Anschreiben, Textfassung).
 
-    cv.html – das eigentliche Dokument (Lebenslauf + Anschreiben).
-    Wird vom Builder in einem iframe angezeigt und per postMessage befuellt.
-    Laesst sich auch direkt oeffnen: dann kommen die Daten aus dem Browser-
-    Speicher, sonst aus den Beispieldaten.
+    Laeuft im Vorschaurahmen des Builders und wird per postMessage befuellt.
+    Direkt geoeffnet zeigt es den zuletzt gespeicherten Stand.
 -->
 <html lang="de">
   <head>
     <meta charset="utf-8" />
-    <title>Lebenslauf und Anschreiben</title>
+    <title>Lebenslauf</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
     <style>
-      /* Im Vorschaurahmen sollen die Seiten untereinander stehen. */
+      /* Im Vorschaurahmen stehen die Seiten untereinander. */
       body {
         background: #c4c4c4;
       }
@@ -32,7 +27,8 @@
         padding: 24px 0;
       }
       .resume_wrapper,
-      .cover-letter_wrapper {
+      .cover-letter_wrapper,
+      .ats-appendix_wrapper {
         margin: 0 !important;
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
         flex-shrink: 0;
@@ -46,7 +42,8 @@
           padding: 0;
         }
         .resume_wrapper,
-        .cover-letter_wrapper {
+        .cover-letter_wrapper,
+        .ats-appendix_wrapper {
           box-shadow: none;
         }
       }
@@ -55,12 +52,18 @@
   <body>
     <div class="document"></div>
 
-    <script src="defaults.js"></script>
-    <script src="render.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/icon-data.js"></script>
+    <script src="js/icons.js"></script>
+    <script src="js/model.js"></script>
+    <script src="js/ats.js"></script>
+    <script src="js/render.js"></script>
     <script>
       (function () {
         "use strict";
-        var STORAGE_KEY = "rickcv.data.v2";
+        var STORAGE_KEY = "rickcv.data.v3";
+        var LEGACY_KEY = "rickcv.data.v2";
+        var PAGE_HEIGHT_CM = 29.7;
 
         function paint(data) {
           try {
@@ -74,11 +77,40 @@
           }
         }
 
-        function reportHeight() {
+        //  Die Seitenzahl wird aus der tatsaechlichen Hoehe der Bloecke
+        //  berechnet – der Builder zeigt sie neben dem Zoom an.
+        function countPages() {
+          var perPage = (PAGE_HEIGHT_CM / 2.54) * 96; // cm -> px bei 96 dpi
+          var pages = 0;
+          document.querySelectorAll(
+            ".resume_wrapper, .cover-letter_wrapper, .ats-appendix_wrapper"
+          ).forEach(function (block) {
+            pages += Math.max(1, Math.ceil(block.offsetHeight / perPage - 0.02));
+          });
+          return pages || 1;
+        }
+
+        //  Hoehe und Seitenzahl erzwingen ein Layout. Das kostet, also wird
+        //  bei mehreren Renderdurchgaengen kurz hintereinander nur einmal
+        //  gemessen – gezeichnet wird trotzdem sofort.
+        var reportQueued = false;
+        function scheduleReport() {
+          if (reportQueued) return;
+          reportQueued = true;
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              reportQueued = false;
+              report();
+            });
+          });
+        }
+
+        function report() {
           parent.postMessage(
             {
               type: "rickcv:height",
               height: document.documentElement.scrollHeight,
+              pages: countPages(),
             },
             "*"
           );
@@ -90,26 +122,25 @@
 
           if (message.type === "rickcv:data") {
             paint(message.data);
-            requestAnimationFrame(function () {
-              requestAnimationFrame(reportHeight);
-            });
+            scheduleReport();
           } else if (message.type === "rickcv:print") {
             window.focus();
             window.print();
           }
         });
 
-        // Direktaufruf ohne Builder: gespeicherte Daten oder Beispiel anzeigen.
+        // Direktaufruf: gespeicherten Stand oder Beispiel zeigen.
         var initial = null;
         try {
-          var stored = localStorage.getItem(STORAGE_KEY);
-          if (stored) initial = JSON.parse(stored);
+          var stored =
+            localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
+          if (stored) initial = RickCVModel.migrate(JSON.parse(stored));
         } catch (error) {
-          /* localStorage nicht verfuegbar – dann eben die Beispieldaten */
+          /* kein Speicher verfuegbar – dann eben das Beispiel */
         }
-        paint(initial || window.RickCVDefaults);
+        paint(initial || RickCVModel.createExample("de"));
 
-        window.addEventListener("load", reportHeight);
+        window.addEventListener("load", report);
         parent.postMessage({ type: "rickcv:ready" }, "*");
       })();
     </script>

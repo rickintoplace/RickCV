@@ -33,6 +33,17 @@
   /*Schriftart des gesamten Dokuments*/
   --font-family: "Open Sans", sans-serif;
 
+  /*Symbolstil. --icon-stroke gilt fuer Lucide (SVG), --icon-weight fuer die
+    wght-Achse von Material Symbols. Beide werden aus einem Regler abgeleitet,
+    damit die Saetze gleich kraeftig wirken.*/
+  --icon-stroke: 1.75;
+  --icon-weight: 400;
+  --icon-scale: 1;
+  --icon-color: var(--accent-color);
+  --icon-bg: transparent;
+  --icon-bg-radius: 50%;
+  --icon-bg-pad: 0;
+
   /*Farbe der nicht ausgefuellten Skill-Punkte*/
   --color-empty: #d9d9d9;
 
@@ -87,13 +98,48 @@
 
 body {
   background: #c4c4c4;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: var(--base-font-size);
+  line-height: 1.43;
 }
 
 .material-symbols-outlined,
 .resume_title .material-icons {
   font-variant: none !important; /*Damit Variationen der Schriftart nicht auf Icons angewendet werden (z.B. Kapitälchen)*/
+}
+
+/*  Lucide-Symbole sind eingebettete SVGs. Sie erben die Textfarbe und
+    skalieren mit der Schriftgroesse – wie ein Icon-Font, aber ohne
+    Netzwerk und ohne Text im ausgelesenen PDF. */
+.rc-icon {
+  width: calc(1.15em * var(--icon-scale));
+  height: calc(1.15em * var(--icon-scale));
+  display: inline-block;
+  vertical-align: -0.2em;
+  flex-shrink: 0;
+  stroke-width: var(--icon-stroke);
+}
+
+/*  Material Symbols ist eine variable Schrift: die wght-Achse ist das
+    Gegenstueck zu stroke-width bei Lucide. Zusaetzlich haben die Glyphen
+    Innenabstand im Kaestchen und wirken bei gleicher Kantenlaenge rund 8 %
+    kleiner – deshalb der groessere Faktor. */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" var(--icon-weight), "GRAD" 0, "opsz" 24;
+  font-size: calc(1.25em * var(--icon-scale));
+}
+
+/*  Einfaerbung und optionaler Hintergrund gelten fuer die Symbole in
+    Ueberschriften und Listeneintraegen. Die Punkte der Zeitleiste sind davon
+    ausgenommen: sie tragen bereits ihren eigenen farbigen Kreis. */
+.resume_title .rc-icon,
+.resume_title .material-symbols-outlined,
+.resume_subinfo .rc-icon,
+.resume_subinfo .material-symbols-outlined {
+  color: var(--icon-color);
+  background: var(--icon-bg);
+  border-radius: var(--icon-bg-radius);
+  padding: var(--icon-bg-pad);
+  box-sizing: content-box;
 }
 
 /*Links*/
@@ -193,8 +239,17 @@ a {
   /* left: calc(1 * var(--offset));*/
 }
 
-.dot .material-symbols-outlined {
+.dot .material-symbols-outlined,
+.dot .rc-icon {
   color: var(--background-color);
+  background: none;
+  padding: 0;
+}
+
+.dot .rc-icon {
+  width: 1.05em;
+  height: 1.05em;
+  vertical-align: middle;
 }
 
 .event::after {
@@ -229,10 +284,8 @@ a {
 
 .content p, span {
   /*margin: 5px 0 0;*/
-  font-size: 10pt;
-  color: var(
-    --font-color
-  ); /* #666;  Optional: andere Farbe für die Beschreibung */
+  font-size: 0.95em;
+  color: var(--font-color);
 }
 
 .content .event-list ul {
@@ -282,12 +335,27 @@ a {
 
 .resume_wrapper {
   display: flex;
-  width: 800px;
   margin: 60px auto 0 0;
   background: var(--background-color);
   padding: var(--border);
   width: 21cm;
   height: 29.7cm;
+}
+
+/*  Mehrseitiger Lebenslauf: die Seite darf wachsen, der Inhalt laeuft im
+    Druck auf weitere Blaetter. Die Sidebar traegt ihren Hintergrund ueber
+    alle Seiten, weil sie mit dem Flex-Container mitwaechst. */
+body.pages-flow .resume_wrapper {
+  height: auto;
+  min-height: 29.7cm;
+}
+
+/* Einzelne Eintraege sollen nie mitten durchgeschnitten werden. */
+body.pages-flow .event,
+body.pages-flow .resume_item,
+body.pages-flow .project {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .resume_wrapper .resume_left {
@@ -362,6 +430,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 }
 
 .resume_title .material-symbols-outlined,
+.resume_title .rc-icon,
 .resume_title .material-icons {
   margin: 0 0 0 -1.2em;
   padding: 0;
@@ -371,6 +440,24 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   /* color: var(--accent-color); */
   font-weight: bold;
   position: absolute;
+}
+
+/*  SVG-Symbole richten sich nicht ueber font-size aus: sie bekommen die
+    Groesse der Ueberschrift direkt und einen eigenen Abstand zum Text. */
+.resume_title .rc-icon {
+  width: calc(var(--headline-size) * 1.25 * var(--icon-scale));
+  height: calc(var(--headline-size) * 1.25 * var(--icon-scale));
+  margin: 0 0.35em 0 calc(var(--headline-size) * -1.6);
+  vertical-align: -0.22em;
+}
+
+.resume_title .material-symbols-outlined {
+  font-size: calc(var(--headline-size) * 1.35 * var(--icon-scale));
+  margin-right: 0.3em;
+}
+
+.resume_wrapper .resume_left .resume_title .rc-icon {
+  margin-left: 0;
 }
 
 .resume_wrapper .resume_left .resume_info {
@@ -432,6 +519,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 */
 
 .cover-letter-header .material-icons,
+.cover-letter-header .rc-icon,
 .cover-letter-header .material-symbols-outlined {
   margin-left: 0.2em;
   color: var(--accent-color);
@@ -723,9 +811,10 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 }
 
 .resume_left .material-icons,
-.resume_left .material-symbols-outlined {
+.resume_left .material-symbols-outlined,
+.resume_left .rc-icon {
   margin-right: 0.5em;
-  color: var(--accent-color);
+  color: var(--icon-color);
 }
 
 .cover-letter .resume_item.resume_namerole {
@@ -1204,30 +1293,92 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   }
 }
 
-/*Styling für ATS (application tracking system) */
+/*  Maschinenlesbare Textfassung
+    ---------------------------------------------------------------------
+    "appendix" ist eine normal gesetzte Zusatzseite: sichtbar, lesbar und
+    damit unbedenklich. "hidden" bleibt waehlbar, ist aber im Editor als
+    riskant gekennzeichnet – siehe js/ats.js. */
 
-#ats {
-  p {
-    height: 0.5em;
-  }
-  h2,
-  li {
-    font-family: verdana;
-    margin: 0.1em 10px;
-  }
+.ats-appendix_wrapper {
+  width: 21cm;
+  min-height: 29.7cm;
+  margin: 60px auto;
+  padding: 2cm var(--right-margin) var(--bottom-margin) var(--left-margin);
+  background: var(--background-color);
+  color: var(--font-color);
+}
+
+.ats-appendix_wrapper h1 {
+  font-size: calc(var(--title-size) * 0.6);
+  color: var(--accent-color);
+  margin-bottom: 0.4em;
+}
+
+.ats-intro {
+  font-size: 0.9em;
+  color: color-mix(in oklab, var(--font-color), white 35%);
+  margin-bottom: 1.6em;
+}
+
+.ats-block {
+  margin-bottom: 1.2em;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.ats-block h2 {
+  font-size: var(--headline-size);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--accent-color);
+  margin-bottom: 0.4em;
+  padding-bottom: 0.15em;
+}
+
+.ats-block li {
+  white-space: pre-line;
+  margin-bottom: 0.35em;
+}
+
+.ats-raw {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.95em;
+}
+
+/*  Unsichtbare Variante. Sie liegt bewusst NICHT hinter dem Inhalt und
+    nutzt keine Winzschrift – sie wird schlicht aus dem Textfluss genommen,
+    damit sie das Layout nicht stoert. */
+.ats-hidden {
   position: absolute;
-  color: black;
-  font-size: 30%;
-  /* width: 100%; */
-  height: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  align-items: baseline;
-  justify-content: flex-start;
-  z-index: -5;
-  margin: auto;
-  flex-direction: column;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
-  text-rendering: optimizeSpeed; /*Verhindert Ligaturen*/
+
+/* Referenzen */
+
+.references-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.reference {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.reference-name {
+  font-weight: 700;
+}
+
+.reference-role,
+.reference-contact {
+  font-size: 0.95em;
+  color: color-mix(in oklab, var(--font-color), white 25%);
 }
