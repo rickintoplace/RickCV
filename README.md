@@ -38,11 +38,11 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 - **Live preview:** The page next to the editor re-renders as you type, and shows the page count.
 - **Photo placement:** Drag the picture to move the crop, scroll to zoom, and pick a shape (full-width band, rounded square, or circle).
 - **Your own categories:** *Education*, *Experience* and *Volunteering* are only the defaults. Rename them, reorder them, add your own — each one keeps a separate machine-readable meaning so applicant systems still file it correctly.
-- **Icon picker:** ~150 embedded [Lucide](https://lucide.dev) icons plus Google Material Symbols, searchable in German and English. One stroke-weight slider drives both sets — Material Symbols is matched through its variable font axis so the two never look mismatched — plus size, colour and an optional background shape.
+- **Icon picker:** ~150 embedded [Lucide](https://lucide.dev) icons plus Google Material Symbols, searchable in German and English. One stroke-weight slider drives both sets — Material Symbols is matched through its variable font axis so the two never look mismatched — plus size, color and an optional background shape.
 - **Two languages:** German and English for the interface and the document, including the language marking inside the PDF.
 - **Honest machine readability:** See exactly what an applicant tracking system reads, and edit it yourself if you want. No hidden text — see below.
 - **Multiple layouts:** 'clean', 'icons', and 'dynaline'.
-- **Customizable styling:** Colours, typeface, font size, sidebar width, headline sizes and DIN 5008 margins.
+- **Customizable styling:** colors, typeface, font size, sidebar width, headline sizes and DIN 5008 margins.
 - **One page or many:** The resume stops after one page by default; switch on multi-page mode for longer careers.
 - **Export to PDF:** Crisp A4 pages, straight from the browser's print dialog.
 - **Your data stays yours:** Everything is stored in your browser only. Export and import it as a JSON file to back it up or move it to another computer.
@@ -89,7 +89,7 @@ git clone https://github.com/rickintoplace/RickCV.git
 5. **Referenzen** – off by default; switch it on if you want them on the page.
 6. **Anschreiben** – recipient, subject, salutation and as many paragraphs as you need.
    You can also upload a scan of your signature.
-7. **Design** – layout, accent colour, typeface, font size, icon set, sidebar width and margins.
+7. **Design** – layout, accent color, typeface, font size, icon set, sidebar width and margins.
 8. **Maschinenlesbarkeit** – see and edit what applicant systems read. See the section below.
 9. **Optionen** – interface language, date format, chronological order and multi-page mode.
 
@@ -109,23 +109,21 @@ Chrome gives the best results, since the layout is tuned for it.
 ### Keeping and moving your data
 
 Your document is saved in your browser automatically, so you can close the tab and come back
-later. Because the browser storage is tied to one browser on one device, use **Exportieren** to
-download a `.json` backup and **Importieren** to load it again – on another computer, in another
+later. Because the browser storage is tied to one browser on one device, use **Export** to
+download a `.json` backup and **Import** to load it again on another computer, in another
 browser, or to keep several versions of your CV side by side.
 
 ## About ATS, hidden text, and "GEO"
 
-RickCV used to embed a copy of your data in ~3 pt type behind the layout, so that
-applicant tracking systems would pick it up. **That is no longer the default, and
-you should think twice before switching it back on.**
+RickCV used to embed a copy of your data behind the layout, so that
+applicant tracking systems would pick it up. **That is no longer the default.**
 
 Research on applicant systems now treats invisible content as a manipulation
-attempt. Detectors flag text below 4 pt, text in the background colour, and —
-most directly — any mismatch between *what a human sees* and *what a machine
-extracts*. In a measurement study of 196,682 real resumes, roughly 1 % contained
+attempt. Detectors flag text below 4 pt, text in the background color, and 
+any mismatch between *what a human sees* and *what a machine extracts*.
+In a measurement study of 196,682 real resumes, roughly 1 % contained
 hidden injected content, and **over 90 % of those were plain "data injection":
-hidden skill and experience lists**, which is exactly what the old feature
-produced. It is the single most-detected pattern, not an obscure edge case.
+hidden skill and experience lists**.
 
 What actually helps is duller and more reliable:
 
@@ -134,13 +132,12 @@ What actually helps is duller and more reliable:
   name and contact details before the career blocks for that reason.
 - **The icon set matters more than you would think.** Material Symbols is a
   font, so the icon name ends up glued to your heading in the extracted text
-  (`schoolAUSBILDUNG`). The embedded Lucide icons are SVG and leave nothing
+  (`schoolEDUCATION`). The embedded Lucide icons are SVG and leave nothing
   behind. Lucide is the default.
-- **The document title becomes the PDF title** and the suggested filename —
-  RickCV sets it to "Lebenslauf – Your Name" automatically.
+- **The document title becomes the PDF title** and the suggested filename.
 
 If your layout is unusually graphic and you still want a safety net, the
-**Maschinenlesbarkeit** section offers a *visible* extra page in plain text. You
+**machine readability** section offers a *visible* extra page in plain text. You
 can read exactly what it says, copy it, or write it yourself. The invisible mode
 is still available, clearly marked, for people who want it anyway.
 
@@ -159,14 +156,13 @@ Screening](https://arxiv.org/abs/2605.28999) ·
 ## A note on browsers
 
 Editing works in any modern browser. **The PDF export is tuned for Chrome** —
-other browsers handle margins, page breaks and background colours differently.
+other browsers handle margins, page breaks and background colors differently.
 RickCV shows a reminder in the preview bar when you are not using a
 Chromium-based browser.
 
 ## Hosting it yourself
 
-RickCV is a static site: there is nothing to build and nothing to run on a server. Upload the
-files and you are done.
+RickCV is a static site. Upload the files and you are done.
 
 ### GitHub Pages
 
@@ -177,11 +173,6 @@ The repository ships with a workflow at `.github/workflows/pages.yml`. Enable it
 
 Every push to `main` then publishes the site to
 `https://<username>.github.io/<repository>/`.
-
-### Netlify, Cloudflare Pages, Vercel & co.
-
-Drag the project folder onto the provider's upload area, or connect the repository and leave
-the build command empty. Publish directory: the repository root.
 
 ### Any web space
 
@@ -206,17 +197,13 @@ Copy `index.html`, `cv.html`, `builder.css`, `builder.js`, `render.js`, `default
 | `js/builder.js` | Wiring: state, history, saving, preview, printing |
 | `tools/gen-icons.py` | Regenerates `js/icon-data.js` from lucide-static |
 
-The editor and the document are deliberately separate: `cv.html` runs in its own
-frame and receives the data through `postMessage`, so the editor's styling can
-never leak into your PDF.
-
-Every file is a plain script — no modules, no bundler — which is what lets you
+Every file is a plain script which is what lets you
 open `index.html` by double-clicking it.
 
 ## Advanced customization
 
 Everything in the **Design** section writes to CSS variables defined at the top of
-`styles.css`. If you want to go further than the editor allows, that is the place to look –
+`styles.css`. If you want to go further than the editor allows, that is the place to look.
 `--accent-color`, `--font-color`, `--sidebar-width`, `--img-height` and friends are all
 documented there.
 
@@ -225,8 +212,8 @@ Icons come from two sets. [Lucide](https://lucide.dev) icons are embedded in
 `tools/gen-icons.py` to change the selection. [Google Material
 Symbols](https://fonts.google.com/icons) are loaded from Google Fonts at runtime.
 
-The two sets measure weight differently — Lucide in stroke pixels on a 24-unit
-grid, Material Symbols on a variable font axis — and their defaults (`stroke 2`
+The two sets measure weight differently: Lucide in stroke pixels on a 24-unit
+grid, Material Symbols on a variable font axis. Their defaults (`stroke 2`
 and `wght 400`) look nothing alike side by side: Material comes out roughly twice
 as heavy. RickCV maps them onto one slider, calibrated by comparing them
 directly: `stroke 1.75` matches `wght 200`. Material glyphs also carry padding
