@@ -7,7 +7,7 @@
     |_|  \_\_|\___|_|\_\\_____|   \/  [rɪk-si-vi]
     A dynamic template for your resume and cover letter
 
-See an example in action at codesandbox: https://hw8733.csb.app/
+Build your CV and Cover Letter here: https://cv.rickinto.place/
 
 Welcome to **RickCV** – a browser-based builder for professional resumes and cover letters. Fill in a form, watch the document update live, and save it as a PDF. No sign-up, no server, no build step: it is plain HTML, CSS and JavaScript, and everything you type stays on your own device.
 
