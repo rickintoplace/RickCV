@@ -39,7 +39,8 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 - **Photo placement:** Drag the picture to move the crop, scroll to zoom, and pick a shape (full-width band, rounded square, or circle).
 - **Your own categories:** *Education*, *Experience* and *Volunteering* are only the defaults. Rename them, reorder them, add your own — each one keeps a separate machine-readable meaning so applicant systems still file it correctly.
 - **Icon picker:** ~150 embedded [Lucide](https://lucide.dev) icons plus Google Material Symbols, searchable in German and English. One stroke-weight slider drives both sets — Material Symbols is matched through its variable font axis so the two never look mismatched — plus size, color and an optional background shape.
-- **Two languages:** German and English for the interface and the document, including the language marking inside the PDF.
+- **Two languages:** German and English for the interface and the document, including the language marking inside the PDF. Switch it straight from the header, or under *Optionen*.
+- **Light and dark editor:** The button next to the language follows your system by default, and cycles to light or dark if you would rather decide yourself. Only the editor changes — the resume stays on white paper, because that is what gets printed.
 - **Honest machine readability:** See exactly what an applicant tracking system reads, and edit it yourself if you want. No hidden text — see below.
 - **Multiple layouts:** 'clean', 'icons', and 'dynaline'.
 - **Customizable styling:** colors, typeface, font size, sidebar width, headline sizes and DIN 5008 margins.
@@ -113,7 +114,7 @@ later. Because the browser storage is tied to one browser on one device, use **E
 download a `.json` backup and **Import** to load it again on another computer, in another
 browser, or to keep several versions of your CV side by side.
 
-## About ATS, hidden text, and "GEO"
+## About ATS, hidden text, and GEO
 
 RickCV used to embed a copy of your data behind the layout, so that
 applicant tracking systems would pick it up. **That is no longer the default.**

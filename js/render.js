@@ -43,6 +43,23 @@
     return !!(section && section.show && items(section).length);
   }
 
+  /* ---------------------------------------------------------------- Seiten */
+
+  //  Ein Block liegt genau dann auf Seite 2, wenn es ueberhaupt eine zweite
+  //  Seite gibt. Sonst wandert er zurueck auf Seite 1, statt zu verschwinden –
+  //  wer die zweite Seite wieder abschaltet, soll nichts verlieren.
+  function pageOf(block, pages) {
+    return pages > 1 && Number(block && block.page) === 2 ? 2 : 1;
+  }
+
+  function onPage(block, page, pages) {
+    return pageOf(block, pages) === page;
+  }
+
+  function pageCount(data) {
+    return data.settings.pageMode === "two" ? 2 : 1;
+  }
+
   /* -------------------------------------------------------------- Zeitraum */
 
   function formatDate(date, format) {
@@ -177,7 +194,9 @@
     }).join(" ");
     body.classList.add("template-" + (data.settings.template || "clean"));
     body.classList.add("photo-" + (photo.shape || "band"));
-    body.classList.add(data.settings.multiPage ? "pages-flow" : "pages-fixed");
+    var mode = data.settings.pageMode || "single";
+    body.classList.add(
+      mode === "flow" ? "pages-flow" : mode === "two" ? "pages-two" : "pages-fixed");
   }
 
   /* ----------------------------------------------------------- CV-Bausteine */
@@ -254,76 +273,149 @@
     }).join("");
   }
 
-  function buildSidebar(data) {
-    var blocks = "";
+  /* --------------------------------------------------------- Link-Fusszeile */
 
-    if (data.profile.show && data.profile.text) {
+  //  Auf welchem Blatt die Leiste steht. "last" ist die Vorgabe: bei einer
+  //  Seite ist das die einzige, bei zweien die hintere.
+  function footerOnPage(footer, page, pages) {
+    if (!footer || !footer.show) return false;
+    if (!(footer.links || []).length) return false;
+    var where = footer.page || "last";
+    if (where === "all") return true;
+    if (where === "last") return page === pages;
+    return Number(where) === page;
+  }
+
+  //  Symbol und Text kommen aus dem normalen Icon-Katalog; freies HTML gibt
+  //  es hier bewusst nicht, sonst haette eine importierte Datei einen Hebel.
+  function footerLinks(footer) {
+    var iconsOnly = footer.mode === "icons";
+
+    return (footer.links || []).map(function (link) {
+      var text = String(link.text || "").trim();
+      var mark = Icons.html(link.icon, "resume-footer-icon");
+      if (!mark && !text) return "";
+
+      var body = mark + (!iconsOnly && text
+        ? '<span class="resume-footer-text">' + esc(text) + "</span>"
+        : "");
+
+      var url = safeUrl(link.url);
+      var label = String(link.label || "").trim() || text || String(link.url || "");
+      if (!url) return '<span class="resume-footer-link">' + body + "</span>";
+
+      return '<a class="resume-footer-link" href="' + url + '" ' +
+        'target="_blank" rel="noopener noreferrer" ' +
+        'title="' + esc(label) + '" aria-label="' + esc(label) + '">' + body + "</a>";
+    }).join("");
+  }
+
+  function footerBlock(footer, sideClass, page, pages) {
+    if (!footerOnPage(footer, page, pages)) return "";
+    var links = footerLinks(footer);
+    if (!links) return "";
+    var intro = String(footer.intro || "").trim();
+
+    return '<footer class="resume-link-footer ' + sideClass +
+      " resume-footer-mode-" + esc(footer.mode || "iconText") + '">' +
+      (intro ? '<div class="resume-footer-intro">' + nl2br(intro) + "</div>" : "") +
+      '<div class="resume-footer-links">' + links + "</div></footer>";
+  }
+
+  function pageNumber(data, page, pages) {
+    if (pages < 2 || !data.settings.page2.pageNumbers) return "";
+    var label = I18n.t("doc", "pageOf", data.locale)
+      .replace("{page}", page).replace("{pages}", pages);
+    return '<div class="resume-page-number">' + esc(label) + "</div>";
+  }
+
+  function buildSidebar(data, page, pages) {
+    var blocks = "";
+    var page2 = data.settings.page2;
+
+    if (data.profile.show && data.profile.text && onPage(data.profile, page, pages)) {
       blocks += '<div class="resume_item resume_profile">' +
         '<div class="resume_title">' + esc(data.profile.title) + "</div>" +
         '<div class="resume_info profile-container">' + nl2br(data.profile.text) + "</div></div>";
     }
 
-    blocks += '<div class="resume_item resume_contact">' +
-      '<div class="resume_title">' + esc(data.contactTitle) + "</div>" +
-      '<div class="resume_info"><div class="contact_container">' +
-      contactBlock(data.contact) + "</div></div></div>";
+    //  Der Kontaktblock gehoert immer auf die erste Seite; auf der zweiten ist
+    //  er eine Wiederholung, damit das Blatt fuer sich zuordenbar bleibt.
+    if (page === 1 || page2.repeatContact) {
+      blocks += '<div class="resume_item resume_contact">' +
+        '<div class="resume_title">' + esc(data.contactTitle) + "</div>" +
+        '<div class="resume_info"><div class="contact_container">' +
+        contactBlock(data.contact) + "</div></div></div>";
+    }
 
-    if (isOn(data.languages)) {
+    if (isOn(data.languages) && onPage(data.languages, page, pages)) {
       blocks += '<div class="resume_item resume_language">' +
         '<div class="resume_title">' + esc(data.languages.title) + "</div>" +
         '<div class="language_container">' + languageBlock(items(data.languages)) + "</div></div>";
     }
-    if (isOn(data.mobilitySB)) {
+    if (isOn(data.mobilitySB) && onPage(data.mobilitySB, page, pages)) {
       blocks += sidebarItem(data.mobilitySB.title,
         '<div class="mobilitySB_container">' + iconRows(items(data.mobilitySB)) + "</div>",
         "resume_mobilitySB");
     }
-    if (isOn(data.interests)) {
+    if (isOn(data.interests) && onPage(data.interests, page, pages)) {
       blocks += sidebarItem(data.interests.title,
         '<div class="interests_container">' + iconRows(items(data.interests)) + "</div>",
         "resume_interests");
     }
-    if (isOn(data.projects)) {
+    if (isOn(data.projects) && onPage(data.projects, page, pages)) {
       blocks += '<div class="resume_item resume_projects">' +
         '<div class="resume_title">' + esc(data.projects.title) + "</div>" +
         '<div class="resume_info projects_container">' + projectBlock(items(data.projects)) + "</div></div>";
     }
 
-    var photo = data.photo.show && data.photo.src
+    var showPhoto = data.photo.show && data.photo.src &&
+      (page === 1 || page2.repeatPhoto);
+    var photo = showPhoto
       ? '<div class="resume_image profile-image-container"><img src="' + safeUrl(data.photo.src) +
         '" alt="' + esc(I18n.t("doc", "photoAlt", data.locale)) + '"></div>'
       : "";
 
     return '<div class="resume_left">' + photo +
-      '<div class="resume_bottom">' + blocks + "</div></div>";
+      '<div class="resume_bottom">' + blocks + "</div>" +
+      footerBlock(data.footers.left, "resume-link-footer-left", page, pages) + "</div>";
   }
 
-  function buildMain(data, grouped) {
-    var out = '<div class="resume_item resume_namerole">' +
-      '<h1 class="name">' + esc(data.contact.name) + "</h1>" +
-      '<div class="role">' + esc(data.contact.role) + "</div></div>";
+  function buildMain(data, grouped, page, pages) {
+    var out = "";
+    var page2 = data.settings.page2;
+
+    //  Auf Seite 2 ist die Kopfzeile eine Wiederholung: kleiner gesetzt,
+    //  damit sie den Blick nicht ein zweites Mal einfaengt.
+    if (page === 1 || page2.repeatHeader) {
+      out += '<div class="resume_item resume_namerole' +
+        (page > 1 ? " resume_namerole-repeat" : "") + '">' +
+        '<h1 class="name">' + esc(data.contact.name) + "</h1>" +
+        '<div class="role">' + esc(data.contact.role) + "</div></div>";
+    }
 
     (data.sections || []).forEach(function (section) {
       if (section.show === false) return;
+      if (!onPage(section, page, pages)) return;
       if (!grouped[section.id] || !grouped[section.id].length) return;
       out += '<div class="resume_item timeline-container" data-section-id="' + esc(section.id) + '">' +
         '<h2 class="resume_title">' + Icons.html(section.icon) + esc(section.title) + "</h2>" +
         '<div class="timeline" data-timeline="' + esc(section.id) + '"></div></div>';
     });
 
-    if (isOn(data.skills)) {
+    if (isOn(data.skills) && onPage(data.skills, page, pages)) {
       out += '<div class="resume_item resmue_skills">' +
         '<h2 class="resume_title">' + Icons.html(data.skills.icon) + esc(data.skills.title) + "</h2>" +
         '<div class="resume_info skills-container">' + skillBlock(items(data.skills)) + "</div></div>";
     }
-    if (isOn(data.mobility)) {
+    if (isOn(data.mobility) && onPage(data.mobility, page, pages)) {
       out += '<div class="resume_item resmue_mobility">' +
         '<h2 class="resume_title">' + Icons.html(data.mobility.icon) + esc(data.mobility.title) + "</h2>" +
         '<div class="resume_info mobility-container">' +
         items(data.mobility).map(function (item) { return esc(item.name); }).join("<br>") +
         "</div></div>";
     }
-    if (isOn(data.references)) {
+    if (isOn(data.references) && onPage(data.references, page, pages)) {
       out += '<div class="resume_item resume_references">' +
         '<h2 class="resume_title">' + Icons.html(data.references.icon) + esc(data.references.title) + "</h2>" +
         '<div class="resume_info references-container">' +
@@ -337,7 +429,14 @@
         }).join("") + "</div></div>";
     }
 
-    return '<div class="resume_right">' + out + "</div>";
+    //  Fusszeile und Seitenzahl haengen am unteren Rand der Spalte – der
+    //  Container schiebt sich per margin-top:auto nach unten.
+    var bottom = footerBlock(data.footers.right, "resume-link-footer-right", page, pages) +
+      pageNumber(data, page, pages);
+
+    return '<div class="resume_right">' + out +
+      (bottom ? '<div class="resume-column-bottom">' + bottom + "</div>" : "") +
+      "</div>";
   }
 
   /* ------------------------------------------------------------- Zeitleiste */
@@ -523,9 +622,19 @@
       doc.body.appendChild(host);
     }
 
+    //  Jede Seite ist ein eigenes Blatt im DOM. Das macht die Zuordnung
+    //  eindeutig und laesst Chrome an genau diesen Stellen umbrechen, statt
+    //  den Umbruch aus der Hoehe zu raten.
+    var pages = pageCount(data);
+    var sheets = "";
+    for (var page = 1; page <= pages; page++) {
+      sheets += '<div class="resume_wrapper" data-page="' + page + '">' +
+        buildSidebar(data, page, pages) +
+        buildMain(data, grouped, page, pages) + "</div>";
+    }
+
     host.innerHTML =
-      '<div id="CV"><div class="resume_wrapper">' +
-      buildSidebar(data) + buildMain(data, grouped) + "</div></div>" +
+      '<div id="CV">' + sheets + "</div>" +
       (data.settings.showCoverLetter ? buildCoverLetter(data) : "") +
       buildAts(data);
 

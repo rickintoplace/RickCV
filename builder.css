@@ -3,35 +3,62 @@
  *  teilt sich keine Stile mit dem Editor.
  */
 
+/*  Hell und Dunkel stehen als Paar in einer Zeile: `light-dark()` waehlt
+    anhand von `color-scheme` aus. Das erspart eine zweite Token-Liste und
+    faerbt nebenbei die Bedienelemente des Browsers mit — Auswahlfelder,
+    Bildlaufleisten, Textcursor. Genau das fehlte der frueheren Loesung ueber
+    `prefers-color-scheme`.
+
+    Drei Zustaende, gesteuert ueber data-theme am <html>:
+      (kein Attribut)      – dem Betriebssystem folgen
+      data-theme="light"   – ausdruecklich hell
+      data-theme="dark"    – ausdruecklich dunkel                            */
+
 :root {
+  color-scheme: light dark;
+
+  /*  Jede Farbe steht zweimal: zuerst der helle Wert allein, dann das Paar.
+      Ein Browser ohne `light-dark()` verwirft die zweite Zeile als ungueltig
+      und behaelt die erste – dann ist der Editor hell statt unbrauchbar. */
+
   --ui-bg: #f2f4f6;
+  --ui-bg: light-dark(#f2f4f6, #16191d);
   --ui-panel: #ffffff;
+  --ui-panel: light-dark(#ffffff, #1e2227);
   --ui-panel-2: #f8f9fb;
+  --ui-panel-2: light-dark(#f8f9fb, #23282e);
   --ui-line: #dfe3e8;
+  --ui-line: light-dark(#dfe3e8, #333a42);
   --ui-text: #22262b;
+  --ui-text: light-dark(#22262b, #e6e8ea);
   --ui-muted: #6b7280;
+  --ui-muted: light-dark(#6b7280, #9aa3ad);
   --ui-accent: #286f6f;
+  --ui-accent: light-dark(#286f6f, #4fa8a1);
   --ui-accent-soft: #e6f0ef;
+  --ui-accent-soft: light-dark(#e6f0ef, #1f3230);
   --ui-danger: #b3403a;
+  --ui-danger: light-dark(#b3403a, #e0736c);
+
+  /*  light-dark() liefert nur Farben, keine ganzen Schatten – deshalb sind
+      die beiden Ebenen des Schattens als Farben hinterlegt. */
+  --ui-shadow-near: rgba(16, 24, 40, 0.06);
+  --ui-shadow-near: light-dark(rgba(16, 24, 40, 0.06), rgba(0, 0, 0, 0.3));
+  --ui-shadow-far: rgba(16, 24, 40, 0.1);
+  --ui-shadow-far: light-dark(rgba(16, 24, 40, 0.1), rgba(0, 0, 0, 0.5));
+  --ui-shadow: 0 1px 2px var(--ui-shadow-near), 0 1px 3px var(--ui-shadow-far);
+
   --ui-radius: 10px;
-  --ui-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
   --ui-header-h: 56px;
   --ui-sidebar-w: 420px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ui-bg: #16191d;
-    --ui-panel: #1e2227;
-    --ui-panel-2: #23282e;
-    --ui-line: #333a42;
-    --ui-text: #e6e8ea;
-    --ui-muted: #9aa3ad;
-    --ui-accent: #4fa8a1;
-    --ui-accent-soft: #1f3230;
-    --ui-danger: #e0736c;
-    --ui-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  }
+:root[data-theme="light"] {
+  color-scheme: only light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: only dark;
 }
 
 * {
@@ -128,6 +155,39 @@ textarea {
   filter: brightness(1.08);
   background: var(--ui-accent);
   color: #fff;
+}
+
+/*  Sprache und Erscheinungsbild stehen vor den Dateiaktionen und sind durch
+    einen Strich von ihnen getrennt: sie aendern die Umgebung, nicht das
+    Dokument. */
+
+.header-select {
+  padding: 6px 8px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-panel-2);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.header-select:hover {
+  border-color: var(--ui-accent);
+}
+
+.header-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 10px 2px;
+  background: var(--ui-line);
+}
+
+.btn-theme {
+  padding: 5px 7px;
+}
+
+.btn-theme .material-symbols-outlined {
+  font-size: 19px;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20;
+  line-height: 1;
 }
 
 .btn-small {

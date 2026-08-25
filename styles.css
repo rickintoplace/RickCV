@@ -342,6 +342,16 @@ a {
   height: 29.7cm;
 }
 
+/*  Mehrere Blaetter stehen als Geschwister im Dokument. Ohne eigene
+    Flex-Achse wuerden sie im Vorschaurahmen ohne Abstand aneinanderkleben;
+    `gap: inherit` uebernimmt den Abstand, den die Vorschau setzt. */
+#CV {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: inherit;
+}
+
 /*  Mehrseitiger Lebenslauf: die Seite darf wachsen, der Inhalt laeuft im
     Druck auf weitere Blaetter. Die Sidebar traegt ihren Hintergrund ueber
     alle Seiten, weil sie mit dem Flex-Container mitwaechst. */
@@ -350,10 +360,21 @@ body.pages-flow .resume_wrapper {
   min-height: 29.7cm;
 }
 
+/*  Zweite Seite: jedes Blatt ist genau ein A4-Bogen. min-height statt height,
+    damit zu viel Inhalt sichtbar bleibt und weiterlaeuft, statt abgeschnitten
+    zu werden – die Seitenzahl in der Vorschau zeigt dann drei statt zwei. */
+body.pages-two .resume_wrapper {
+  height: auto;
+  min-height: 29.7cm;
+}
+
 /* Einzelne Eintraege sollen nie mitten durchgeschnitten werden. */
 body.pages-flow .event,
 body.pages-flow .resume_item,
-body.pages-flow .project {
+body.pages-flow .project,
+body.pages-two .event,
+body.pages-two .resume_item,
+body.pages-two .project {
   break-inside: avoid;
   page-break-inside: avoid;
 }
@@ -634,6 +655,34 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   width: 65%;
   padding: 20px 40px;
   color: var(--font-color);
+  /*  Saeule statt Block, damit sich die Fusszeile mit margin-top:auto an den
+      unteren Rand haengen kann. */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.resume_wrapper .resume_right .resume-column-bottom {
+  margin-top: auto;
+  padding-top: 1.5em;
+}
+
+/*  Wiederholte Kopfzeile auf Seite 2 – kleiner, damit sie nicht ein zweites
+    Mal um Aufmerksamkeit konkurriert. Die Klasse `resume_item` steht mit im
+    Selektor, weil die Regel sonst gegen die Vorgabe darunter verliert. */
+.resume_wrapper .resume_right .resume_item.resume_namerole-repeat .name {
+  font-size: calc(var(--title-size) * 0.55);
+}
+
+.resume_wrapper .resume_right .resume_item.resume_namerole-repeat .role {
+  font-size: 0.8em;
+}
+
+.resume-page-number {
+  font-size: 0.8em;
+  text-align: right;
+  opacity: 0.65;
+  margin-top: 0.6em;
 }
 
 .resume_wrapper .resume_right .resume_namerole .name {
@@ -1251,6 +1300,76 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   }
 }
 
+/*  Link-Fusszeilen
+    ---------------------------------------------------------------------
+    Zwei unabhaengige Leisten: eine unten in der Sidebar, eine unten im
+    Hauptbereich. Beide haengen sich per margin-top:auto an den unteren Rand
+    ihrer Spalte, stehen also auch dann unten, wenn der Inhalt kurz ist. */
+
+.resume-link-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  font-size: 0.85em;
+  line-height: 1.3;
+}
+
+.resume-link-footer-left {
+  margin-top: auto;
+  padding: 1.2em 30px 20px;
+  color: var(--sidebar-font-color);
+}
+
+.resume-link-footer-right {
+  color: var(--font-color);
+  border-top: 1px solid color-mix(in oklab, var(--accent-color), transparent 70%);
+  padding-top: 0.7em;
+}
+
+.resume-footer-intro {
+  opacity: 0.8;
+}
+
+.resume-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em 1.1em;
+}
+
+/*  Nur-Symbole: eine Reihe kleiner Marken statt einer Liste. */
+.resume-footer-mode-icons .resume-footer-links {
+  gap: 0.6em;
+}
+
+.resume-footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  color: inherit;
+  text-decoration: none;
+  /* Ein Link soll nie zwischen Symbol und Text umbrechen. */
+  break-inside: avoid;
+}
+
+.resume-footer-link:hover .resume-footer-text {
+  text-decoration: underline;
+}
+
+/*  Die Symbole folgen der eingestellten Symbolfarbe, aber nicht deren
+    Hintergrundplaettchen – in einer Zeile aus Links wirkt das unruhig. */
+.resume-link-footer .resume-footer-icon {
+  color: var(--icon-color);
+  flex-shrink: 0;
+  background: transparent;
+  padding: 0;
+  margin-right: 0;
+}
+
+/* Wortmarken sind Flaechen: Strichstaerke greift nicht, Groesse schon. */
+.rc-icon-brand {
+  stroke: none;
+}
+
 /*Für PDF Export (Seite mit Chrome öffnen, drucken, als PDF speichern, A4, Ränder: keine)*/
 
 @page {
@@ -1275,15 +1394,27 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   .cover-letter_wrapper {
     margin: 0 !important;
     box-shadow: none !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
     break-after: page;
     page-break-after: always;
   }
 
+  /*  Ein Blatt am Stueck halten ergibt nur beim festen Einseiter Sinn. Bei
+      "zwei Seiten" und "mehrseitig" darf der Ueberhang weiterlaufen – sonst
+      schiebt der Browser das ganze Blatt auf die naechste Seite und
+      hinterlaesst eine leere. */
+  body.pages-fixed .resume_wrapper {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .cover-letter_wrapper {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   /*Nach der letzten Seite keine Leerseite erzeugen*/
-  .document > *:last-child .resume_wrapper,
-  .document > *:last-child .cover-letter_wrapper {
+  .document > *:last-child .resume_wrapper:last-child,
+  .document > *:last-child .cover-letter_wrapper:last-child {
     break-after: auto;
     page-break-after: auto;
   }

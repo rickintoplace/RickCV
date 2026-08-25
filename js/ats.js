@@ -75,13 +75,29 @@
 
     // Kontakt zuerst: Bewerbungssysteme suchen die Stammdaten am Anfang.
     var contact = data.contact;
+
+    //  Die Links aus den Fusszeilen gehoeren zu den Stammdaten: als Symbol mit
+    //  Text sind sie fuer eine Maschine sonst kaum zu greifen.
+    var footers = data.footers || {};
+    var links = [];
+    ["left", "right"].forEach(function (side) {
+      var footer = footers[side];
+      if (!footer || !footer.show) return;
+      (footer.links || []).forEach(function (link) {
+        var url = clean(link.url);
+        if (!url) return;
+        var label = clean(link.label) || clean(link.text);
+        links.push(label && label !== url ? label + ": " + url : url);
+      });
+    });
+
     add(h("contact"), [
       contact.name,
       contact.role,
       [clean(contact.address), clean(contact.city)].filter(Boolean).join(", "),
       contact.email,
       contact.phone,
-    ]);
+    ].concat(links));
 
     if (data.profile.show && clean(data.profile.text)) {
       add(h("profile"), [data.profile.text]);

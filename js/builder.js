@@ -9,6 +9,7 @@
 
   var STORAGE_KEY = "rickcv.data.v3";
   var LEGACY_KEY = "rickcv.data.v2";
+  var THEME_KEY = "rickcv.theme";
 
   var Model = global.RickCVModel;
   var Fields = global.RickCVFields;
@@ -26,6 +27,14 @@
   var historyTimer = null;
   var pendingSnapshot = null;
   var committed = "";
+
+  //  Erscheinungsbild des Editors. "system" traegt kein Attribut – dann
+  //  entscheidet color-scheme anhand der Einstellung des Betriebssystems.
+  var THEMES = ["system", "light", "dark"];
+  var THEME_ICONS = { system: "contrast", light: "light_mode", dark: "dark_mode" };
+  var THEME_LABELS = { system: "themeSystem", light: "themeLight", dark: "themeDark" };
+  var theme = "system";
+  var themeHintShown = false;
 
   /* ---------------------------------------------------------------- Helfer */
 
@@ -152,6 +161,51 @@
     if (structural) updateCounts();
   }
 
+  /* ------------------------------------------------------ Erscheinungsbild */
+
+  //  Wird direkt beim Laden aufgerufen, noch vor init(): sonst blitzt beim
+  //  Start kurz das Systemschema auf, bevor die eigene Wahl greift.
+  function applyTheme() {
+    var root = document.documentElement;
+    if (theme === "system") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme", theme);
+
+    var icon = document.getElementById("btn-theme-icon");
+    var button = document.getElementById("btn-theme");
+    if (icon) icon.textContent = THEME_ICONS[theme];
+    if (button) {
+      var label = t(THEME_LABELS[theme]);
+      button.title = label;
+      button.setAttribute("aria-label", label);
+    }
+  }
+
+  function cycleTheme() {
+    theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch (error) {
+      /* ohne Speicher gilt die Wahl eben nur fuer diese Sitzung */
+    }
+    applyTheme();
+
+    //  Dass der Lebenslauf hell bleibt, ist Absicht: er wird gedruckt. Einmal
+    //  gesagt reicht – bei jedem Klick waere der Hinweis nur noch im Weg.
+    if (theme !== "system" && !themeHintShown) {
+      themeHintShown = true;
+      toast(t("themeSwitched"));
+    }
+  }
+
+  try {
+    if (THEMES.indexOf(localStorage.getItem(THEME_KEY)) !== -1) {
+      theme = localStorage.getItem(THEME_KEY);
+    }
+  } catch (error) {
+    /* kein Speicher – dann folgt der Editor dem System */
+  }
+  applyTheme();
+
   /* -------------------------------------------------------------- Sprache */
 
   function applyLocale() {
@@ -177,8 +231,17 @@
       if (node) node.textContent = t(texts[id]);
     });
 
+    //  Die Auswahl in der Kopfzeile und die im Abschnitt "Optionen" zeigen
+    //  denselben Wert – egal, ueber welche der beiden umgestellt wurde.
+    var langSwitch = document.getElementById("lang-switch");
+    if (langSwitch) langSwitch.value = locale;
+
+    //  Das Erscheinungsbild ist beschriftet, also faellt es mit der Sprache um.
+    applyTheme();
+
     var titles = {
       "btn-example": "exampleTitle",
+      "lang-switch": "languageTitle",
       "btn-reset": "resetTitle",
       "btn-import": "importTitle",
       "btn-export": "exportTitle",
@@ -209,6 +272,7 @@
       t: t,
       onChange: changed,
       refreshSection: refreshSection,
+      rebuildEditor: buildEditor,
       onLocaleChange: switchLocale,
     };
   }
@@ -396,6 +460,14 @@
   /* ---------------------------------------------------------------- Start */
 
   function bindHeader() {
+    document.getElementById("btn-theme").addEventListener("click", cycleTheme);
+
+    document.getElementById("lang-switch").addEventListener("change", function (event) {
+      if (event.target.value === state.locale) return;
+      state.locale = event.target.value;
+      switchLocale(); // uebersetzt auch die Vorgabe-Ueberschriften mit
+    });
+
     document.getElementById("btn-print").addEventListener("click", printCv);
     document.getElementById("btn-export").addEventListener("click", exportJson);
     document.getElementById("btn-import").addEventListener("click", function () {

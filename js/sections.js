@@ -26,6 +26,29 @@
       return field;
     }
 
+    //  Seitenauswahl. Sie erscheint nur, wenn es ueberhaupt eine zweite Seite
+    //  gibt – sonst waere es eine Einstellung ohne Wirkung.
+    function pageField(path) {
+      if (state.settings.pageMode !== "two") return null;
+      return F.select(path + ".page", t("pageField"), [
+        { value: 1, label: t("page1") },
+        { value: 2, label: t("page2") },
+      ]);
+    }
+
+    //  F.select liefert Zeichenketten zurueck; die Seitenzahl soll aber eine
+    //  Zahl bleiben, damit der Renderer nicht raten muss.
+    function addPageField(body, path) {
+      var field = pageField(path);
+      if (!field) return;
+      var input = field.querySelector("select");
+      input.value = String(F.get(path + ".page") || 1);
+      input.addEventListener("change", function () {
+        F.set(path + ".page", Number(input.value));
+      });
+      body.appendChild(field);
+    }
+
     function iconListEditor(path, addLabel, blankIcon) {
       return F.listEditor({
         path: path,
@@ -239,6 +262,7 @@
       body.appendChild(F.toggle("profile.show", t("showProfile")));
       body.appendChild(F.text("profile.title", t("headline")));
       body.appendChild(F.textarea("profile.text", t("text"), 5, t("profilePlaceholder")));
+      addPageField(body, "profile");
     }
 
     /* ---------------------------------------------------------- Werdegang */
@@ -262,6 +286,7 @@
             icon: Model.icon(state.style.iconSet, "briefcase"),
             atsRole: "other",
             show: true,
+            page: 1,
           };
         },
         title: function (section) { return section.title; },
@@ -304,6 +329,7 @@
           ));
           container.appendChild(F.hint(t("atsRoleHint")));
           container.appendChild(F.toggle(path + ".show", t("showCategory")));
+          addPageField(container, path);
         },
       }));
       categories.appendChild(categoryBody);
@@ -391,6 +417,7 @@
           container.appendChild(rank);
         },
       }));
+      addPageField(body, "skills");
     }
 
     function buildLanguages(body) {
@@ -410,12 +437,14 @@
           container.appendChild(level);
         },
       }));
+      addPageField(body, "languages");
     }
 
     function buildInterests(body) {
       body.appendChild(F.toggle("interests.show", t("showSection")));
       body.appendChild(F.text("interests.title", t("headline")));
       body.appendChild(iconListEditor("interests.items", t("addInterest"), "star"));
+      addPageField(body, "interests");
     }
 
     function buildMobility(body) {
@@ -434,10 +463,12 @@
           nameFirst(container, path, refresh);
         },
       }));
+      addPageField(body, "mobility");
       body.appendChild(el("hr"));
       body.appendChild(F.toggle("mobilitySB.show", t("showInSidebar")));
       body.appendChild(F.text("mobilitySB.title", t("sidebarHeading")));
       body.appendChild(iconListEditor("mobilitySB.items", t("addEntry"), "car-front"));
+      addPageField(body, "mobilitySB");
     }
 
     function buildProjects(body) {
@@ -455,6 +486,7 @@
           container.appendChild(F.imageField(path + ".img", t("image")));
         },
       }));
+      addPageField(body, "projects");
     }
 
     function buildReferences(body) {
@@ -481,6 +513,69 @@
           container.appendChild(F.text(path + ".contact", t("referenceContact"), "…"));
         },
       }));
+      addPageField(body, "references");
+    }
+
+    /* ---------------------------------------------------------- Fusszeile */
+
+    //  Beide Leisten werden gleich bedient, nur an unterschiedlichen Stellen
+    //  im Datenobjekt. Deshalb eine Funktion mit der Seite als Parameter.
+    function footerEditor(body, side, headingKey) {
+      var path = "footers." + side;
+      var block = el("details", "sub-block");
+      block.appendChild(el("summary", null, t(headingKey)));
+      var inner = el("div", "sub-block-body");
+
+      inner.appendChild(F.toggle(path + ".show", t("footerShow")));
+      inner.appendChild(F.select(path + ".mode", t("footerMode"), [
+        { value: "iconText", label: t("footerModeIconText") },
+        { value: "icons", label: t("footerModeIcons") },
+      ]));
+      inner.appendChild(F.text(path + ".intro", t("footerIntro"), t("footerIntroPlaceholder")));
+
+      //  Die Auswahl des Blattes hat nur bei zwei Seiten eine Wirkung.
+      if (state.settings.pageMode === "two") {
+        inner.appendChild(F.select(path + ".page", t("footerPage"), [
+          { value: "last", label: t("footerPageLast") },
+          { value: "1", label: t("page1") },
+          { value: "2", label: t("page2") },
+          { value: "all", label: t("footerPageAll") },
+        ]));
+      }
+
+      inner.appendChild(F.listEditor({
+        path: path + ".links",
+        addLabel: t("footerAddLink"),
+        emptyText: t("footerNoLinks"),
+        blank: function () { return Model.emptyFooterLink(); },
+        title: function (link) { return link.label || link.text || link.url; },
+        badge: function (link) { return link.url ? "↗" : ""; },
+        body: function (container, index, linkPath, refresh) {
+          var label = F.text(linkPath + ".label", t("footerLinkLabel"), t("footerLinkLabelPlaceholder"));
+          label.querySelector("input").addEventListener("input", refresh);
+          container.appendChild(label);
+
+          var visible = F.text(linkPath + ".text", t("footerLinkText"), t("footerLinkTextPlaceholder"));
+          visible.querySelector("input").addEventListener("input", refresh);
+          container.appendChild(visible);
+
+          var url = F.text(linkPath + ".url", t("link"), "https://…");
+          url.querySelector("input").addEventListener("input", refresh);
+          container.appendChild(url);
+
+          container.appendChild(F.iconField(linkPath + ".icon", t("icon")));
+        },
+      }));
+
+      block.appendChild(inner);
+      body.appendChild(block);
+    }
+
+    function buildFooter(body) {
+      body.appendChild(F.hint(t("footerHint")));
+      body.appendChild(F.hint(t("footerBrandHint")));
+      footerEditor(body, "left", "footerLeft");
+      footerEditor(body, "right", "footerRight");
     }
 
     /* -------------------------------------------------------- Anschreiben */
@@ -705,8 +800,37 @@
       body.appendChild(F.toggle("settings.noLine", t("hideAllLines")));
 
       body.appendChild(el("hr"));
-      body.appendChild(F.toggle("settings.multiPage", t("multiPage")));
-      body.appendChild(F.hint(t("multiPageHint")));
+
+      //  Der Wechsel des Seitenmodus blendet in allen anderen Abschnitten die
+      //  Seitenauswahl ein oder aus – deshalb wird der Editor neu aufgebaut.
+      var pageMode = F.select("settings.pageMode", t("pageMode"), [
+        { value: "single", label: t("pageSingle") },
+        { value: "two", label: t("pageTwo") },
+        { value: "flow", label: t("pageFlow") },
+      ]);
+      pageMode.querySelector("select").addEventListener("change", function () {
+        setTimeout(context.rebuildEditor, 0);
+      });
+      body.appendChild(pageMode);
+      body.appendChild(F.hint(t("pageModeHint")));
+
+      if (state.settings.pageMode === "two") {
+        var page2 = el("details", "sub-block");
+        page2.open = true;
+        page2.appendChild(el("summary", null, t("page2Block")));
+        var page2Body = el("div", "sub-block-body");
+
+        page2Body.appendChild(F.hint(t("page2Hint")));
+        page2Body.appendChild(F.toggle("settings.page2.repeatHeader", t("page2RepeatHeader")));
+        page2Body.appendChild(F.toggle("settings.page2.repeatContact", t("page2RepeatContact")));
+        page2Body.appendChild(F.toggle("settings.page2.repeatPhoto", t("page2RepeatPhoto")));
+        page2Body.appendChild(F.toggle("settings.page2.pageNumbers", t("page2Numbers")));
+        page2Body.appendChild(F.hint(t("page2NumbersHint")));
+        page2Body.appendChild(F.hint(t("pageOverflowHint")));
+
+        page2.appendChild(page2Body);
+        body.appendChild(page2);
+      }
     }
 
     /* ------------------------------------------------------------- Register */
@@ -728,6 +852,10 @@
         count: function () { return state.projects.items.length; } },
       { id: "references", title: t("secReferences"), build: buildReferences,
         count: function () { return state.references.items.length; } },
+      { id: "footer", title: t("secFooter"), build: buildFooter,
+        count: function () {
+          return state.footers.left.links.length + state.footers.right.links.length;
+        } },
       { id: "letter", title: t("secLetter"), build: buildLetter },
       { id: "design", title: t("secDesign"), build: buildDesign },
       { id: "ats", title: t("secAts"), build: buildAts },

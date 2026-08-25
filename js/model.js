@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = 3;
+  var VERSION = 4;
 
   function icon(set, name) {
     return { set: set, name: name };
@@ -23,10 +23,24 @@
   function defaultSections(locale) {
     var d = RickCVI18n.doc(locale);
     return [
-      { id: "education", title: d("education"), icon: icon("lucide", "graduation-cap"), atsRole: "education", show: true },
-      { id: "experience", title: d("experience"), icon: icon("lucide", "briefcase"), atsRole: "experience", show: true },
-      { id: "volunteer", title: d("volunteer"), icon: icon("lucide", "heart-handshake"), atsRole: "volunteer", show: true },
+      { id: "education", title: d("education"), icon: icon("lucide", "graduation-cap"), atsRole: "education", show: true, page: 1 },
+      { id: "experience", title: d("experience"), icon: icon("lucide", "briefcase"), atsRole: "experience", show: true, page: 1 },
+      { id: "volunteer", title: d("volunteer"), icon: icon("lucide", "heart-handshake"), atsRole: "volunteer", show: true, page: 1 },
     ];
+  }
+
+  //  Ein Footer-Link ist bewusst schlicht: ein Symbol aus dem vorhandenen
+  //  Katalog, ein sichtbarer Text und ein Ziel. Kein freies HTML – der
+  //  Renderer maskiert alles, damit eine importierte Datei nichts einschleusen
+  //  kann.
+  function emptyFooterLink() {
+    return { label: "", text: "", url: "", icon: icon("lucide", "link") };
+  }
+
+  //  page: auf welchem Blatt der Footer erscheint.
+  //  "last" – letzte Seite (Vorgabe), "all" – auf jeder, "1"/"2" – genau dort.
+  function emptyFooter() {
+    return { show: false, mode: "iconText", intro: "", page: "last", links: [] };
   }
 
   function emptyEvent(sectionId) {
@@ -61,7 +75,18 @@
         noLine: false,
         alignText: "left",
         showCoverLetter: true,
-        multiPage: false,
+
+        //  "single" – ein festes Blatt (Vorgabe)
+        //  "two"    – zweites Blatt, jeder Block wird einer Seite zugeordnet
+        //  "flow"   – laengerer Inhalt laeuft von selbst weiter
+        pageMode: "single",
+
+        page2: {
+          repeatPhoto: false,
+          repeatContact: true,
+          repeatHeader: true,
+          pageNumbers: false,
+        },
       },
 
       style: {
@@ -105,7 +130,7 @@
         radius: 12,
       },
 
-      profile: { show: true, title: d("profile"), text: "" },
+      profile: { show: true, title: d("profile"), text: "", page: 1 },
 
       contact: { name: "", role: "", address: "", city: "", email: "", phone: "" },
 
@@ -114,13 +139,17 @@
       sections: defaultSections(locale),
       events: [],
 
-      skills: { show: true, title: d("skills"), icon: icon("lucide", "star"), items: [] },
-      languages: { show: false, title: d("languages"), items: [] },
-      interests: { show: true, title: d("interests"), items: [] },
-      projects: { show: true, title: d("projects"), items: [] },
-      mobility: { show: true, title: d("mobility"), icon: icon("lucide", "car-front"), items: [] },
-      mobilitySB: { show: false, title: d("mobility"), items: [] },
-      references: { show: false, title: d("references"), icon: icon("lucide", "users"), items: [] },
+      skills: { show: true, title: d("skills"), icon: icon("lucide", "star"), items: [], page: 1 },
+      languages: { show: false, title: d("languages"), items: [], page: 1 },
+      interests: { show: true, title: d("interests"), items: [], page: 1 },
+      projects: { show: true, title: d("projects"), items: [], page: 1 },
+      mobility: { show: true, title: d("mobility"), icon: icon("lucide", "car-front"), items: [], page: 1 },
+      mobilitySB: { show: false, title: d("mobility"), items: [], page: 1 },
+      references: { show: false, title: d("references"), icon: icon("lucide", "users"), items: [], page: 1 },
+
+      //  Zwei unabhaengige Link-Leisten am unteren Rand: eine in der Sidebar,
+      //  eine im Hauptbereich.
+      footers: { left: emptyFooter(), right: emptyFooter() },
 
       ats: {
         //  "off"      – nichts einbetten (Vorgabe)
@@ -226,6 +255,30 @@
         company: "Bundesagentur für Arbeit", place: "Frankfurt",
         description: ["Größtenteils als Empfänger"], sectionId: "volunteer" },
     ],
+    footers: {
+      left: {
+        show: true,
+        mode: "iconText",
+        intro: "Mehr dazu im Portfolio:",
+        page: "last",
+        links: [
+          { label: "Portfolio", text: "beispiel.de", url: "https://example.com",
+            icon: icon("lucide", "globe") },
+        ],
+      },
+      right: {
+        show: true,
+        mode: "iconText",
+        intro: "",
+        page: "last",
+        links: [
+          { label: "GitHub", text: "github.com/rickintoplace",
+            url: "https://github.com/rickintoplace", icon: icon("brands", "github") },
+          { label: "LinkedIn", text: "LinkedIn", url: "https://www.linkedin.com/",
+            icon: icon("brands", "linkedin") },
+        ],
+      },
+    },
     coverLetter: {
       recipient: "Firma Beispiel GmbH\nAnsprechpartner Beate Beispiel\nBeispielstraße 2\n54321 Beispielstadt",
       place: "Musterstadt",
@@ -254,6 +307,7 @@
     data.mobility.items = JSON.parse(JSON.stringify(ex.mobility));
     data.projects.items = JSON.parse(JSON.stringify(ex.projects));
     data.references.items = JSON.parse(JSON.stringify(ex.references));
+    data.footers = JSON.parse(JSON.stringify(ex.footers));
     data.events = ex.events.map(function (event) {
       return Object.assign(emptyEvent(event.sectionId), event);
     });
@@ -378,8 +432,37 @@
       data.version = 3;
     }
 
+    //  v3 -> v4: aus dem Schalter "mehrseitig" wird eine Auswahl mit drei
+    //  Moeglichkeiten, und jeder Block bekommt eine Seitenzuordnung.
+    if (data.version < 4) {
+      var oldSettings = data.settings || (data.settings = {});
+      if (!oldSettings.pageMode) {
+        oldSettings.pageMode = oldSettings.multiPage ? "flow" : "single";
+      }
+      delete oldSettings.multiPage;
+      data.version = 4;
+    }
+
+    //  Seitenzuordnung nachtragen. Arrays ruehrt fillMissing nicht an, die
+    //  Sektionen brauchen deshalb einen eigenen Durchgang.
+    (data.sections || []).forEach(function (section) {
+      if (!section.page) section.page = 1;
+    });
+
     data.locale = locale;
-    return fillMissing(data, createBase(locale));
+    data = fillMissing(data, createBase(locale));
+
+    //  Alles, was nicht Seite 2 heisst, ist Seite 1 – auch dann, wenn eine
+    //  fremde Datei etwas anderes hineingeschrieben hat.
+    ["profile", "skills", "languages", "interests", "projects", "mobility",
+     "mobilitySB", "references"].forEach(function (key) {
+      data[key].page = Number(data[key].page) === 2 ? 2 : 1;
+    });
+    (data.sections || []).forEach(function (section) {
+      section.page = Number(section.page) === 2 ? 2 : 1;
+    });
+
+    return data;
   }
 
   global.RickCVModel = {
@@ -389,6 +472,8 @@
     createBase: createBase,
     createExample: createExample,
     emptyEvent: emptyEvent,
+    emptyFooter: emptyFooter,
+    emptyFooterLink: emptyFooterLink,
     migrate: migrate,
     fillMissing: fillMissing,
   };
