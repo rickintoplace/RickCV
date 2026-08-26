@@ -146,8 +146,12 @@
       languages: { show: false, title: d("languages"), items: [], page: 1 },
       interests: { show: true, title: d("interests"), items: [], page: 1 },
       projects: { show: true, title: d("projects"), items: [], page: 1 },
-      mobility: { show: true, title: d("mobility"), icon: icon("lucide", "car-front"), items: [], page: 1 },
-      mobilitySB: { show: false, title: d("mobility"), items: [], page: 1 },
+      //  Ein Eintrag steht schon drin: ein leerer Block wirkt wie ein
+      //  Fehler – man schaltet ihn ein und es passiert nichts.
+      mobility: { show: true, title: d("mobility"), icon: icon("lucide", "car-front"),
+                  items: [{ name: d("licence") }], page: 1 },
+      mobilitySB: { show: false, title: d("mobility"),
+                    items: [{ name: d("licence") }], page: 1 },
       references: { show: false, title: d("references"), icon: icon("lucide", "users"), items: [], page: 1 },
 
       //  Zwei unabhaengige Link-Leisten am unteren Rand: eine in der Sidebar,

@@ -614,8 +614,9 @@
    *  Senkrechtes Scrollen behaelt Vorrang: erst wenn die Bewegung deutlich
    *  waagerechter ist als senkrecht, uebernimmt die Geste.
    */
-  var SWIPE_TAKEOVER = 12;   // px, ab hier entscheidet sich die Richtung
-  var SWIPE_COMMIT = 0.3;    // Anteil der Bildschirmbreite zum Umschalten
+  var SWIPE_TAKEOVER = 8;     // px, ab hier entscheidet sich die Richtung
+  var SWIPE_COMMIT = 0.18;    // Anteil der Bildschirmbreite zum Umschalten
+  var SWIPE_FLICK = 0.45;     // px je ms – ein Schnippen genuegt auch kurz
 
   function bindSwipe() {
     var track = document.querySelector(".app-track");
@@ -623,6 +624,10 @@
 
     var startX = 0, startY = 0, deltaX = 0, pointer = null;
     var tracking = false, sliding = false, width = 0;
+
+    //  Fuer das Schnippen: letzter Punkt und Zeitpunkt, daraus die
+    //  Geschwindigkeit am Ende der Geste.
+    var lastX = 0, lastTime = 0, speed = 0;
 
     function narrow() {
       return global.matchMedia("(max-width: 900px)").matches;
@@ -652,6 +657,9 @@
       startX = event.clientX;
       startY = event.clientY;
       deltaX = 0;
+      lastX = event.clientX;
+      lastTime = event.timeStamp;
+      speed = 0;
       width = track.clientWidth / 2 || global.innerWidth;
     });
 
@@ -660,6 +668,15 @@
 
       deltaX = event.clientX - startX;
       var deltaY = event.clientY - startY;
+
+      var span = event.timeStamp - lastTime;
+      if (span > 0) {
+        //  Gleitender Mittelwert: eine einzelne ruckartige Meldung soll die
+        //  Entscheidung nicht allein tragen.
+        speed = speed * 0.6 + ((event.clientX - lastX) / span) * 0.4;
+        lastX = event.clientX;
+        lastTime = event.timeStamp;
+      }
 
       if (!sliding) {
         //  Erst entscheiden, wenn ueberhaupt ein Weg zurueckgelegt ist. Ein
@@ -688,7 +705,11 @@
     ["pointerup", "pointercancel"].forEach(function (type) {
       track.addEventListener(type, function (event) {
         if (!tracking || (pointer !== null && event.pointerId !== pointer)) return;
-        var far = Math.abs(deltaX) > width * SWIPE_COMMIT;
+        //  Zwei Wege zum Umschalten: weit genug gezogen oder schnell genug
+        //  geschnippt. Ohne den zweiten fuehlt sich die Geste zaeh an, weil
+        //  ein kurzer, schneller Wisch folgenlos bliebe.
+        var far = Math.abs(deltaX) > width * SWIPE_COMMIT ||
+          (Math.abs(speed) > SWIPE_FLICK && deltaX * speed > 0);
 
         if (sliding && far && type === "pointerup") {
           if (deltaX < 0 && !showing()) {
@@ -701,6 +722,83 @@
         release();
       });
     });
+  }
+
+  /*  Kopfzeile, Reiter und Vorschauleiste weichen beim Scrollen.
+   *
+   *  Zusammen belegen sie auf einem Telefon rund ein Drittel der Hoehe. Wer
+   *  liest, scrollt abwaerts – dann duerfen sie weg. Wer zurueckwill,
+   *  scrollt aufwaerts – dann sind sie sofort wieder da, ohne dass man erst
+   *  ganz nach oben muss.
+   *
+   *  Die Bewegung wird aufaddiert, statt jede einzelne Meldung zu bewerten:
+   *  Scrollen meldet sich in vielen kleinen Schritten, ein einzelner davon
+   *  sagt ueber die Richtung wenig.
+   */
+  var CHROME_HIDE = 24;     // px abwaerts, bevor die Leisten weichen
+  var CHROME_REVEAL = 10;   // px aufwaerts, und sie sind wieder da
+  var CHROME_TOP = 24;      // so weit oben bleiben sie ohnehin stehen
+
+  function bindChromeAutoHide() {
+    var bars = [document.querySelector(".app-header"),
+                document.querySelector(".mobile-tabs"),
+                document.getElementById("preview-bar")];
+    var panes = [document.querySelector(".editor-pane"),
+                 document.getElementById("preview-scroll")];
+    var carry = 0;
+
+    function narrow() {
+      return global.matchMedia("(max-width: 900px)").matches;
+    }
+
+    function show() {
+      carry = 0;
+      document.body.classList.remove("chrome-away");
+    }
+
+    function measure() {
+      bars.forEach(function (bar) {
+        if (bar) bar.style.setProperty("--shift", bar.offsetHeight + "px");
+      });
+    }
+
+    panes.forEach(function (pane) {
+      if (!pane) return;
+      var last = 0;
+
+      pane.addEventListener("scroll", function () {
+        if (!narrow()) return;
+
+        var top = pane.scrollTop;
+        var step = top - last;
+        last = top;
+
+        if (top <= CHROME_TOP) { show(); return; }
+
+        //  Richtungswechsel setzt den Zaehler zurueck, sonst muesste man
+        //  erst den ganzen bisherigen Weg wieder aufholen.
+        if ((step > 0) !== (carry > 0)) carry = 0;
+        carry += step;
+
+        if (carry > CHROME_HIDE) {
+          measure();
+          document.body.classList.add("chrome-away");
+        } else if (carry < -CHROME_REVEAL) {
+          show();
+        }
+      }, { passive: true });
+    });
+
+    //  Beim Umschalten der Spalte und beim Verlassen der schmalen Ansicht
+    //  sollen die Leisten sichtbar sein.
+    document.getElementById("tab-edit").addEventListener("click", show);
+    document.getElementById("tab-preview").addEventListener("click", show);
+    global.addEventListener("resize", debounce(function () {
+      if (!narrow()) show();
+      else measure();
+    }, 150));
+
+    measure();
   }
 
   function bindResizer() {
@@ -777,6 +875,7 @@
     bindHeader();
     bindResizer();
     bindSwipe();
+    bindChromeAutoHide();
     bindWideLayout();
     bindKeys();
     global.addEventListener("resize", debounce(applyZoom, 100));
