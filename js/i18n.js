@@ -49,13 +49,15 @@
         printHint: "Im Druckdialog: A4, Ränder „Keine“, Hintergrundgrafiken an",
 
         // Fusszeile der Seite (nicht die des Dokuments – die heisst secFooter)
-        footerNote: "Alle Daten bleiben in deinem Browser",
+        footerNote: "Alle Daten bleiben in deinem Browser.",
         footerImprint: "Impressum",
         footerPrivacy: "Datenschutz",
         footerSource: "Quellcode",
 
         mapLink: "Anschrift auf OpenStreetMap verlinken",
-        mapLinkHint: "Im PDF wird die Anschrift anklickbar und öffnet die Karte. Sichtbar ändert sich nichts.",
+        mapLinkHint: "Im PDF wird die Anschrift anklickbar und öffnet die Karte. Am Aussehen ändert sich nichts.",
+        mapUrl: "Eigener Kartenlink",
+        mapUrlHint: "Nur nötig, wenn die Suche die Anschrift nicht findet: Ort in der Karte suchen, Link kopieren, hier einsetzen. Leer lassen heißt: automatisch suchen.",
         confirmReset: "Alle Eingaben löschen und leer neu beginnen?",
         pickImage: "Bitte eine Bilddatei auswählen",
         dragWidth: "Breite ziehen",
@@ -363,13 +365,15 @@
         printHint: "In the print dialog: A4, margins “None”, background graphics on",
 
         // Fusszeile der Seite (nicht die des Dokuments – die heisst secFooter)
-        footerNote: "All your data stays in your browser",
+        footerNote: "All your data stays in your browser.",
         footerImprint: "Imprint",
         footerPrivacy: "Privacy",
         footerSource: "Source code",
 
         mapLink: "Link the address to OpenStreetMap",
-        mapLinkHint: "In the PDF the address becomes clickable and opens the map. Nothing changes visually.",
+        mapLinkHint: "In the PDF the address becomes clickable and opens the map. Nothing changes about how it looks.",
+        mapUrl: "Custom map link",
+        mapUrlHint: "Only needed when the search does not find the address: look the place up on the map, copy the link, paste it here. Left empty means: search automatically.",
         confirmReset: "Delete everything and start over?",
         pickImage: "Please choose an image file",
         dragWidth: "Drag to resize",

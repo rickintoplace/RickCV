@@ -166,10 +166,16 @@ a {
   color: inherit; /*Verhindert die farbliche Kennzeichnung von Kontaktlinks*/
 }
 
-/*  Die Anschrift kann auf OpenStreetMap zeigen. Sichtbar aendert sich
-    nichts – im PDF wird daraus ein anklickbarer Bereich. */
+/*  Die Anschrift kann auf OpenStreetMap zeigen. Der Link uebernimmt dazu
+    das Layout des Kastens, den er umschliesst: Strasse und Ort bleiben so
+    nebeneinander und brechen erst um, wenn der Platz nicht reicht. Als
+    schlichter Block waere die Anschrift sonst zweizeilig geworden, sobald
+    der Link an ist. */
 .address-wrapper a.map-link {
-  display: block;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex: 1;
   text-decoration: none;
 }
 
@@ -488,7 +494,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 .resume_title .rc-icon,
 .resume_title .material-icons {
   position: absolute;
-  left: calc(-1 * (var(--title-icon) + 0.3em));
+  left: calc(-1 * (var(--title-icon) + var(--headline-size) * 0.3));
   top: 50%;
   transform: translateY(-50%);
   width: var(--title-icon);
@@ -511,7 +517,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 .resume_wrapper .resume_left .resume_title .material-icons {
   position: static;
   transform: none;
-  margin: 0 0.3em 0 0;
+  margin: 0 calc(var(--headline-size) * 0.3) 0 0;
   vertical-align: -0.18em;
 }
 
@@ -523,10 +529,15 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   text-align: center;
 }
 
+/*  Der Abstand zwischen Symbol und Text gehoert an die Zeile, nicht an das
+    Symbol: als gap bezieht sich das em auf die Schriftgroesse der Zeile und
+    faellt fuer beide Symbolsaetze gleich aus. Am Symbol selbst haette ein
+    Rand von 0.5em bei Material eine andere Bezugsgroesse als bei Lucide. */
 .resume_subinfo {
   display: flex;
   flex-direction: row;
   align-items: center;
+  gap: 0.5em;
 }
 
 .textblock {
@@ -878,7 +889,6 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 .resume_left .material-icons,
 .resume_left .material-symbols-outlined,
 .resume_left .rc-icon {
-  margin-right: 0.5em;
   color: var(--icon-color);
 }
 

@@ -132,9 +132,10 @@
 
       profile: { show: true, title: d("profile"), text: "", page: 1 },
 
-      //  mapLink: Anschrift wahlweise als Link auf OpenStreetMap
+      //  mapLink: Anschrift wahlweise als Link auf OpenStreetMap,
+      //  mapUrl: eigene Adresse, falls die Suche daneben liegt
       contact: { name: "", role: "", address: "", city: "", email: "", phone: "",
-                 mapLink: false },
+                 mapLink: false, mapUrl: "" },
 
       contactTitle: d("contact"),
 

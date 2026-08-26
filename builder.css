@@ -120,9 +120,9 @@ textarea {
   letter-spacing: 0;
 }
 
-.header-spacer {
+/* .header-spacer {
   flex: 1;
-}
+} */
 
 .header-actions {
   display: flex;
@@ -758,18 +758,57 @@ textarea {
     display: none;
   }
 
-  .app-main {
+  /*  Bearbeiten und Vorschau liegen nebeneinander auf einer doppelt so
+      breiten Schiene; sichtbar ist immer genau eine Haelfte. Das kostet
+      nichts, macht aber das Wischen moeglich: waehrend der Finger zieht,
+      folgt die Schiene unmittelbar, und beim Loslassen rastet sie ein.
+      Frueher wurde die andere Spalte schlicht ausgeblendet – da gibt es
+      nichts zu animieren.
+
+      Damit die Schiene eine Hoehe hat, wird der Bildschirm zur Spalte:
+      Kopfzeile und Reiter nehmen ihren Platz, der Rest gehoert der Schiene.
+      dvh statt vh, weil die Adressleiste mobiler Browser mitwandert. */
+  body {
+    height: 100dvh;
+    display: flex;
     flex-direction: column;
-    height: auto;
+    overflow: hidden;
+  }
+
+  .app-header,
+  .mobile-tabs {
+    flex: none;
+  }
+
+  .app-main {
+    flex: 1;
+    min-height: 0;
+    flex-direction: row;
+    width: 200%;
+    transform: translateX(0);
+    transition: transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
+
+    /*  Senkrecht scrollt der Browser wie gewohnt, waagerecht hoeren wir
+        selbst zu – sonst kaempfen Wischen und Scrollen gegeneinander. */
+    touch-action: pan-y;
+  }
+
+  body.show-preview .app-main {
+    transform: translateX(-50%);
+  }
+
+  /*  Waehrend der Finger zieht, darf nichts nachlaufen. */
+  .app-main.dragging {
+    transition: none;
   }
 
   .editor-pane,
-  .editor,
   .preview {
-    width: 100%;
+    width: 50%;
     max-width: none;
-    height: auto;
-    overflow: visible;
+    height: 100%;
+    overflow-y: auto;
+    flex: none;
   }
 
   .editor {
@@ -805,14 +844,6 @@ textarea {
   .mobile-tabs .btn {
     flex: 1;
     justify-content: center;
-  }
-
-  body.show-preview .editor-pane {
-    display: none;
-  }
-
-  body:not(.show-preview) .preview {
-    display: none;
   }
 
   .header-actions .btn span.label {
@@ -1166,13 +1197,14 @@ body.picker-open {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin: auto;
 }
 
 .app-footer-links {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-left: auto;
+  margin: auto;
 }
 
 .app-footer a {

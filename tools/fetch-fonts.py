@@ -58,12 +58,17 @@ LIGATURE_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789_ "
 
 #  Googles Stylesheet lieferte nicht nur die Schrift, sondern auch diese
 #  Klasse. Ohne sie stuende in der Kopfzeile das Wort "contrast" statt des
-#  Symbols. Uebernommen wie ausgeliefert, damit sich nichts verschiebt.
+#  Symbols.
+#
+#  Eine Zeile fehlt hier bewusst: Google setzt "font-size: 24px". Sowohl das
+#  Dokument als auch der Editor bestimmen die Symbolgroesse selbst, und die
+#  24 px waren die stille Bezugsgroesse fuer jedes em daneben – ein Rand von
+#  0.5em geriet damit auf 12 px, waehrend das gleich grosse Lucide-Symbol auf
+#  7 px kam. Ohne die Vorgabe erben die Symbole die Groesse ihrer Umgebung.
 MATERIAL_CLASS = """.material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;

@@ -203,11 +203,17 @@
       //  daraus ein anklickbarer Bereich; sichtbar aendert sich nichts, die
       //  Adresse bleibt schlicht schwarz.
       if (contact.mapLink) {
+        //  Die Suche findet die meisten Anschriften, aber nicht jede. Wer
+        //  eine eigene Adresse hinterlegt – etwa den Permalink aus der
+        //  Karte –, bekommt genau die.
+        var custom = safeUrl(contact.mapUrl);
         var query = [contact.address, contact.city]
           .filter(function (part) { return part; }).join(", ");
-        lines = '<a class="map-link" href="https://www.openstreetmap.org/search?query=' +
-          esc(encodeURIComponent(query)) + '" target="_blank" rel="noopener noreferrer">' +
-          lines + "</a>";
+        var href = custom || ("https://www.openstreetmap.org/search?query=" +
+          encodeURIComponent(query));
+
+        lines = '<a class="map-link" href="' + esc(href) +
+          '" target="_blank" rel="noopener noreferrer">' + lines + "</a>";
       }
 
       out += '<div class="resume_subinfo">' +

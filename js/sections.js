@@ -75,8 +75,19 @@
         F.text("contact.address", t("fieldStreet")),
         F.text("contact.city", t("fieldCity"))
       ));
-      body.appendChild(F.toggle("contact.mapLink", t("mapLink")));
+      //  Das Feld fuer den eigenen Kartenlink erscheint nur, wenn es auch
+      //  gebraucht wird – wie das Farbfeld im Abschnitt "Design".
+      var mapToggle = F.toggle("contact.mapLink", t("mapLink"));
+      mapToggle.querySelector("input").addEventListener("change", function () {
+        setTimeout(function () { refreshSection("person"); }, 0);
+      });
+      body.appendChild(mapToggle);
       body.appendChild(F.hint(t("mapLinkHint")));
+
+      if (state.contact.mapLink) {
+        body.appendChild(F.text("contact.mapUrl", t("mapUrl")));
+        body.appendChild(F.hint(t("mapUrlHint")));
+      }
       body.appendChild(F.row(
         F.text("contact.email", t("fieldEmail")),
         F.text("contact.phone", t("fieldPhone"))

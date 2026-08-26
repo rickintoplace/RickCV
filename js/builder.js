@@ -146,11 +146,46 @@
   function sendToPreview() {
     if (previewQueued) return;
     previewQueued = true;
-    global.requestAnimationFrame(function () {
+
+    function flush() {
+      if (!previewQueued) return;   // schon abgeschickt
       previewQueued = false;
       if (!frameReady || !frame.contentWindow) return;
       frame.contentWindow.postMessage({ type: "rickcv:data", data: state }, "*");
-    });
+    }
+
+    global.requestAnimationFrame(flush);
+
+    //  requestAnimationFrame laeuft nur, solange gezeichnet wird – im
+    //  Hintergrund-Tab oder bei ausgeblendeter Vorschau ruht es. Ohne den
+    //  Timer bliebe die Sperre dann stehen und die Vorschau fror ein, bis
+    //  die Seite neu geladen wurde. Der Timer schickt notfalls selbst; wer
+    //  zuerst kommt, gewinnt.
+    global.setTimeout(flush, 120);
+  }
+
+  /*  Die Vorschau meldet sich mit "rickcv:ready", sobald cv.html steht.
+   *  Auf diese Meldung allein ist kein Verlass: der Rahmen laedt parallel
+   *  zum Builder, und liegt cv.html im Cache, ist die Meldung schon durch,
+   *  bevor hier jemand zuhoert. Dann blieb frameReady falsch und die
+   *  Vorschau stand bis zum naechsten Neuladen still – Eingaben landeten im
+   *  Speicher, aber nicht im Bild.
+   *
+   *  Deshalb zwei Wege zum selben Ziel: die Meldung und das load-Ereignis
+   *  des Rahmens. Wer zuerst kommt, schaltet frei; der zweite Aufruf kostet
+   *  nur eine ueberfluessige Nachricht.
+   */
+  function markFrameReady() {
+    frameReady = true;
+    sendToPreview();
+  }
+
+  function watchFrame() {
+    frame.addEventListener("load", markFrameReady);
+
+    //  Schon fertig, bevor der Zuhoerer stand? Dann sofort nachreichen.
+    var doc = frame.contentDocument;
+    if (doc && doc.readyState === "complete") markFrameReady();
   }
 
   function changed(structural) {
@@ -563,6 +598,90 @@
     });
   }
 
+  /*  Wischen zwischen Bearbeiten und Vorschau.
+   *
+   *  Die Schiene folgt dem Finger, statt erst beim Loslassen umzuschalten:
+   *  Das zeigt waehrend der Geste, wohin sie fuehrt, und laesst sich
+   *  abbrechen, indem man zurueckzieht. Beim Loslassen entscheidet, wie weit
+   *  gezogen wurde – ein Drittel der Breite genuegt.
+   *
+   *  Senkrechtes Scrollen behaelt Vorrang: erst wenn die Bewegung deutlich
+   *  waagerechter ist als senkrecht, uebernimmt die Geste.
+   */
+  var SWIPE_TAKEOVER = 12;   // px, ab hier entscheidet sich die Richtung
+  var SWIPE_COMMIT = 0.3;    // Anteil der Bildschirmbreite zum Umschalten
+
+  function bindSwipe() {
+    var main = document.querySelector(".app-main");
+    if (!main) return;
+
+    var startX = 0, startY = 0, deltaX = 0;
+    var tracking = false, sliding = false, width = 0;
+
+    function narrow() {
+      return global.matchMedia("(max-width: 900px)").matches;
+    }
+
+    function showing() {
+      return document.body.classList.contains("show-preview");
+    }
+
+    function release() {
+      tracking = false;
+      sliding = false;
+      main.classList.remove("dragging");
+      main.style.transform = "";   // ab hier fuehrt wieder das Stylesheet
+    }
+
+    main.addEventListener("pointerdown", function (event) {
+      if (!narrow() || event.pointerType === "mouse") return;
+      tracking = true;
+      sliding = false;
+      startX = event.clientX;
+      startY = event.clientY;
+      deltaX = 0;
+      width = main.clientWidth / 2 || global.innerWidth;
+    });
+
+    main.addEventListener("pointermove", function (event) {
+      if (!tracking) return;
+
+      deltaX = event.clientX - startX;
+      var deltaY = event.clientY - startY;
+
+      if (!sliding) {
+        if (Math.abs(deltaY) > Math.abs(deltaX)) { tracking = false; return; }
+        if (Math.abs(deltaX) < SWIPE_TAKEOVER) return;
+        sliding = true;
+        main.classList.add("dragging");
+      }
+
+      //  Am jeweiligen Ende gibt die Schiene nur gedaempft nach, damit
+      //  spuerbar ist, dass dahinter nichts mehr kommt.
+      if ((!showing() && deltaX > 0) || (showing() && deltaX < 0)) deltaX /= 4;
+
+      var base = showing() ? -50 : 0;
+      main.style.transform = "translateX(" + (base + (deltaX / width) * 50) + "%)";
+    });
+
+    ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
+      main.addEventListener(type, function () {
+        if (!tracking) return;
+        var far = Math.abs(deltaX) > width * SWIPE_COMMIT;
+
+        if (sliding && far) {
+          if (deltaX < 0 && !showing()) {
+            document.body.classList.add("show-preview");
+            applyZoom();
+          } else if (deltaX > 0 && showing()) {
+            document.body.classList.remove("show-preview");
+          }
+        }
+        release();
+      });
+    });
+  }
+
   function bindResizer() {
     var resizer = document.getElementById("resizer");
     var resizing = false;
@@ -620,8 +739,7 @@
       if (!message || typeof message !== "object") return;
 
       if (message.type === "rickcv:ready") {
-        frameReady = true;
-        frame.contentWindow.postMessage({ type: "rickcv:data", data: state }, "*");
+        markFrameReady();
       } else if (message.type === "rickcv:height") {
         previewHeight = Math.max(600, message.height);
         showPageCount(message.pages || Math.max(1, Math.round(message.height / PAGE_HEIGHT)));
@@ -632,10 +750,12 @@
       }
     });
 
+    watchFrame();
     applyLocale();
     buildEditor();
     bindHeader();
     bindResizer();
+    bindSwipe();
     bindWideLayout();
     bindKeys();
     global.addEventListener("resize", debounce(applyZoom, 100));
