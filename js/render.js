@@ -113,13 +113,21 @@
    */
 
   /*  Lucide misst in Pixeln auf einem 24er Raster, Material Symbols in
-   *  Schriftgewicht. Beide Vorgabewerte (stroke 2 bzw. wght 400) sehen
-   *  nebeneinander NICHT gleich aus – Material ist bei wght 400 rund doppelt
-   *  so kraeftig. Im direkten Vergleich entspricht stroke 1,75 etwa wght 200;
-   *  daraus ergibt sich diese Gerade.
+   *  Schriftgewicht. Die beiden Skalen haben nichts miteinander zu tun, also
+   *  wurde die Gerade ausgemessen statt geschaetzt: gleiche Symbole beider
+   *  Saetze in gleicher Groesse gerendert und der Schwarzanteil verglichen.
+   *
+   *      Lucide 1,50  ~  wght 305
+   *      Lucide 1,75  ~  wght 345
+   *      Lucide 2,00  ~  wght 375
+   *      Lucide 2,25  ~  wght 448
+   *
+   *  Daraus dieser Zusammenhang. Die frueheren Werte (1,75 entsprach wght
+   *  200) stammten aus einem Augenmass und lagen durchweg zu leicht –
+   *  Material wirkte neben Lucide duenn.
    */
   function strokeToWeight(stroke) {
-    var weight = Math.round(200 + (Number(stroke) - 1.75) * 133);
+    var weight = Math.round(345 + (Number(stroke) - 1.75) * 190);
     return Math.max(100, Math.min(700, weight));
   }
 

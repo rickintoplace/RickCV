@@ -223,6 +223,13 @@ textarea {
   align-items: stretch;
 }
 
+/*  Hier zaehlt nur, dass es sie nicht gibt: display:contents reicht die
+    Kinder an .app-main durch, das Layout ist dasselbe wie ohne Schiene.
+    Erst schmale Bildschirme machen daraus einen eigenen Kasten. */
+.app-track {
+  display: contents;
+}
+
 /*  Die Spalte scrollt, nicht das Formular: so laeuft die Fusszeile am Ende
     des Formulars mit und belegt keinen festen Streifen am Bildschirmrand. */
 .editor-pane {
@@ -664,6 +671,7 @@ textarea {
   color: var(--ui-muted);
   font-size: 12px;
   margin-left: auto;
+  min-width: 70px;
 }
 
 .preview-scroll {
@@ -745,6 +753,7 @@ textarea {
     width: 100%;
     flex-wrap: wrap;
     gap: 6px;
+    margin-left: auto;
   }
 
   /*  Nur beschriftete Schaltflaechen fuellen die Zeile aus – der
@@ -768,11 +777,15 @@ textarea {
       Damit die Schiene eine Hoehe hat, wird der Bildschirm zur Spalte:
       Kopfzeile und Reiter nehmen ihren Platz, der Rest gehoert der Schiene.
       dvh statt vh, weil die Adressleiste mobiler Browser mitwandert. */
+  html,
   body {
     height: 100dvh;
+    overflow: hidden;
+  }
+
+  body {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
   }
 
   .app-header,
@@ -780,25 +793,41 @@ textarea {
     flex: none;
   }
 
+  /*  Der Rahmen bleibt genau bildschirmbreit und schneidet ab. Das ist
+      nicht nur Kosmetik: ragt der Inhalt waagerecht hinaus, verbreitern
+      mobile Browser den Layout-Viewport und die ganze Oberflaeche kommt zu
+      breit heraus – dann liegt die zweite Spalte neben dem Bildschirm statt
+      dahinter, und keine Geste der Welt holt sie hervor. */
   .app-main {
     flex: 1;
     min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .app-track {
+    display: flex;
     flex-direction: row;
     width: 200%;
+    height: 100%;
+
+    /*  Als Flex-Element wuerde die Schiene sonst auf die Rahmenbreite
+        zusammengedrueckt – dann waeren die Spalten schmaler als der
+        Bildschirm und die Geste liefe ins Leere. */
+    flex: none;
     transform: translateX(0);
     transition: transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
 
-    /*  Senkrecht scrollt der Browser wie gewohnt, waagerecht hoeren wir
-        selbst zu – sonst kaempfen Wischen und Scrollen gegeneinander. */
     touch-action: pan-y;
   }
 
-  body.show-preview .app-main {
+  body.show-preview .app-track {
     transform: translateX(-50%);
   }
 
   /*  Waehrend der Finger zieht, darf nichts nachlaufen. */
-  .app-main.dragging {
+  .app-track.dragging {
     transition: none;
   }
 
@@ -807,12 +836,34 @@ textarea {
     width: 50%;
     max-width: none;
     height: 100%;
-    overflow-y: auto;
     flex: none;
+
+    /*  Waagerecht ausdruecklich zu: steht nur overflow-y auf auto, wird die
+        andere Achse automatisch mitscrollbar. */
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    /*  Das Entscheidende fuer die Wischgeste, und keineswegs offensichtlich:
+        gefragt wird die scrollende Spalte selbst, nicht ihre Vorfahren. Auf
+        der Schiene blieb selbst touch-action:none wirkungslos – der Browser
+        sah eine schwenkbare Spalte darunter, nahm die Querbewegung an sich
+        und beendete unsere Geste nach dem ersten Schritt mit pointercancel.
+        Hier steht es richtig: senkrecht scrollt der Browser, waagerecht
+        hoeren wir zu. */
+    touch-action: pan-y;
   }
 
   .editor {
     padding-bottom: 0;
+  }
+
+  /*  Der Vorschaurahmen ist ein eigenes Dokument: Beruehrungen darin
+      erreichen diese Seite nicht, das Zurueckwischen lief deshalb ins
+      Leere, sobald der Finger auf dem Blatt lag. Auf dem Telefon ist die
+      Vorschau ohnehin nur zum Ansehen – also nimmt sie keine Eingaben mehr
+      an und die Geste gehoert wieder der Spalte darunter. */
+  #preview-frame {
+    pointer-events: none;
   }
 
   .resizer {
@@ -824,6 +875,7 @@ textarea {
   .preview-bar {
     flex-wrap: wrap;
     row-gap: 6px;
+    margin: auto;
   }
 
   .browser-warn {

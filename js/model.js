@@ -265,7 +265,7 @@
         intro: "Mehr dazu im Portfolio:",
         page: "last",
         links: [
-          { label: "Portfolio", text: "beispiel.de", url: "https://example.com",
+          { label: "Portfolio", text: "rickinto.place", url: "https://rickinto.place",
             icon: icon("lucide", "globe") },
         ],
       },

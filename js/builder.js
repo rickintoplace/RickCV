@@ -491,6 +491,12 @@
 
     var scale = zoomMode === "fit" ? Math.min(1, available / 820) : Number(zoomMode);
 
+    //  Passt das Blatt in die Breite, gehoert die Querbewegung der
+    //  Wischgeste – sonst muss man es waagerecht schieben koennen. Die
+    //  scrollende Flaeche entscheidet das selbst, deshalb steht es hier und
+    //  nicht im Stylesheet.
+    scroll.style.touchAction = 820 * scale > scroll.clientWidth + 1 ? "" : "pan-y";
+
     stage.style.transform = "scale(" + scale + ")";
     canvas.style.width = 820 * scale + "px";
     canvas.style.height = previewHeight * scale + "px";
@@ -612,10 +618,10 @@
   var SWIPE_COMMIT = 0.3;    // Anteil der Bildschirmbreite zum Umschalten
 
   function bindSwipe() {
-    var main = document.querySelector(".app-main");
-    if (!main) return;
+    var track = document.querySelector(".app-track");
+    if (!track) return;
 
-    var startX = 0, startY = 0, deltaX = 0;
+    var startX = 0, startY = 0, deltaX = 0, pointer = null;
     var tracking = false, sliding = false, width = 0;
 
     function narrow() {
@@ -627,49 +633,64 @@
     }
 
     function release() {
+      if (pointer !== null && track.hasPointerCapture &&
+          track.hasPointerCapture(pointer)) {
+        track.releasePointerCapture(pointer);
+      }
+      pointer = null;
       tracking = false;
       sliding = false;
-      main.classList.remove("dragging");
-      main.style.transform = "";   // ab hier fuehrt wieder das Stylesheet
+      track.classList.remove("dragging");
+      track.style.transform = "";   // ab hier fuehrt wieder das Stylesheet
     }
 
-    main.addEventListener("pointerdown", function (event) {
+    track.addEventListener("pointerdown", function (event) {
       if (!narrow() || event.pointerType === "mouse") return;
       tracking = true;
       sliding = false;
+      pointer = event.pointerId;
       startX = event.clientX;
       startY = event.clientY;
       deltaX = 0;
-      width = main.clientWidth / 2 || global.innerWidth;
+      width = track.clientWidth / 2 || global.innerWidth;
     });
 
-    main.addEventListener("pointermove", function (event) {
-      if (!tracking) return;
+    track.addEventListener("pointermove", function (event) {
+      if (!tracking || event.pointerId !== pointer) return;
 
       deltaX = event.clientX - startX;
       var deltaY = event.clientY - startY;
 
       if (!sliding) {
-        if (Math.abs(deltaY) > Math.abs(deltaX)) { tracking = false; return; }
-        if (Math.abs(deltaX) < SWIPE_TAKEOVER) return;
+        //  Erst entscheiden, wenn ueberhaupt ein Weg zurueckgelegt ist. Ein
+        //  Finger zittert beim Aufsetzen; wer schon beim ersten Pixel nach
+        //  Richtung fragt, verwirft fast jede Geste als senkrecht.
+        if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < SWIPE_TAKEOVER) return;
+        if (Math.abs(deltaX) < Math.abs(deltaY) * 1.2) { tracking = false; return; }
+
         sliding = true;
-        main.classList.add("dragging");
+        //  Ab hier zaehlt der Weg, damit die Schiene nicht springt.
+        startX = event.clientX;
+        deltaX = 0;
+        track.classList.add("dragging");
+        if (track.setPointerCapture) track.setPointerCapture(pointer);
       }
 
       //  Am jeweiligen Ende gibt die Schiene nur gedaempft nach, damit
       //  spuerbar ist, dass dahinter nichts mehr kommt.
-      if ((!showing() && deltaX > 0) || (showing() && deltaX < 0)) deltaX /= 4;
+      var shown = deltaX;
+      if ((!showing() && shown > 0) || (showing() && shown < 0)) shown /= 4;
 
       var base = showing() ? -50 : 0;
-      main.style.transform = "translateX(" + (base + (deltaX / width) * 50) + "%)";
+      track.style.transform = "translateX(" + (base + (shown / width) * 50) + "%)";
     });
 
-    ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
-      main.addEventListener(type, function () {
-        if (!tracking) return;
+    ["pointerup", "pointercancel"].forEach(function (type) {
+      track.addEventListener(type, function (event) {
+        if (!tracking || (pointer !== null && event.pointerId !== pointer)) return;
         var far = Math.abs(deltaX) > width * SWIPE_COMMIT;
 
-        if (sliding && far) {
+        if (sliding && far && type === "pointerup") {
           if (deltaX < 0 && !showing()) {
             document.body.classList.add("show-preview");
             applyZoom();
