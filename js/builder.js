@@ -225,6 +225,10 @@
       "zoom-label": "zoom",
       "tab-edit": "tabEdit",
       "tab-preview": "tabPreview",
+      "footer-note": "footerNote",
+      "footer-imprint": "footerImprint",
+      "footer-privacy": "footerPrivacy",
+      "footer-source": "footerSource",
     };
     Object.keys(texts).forEach(function (id) {
       var node = document.getElementById(id);

@@ -21,10 +21,7 @@
       content="Lebenslauf und Anschreiben im Browser erstellen – mit Live-Vorschau und PDF-Export. Ohne Anmeldung, alle Daten bleiben auf deinem Gerät."
     />
     <link rel="stylesheet" href="builder.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,100..700,0..1,-50..200"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="fonts/fonts.css" />
   </head>
   <body>
     <header class="app-header">
@@ -86,6 +83,27 @@
         </div>
       </section>
     </main>
+
+    <footer class="app-footer">
+      <span class="app-footer-note" id="footer-note"
+        >Alle Daten bleiben in deinem Browser</span
+      >
+
+      <nav class="app-footer-links" aria-label="Rechtliches und Quellen">
+        <a href="legal.html#impressum" id="footer-imprint">Impressum</a>
+        <a href="legal.html#datenschutz" id="footer-privacy">Datenschutz</a>
+        <a
+          href="https://github.com/rickintoplace/RickCV"
+          id="footer-source"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Quellcode</a
+        >
+        <a href="https://rickinto.place/" target="_blank" rel="noopener noreferrer"
+          >rickinto.place</a
+        >
+      </nav>
+    </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <input type="file" id="import-file" accept="application/json,.json" hidden />

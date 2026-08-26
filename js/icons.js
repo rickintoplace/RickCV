@@ -1,11 +1,13 @@
 /*  icons.js – Icon-Katalog und Darstellung.
  *
  *  Zwei Sets:
- *    lucide   – SVG-Pfade, eingebettet in icon-data.js. Funktioniert ohne
- *               Netzwerk und hinterlaesst keinen Text im PDF.
- *    material – Google Material Symbols, per Webfont. Der Iconname ist eine
- *               Ligatur und landet daher als Wort im extrahierten Text; fuer
- *               maschinenlesbare Lebenslaeufe ist Lucide die bessere Wahl.
+ *    lucide   – SVG-Pfade, eingebettet in icon-data.js. Hinterlaesst keinen
+ *               Text im PDF.
+ *    material – Google Material Symbols, als Webfont aus fonts/. Der
+ *               Iconname ist eine Ligatur und landet daher als Wort im
+ *               extrahierten Text; fuer maschinenlesbare Lebenslaeufe ist
+ *               Lucide die bessere Wahl. Die mitgelieferte Schrift enthaelt
+ *               nur die Symbole aus MATERIAL – siehe tools/fetch-fonts.py.
  *    brands   – Wortmarken (GitHub, LinkedIn). Flaechig statt gestrichelt,
  *               deshalb eigene Darstellung. Handgepflegt: ein neuer Eintrag
  *               ist eine Zeile in BRANDS.

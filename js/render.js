@@ -105,19 +105,12 @@
     "EB Garamond": "'EB Garamond', Garamond, serif",
   };
 
-  function loadFont(doc, family) {
-    if (!FONT_STACK[family]) return;
-    var link = doc.getElementById("rickcv-font");
-    if (!link) {
-      link = doc.createElement("link");
-      link.id = "rickcv-font";
-      link.rel = "stylesheet";
-      doc.head.appendChild(link);
-    }
-    var href = "https://fonts.googleapis.com/css2?family=" +
-      encodeURIComponent(family).replace(/%20/g, "+") + ":wght@400;600;700&display=swap";
-    if (link.href !== href) link.href = href;
-  }
+  /*  Frueher wurde hier zur Laufzeit ein Stylesheet von fonts.googleapis.com
+   *  nachgeladen. Alle neun Familien liegen jetzt lokal in fonts/fonts.css,
+   *  das cv.html fest einbindet – der Browser holt daraus nur die Datei der
+   *  tatsaechlich benutzten Schrift. Kein Nachladen, keine Verbindung zu
+   *  Google, und die Vorschau funktioniert auch offline.
+   */
 
   /*  Lucide misst in Pixeln auf einem 24er Raster, Material Symbols in
    *  Schriftgewicht. Beide Vorgabewerte (stroke 2 bzw. wght 400) sehen
@@ -144,7 +137,6 @@
     var root = doc.documentElement;
     var set = function (name, value) { root.style.setProperty(name, value); };
 
-    loadFont(doc, style.fontFamily);
     set("--font-family", FONT_STACK[style.fontFamily] || "'Open Sans', sans-serif");
     set("--base-font-size", style.baseFontSize + "px");
     set("--accent-color", style.accentColor);

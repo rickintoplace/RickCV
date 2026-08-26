@@ -50,6 +50,7 @@
 
   --ui-radius: 10px;
   --ui-header-h: 56px;
+  --ui-footer-h: 34px;
   --ui-sidebar-w: 420px;
 }
 
@@ -214,7 +215,7 @@ textarea {
 
 .app-main {
   display: flex;
-  height: calc(100% - var(--ui-header-h));
+  height: calc(100% - var(--ui-header-h) - var(--ui-footer-h));
   align-items: stretch;
 }
 
@@ -661,7 +662,7 @@ textarea {
 
 .toast {
   position: fixed;
-  bottom: 20px;
+  bottom: calc(var(--ui-footer-h) + 16px);
   left: 50%;
   transform: translateX(-50%) translateY(80px);
   background: var(--ui-text);
@@ -1058,4 +1059,247 @@ body.picker-open {
 
 .browser-warn[hidden] {
   display: none;
+}
+
+/* ------------------------------------------------------------------ Fusszeile */
+
+/*  Ein schmales Band unter der Arbeitsflaeche. Es traegt die Pflichtlinks
+    (Impressum, Datenschutz) und den Weg zurueck zum Quellcode. Die Hoehe
+    steht als Token in :root, weil .app-main sie von 100% abzieht. */
+
+.app-footer {
+  height: var(--ui-footer-h);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  background: var(--ui-panel);
+  border-top: 1px solid var(--ui-line);
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.app-footer-note {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.app-footer a {
+  color: var(--ui-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-footer a:hover,
+.app-footer a:focus-visible {
+  color: var(--ui-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ----------------------------------------------------------- Rechtliche Seite */
+
+/*  legal.html teilt sich die Farbtokens mit dem Editor, nicht dessen Layout:
+    dort ist der Bildlauf abgeschaltet, hier ist er der Normalfall. */
+
+/*  Der Editor sperrt den Bildlauf an <html> und <body>; hier soll das
+    Dokument selbst scrollen, sonst springen die Sprungmarken ins Leere. */
+.legal-root {
+  height: auto;
+}
+
+body.legal-body {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+/*  Beide Sprachen stehen im Markup; sichtbar ist, was zu <html lang> passt.
+    `revert` statt `block`, damit Zeilenteile Zeilenteile bleiben. */
+.legal-body [data-lang] {
+  display: none;
+}
+
+:root[lang="en"] .legal-body [data-lang="en"],
+:root:not([lang="en"]) .legal-body [data-lang="de"] {
+  display: revert;
+}
+
+.legal-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.brand.legal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand.legal-back:hover {
+  color: var(--ui-accent);
+}
+
+.legal-main {
+  flex: 1;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+  line-height: 1.65;
+}
+
+.legal-eyebrow {
+  margin: 0 0 10px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+}
+
+.legal-main h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.legal-lead {
+  margin: 16px 0 0;
+  font-size: 15px;
+  color: var(--ui-muted);
+}
+
+.legal-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.legal-jump a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: 999px;
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.legal-jump a:hover {
+  border-color: var(--ui-accent);
+  color: var(--ui-accent);
+}
+
+.legal-section {
+  margin-top: 44px;
+  padding-top: 32px;
+  border-top: 1px solid var(--ui-line);
+  scroll-margin-top: calc(var(--ui-header-h) + 16px);
+}
+
+.legal-section h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.legal-section h3 {
+  margin: 28px 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-text);
+}
+
+.legal-section p {
+  margin: 0 0 12px;
+  color: var(--ui-muted);
+}
+
+.legal-section address {
+  margin: 0 0 12px;
+  font-style: normal;
+  color: var(--ui-muted);
+}
+
+.legal-section a {
+  color: var(--ui-accent);
+  text-underline-offset: 3px;
+}
+
+.legal-section code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--ui-panel-2);
+  border: 1px solid var(--ui-line);
+  font-size: 12px;
+}
+
+.legal-callout {
+  padding: 14px 16px;
+  border-left: 3px solid var(--ui-accent);
+  border-radius: 0 var(--ui-radius) var(--ui-radius) 0;
+  background: var(--ui-accent-soft);
+  color: var(--ui-text) !important;
+}
+
+.legal-note {
+  margin-top: 28px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ui-muted);
+}
+
+.legal-footer {
+  height: auto;
+  min-height: var(--ui-footer-h);
+  padding: 10px 16px;
+}
+
+@media (max-width: 620px) {
+  .app-footer {
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 16px;
+  }
+
+  .app-footer-links {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+
+  .legal-main {
+    padding: 28px 18px 48px;
+  }
+
+  .legal-main h1 {
+    font-size: 25px;
+  }
 }

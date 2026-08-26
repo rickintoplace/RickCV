@@ -47,6 +47,12 @@
         exampleLoaded: "Beispiel geladen",
         newStarted: "Neu begonnen",
         printHint: "Im Druckdialog: A4, Ränder „Keine“, Hintergrundgrafiken an",
+
+        // Fusszeile der Seite (nicht die des Dokuments – die heisst secFooter)
+        footerNote: "Alle Daten bleiben in deinem Browser",
+        footerImprint: "Impressum",
+        footerPrivacy: "Datenschutz",
+        footerSource: "Quellcode",
         confirmReset: "Alle Eingaben löschen und leer neu beginnen?",
         pickImage: "Bitte eine Bilddatei auswählen",
         dragWidth: "Breite ziehen",
@@ -190,7 +196,7 @@
         fontSize: "Schriftgröße",
         fontSizeHint: "Wirkt auf das ganze Dokument. Unter 12 px wird es für Personalverantwortliche mühsam.",
         iconSet: "Symbolsatz",
-        iconSetHint: "Lucide sind eingebettete SVGs: sie funktionieren ohne Internet und hinterlassen keinen Text im PDF. Material Symbols sind eine Schriftart — beim Auslesen klebt der Iconname am Text der Überschrift (etwa „schoolAUSBILDUNG“).",
+        iconSetHint: "Lucide sind eingebettete SVGs: sie hinterlassen keinen Text im PDF. Material Symbols sind eine Schriftart — beim Auslesen klebt der Iconname am Text der Überschrift (etwa „schoolAUSBILDUNG“).",
         accentColor: "Akzentfarbe",
         sidebar: "Seitenleiste",
         sidebarLight: "Hell (aus Akzentfarbe abgeleitet)",
@@ -352,6 +358,12 @@
         exampleLoaded: "Example loaded",
         newStarted: "Started over",
         printHint: "In the print dialog: A4, margins “None”, background graphics on",
+
+        // Fusszeile der Seite (nicht die des Dokuments – die heisst secFooter)
+        footerNote: "All your data stays in your browser",
+        footerImprint: "Imprint",
+        footerPrivacy: "Privacy",
+        footerSource: "Source code",
         confirmReset: "Delete everything and start over?",
         pickImage: "Please choose an image file",
         dragWidth: "Drag to resize",
@@ -493,7 +505,7 @@
         fontSize: "Font size",
         fontSizeHint: "Applies to the whole document. Below 12 px it gets tiring to read.",
         iconSet: "Icon set",
-        iconSetHint: "Lucide icons are embedded SVGs: they work offline and leave no text in the PDF. Material Symbols are a font — when extracted, the icon name sticks to the heading text (e.g. “schoolEDUCATION”).",
+        iconSetHint: "Lucide icons are embedded SVGs: they leave no text in the PDF. Material Symbols are a font — when extracted, the icon name sticks to the heading text (e.g. “schoolEDUCATION”).",
         accentColor: "Accent colour",
         sidebar: "Sidebar",
         sidebarLight: "Light (derived from accent)",

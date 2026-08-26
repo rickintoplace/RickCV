@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<!--
+    legal.html – Impressum und Datenschutzerklaerung.
+
+    Beide Sprachen stehen nebeneinander im Markup: die Bloecke tragen
+    data-lang="de" bzw. data-lang="en", sichtbar ist immer nur der Satz,
+    der zu <html lang> passt. Das haelt den Rechtstext im Klartext lesbar
+    und pruefbar — er kommt nicht aus einem Woerterbuch in JavaScript.
+
+    Die Seite laedt bewusst nichts aus dem Netz: keine Webfonts, keine
+    Skripte von aussen. Die wenigen Symbole sind eingebettete SVG-Pfade.
+-->
+<html lang="de" class="legal-root">
+  <head>
+    <meta charset="utf-8" />
+    <title>RickCV – Impressum &amp; Datenschutz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+    <meta
+      name="description"
+      content="Impressum und Datenschutzerklärung für den RickCV-Lebenslauf-Baukasten."
+    />
+    <link rel="stylesheet" href="builder.css" />
+    <script>
+      /*  Erscheinungsbild und Sprache vor dem ersten Bild setzen, damit die
+          Seite nicht in Hell aufblitzt und dann nachdunkelt. Beide Werte
+          kommen aus demselben Speicher wie im Baukasten. */
+      (function () {
+        try {
+          var theme = localStorage.getItem("rickcv.theme");
+          if (theme === "light" || theme === "dark") {
+            document.documentElement.setAttribute("data-theme", theme);
+          }
+          var raw = localStorage.getItem("rickcv.data.v3");
+          var locale = raw ? JSON.parse(raw).locale : null;
+          if (locale === "en") document.documentElement.lang = "en";
+        } catch (error) {
+          /* kein Speicher, kaputter Eintrag – dann bleibt es bei Deutsch */
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="legal-body">
+    <header class="app-header">
+      <a class="brand legal-back" href="index.html">
+        <svg viewBox="0 0 24 24" class="legal-icon" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        RickCV
+        <small data-lang="de">Zurück zum Baukasten</small>
+        <small data-lang="en">Back to the builder</small>
+      </a>
+
+      <div class="header-spacer"></div>
+
+      <div class="header-actions">
+        <select class="header-select" id="lang-switch" aria-label="Sprache / Language">
+          <option value="de">Deutsch</option>
+          <option value="en">English</option>
+        </select>
+        <button
+          class="btn btn-icon btn-theme"
+          id="btn-theme"
+          type="button"
+          title="Erscheinungsbild / Appearance"
+          aria-label="Erscheinungsbild / Appearance"
+        >
+          <svg viewBox="0 0 24 24" class="legal-icon" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="legal-main">
+      <p class="legal-eyebrow" data-lang="de">Rechtliche Hinweise</p>
+      <p class="legal-eyebrow" data-lang="en">Legal information</p>
+
+      <h1 data-lang="de">Impressum &amp; Datenschutz</h1>
+      <h1 data-lang="en">Imprint &amp; Privacy Policy</h1>
+
+      <p class="legal-lead" data-lang="de">
+        Diese Seite enthält die nach deutschem Recht vorgeschriebene
+        Anbieterkennzeichnung und die Datenschutzerklärung für
+        <strong>cv.rickinto.place</strong>. RickCV ist ein Lebenslauf-Baukasten,
+        der vollständig im Browser läuft: deine Eingaben verlassen dein Gerät
+        nicht.
+      </p>
+      <p class="legal-lead" data-lang="en">
+        This page contains the provider identification required under German law
+        and the privacy policy for <strong>cv.rickinto.place</strong>. RickCV is
+        a CV builder that runs entirely in your browser: your entries never leave
+        your device.
+      </p>
+
+      <nav class="legal-jump" aria-label="Seitennavigation">
+        <a href="#impressum">
+          <svg viewBox="0 0 24 24" class="legal-icon" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+          </svg>
+          <span data-lang="de">Impressum</span>
+          <span data-lang="en">Imprint</span>
+        </a>
+        <a href="#datenschutz">
+          <svg viewBox="0 0 24 24" class="legal-icon" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <span data-lang="de">Datenschutz</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+      </nav>
+
+      <!-- ------------------------------------------------------ Impressum -->
+
+      <section id="impressum" class="legal-section">
+        <h2 data-lang="de">Impressum</h2>
+        <h2 data-lang="en">Imprint</h2>
+
+        <div data-lang="de">
+          <h3>Angaben gemäß § 5 DDG</h3>
+          <address>
+            Eirik Heilmann<br />
+            Neustädter Ring 4<br />
+            37154 Northeim<br />
+            Deutschland
+          </address>
+
+          <h3>Kontakt</h3>
+          <p>
+            E-Mail:
+            <a href="mailto:rickintoplace@proton.me">rickintoplace@proton.me</a>
+          </p>
+
+          <h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3>
+          <address>
+            Eirik Heilmann<br />
+            Neustädter Ring 4<br />
+            37154 Northeim<br />
+            Deutschland
+          </address>
+
+          <h3>Haftung für Inhalte</h3>
+          <p>
+            Als Diensteanbieter bin ich für eigene Inhalte auf diesen Seiten nach
+            den allgemeinen Gesetzen verantwortlich. Ich bin jedoch nicht
+            verpflichtet, übermittelte oder gespeicherte fremde Informationen zu
+            überwachen oder nach Umständen zu forschen, die auf eine
+            rechtswidrige Tätigkeit hinweisen.
+          </p>
+
+          <h3>Haftung für Links</h3>
+          <p>
+            Diese Seite enthält Links zu externen Websites Dritter, auf deren
+            Inhalte ich keinen Einfluss habe. Für diese fremden Inhalte kann ich
+            keine Gewähr übernehmen; verantwortlich ist stets der jeweilige
+            Anbieter oder Betreiber der verlinkten Seiten.
+          </p>
+
+          <h3>Urheberrecht</h3>
+          <p>
+            Der Quellcode von RickCV steht unter der MIT-Lizenz mit der
+            Einschränkung, dass eine kommerzielle Nutzung der ausdrücklichen
+            schriftlichen Zustimmung des Autors bedarf — siehe das
+            <a
+              href="https://github.com/rickintoplace/RickCV"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Repository auf GitHub</a
+            >. Die im Baukasten enthaltenen Symbole stammen aus Lucide
+            (ISC-Lizenz) und von Google Material Symbols (Apache-2.0); die
+            Wortmarken gehören ihren jeweiligen Inhabern.
+          </p>
+
+          <h3>Von dir erstellte Dokumente</h3>
+          <p>
+            Lebensläufe und Anschreiben, die du mit RickCV baust, sind deine
+            Inhalte. Ich erhebe daran keinerlei Rechte und bekomme sie nicht zu
+            sehen.
+          </p>
+        </div>
+
+        <div data-lang="en">
+          <h3>Information according to Section 5 DDG</h3>
+          <address>
+            Eirik Heilmann<br />
+            Neustädter Ring 4<br />
+            37154 Northeim<br />
+            Germany
+          </address>
+
+          <h3>Contact</h3>
+          <p>
+            Email:
+            <a href="mailto:rickintoplace@proton.me">rickintoplace@proton.me</a>
+          </p>
+
+          <h3>Responsible for content according to Section 18(2) MStV</h3>
+          <address>
+            Eirik Heilmann<br />
+            Neustädter Ring 4<br />
+            37154 Northeim<br />
+            Germany
+          </address>
+
+          <h3>Liability for content</h3>
+          <p>
+            As a service provider, I am responsible for my own content on these
+            pages in accordance with general law. However, I am not obliged to
+            monitor transmitted or stored third-party information or to
+            investigate circumstances that indicate unlawful activity.
+          </p>
+
+          <h3>Liability for links</h3>
+          <p>
+            This site contains links to external third-party websites over whose
+            content I have no influence. I therefore cannot accept any liability
+            for that content; the respective provider or operator of the linked
+            pages is always responsible for it.
+          </p>
+
+          <h3>Copyright</h3>
+          <p>
+            The RickCV source code is published under the MIT license with the
+            restriction that commercial use requires the author's express written
+            permission — see the
+            <a
+              href="https://github.com/rickintoplace/RickCV"
+              target="_blank"
+              rel="noopener noreferrer"
+              >repository on GitHub</a
+            >. The icons shipped with the builder come from Lucide (ISC license)
+            and Google Material Symbols (Apache-2.0); the wordmarks belong to
+            their respective owners.
+          </p>
+
+          <h3>Documents you create</h3>
+          <p>
+            CVs and cover letters you build with RickCV are your content. I claim
+            no rights to them and never get to see them.
+          </p>
+        </div>
+      </section>
+
+      <!-- ----------------------------------------------------- Datenschutz -->
+
+      <section id="datenschutz" class="legal-section">
+        <h2 data-lang="de">Datenschutzerklärung</h2>
+        <h2 data-lang="en">Privacy Policy</h2>
+
+        <div data-lang="de">
+          <h3>Verantwortlicher</h3>
+          <p>
+            Verantwortlich für die Datenverarbeitung auf dieser Website im Sinne
+            der DSGVO ist:
+          </p>
+          <address>
+            Eirik Heilmann<br />
+            Neustädter Ring 4<br />
+            37154 Northeim<br />
+            Deutschland<br />
+            <a href="mailto:rickintoplace@proton.me">rickintoplace@proton.me</a>
+          </address>
+
+          <h3>Deine Lebenslauf-Daten bleiben auf deinem Gerät</h3>
+          <p class="legal-callout">
+            RickCV hat keinen Server, keine Anmeldung und keine Datenbank. Alles,
+            was du eingibst — Name, Anschrift, Werdegang, Profilbild, Anschreiben
+            — wird ausschließlich im lokalen Speicher deines Browsers
+            (<code>localStorage</code>) abgelegt, damit deine Arbeit einen
+            Neustart des Browsers übersteht. Diese Daten werden nicht übertragen,
+            nicht ausgewertet und sind für mich zu keiner Zeit einsehbar.
+          </p>
+          <p>
+            Verwendet werden die Einträge <code>rickcv.data.v3</code> (deine
+            Dokumente) und <code>rickcv.theme</code> (Hell- oder
+            Dunkeldarstellung des Editors). Es handelt sich um Speicherung, die
+            für den von dir ausdrücklich gewünschten Dienst unbedingt
+            erforderlich ist (§ 25 Abs. 2 Nr. 2 TDDDG); eine Einwilligung ist
+            dafür nicht erforderlich. Du kannst die Daten jederzeit selbst
+            löschen: über die Schaltfläche „Neu“ im Baukasten oder indem du die
+            Website-Daten in den Einstellungen deines Browsers entfernst.
+          </p>
+          <p>
+            Der PDF-Export läuft über den Druckdialog deines Browsers und damit
+            ebenfalls vollständig lokal. Export und Import als JSON-Datei
+            schreiben und lesen Dateien auf deinem eigenen Gerät.
+          </p>
+
+          <h3>Hosting und Server-Logfiles</h3>
+          <p>
+            Diese Website wird als statische Seite über Vercel bereitgestellt,
+            einen Dienst der Vercel Inc., 440 N Barranca Ave #4133, Covina,
+            CA 91723, USA. Beim Aufruf der Seite verarbeitet Vercel technisch
+            notwendige Zugriffsdaten, um die Seite auszuliefern und deren
+            Sicherheit, Stabilität und Geschwindigkeit zu gewährleisten.
+          </p>
+          <p>
+            Dazu können gehören: IP-Adresse, Datum und Uhrzeit des Zugriffs,
+            angeforderte Datei, übertragene Datenmenge, Referrer-URL, Browsertyp,
+            Betriebssystem und HTTP-Statuscode. Diese Daten können in
+            Server-Logfiles gespeichert werden. Rechtsgrundlage ist Art. 6 Abs. 1
+            lit. f DSGVO; das berechtigte Interesse liegt in der sicheren und
+            zuverlässigen Bereitstellung dieser Website.
+          </p>
+          <p>
+            Da die Vercel Inc. ihren Sitz in den USA hat, kann es zu einer
+            Übermittlung in ein Drittland kommen. Diese stützt sich auf geeignete
+            Garantien, insbesondere die EU-Standardvertragsklauseln bzw. die
+            Zertifizierung nach dem EU-US Data Privacy Framework. Näheres regelt
+            die
+            <a
+              href="https://vercel.com/legal/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Datenschutzerklärung von Vercel</a
+            >.
+          </p>
+
+          <h3>Schriftarten und Symbole</h3>
+          <p>
+            Alle Schriftarten und die Symbolschrift werden von dieser Website
+            selbst ausgeliefert und liegen im Ordner <code>fonts/</code>. Es
+            werden keine Google Fonts und keine anderen externen Dienste
+            nachgeladen. Deine IP-Adresse wird dadurch an keinen Dritten
+            übermittelt, und der Baukasten funktioniert auch ohne Internet.
+          </p>
+
+          <h3>Domain und DNS</h3>
+          <p>
+            Die Domain <strong>rickinto.place</strong> ist über die Porkbun LLC
+            registriert. Damit dein Browser diese Seite unter ihrem Namen
+            erreichen kann, werden DNS-Anfragen von der zuständigen
+            DNS-Infrastruktur verarbeitet. Das ist technisch notwendig.
+          </p>
+
+          <h3>Keine Cookies, kein Tracking, keine Formulare</h3>
+          <p>
+            Diese Website setzt keine Cookies, verwendet keine Analyse- oder
+            Tracking-Werkzeuge, bindet keine Werbenetzwerke ein und bietet kein
+            Kontaktformular und keinen Newsletter an. Es findet keine
+            Profilbildung und keine automatisierte Entscheidungsfindung statt.
+          </p>
+
+          <h3>Externe Links</h3>
+          <p>
+            Diese Website verlinkt auf externe Angebote, unter anderem auf GitHub
+            und auf
+            <a
+              href="https://rickinto.place/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >rickinto.place</a
+            >. Mit dem Klick auf einen solchen Link verlässt du diese Website;
+            für die Datenverarbeitung auf der Zielseite ist deren Anbieter
+            verantwortlich.
+          </p>
+
+          <h3>Deine Rechte</h3>
+          <p>
+            Unter den Voraussetzungen der DSGVO hast du das Recht auf Auskunft
+            (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung
+            der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie das
+            Recht, einer Verarbeitung auf Grundlage von Art. 6 Abs. 1 lit. f
+            DSGVO zu widersprechen (Art. 21). Außerdem steht dir ein
+            Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde zu, etwa der
+            Landesbeauftragten für den Datenschutz Niedersachsen.
+          </p>
+          <p>
+            Für Anfragen zum Datenschutz erreichst du mich unter
+            <a href="mailto:rickintoplace@proton.me">rickintoplace@proton.me</a>.
+          </p>
+
+          <h3>Stand</h3>
+          <p><time datetime="2026-08-26">26. August 2026</time></p>
+        </div>
+
+        <div data-lang="en">
+          <h3>Controller</h3>
+          <p>
+            The controller responsible for data processing on this website within
+            the meaning of the GDPR is:
+          </p>
+          <address>
+            Eirik Heilmann<br />
+            Neustädter Ring 4<br />
+            37154 Northeim<br />
+            Germany<br />
+            <a href="mailto:rickintoplace@proton.me">rickintoplace@proton.me</a>
+          </address>
+
+          <h3>Your CV data stays on your device</h3>
+          <p class="legal-callout">
+            RickCV has no server, no sign-up and no database. Everything you
+            enter — name, address, career history, photo, cover letter — is
+            stored exclusively in your browser's local storage
+            (<code>localStorage</code>) so that your work survives a browser
+            restart. This data is never transmitted, never analysed and is at no
+            point visible to me.
+          </p>
+          <p>
+            The entries used are <code>rickcv.data.v3</code> (your documents) and
+            <code>rickcv.theme</code> (light or dark appearance of the editor).
+            This is storage strictly necessary for the service you explicitly
+            requested (Section 25(2) no. 2 TDDDG); no consent is required for it.
+            You can delete the data yourself at any time: via the "New" button in
+            the builder, or by clearing website data in your browser settings.
+          </p>
+          <p>
+            The PDF export runs through your browser's print dialog and therefore
+            also stays entirely local. JSON export and import write and read
+            files on your own device.
+          </p>
+
+          <h3>Hosting and server log files</h3>
+          <p>
+            This website is served as a static site via Vercel, a service of
+            Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA. When
+            the site is accessed, Vercel processes technically necessary access
+            data in order to deliver the site and maintain its security,
+            stability and performance.
+          </p>
+          <p>
+            This may include: IP address, date and time of access, requested
+            file, volume of data transferred, referrer URL, browser type,
+            operating system and HTTP status code. Such data may be stored in
+            server log files. The legal basis is Art. 6(1)(f) GDPR; the
+            legitimate interest is the secure and reliable provision of this
+            website.
+          </p>
+          <p>
+            As Vercel Inc. is based in the United States, data may be transferred
+            to a third country. Such transfers rely on appropriate safeguards, in
+            particular the EU Standard Contractual Clauses and certification
+            under the EU-US Data Privacy Framework. For details see
+            <a
+              href="https://vercel.com/legal/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Vercel's privacy policy</a
+            >.
+          </p>
+
+          <h3>Typefaces and icons</h3>
+          <p>
+            All typefaces and the icon font are served by this website itself
+            and live in the <code>fonts/</code> folder. No Google Fonts and no
+            other external services are loaded. Your IP address is therefore not
+            passed to any third party, and the builder works without an internet
+            connection.
+          </p>
+
+          <h3>Domain and DNS</h3>
+          <p>
+            The domain <strong>rickinto.place</strong> is registered through
+            Porkbun LLC. So that your browser can reach this site under its name,
+            DNS requests are processed by the responsible DNS infrastructure.
+            This is technically necessary.
+          </p>
+
+          <h3>No cookies, no tracking, no forms</h3>
+          <p>
+            This website sets no cookies, uses no analytics or tracking tools,
+            embeds no advertising networks and offers neither a contact form nor
+            a newsletter. There is no profiling and no automated decision-making.
+          </p>
+
+          <h3>External links</h3>
+          <p>
+            This website links to external services, among them GitHub and
+            <a
+              href="https://rickinto.place/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >rickinto.place</a
+            >. When you click such a link you leave this website; the provider of
+            the target site is responsible for any data processing there.
+          </p>
+
+          <h3>Your rights</h3>
+          <p>
+            Subject to the conditions of the GDPR, you have the right of access
+            (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction of
+            processing (Art. 18), data portability (Art. 20) and the right to
+            object to processing based on Art. 6(1)(f) GDPR (Art. 21). You also
+            have the right to lodge a complaint with a data protection
+            supervisory authority, for example the State Commissioner for Data
+            Protection of Lower Saxony.
+          </p>
+          <p>
+            For privacy enquiries you can reach me at
+            <a href="mailto:rickintoplace@proton.me">rickintoplace@proton.me</a>.
+          </p>
+
+          <h3>Last updated</h3>
+          <p><time datetime="2026-08-26">26 August 2026</time></p>
+        </div>
+
+        <p class="legal-note" data-lang="en">
+          This English version is provided for readability. The German version is
+          the legally authoritative one.
+        </p>
+      </section>
+    </main>
+
+    <footer class="app-footer legal-footer">
+      <span class="app-footer-note">
+        <span data-lang="de">Deine Daten bleiben in deinem Browser</span>
+        <span data-lang="en">Your data stays in your browser</span>
+      </span>
+
+      <nav class="app-footer-links">
+        <a href="index.html">
+          <span data-lang="de">Baukasten</span>
+          <span data-lang="en">Builder</span>
+        </a>
+        <a
+          href="https://github.com/rickintoplace/RickCV"
+          target="_blank"
+          rel="noopener noreferrer"
+          >GitHub</a
+        >
+        <a href="https://rickinto.place/" target="_blank" rel="noopener noreferrer"
+          >rickinto.place</a
+        >
+      </nav>
+    </footer>
+
+    <script>
+      /*  Zwei Schalter, sonst nichts: Sprache und Erscheinungsbild. Beide
+          schreiben in denselben Speicher wie der Baukasten, damit die
+          Einstellung beim Zurueckwechseln erhalten bleibt. */
+      (function () {
+        var root = document.documentElement;
+
+        var select = document.getElementById("lang-switch");
+        select.value = root.lang === "en" ? "en" : "de";
+        select.addEventListener("change", function () {
+          root.lang = select.value;
+          try {
+            var raw = localStorage.getItem("rickcv.data.v3");
+            if (!raw) return;
+            var state = JSON.parse(raw);
+            state.locale = select.value;
+            localStorage.setItem("rickcv.data.v3", JSON.stringify(state));
+          } catch (error) {
+            /* nicht speicherbar – die Ansicht steht trotzdem um */
+          }
+        });
+
+        var THEMES = ["system", "light", "dark"];
+        var theme = root.getAttribute("data-theme") || "system";
+
+        document.getElementById("btn-theme").addEventListener("click", function () {
+          theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+          if (theme === "system") root.removeAttribute("data-theme");
+          else root.setAttribute("data-theme", theme);
+          try {
+            localStorage.setItem("rickcv.theme", theme);
+          } catch (error) {
+            /* nicht speicherbar – gilt dann nur fuer diesen Besuch */
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
