@@ -122,6 +122,21 @@ body {
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" var(--icon-weight), "GRAD" 0, "opsz" 24;
   font-size: calc(1.25em * var(--icon-scale));
+
+  /*  Gleiche Kastenbreite wie ein Lucide-Symbol. Die Glyphe wird bewusst
+      etwas groesser gesetzt (siehe oben), belegt aber genauso viel Platz –
+      sonst rueckt der Text dahinter weiter nach rechts, sobald in einer
+      Liste beide Saetze gemischt sind.
+
+      0.92em bezieht sich auf die eigene Schriftgroesse (1.25em der
+      Umgebung): 0.92 x 1.25 = 1.15em – genau die Kantenlaenge von Lucide.
+      Die Skalierung steckt schon in der Schriftgroesse und darf hier nicht
+      ein zweites Mal auftauchen. */
+  width: 0.92em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /*  Einfaerbung und optionaler Hintergrund gelten fuer die Symbole in
@@ -146,8 +161,16 @@ a {
   display: inline-block; /*Damit der Link-Container echte Dimensionen hat und auch in der PDF anklickbar ist*/
 }
 
-.contact-info a {
+.contact-info a,
+.address-wrapper a.map-link {
   color: inherit; /*Verhindert die farbliche Kennzeichnung von Kontaktlinks*/
+}
+
+/*  Die Anschrift kann auf OpenStreetMap zeigen. Sichtbar aendert sich
+    nichts – im PDF wird daraus ein anklickbarer Bereich. */
+.address-wrapper a.map-link {
+  display: block;
+  text-decoration: none;
 }
 
 /*Timeline*/
@@ -446,35 +469,50 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   letter-spacing: 2px;
 }
 
+/*  Das Symbol haengt links neben der Ueberschrift, ausserhalb ihres
+    Kastens – so bleibt die Ueberschrift buendig mit dem Text darunter.
+
+    Frueher war der Einzug fest (-1.2em bzw. -1.6 x Zeilenhoehe) und die
+    Symbolgroesse veraenderlich: gross gewaehlte Symbole ragten in die
+    Ueberschrift hinein, kleine liessen eine Luecke. Jetzt richtet sich der
+    Einzug nach der tatsaechlichen Kantenlaenge, die einmal als --title-icon
+    festgelegt ist. Beide Saetze teilen sich denselben Kasten; die
+    Material-Glyphe wird darin nur etwas groesser gesetzt, weil sie
+    Innenabstand mitbringt. */
+.resume_title {
+  position: relative;
+  --title-icon: calc(var(--headline-size) * 1.25 * var(--icon-scale));
+}
+
 .resume_title .material-symbols-outlined,
 .resume_title .rc-icon,
 .resume_title .material-icons {
-  margin: 0 0 0 -1.2em;
-  padding: 0;
-  vertical-align: text-top;
-  font-size: var(--headline-size);
-  font-size: 1.5em;
-  /* color: var(--accent-color); */
-  font-weight: bold;
   position: absolute;
-}
-
-/*  SVG-Symbole richten sich nicht ueber font-size aus: sie bekommen die
-    Groesse der Ueberschrift direkt und einen eigenen Abstand zum Text. */
-.resume_title .rc-icon {
-  width: calc(var(--headline-size) * 1.25 * var(--icon-scale));
-  height: calc(var(--headline-size) * 1.25 * var(--icon-scale));
-  margin: 0 0.35em 0 calc(var(--headline-size) * -1.6);
-  vertical-align: -0.22em;
+  left: calc(-1 * (var(--title-icon) + 0.3em));
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--title-icon);
+  height: var(--title-icon);
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+  /* color: var(--accent-color); */
 }
 
 .resume_title .material-symbols-outlined {
-  font-size: calc(var(--headline-size) * 1.35 * var(--icon-scale));
-  margin-right: 0.3em;
+  font-size: calc(var(--title-icon) * 1.08);
+  line-height: 1;
 }
 
-.resume_wrapper .resume_left .resume_title .rc-icon {
-  margin-left: 0;
+/*  In der Seitenleiste stehen die Ueberschriften mittig zwischen zwei
+    Linien. Dort haengt nichts aus – das Symbol bleibt im Textfluss. */
+.resume_wrapper .resume_left .resume_title .material-symbols-outlined,
+.resume_wrapper .resume_left .resume_title .rc-icon,
+.resume_wrapper .resume_left .resume_title .material-icons {
+  position: static;
+  transform: none;
+  margin: 0 0.3em 0 0;
+  vertical-align: -0.18em;
 }
 
 .resume_wrapper .resume_left .resume_info {
@@ -745,7 +783,6 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   flex-wrap: nowrap;
   flex: 1;
   align-items: center;
-  margin-bottom: -1.5em;
 }
 
 .skill-description {
@@ -754,46 +791,29 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   margin-left: 0.5em;
 }
 
-.rank,
-#rank {
-  --color-full: var(--accent-color);
-  --color-empty: #26252d45;
-  font-size: 2.1rem;
-  color: var(--color-empty);
-  white-space: nowrap;
-  flex: 1;
-  transform: translateY(-14%);
-  letter-spacing: -2px;
+/*  Die fuenf Punkte kommen als SVG aus render.js. Frueher standen hier
+    Zeichen (U+25CF) bei 2.1rem: das Zeichen fehlt in den Textschriften,
+    also sprang jeder Browser auf eine andere Ersatzschrift – in Firefox
+    kamen die Punkte deutlich groesser heraus und ueberlappten sich. */
+.rank {
+  display: flex;
+  align-items: center;
+  flex: none;
   max-width: min-content;
-  line-height: normal;
-  margin-bottom: -7px;
 }
 
-#rank {
-  position: relative;
-  font-size: 2.1rem;
-  color: var(--color-empty);
-  display: inline-block;
+.rank-dots {
+  height: 0.8em;
+  width: auto;
+  display: block;
 }
 
-.rank::before,
-#rank::before {
-  content: "●●●●●";
-  position: absolute;
-  top: 0;
-  left: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  width: var(--ratio);
-  color: var(--accent-color);
-  z-index: 1; /* Damit das Pseudoelement oben ist */
+.rank-empty {
+  fill: var(--color-empty);
 }
 
-.rank::after,
-#rank::after {
-  content: "";
-  color: var(--color-empty);
-  z-index: 0; /* Damit der Hintergrund unten ist */
+.rank-full {
+  fill: var(--accent-color);
 }
 
 .skills .material-symbols-outlined {

@@ -446,12 +446,59 @@
     var stage = document.getElementById("preview-stage");
 
     var available = scroll.clientWidth - 32;
+
+    //  Auf schmalen Bildschirmen liegt die Vorschau hinter dem Reiter
+    //  "Vorschau" und ist zwischendurch ausgeblendet – dann ist sie 0 breit.
+    //  Ohne diese Bremse ergaebe "Einpassen" einen negativen Massstab und
+    //  das Dokument verschwaende: genau das machte den Baukasten auf dem
+    //  Telefon unbrauchbar.
+    if (available <= 0) return;
+
     var scale = zoomMode === "fit" ? Math.min(1, available / 820) : Number(zoomMode);
 
     stage.style.transform = "scale(" + scale + ")";
     canvas.style.width = 820 * scale + "px";
     canvas.style.height = previewHeight * scale + "px";
     frame.style.height = previewHeight + "px";
+  }
+
+  /*  Ab einer gewissen Breite ist in der Kopfzeile Platz fuer Zoom,
+   *  Seitenzahl und Status. Dann wandert die Leiste dorthin und die Vorschau
+   *  bekommt die Zeile zurueck, die sie sonst an eine halbleere Leiste
+   *  verliert. Darunter bleibt die eigene Leiste ueber der Vorschau – dort
+   *  waere in der Kopfzeile kein Platz. Die Breite steht auch in
+   *  builder.css als --ui-wide.
+   */
+  var WIDE_LAYOUT = "(min-width: 1700px)";
+
+  function placePreviewBar(wide) {
+    var bar = document.getElementById("preview-bar");
+    if (!bar) return;
+
+    var target = wide
+      ? document.querySelector(".app-header")
+      : document.querySelector(".preview");
+    if (bar.parentNode === target) return;
+
+    if (wide) {
+      //  Vor die Luecke, damit die Schaltflaechen rechts stehen bleiben.
+      target.insertBefore(bar, document.querySelector(".header-spacer"));
+    } else {
+      target.insertBefore(bar, target.firstChild);
+    }
+    bar.classList.toggle("in-header", wide);
+    applyZoom();
+  }
+
+  function bindWideLayout() {
+    var query = global.matchMedia(WIDE_LAYOUT);
+    placePreviewBar(query.matches);
+    //  addEventListener kennt Safari erst ab 14 – addListener als Rueckfall.
+    if (query.addEventListener) {
+      query.addEventListener("change", function (event) { placePreviewBar(event.matches); });
+    } else if (query.addListener) {
+      query.addListener(function (event) { placePreviewBar(event.matches); });
+    }
   }
 
   function showPageCount(count) {
@@ -510,6 +557,9 @@
     });
     document.getElementById("tab-preview").addEventListener("click", function () {
       document.body.classList.add("show-preview");
+      //  Erst jetzt hat die Vorschau eine Breite, auf die sich "Einpassen"
+      //  beziehen kann.
+      applyZoom();
     });
   }
 
@@ -586,6 +636,7 @@
     buildEditor();
     bindHeader();
     bindResizer();
+    bindWideLayout();
     bindKeys();
     global.addEventListener("resize", debounce(applyZoom, 100));
     applyZoom();

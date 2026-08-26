@@ -50,8 +50,12 @@
 
   --ui-radius: 10px;
   --ui-header-h: 56px;
-  --ui-footer-h: 34px;
   --ui-sidebar-w: 420px;
+
+  /*  Ab dieser Breite passt die Bedienung der Vorschau in die Kopfzeile;
+      die eigene Leiste ueber der Vorschau entfaellt dann. Der Wert steht
+      auch in builder.js – dort als Media Query. */
+  --ui-wide: 1700px;
 }
 
 :root[data-theme="light"] {
@@ -215,20 +219,29 @@ textarea {
 
 .app-main {
   display: flex;
-  height: calc(100% - var(--ui-header-h) - var(--ui-footer-h));
+  height: calc(100% - var(--ui-header-h));
   align-items: stretch;
 }
 
-.editor {
+/*  Die Spalte scrollt, nicht das Formular: so laeuft die Fusszeile am Ende
+    des Formulars mit und belegt keinen festen Streifen am Bildschirmrand. */
+.editor-pane {
   width: var(--ui-sidebar-w);
   min-width: 300px;
   max-width: 70vw;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overscroll-behavior: contain;
   background: var(--ui-panel);
   border-right: 1px solid var(--ui-line);
-  padding-bottom: 40vh;
+}
+
+.editor {
+  flex: 1 0 auto;
+  /*  Platz, damit sich auch der letzte Abschnitt nach oben scrollen laesst. */
+  padding-bottom: 30vh;
 }
 
 .resizer {
@@ -633,6 +646,20 @@ textarea {
   font-size: 13px;
 }
 
+/*  In der Kopfzeile ist die Leiste kein eigenes Band mehr, sondern eine
+    Gruppe zwischen Marke und Schaltflaechen. */
+.app-header .preview-bar.in-header {
+  padding: 0;
+  background: transparent;
+  border-bottom: 0;
+  gap: 8px;
+  min-width: 0;
+}
+
+.app-header .preview-bar.in-header .status {
+  margin-left: 0;
+}
+
 .preview-bar .status {
   color: var(--ui-muted);
   font-size: 12px;
@@ -662,7 +689,7 @@ textarea {
 
 .toast {
   position: fixed;
-  bottom: calc(var(--ui-footer-h) + 16px);
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%) translateY(80px);
   background: var(--ui-text);
@@ -693,20 +720,75 @@ textarea {
     overflow: auto;
   }
 
+  /*  Auf dem Telefon passen sieben Schaltflaechen nicht in eine 56-px-Zeile:
+      die Kopfzeile waechst mit und legt die Bedienung um. Ohne das lagen die
+      Schaltflaechen frueher ueber dem Formular und der Baukasten war auf dem
+      Telefon nicht bedienbar. */
+  .app-header {
+    height: auto;
+    min-height: var(--ui-header-h);
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 8px 12px;
+    row-gap: 8px;
+  }
+
+  .brand small {
+    display: none;
+  }
+
+  .header-spacer {
+    display: none;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /*  Nur beschriftete Schaltflaechen fuellen die Zeile aus – der
+      Umschalter fuer das Erscheinungsbild bleibt quadratisch. */
+  .header-actions .btn:not(.btn-icon) {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .header-divider {
+    display: none;
+  }
+
   .app-main {
     flex-direction: column;
     height: auto;
   }
 
+  .editor-pane,
   .editor,
   .preview {
     width: 100%;
     max-width: none;
     height: auto;
+    overflow: visible;
+  }
+
+  .editor {
+    padding-bottom: 0;
   }
 
   .resizer {
     display: none;
+  }
+
+  /*  Zoom, Seitenzahl, Hinweis und Status passen nebeneinander nicht in
+      eine Telefonbreite – sie legen sich um, statt hinauszuragen. */
+  .preview-bar {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .browser-warn {
+    white-space: normal;
   }
 
   .mobile-tabs {
@@ -725,7 +807,7 @@ textarea {
     justify-content: center;
   }
 
-  body.show-preview .editor {
+  body.show-preview .editor-pane {
     display: none;
   }
 
@@ -1068,11 +1150,11 @@ body.picker-open {
     steht als Token in :root, weil .app-main sie von 100% abzieht. */
 
 .app-footer {
-  height: var(--ui-footer-h);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
-  padding: 0 16px;
+  gap: 6px 16px;
+  padding: 12px 16px;
   background: var(--ui-panel);
   border-top: 1px solid var(--ui-line);
   font-size: 12px;
@@ -1276,18 +1358,13 @@ body.legal-body {
 }
 
 .legal-footer {
-  height: auto;
-  min-height: var(--ui-footer-h);
-  padding: 10px 16px;
+  padding: 12px 16px;
 }
 
 @media (max-width: 620px) {
   .app-footer {
-    height: auto;
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
-    padding: 10px 16px;
   }
 
   .app-footer-links {

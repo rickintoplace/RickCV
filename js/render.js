@@ -196,11 +196,23 @@
   function contactBlock(contact) {
     var out = "";
     if (contact.address || contact.city) {
+      var lines = '<div class="contact-info">' + esc(contact.address) + "</div>" +
+        '<div class="contact-info">' + esc(contact.city) + "</div>";
+
+      //  Auf Wunsch zeigt die Anschrift auf OpenStreetMap. Im PDF wird
+      //  daraus ein anklickbarer Bereich; sichtbar aendert sich nichts, die
+      //  Adresse bleibt schlicht schwarz.
+      if (contact.mapLink) {
+        var query = [contact.address, contact.city]
+          .filter(function (part) { return part; }).join(", ");
+        lines = '<a class="map-link" href="https://www.openstreetmap.org/search?query=' +
+          esc(encodeURIComponent(query)) + '" target="_blank" rel="noopener noreferrer">' +
+          lines + "</a>";
+      }
+
       out += '<div class="resume_subinfo">' +
         Icons.html({ set: "lucide", name: "map-pin" }) +
-        '<div class="address-wrapper">' +
-        '<div class="contact-info">' + esc(contact.address) + "</div>" +
-        '<div class="contact-info">' + esc(contact.city) + "</div></div></div>";
+        '<div class="address-wrapper">' + lines + "</div></div>";
     }
     if (contact.email) {
       out += '<div class="resume_subinfo">' +
@@ -256,12 +268,45 @@
     }).join("");
   }
 
+  /*  Fuenf Punkte als SVG.
+   *
+   *  Frueher standen hier fuenf Zeichen "●" (U+25CF). Das Zeichen fehlt in
+   *  den Textschriften – jeder Browser griff zu einer anderen Ersatzschrift,
+   *  in Firefox kamen die Punkte dadurch deutlich groesser heraus als in
+   *  Chrome und ueberlappten sich. Als Vektor sind sie ueberall gleich, und
+   *  sie landen als Grafik im PDF statt als Zeichenfolge im ausgelesenen
+   *  Text.
+   *
+   *  Der Anteil bleibt stufenlos: der gefuellte Satz liegt ueber dem leeren
+   *  und wird auf die Breite des Anteils beschnitten.
+   */
+  var RANK_DOTS = 5;
+  var RANK_RADIUS = 8;
+  var RANK_STEP = 21;
+
+  function rankDots(ratio, key) {
+    var width = RANK_STEP * (RANK_DOTS - 1) + RANK_RADIUS * 2;
+    var height = RANK_RADIUS * 2;
+    var circles = "";
+    for (var i = 0; i < RANK_DOTS; i++) {
+      circles += '<circle cx="' + (RANK_RADIUS + i * RANK_STEP) +
+        '" cy="' + RANK_RADIUS + '" r="' + RANK_RADIUS + '"/>';
+    }
+    var clip = "rank-clip-" + key;
+    return '<svg class="rank-dots" viewBox="0 0 ' + width + " " + height +
+      '" role="img" aria-label="' + Math.round(ratio / 20) + " / " + RANK_DOTS + '">' +
+      '<g class="rank-empty">' + circles + "</g>" +
+      '<clipPath id="' + clip + '"><rect x="0" y="0" width="' +
+      (width * ratio / 100) + '" height="' + height + '"/></clipPath>' +
+      '<g class="rank-full" clip-path="url(#' + clip + ')">' + circles + "</g></svg>";
+  }
+
   function skillBlock(list) {
-    return list.map(function (skill) {
+    return list.map(function (skill, index) {
       var ratio = (Math.max(0, Math.min(5, Number(skill.rank) || 0)) / 5) * 100;
       return '<ul class="skills">' +
         '<li class="skill-description">' + esc(skill.name) + "</li>" +
-        '<li class="rank" style="--ratio:' + ratio + '%">&#9679;&#9679;&#9679;&#9679;&#9679;</li></ul>';
+        '<li class="rank">' + rankDots(ratio, index) + "</li></ul>";
     }).join("");
   }
 

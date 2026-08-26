@@ -39,6 +39,7 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 - **Photo placement:** Drag the picture to move the crop, scroll to zoom, and pick a shape (full-width band, rounded square, or circle).
 - **Your own categories:** *Education*, *Experience* and *Volunteering* are only the defaults. Rename them, reorder them, add your own — each one keeps a separate machine-readable meaning so applicant systems still file it correctly.
 - **Icon picker:** ~150 embedded [Lucide](https://lucide.dev) icons plus Google Material Symbols, searchable in German and English. One stroke-weight slider drives both sets — Material Symbols is matched through its variable font axis so the two never look mismatched — plus size, color and an optional background shape.
+- **Address as a map link:** Optionally the address in the sidebar links to OpenStreetMap — clickable in the PDF, unchanged on paper.
 - **Two languages:** German and English for the interface and the document, including the language marking inside the PDF. Switch it straight from the header, or under *Optionen*.
 - **Light and dark editor:** The button next to the language follows your system by default, and cycles to light or dark if you would rather decide yourself. Only the editor changes — the resume stays on white paper, because that is what gets printed.
 - **Honest machine readability:** See exactly what an applicant tracking system reads, and edit it yourself if you want. No hidden text — see below.

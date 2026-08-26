@@ -57,11 +57,35 @@
     </nav>
 
     <main class="app-main">
-      <aside class="editor" id="editor"></aside>
+      <aside class="editor-pane">
+        <div class="editor" id="editor"></div>
+
+        <footer class="app-footer">
+          <span class="app-footer-note" id="footer-note"
+            >Alle Daten bleiben in deinem Browser</span
+          >
+
+          <nav class="app-footer-links" aria-label="Rechtliches und Quellen">
+            <a href="legal.html#impressum" id="footer-imprint">Impressum</a>
+            <a href="legal.html#datenschutz" id="footer-privacy">Datenschutz</a>
+            <a
+              href="https://github.com/rickintoplace/RickCV"
+              id="footer-source"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Quellcode</a
+            >
+            <a href="https://rickinto.place/" target="_blank" rel="noopener noreferrer"
+              >rickinto.place</a
+            >
+          </nav>
+        </footer>
+      </aside>
+
       <div class="resizer" id="resizer"></div>
 
       <section class="preview">
-        <div class="preview-bar">
+        <div class="preview-bar" id="preview-bar">
           <label for="zoom" id="zoom-label">Zoom</label>
           <select id="zoom">
             <option value="fit">Einpassen</option>
@@ -83,27 +107,6 @@
         </div>
       </section>
     </main>
-
-    <footer class="app-footer">
-      <span class="app-footer-note" id="footer-note"
-        >Alle Daten bleiben in deinem Browser</span
-      >
-
-      <nav class="app-footer-links" aria-label="Rechtliches und Quellen">
-        <a href="legal.html#impressum" id="footer-imprint">Impressum</a>
-        <a href="legal.html#datenschutz" id="footer-privacy">Datenschutz</a>
-        <a
-          href="https://github.com/rickintoplace/RickCV"
-          id="footer-source"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Quellcode</a
-        >
-        <a href="https://rickinto.place/" target="_blank" rel="noopener noreferrer"
-          >rickinto.place</a
-        >
-      </nav>
-    </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <input type="file" id="import-file" accept="application/json,.json" hidden />

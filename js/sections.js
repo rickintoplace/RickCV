@@ -75,6 +75,8 @@
         F.text("contact.address", t("fieldStreet")),
         F.text("contact.city", t("fieldCity"))
       ));
+      body.appendChild(F.toggle("contact.mapLink", t("mapLink")));
+      body.appendChild(F.hint(t("mapLinkHint")));
       body.appendChild(F.row(
         F.text("contact.email", t("fieldEmail")),
         F.text("contact.phone", t("fieldPhone"))
