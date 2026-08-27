@@ -190,13 +190,20 @@
 
     var body = doc.body;
     body.className = body.className.split(/\s+/).filter(function (name) {
-      return name && !/^(template-|photo-|pages-)/.test(name);
+      return name && !/^(template-|photo-|pages-|letter-)/.test(name);
     }).join(" ");
     body.classList.add("template-" + (data.settings.template || "clean"));
     body.classList.add("photo-" + (photo.shape || "band"));
     var mode = data.settings.pageMode || "single";
     body.classList.add(
       mode === "flow" ? "pages-flow" : mode === "two" ? "pages-two" : "pages-fixed");
+
+    //  Das Anschreiben hat seinen eigenen Seitenmodus: es steht auf einem
+    //  eigenen Blatt und hat mit der Seitenzuordnung des Lebenslaufs nichts
+    //  zu tun.
+    body.classList.add(
+      (data.settings.letterPageMode || "single") === "flow"
+        ? "letter-flow" : "letter-fixed");
   }
 
   /* ----------------------------------------------------------- CV-Bausteine */

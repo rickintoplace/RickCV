@@ -624,6 +624,27 @@
         { value: "left", label: t("alignLeft") },
         { value: "justify", label: t("alignJustify") },
       ]));
+
+      body.appendChild(el("hr"));
+
+      //  Der Umfang steht am Ende des Abschnitts, nicht am Anfang: wer hier
+      //  ankommt, hat den Text schon geschrieben und weiss, ob er auf ein
+      //  Blatt passt.
+      var letterPage = F.select("settings.letterPageMode", t("letterPageMode"), [
+        { value: "single", label: t("letterPageSingle") },
+        { value: "flow", label: t("letterPageFlow") },
+      ]);
+      letterPage.querySelector("select").addEventListener("change", function () {
+        setTimeout(function () { refreshSection("letter"); }, 0);
+      });
+      body.appendChild(letterPage);
+      body.appendChild(F.hint(t("letterPageHint")));
+
+      //  Die Warnung erscheint erst, wenn sie zutrifft – nicht als Nachsatz
+      //  unter einer Vorgabe, die ohnehin die richtige ist.
+      if (state.settings.letterPageMode === "flow") {
+        body.appendChild(F.note(t("letterPageFlowWarn"), "warn"));
+      }
     }
 
     /* -------------------------------------------------------------- Design */

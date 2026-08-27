@@ -81,6 +81,11 @@
         //  "flow"   – laengerer Inhalt laeuft von selbst weiter
         pageMode: "single",
 
+        //  Dasselbe fuer das Anschreiben, nur ohne die Zuordnung von Bloecken:
+        //  "single" – ein festes Blatt (Vorgabe und der Normalfall)
+        //  "flow"   – laengerer Text laeuft auf weitere Blaetter
+        letterPageMode: "single",
+
         page2: {
           repeatPhoto: false,
           repeatContact: true,

@@ -877,6 +877,36 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   height: 29.7cm;
 }
 
+/*  Mehrseitiges Anschreiben. Der Normalfall bleibt das eine Blatt – ein
+    Anschreiben, das laenger ist, liest niemand freiwillig. Es gibt aber
+    Ausschreibungen, die es ausdruecklich anders wollen: Stipendien mit
+    vorgegebenem Umfang, akademische Bewerbungen, ausfuehrliche
+    Motivationsschreiben. Fuer die gibt es diesen Modus.
+
+    Wie beim mehrseitigen Lebenslauf: min-height statt height, damit das
+    Blatt waechst statt abzuschneiden. Die Seitenzahl in der Vorschau rechnet
+    die tatsaechliche Hoehe ohnehin schon in Blaetter um. */
+body.letter-flow .cover-letter_wrapper {
+  height: auto;
+  min-height: 29.7cm;
+}
+
+/*  Was beim Umbruch zusammenbleiben muss. Grussformel und Unterschrift
+    gehoeren zusammen – eine Unterschrift allein auf dem letzten Blatt sieht
+    nach Versehen aus. Absaetze duerfen umbrechen, aber nicht so, dass eine
+    einzelne Zeile allein steht. */
+body.letter-flow .cover-letter-closing,
+body.letter-flow .cover-letter-recipient,
+body.letter-flow .cover-letter-regard {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+body.letter-flow .cover-letter-body p {
+  orphans: 2;
+  widows: 2;
+}
+
 .cover-letter-header {
   background-color: var(--sidebar-color);
   color: var(--sidebar-font-color);
@@ -1433,7 +1463,10 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
     page-break-inside: avoid;
   }
 
-  .cover-letter_wrapper {
+  /*  Das feste Anschreiben bleibt ein Blatt. Im mehrseitigen Modus muss der
+      Ueberhang weiterlaufen duerfen – sonst schiebt der Browser das ganze
+      Blatt auf die naechste Seite und hinterlaesst eine leere. */
+  body.letter-fixed .cover-letter_wrapper {
     break-inside: avoid;
     page-break-inside: avoid;
   }
