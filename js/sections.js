@@ -627,24 +627,43 @@
 
       body.appendChild(el("hr"));
 
-      //  Der Umfang steht am Ende des Abschnitts, nicht am Anfang: wer hier
-      //  ankommt, hat den Text schon geschrieben und weiss, ob er auf ein
-      //  Blatt passt.
-      var letterPage = F.select("settings.letterPageMode", t("letterPageMode"), [
-        { value: "single", label: t("letterPageSingle") },
-        { value: "flow", label: t("letterPageFlow") },
-      ]);
-      letterPage.querySelector("select").addEventListener("change", function () {
+      //  Die Warnung steht immer im Markup und wird vom Baukasten ein- und
+      //  ausgeblendet, sobald die Vorschau die Seitenzahl meldet. Sie neu zu
+      //  bauen wuerde beim Tippen den Schreibcursor aus dem Textfeld werfen.
+      var warn = F.note("", "warn");
+      warn.id = "letter-length-warn";
+      warn.hidden = true;
+      body.appendChild(warn);
+
+      //  Wieviele Blaetter es werden, entscheidet der Text. Einzustellen
+      //  bleibt nur, wie die Folgeblaetter aussehen – deshalb ein eigener,
+      //  zugeklappter Block statt vier Feldern im Weg.
+      var letterPages = el("details", "sub-block");
+      letterPages.appendChild(el("summary", null, t("letterPagesBlock")));
+      var letterBody = el("div", "sub-block-body");
+
+      letterBody.appendChild(F.hint(t("letterPagesHint")));
+      letterBody.appendChild(F.toggle("settings.letterPages.repeatHeader",
+        t("letterRepeatHeader")));
+      letterBody.appendChild(F.hint(t("letterRepeatHeaderHint")));
+
+      var numbers = F.toggle("settings.letterPages.pageNumbers", t("letterPageNumbers"));
+      numbers.querySelector("input").addEventListener("change", function () {
         setTimeout(function () { refreshSection("letter"); }, 0);
       });
-      body.appendChild(letterPage);
-      body.appendChild(F.hint(t("letterPageHint")));
+      letterBody.appendChild(numbers);
+      letterBody.appendChild(F.hint(t("letterPageNumbersHint")));
 
-      //  Die Warnung erscheint erst, wenn sie zutrifft – nicht als Nachsatz
-      //  unter einer Vorgabe, die ohnehin die richtige ist.
-      if (state.settings.letterPageMode === "flow") {
-        body.appendChild(F.note(t("letterPageFlowWarn"), "warn"));
+      //  Die Beschriftung steht nur zur Wahl, wenn es ueberhaupt eine
+      //  Seitenzahl gibt.
+      if (state.settings.letterPages.pageNumbers) {
+        letterBody.appendChild(F.text("settings.letterPages.numberFormat",
+          t("letterNumberFormat"), "Seite {page} von {pages}"));
+        letterBody.appendChild(F.hint(t("letterNumberFormatHint")));
       }
+
+      letterPages.appendChild(letterBody);
+      body.appendChild(letterPages);
     }
 
     /* -------------------------------------------------------------- Design */

@@ -81,16 +81,21 @@
         //  "flow"   – laengerer Inhalt laeuft von selbst weiter
         pageMode: "single",
 
-        //  Dasselbe fuer das Anschreiben, nur ohne die Zuordnung von Bloecken:
-        //  "single" – ein festes Blatt (Vorgabe und der Normalfall)
-        //  "flow"   – laengerer Text laeuft auf weitere Blaetter
-        letterPageMode: "single",
-
         page2: {
           repeatPhoto: false,
           repeatContact: true,
           repeatHeader: true,
           pageNumbers: false,
+        },
+
+        //  Das Anschreiben bricht von selbst um, sobald der Text nicht mehr
+        //  auf ein Blatt passt – hier steht nur, wie die Folgeblaetter
+        //  aussehen. Die Vorgaben folgen DIN 5008: kein Briefkopf auf
+        //  Folgeseiten, dafuer Seitenzahlen.
+        letterPages: {
+          repeatHeader: false,
+          pageNumbers: true,
+          numberFormat: "", // leer = "Seite {page} von {pages}"
         },
       },
 
@@ -454,6 +459,11 @@
       delete oldSettings.multiPage;
       data.version = 4;
     }
+
+    //  Kurzzeitig gab es fuer das Anschreiben einen eigenen Seitenmodus. Es
+    //  bricht jetzt von selbst um, sobald der Text nicht mehr passt – der
+    //  Schluessel soll nicht in Ausgabedateien weiterleben.
+    if (data.settings) delete data.settings.letterPageMode;
 
     //  Seitenzuordnung nachtragen. Arrays ruehrt fillMissing nicht an, die
     //  Sektionen brauchen deshalb einen eigenen Durchgang.

@@ -190,20 +190,13 @@
 
     var body = doc.body;
     body.className = body.className.split(/\s+/).filter(function (name) {
-      return name && !/^(template-|photo-|pages-|letter-)/.test(name);
+      return name && !/^(template-|photo-|pages-)/.test(name);
     }).join(" ");
     body.classList.add("template-" + (data.settings.template || "clean"));
     body.classList.add("photo-" + (photo.shape || "band"));
     var mode = data.settings.pageMode || "single";
     body.classList.add(
       mode === "flow" ? "pages-flow" : mode === "two" ? "pages-two" : "pages-fixed");
-
-    //  Das Anschreiben hat seinen eigenen Seitenmodus: es steht auf einem
-    //  eigenen Blatt und hat mit der Seitenzuordnung des Lebenslaufs nichts
-    //  zu tun.
-    body.classList.add(
-      (data.settings.letterPageMode || "single") === "flow"
-        ? "letter-flow" : "letter-fixed");
   }
 
   /* ----------------------------------------------------------- CV-Bausteine */
@@ -613,6 +606,277 @@
       "<span>" + esc(data.contact.name) + "</span></div></div></div></div>";
   }
 
+  /* ------------------------------------------- Seitenumbruch des Anschreibens */
+
+  /*  Der Lebenslauf weiss, wieviele Blaetter er hat: dort ordnet man jeden
+   *  Block von Hand einer Seite zu. Ein Anschreiben ist Fließtext – wo es
+   *  umbricht, ergibt erst der Satz. Also wird gemessen: erst steht alles in
+   *  einem Blatt, dann wandern die Bloecke der Reihe nach auf echte
+   *  A4-Blaetter, und der Absatz, der die Grenze kreuzt, wird an der letzten
+   *  Zeile geteilt, die noch passt.
+   *
+   *  Ein gestrecktes Blatt waere einfacher zu bauen, aber falsch: die
+   *  eingestellten Raender gaelten dann nur einmal ganz oben und ganz unten,
+   *  und der Browser saehe beim Drucken nur einen langen Kasten, den er
+   *  irgendwo zerschneidet. Jedes Blatt ist deshalb ein eigener Kasten mit
+   *  eigenen Raendern – genauso, wie es der Lebenslauf haelt.
+   */
+
+  var LETTER_PAGE_HEIGHT = (29.7 / 2.54) * 96;   // A4-Hoehe in px bei 96 dpi
+
+  //  Beim Teilen bleiben mindestens so viele Zeilen auf jeder Seite stehen.
+  //  Eine einzelne Zeile am Seitenanfang oder -ende liest sich wie ein
+  //  Versehen; der Schriftsatz nennt sie Hurenkind und Schusterjunge.
+  var LETTER_MIN_LINES = 2;
+
+  function letterSettings(data) {
+    return data.settings.letterPages || {};
+  }
+
+  function letterPageLabel(data, page, pages) {
+    var settings = letterSettings(data);
+    if (pages < 2 || settings.pageNumbers === false) return "";
+
+    //  Eigener Text schlaegt die Vorgabe. {page} und {pages} werden ersetzt,
+    //  alles andere bleibt stehen – so kommt man von "Seite 1 von 2" ueber
+    //  "S. 1/2" bis "p\u00e1gina 1".
+    var format = String(settings.numberFormat || "").trim() ||
+      I18n.t("doc", "pageOf", data.locale);
+    return format.replace(/\{page\}/g, page).replace(/\{pages\}/g, pages);
+  }
+
+  //  Ein leeres Blatt. Das Kopfband steht nach DIN 5008 nur auf der ersten
+  //  Seite; wer es trotzdem durchlaufen lassen will, schaltet es ein.
+  function letterSheet(doc, data, header, page) {
+    var sheet = doc.createElement("div");
+    sheet.className = "cover-letter_wrapper" + (page > 1 ? " is-continued" : "");
+    sheet.setAttribute("data-letter-page", String(page));
+
+    if (header && (page === 1 || letterSettings(data).repeatHeader)) {
+      sheet.appendChild(header.cloneNode(true));
+    }
+
+    var content = doc.createElement("div");
+    content.className = "cover-letter-content";
+    sheet.appendChild(content);
+    return sheet;
+  }
+
+  //  Alle Textknoten eines Absatzes als eine durchgehende Zeichenkette, damit
+  //  sich ein Offset in einen Punkt im Baum zurueckuebersetzen laesst.
+  function textMap(root) {
+    var map = { nodes: [], text: "", total: 0 };
+    var walker = root.ownerDocument.createTreeWalker(root, 4 /* SHOW_TEXT */);
+    var node;
+    while ((node = walker.nextNode())) {
+      map.nodes.push({ node: node, start: map.total });
+      map.text += node.nodeValue;
+      map.total += node.nodeValue.length;
+    }
+    return map;
+  }
+
+  function setRangeEnd(range, map, offset) {
+    for (var i = map.nodes.length - 1; i >= 0; i--) {
+      var entry = map.nodes[i];
+      if (offset >= entry.start) {
+        range.setEnd(entry.node,
+          Math.min(offset - entry.start, entry.node.nodeValue.length));
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /*  Teilt einen Absatz an der letzten Zeile, die noch in die Resthoehe
+   *  passt. Gemessen wird am Satz selbst, nicht an der Zeichenzahl: wo seine
+   *  Zeilen umbrechen, weiss nur der Browser. Gibt null zurueck, wenn sich
+   *  das Teilen nicht lohnt – dann wandert der ganze Absatz weiter.
+   */
+  function splitLetterBlock(doc, node, room) {
+    var paragraph = node.firstElementChild;
+    if (!paragraph) return null;
+
+    var map = textMap(paragraph);
+    if (!map.total) return null;
+
+    var range = doc.createRange();
+    range.selectNodeContents(paragraph);
+    var lines = range.getClientRects().length;
+    if (lines < LETTER_MIN_LINES * 2) return null;
+
+    //  Groesster Textoffset, dessen Zeilen alle noch oberhalb der Grenze
+    //  bleiben. Der Rand des Bereichs waechst in Zeilenspruengen, deshalb
+    //  findet die Halbierung genau die letzte passende Zeile.
+    var top = node.getBoundingClientRect().top;
+    var low = 0;
+    var high = map.total;
+    range.setStart(paragraph, 0);
+    while (low < high) {
+      var mid = Math.ceil((low + high) / 2);
+      setRangeEnd(range, map, mid);
+      if (range.getBoundingClientRect().bottom - top <= room) low = mid;
+      else high = mid - 1;
+    }
+    if (!low) return null;
+
+    //  Nicht mitten im Wort trennen. Ein einzelnes Wort, das laenger als die
+    //  Resthoehe ist, gibt es nicht – dann steht low ohnehin am Wortanfang.
+    var cut = low;
+    while (cut > 0 && !/\s/.test(map.text.charAt(cut - 1))) cut--;
+    if (!cut) cut = low;
+
+    setRangeEnd(range, map, cut);
+    var headLines = range.getClientRects().length;
+    if (headLines < LETTER_MIN_LINES || lines - headLines < LETTER_MIN_LINES) return null;
+
+    var head = node.cloneNode(false);
+    var headParagraph = paragraph.cloneNode(false);
+    headParagraph.appendChild(range.extractContents());
+    head.appendChild(headParagraph);
+
+    //  Der Rest faengt eine Seite an – ohne den Leerraum, an dem getrennt
+    //  wurde, denn der stuende sonst als Einzug am Zeilenanfang.
+    var first = paragraph.firstChild;
+    if (first && first.nodeType === 3) {
+      first.nodeValue = first.nodeValue.replace(/^\s+/, "");
+    }
+
+    node.parentNode.insertBefore(head, node);
+    return { head: head, tail: node };
+  }
+
+  /*  Verteilt das Anschreiben auf Blaetter und gibt deren Zahl zurueck.
+   *  Laeuft direkt nach dem Zeichnen, damit das Dokument fertig ist, bevor
+   *  jemand die Seitenzahl liest oder druckt.
+   */
+  function paginateLetter(doc, data) {
+    var letter = doc.querySelector(".cover-letter");
+    if (!letter) return 0;
+
+    var draft = letter.firstElementChild;
+    var content = draft && draft.querySelector(".cover-letter-content");
+    if (!content) return 0;
+
+    var view = doc.defaultView || global;
+    var header = draft.querySelector(".cover-letter-header");
+
+    //  Waehrend gemessen wird, darf das Blatt wachsen – sonst schnitte die
+    //  feste Hoehe genau das ab, was verteilt werden soll.
+    draft.style.height = "auto";
+
+    var wrapStyle = view.getComputedStyle(draft);
+    var contentStyle = view.getComputedStyle(content);
+
+    //  Unterkante des Textbereichs, gemessen ab Blattoberkante. Der untere
+    //  Rand und der Abstand der Textspalte bleiben auf jeder Seite frei.
+    var limit = LETTER_PAGE_HEIGHT -
+      (parseFloat(wrapStyle.paddingBottom) || 0) -
+      (parseFloat(contentStyle.paddingBottom) || 0) -
+      (parseFloat(contentStyle.marginBottom) || 0);
+
+    var sheetTop = draft.getBoundingClientRect().top;
+    var items = [];
+    var previousBottom = null;
+    Array.prototype.forEach.call(content.children, function (node) {
+      var rect = node.getBoundingClientRect();
+      items.push({
+        node: node,
+        height: rect.height,
+        //  Der Abstand zum Vorgaenger steckt in den Aussenabstaenden und
+        //  gilt nur, solange beide auf derselben Seite stehen.
+        gap: previousBottom === null ? 0 : rect.top - previousBottom,
+        top: rect.top - sheetTop,
+      });
+      previousBottom = rect.bottom;
+    });
+
+    if (!items.length) {
+      draft.style.height = "";
+      return 1;
+    }
+
+    //  Wo der Text auf einem Folgeblatt beginnt, sagt das Folgeblatt selbst:
+    //  ob dort ein Kopfband steht und wieviel Luft darueber bleibt, haengt an
+    //  Einstellung und Stylesheet. Ein leeres Probeblatt beantwortet beides,
+    //  ohne dass die Rechnung es zum zweiten Mal wissen muss.
+    var probe = letterSheet(doc, data, header, 2);
+    var mark = doc.createElement("div");
+    probe.querySelector(".cover-letter-content").appendChild(mark);
+    letter.appendChild(probe);
+    var startNext = mark.getBoundingClientRect().top - probe.getBoundingClientRect().top;
+    letter.removeChild(probe);
+
+    var pages = [];
+    var target = null;
+    var cursor = 0;
+    var fresh = true;
+
+    function nextPage() {
+      var sheet = letterSheet(doc, data, header, pages.length + 1);
+      pages.push(sheet);
+      target = sheet.querySelector(".cover-letter-content");
+      cursor = pages.length === 1 ? items[0].top : startNext;
+      fresh = true;
+    }
+
+    nextPage();
+
+    var queue = items.slice();
+    var guard = 0;
+    while (queue.length && guard++ < 500) {
+      var item = queue.shift();
+      var gap = fresh ? 0 : item.gap;
+      var room = limit - cursor - gap;
+
+      if (item.height <= room) {
+        target.appendChild(item.node);
+        cursor += gap + item.height;
+        fresh = false;
+        continue;
+      }
+
+      var parts = splitLetterBlock(doc, item.node, room);
+      if (parts) {
+        target.appendChild(parts.head);
+        nextPage();
+        queue.unshift({
+          node: parts.tail,
+          height: parts.tail.getBoundingClientRect().height,
+          gap: 0,
+        });
+        continue;
+      }
+
+      //  Passt auf kein Blatt und laesst sich nicht teilen – ein sehr hohes
+      //  Bild etwa. Dann lieber ueberstehen lassen als eine leere Seite
+      //  davorschieben.
+      if (fresh) {
+        target.appendChild(item.node);
+        cursor += item.height;
+        fresh = false;
+        continue;
+      }
+
+      nextPage();
+      queue.unshift(item);
+    }
+
+    letter.removeChild(draft);
+    pages.forEach(function (sheet, index) {
+      var label = letterPageLabel(data, index + 1, pages.length);
+      if (label) {
+        var number = doc.createElement("div");
+        number.className = "cover-letter-page-number";
+        number.textContent = label;
+        sheet.appendChild(number);
+      }
+      letter.appendChild(sheet);
+    });
+
+    return pages.length;
+  }
+
   /* -------------------------------------------------------- Maschinenfassung */
 
   function buildAts(data) {
@@ -666,6 +930,10 @@
     return name ? kind + " – " + name : kind;
   }
 
+  //  Wieviele Blaetter das Anschreiben zuletzt gebraucht hat. Der Baukasten
+  //  warnt damit, sobald es mehr als eines ist.
+  var letterPages = 0;
+
   function render(doc, data) {
     var grouped = groupEvents(data);
     applyStyle(doc, data);
@@ -696,6 +964,10 @@
       (data.settings.showCoverLetter ? buildCoverLetter(data) : "") +
       buildAts(data);
 
+    //  Sofort und nicht erst im naechsten Bild: wer gleich nach dem Zeichnen
+    //  druckt oder die Seitenzahl liest, soll das fertige Dokument sehen.
+    letterPages = paginateLetter(doc, data);
+
     var direction = data.settings.reverseTimeline ? "column-reverse" : "column";
     (data.sections || []).forEach(function (section) {
       var timeline = host.querySelector('[data-timeline="' + section.id + '"]');
@@ -716,5 +988,6 @@
     render: render,
     fonts: Object.keys(FONT_STACK),
     documentTitle: documentTitle,
+    letterPages: function () { return letterPages; },
   };
 })(typeof window !== "undefined" ? window : this);

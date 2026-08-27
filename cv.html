@@ -62,7 +62,15 @@
         var LEGACY_KEY = "rickcv.data.v2";
         var PAGE_HEIGHT_CM = 29.7;
 
+        //  Der Seitenumbruch des Anschreibens wird gemessen, und Messen setzt
+        //  die endgueltige Schrift voraus: laedt sie erst spaeter nach,
+        //  stimmen Zeilenumbruch und Seitengrenze nicht mehr. Deshalb merkt
+        //  sich die Seite ihren letzten Stand und zeichnet ihn neu, sobald
+        //  die Schriften stehen.
+        var lastData = null;
+
         function paint(data) {
+          lastData = data;
           try {
             RickCVRender.render(document, data);
           } catch (error) {
@@ -108,6 +116,7 @@
               type: "rickcv:height",
               height: document.documentElement.scrollHeight,
               pages: countPages(),
+              letterPages: RickCVRender.letterPages(),
             },
             "*"
           );
@@ -138,6 +147,14 @@
         paint(initial || RickCVModel.createExample("de"));
 
         window.addEventListener("load", report);
+
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function () {
+            if (lastData) paint(lastData);
+            scheduleReport();
+          });
+        }
+
         parent.postMessage({ type: "rickcv:ready" }, "*");
       })();
     </script>

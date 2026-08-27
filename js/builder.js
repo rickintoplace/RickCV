@@ -354,6 +354,7 @@
     if (!section || !node) return;
     node.innerHTML = "";
     section.build(node);
+    showLetterLength();
   }
 
   function updateCounts() {
@@ -399,11 +400,14 @@
         if (details.open && !body.dataset.built) {
           section.build(body);
           body.dataset.built = "1";
+          showLetterLength();
         }
       });
       details.appendChild(body);
       editor.appendChild(details);
     });
+
+    showLetterLength();
   }
 
   /* ------------------------------------------------------- Import/Export */
@@ -540,6 +544,26 @@
     } else if (query.addListener) {
       query.addListener(function (event) { placePreviewBar(event.matches); });
     }
+  }
+
+  /*  Das Anschreiben bricht von selbst um. Damit das niemandem entgeht,
+   *  meldet die Vorschau, wieviele Blaetter es geworden sind, und der
+   *  Abschnitt "Anschreiben" sagt, was davon zu halten ist.
+   */
+  var letterPageCount = 0;
+
+  function showLetterLength(pages) {
+    if (pages !== undefined) letterPageCount = pages;
+
+    //  Der Abschnitt wird beim ersten Aufklappen und bei jedem Neuaufbau
+    //  frisch gebaut – die Warnung ist dann wieder versteckt und muss den
+    //  zuletzt gemeldeten Stand nachgereicht bekommen.
+    var note = document.getElementById("letter-length-warn");
+    if (!note) return;
+
+    if (letterPageCount < 2) { note.hidden = true; return; }
+    note.textContent = t("letterLongWarn").replace(/\{pages\}/g, letterPageCount);
+    note.hidden = false;
   }
 
   function showPageCount(count) {
@@ -931,6 +955,7 @@
       } else if (message.type === "rickcv:height") {
         previewHeight = Math.max(600, message.height);
         showPageCount(message.pages || Math.max(1, Math.round(message.height / PAGE_HEIGHT)));
+        showLetterLength(message.letterPages || 0);
         applyZoom();
         status(t("saved"));
       } else if (message.type === "rickcv:error") {

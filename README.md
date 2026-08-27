@@ -46,7 +46,9 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 - **Multiple layouts:** 'clean', 'icons', and 'dynaline'.
 - **Customizable styling:** colors, typeface, font size, sidebar width, headline sizes and DIN 5008 margins.
 - **One page or many:** The resume stops after one page by default; switch on multi-page mode for longer careers.
-  The cover letter has the same choice under **Umfang**, though one page is almost always the right answer — use it only when the length is actually required.
+  The cover letter needs no switch: it breaks onto further A4 sheets by itself once the text no longer fits,
+  keeping your margins on every page and numbering them per DIN 5008 — and it says so when that happens,
+  because one page is almost always the right answer.
 - **Export to PDF:** Crisp A4 pages, straight from the browser's print dialog.
 - **Your data stays yours:** Everything is stored in your browser only. Export and import it as a JSON file to back it up or move it to another computer.
 
@@ -91,8 +93,9 @@ git clone https://github.com/rickintoplace/RickCV.git
    switch to hide it completely.
 5. **Referenzen** – off by default; switch it on if you want them on the page.
 6. **Anschreiben** – recipient, subject, salutation and as many paragraphs as you need.
-   You can also upload a scan of your signature. **Umfang** keeps the letter on one sheet
-   unless you deliberately let it run longer.
+   You can also upload a scan of your signature. Under **Folgeseiten** you decide what a
+   second sheet looks like: letterhead on page one only (DIN 5008) or repeated, and how the
+   page numbers are labelled.
 7. **Design** – layout, accent color, typeface, font size, icon set, sidebar width and margins.
 8. **Maschinenlesbarkeit** – see and edit what applicant systems read. See the section below.
 9. **Optionen** – interface language, date format, chronological order and multi-page mode.

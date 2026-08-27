@@ -877,34 +877,53 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   height: 29.7cm;
 }
 
-/*  Mehrseitiges Anschreiben. Der Normalfall bleibt das eine Blatt – ein
-    Anschreiben, das laenger ist, liest niemand freiwillig. Es gibt aber
-    Ausschreibungen, die es ausdruecklich anders wollen: Stipendien mit
-    vorgegebenem Umfang, akademische Bewerbungen, ausfuehrliche
-    Motivationsschreiben. Fuer die gibt es diesen Modus.
-
-    Wie beim mehrseitigen Lebenslauf: min-height statt height, damit das
-    Blatt waechst statt abzuschneiden. Die Seitenzahl in der Vorschau rechnet
-    die tatsaechliche Hoehe ohnehin schon in Blaetter um. */
-body.letter-flow .cover-letter_wrapper {
-  height: auto;
-  min-height: 29.7cm;
+/*  Mehrere Blaetter des Anschreibens stehen als Geschwister nebeneinander –
+    wie beim Lebenslauf traegt der Zwischenkasten den Abstand der Vorschau. */
+.cover-letter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: inherit;
 }
 
-/*  Was beim Umbruch zusammenbleiben muss. Grussformel und Unterschrift
-    gehoeren zusammen – eine Unterschrift allein auf dem letzten Blatt sieht
-    nach Versehen aus. Absaetze duerfen umbrechen, aber nicht so, dass eine
-    einzelne Zeile allein steht. */
-body.letter-flow .cover-letter-closing,
-body.letter-flow .cover-letter-recipient,
-body.letter-flow .cover-letter-regard {
-  break-inside: avoid;
-  page-break-inside: avoid;
+/*  Das Blatt traegt die Seitenzahl, die unten im Rand sitzt. */
+.cover-letter_wrapper {
+  position: relative;
 }
 
-body.letter-flow .cover-letter-body p {
-  orphans: 2;
-  widows: 2;
+/*  Folgeblaetter: der Text beginnt oben am Rand, nicht dort, wo auf der
+    ersten Seite das Anschriftenfeld sitzt. Der Abstand folgt dem
+    eingestellten unteren Rand, damit oben und unten gleich viel Luft
+    bleibt. Steht das Kopfband auch hier, uebernimmt es diese Rolle. */
+.cover-letter_wrapper.is-continued .cover-letter-content {
+  padding-top: var(--bottom-margin);
+}
+
+/*  Steht das Kopfband auch hier, uebernimmt es den oberen Rand – es bleibt
+    nur der Abstand, den die Textspalte ohnehin haelt. Wieviel daraus wird,
+    misst render.js an einem Probeblatt: hier steht die Gestaltung, dort die
+    Rechnung. */
+.cover-letter_wrapper.is-continued .cover-letter-header + .cover-letter-content {
+  padding-top: 20px;
+}
+
+/*  Der erste Block eines Folgeblatts sitzt buendig oben. Sein Aussenabstand
+    gehoert zum Abstand zwischen zwei Bloecken, nicht an den Seitenanfang –
+    und die Rechnung in render.js laesst ihn dort ebenfalls weg. */
+.cover-letter_wrapper.is-continued .cover-letter-content > :first-child {
+  margin-top: 0;
+}
+
+/*  Seitenzahl im unteren Rand, nicht im Textbereich: dort steht sie nach
+    DIN 5008 und nimmt dem Text keine Zeile weg. */
+.cover-letter-page-number {
+  position: absolute;
+  left: var(--left-margin);
+  right: var(--right-margin);
+  bottom: calc(var(--bottom-margin) * 0.4);
+  text-align: right;
+  font-size: 0.8em;
+  opacity: 0.65;
 }
 
 .cover-letter-header {
@@ -1463,10 +1482,10 @@ body.letter-flow .cover-letter-body p {
     page-break-inside: avoid;
   }
 
-  /*  Das feste Anschreiben bleibt ein Blatt. Im mehrseitigen Modus muss der
-      Ueberhang weiterlaufen duerfen – sonst schiebt der Browser das ganze
-      Blatt auf die naechste Seite und hinterlaesst eine leere. */
-  body.letter-fixed .cover-letter_wrapper {
+  /*  Jedes Blatt des Anschreibens ist genau eine Seite – der Umbruch ist
+      schon beim Zeichnen gefallen, der Browser soll ihn nicht noch einmal
+      raten. */
+  .cover-letter_wrapper {
     break-inside: avoid;
     page-break-inside: avoid;
   }
