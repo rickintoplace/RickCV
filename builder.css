@@ -93,6 +93,14 @@ textarea {
 
 /* ------------------------------------------------------------------ Kopfzeile */
 
+/*  Wie bei .app-track zaehlt hier nur, dass es den Kasten nicht gibt:
+    display:contents reicht Kopfzeile und Reiter an <body> durch, das Layout
+    ist dasselbe wie ohne Huelle. Erst schmale Bildschirme machen daraus den
+    Block, der beim Scrollen hinausfaehrt. */
+.app-chrome {
+  display: contents;
+}
+
 .app-header {
   height: var(--ui-header-h);
   display: flex;
@@ -726,6 +734,15 @@ textarea {
 }
 
 @media (max-width: 900px) {
+  /*  Nur fuer den Augenblick vor der ersten Messung: measure() in builder.js
+      ersetzt beide Werte, sobald das Dokument steht. Grosszuegig geschaetzt,
+      weil ein Streifen Luft zuviel harmloser ist als Inhalt, der unter der
+      Kopfzeile beginnt. */
+  :root {
+    --chrome-h: 210px;
+    --bar-h: 40px;
+  }
+
   body {
     overflow: auto;
   }
@@ -776,9 +793,11 @@ textarea {
       Frueher wurde die andere Spalte schlicht ausgeblendet – da gibt es
       nichts zu animieren.
 
-      Damit die Schiene eine Hoehe hat, wird der Bildschirm zur Spalte:
-      Kopfzeile und Reiter nehmen ihren Platz, der Rest gehoert der Schiene.
-      dvh statt vh, weil die Adressleiste mobiler Browser mitwandert. */
+      Damit die Schiene eine Hoehe hat, wird der Bildschirm zur Spalte. Die
+      Leisten liegen darueber (siehe .app-chrome weiter unten), also gehoert
+      die ganze Hoehe der Schiene – und bleibt ihr auch, wenn die Leisten
+      hinausfahren. dvh statt vh, weil die Adressleiste mobiler Browser
+      mitwandert. */
   html,
   body {
     height: 100dvh;
@@ -790,29 +809,42 @@ textarea {
     flex-direction: column;
   }
 
-  .app-header,
-  .mobile-tabs {
-    flex: none;
-  }
-
   /*  Kopfzeile, Reiter und Vorschauleiste nehmen zusammen rund ein Drittel
       des Telefonbildschirms ein. Sie weichen deshalb beim Abwaertsscrollen
       nach oben weg und kommen beim ersten Aufwaertsscrollen zurueck – wie
       man es von mobilen Anwendungen kennt.
 
-      Der Weg steht als --shift an jedem Element und wird in builder.js
-      gemessen: die Kopfzeile bricht je nach Breite unterschiedlich um, eine
-      feste Zahl waere hier falsch. */
-  .app-header,
-  .mobile-tabs,
-  .preview-bar {
-    transition: margin-top 200ms ease;
+      Entscheidend ist, WIE sie weichen: nicht aus dem Fluss heraus. Gaeben
+      sie ihren Platz frei, waechst die scrollende Spalte um denselben
+      Betrag, ihr groesster Scrollwert schrumpft, der Browser zieht scrollTop
+      nach – und meldet das als Bildlauf. Diese Meldung ist von einer
+      Handbewegung nicht zu unterscheiden; wir lasen sie als "aufwaerts" und
+      blendeten die Leisten wieder ein, was die Spalte wieder schrumpfen
+      liess. Ein Zug an der Leiste, der die Leiste selbst umlegt: genau das
+      Flackern, das man beim zweiten Richtungswechsel sah, und der Grund,
+      warum das erste Abwaertsscrollen noch sauber lief – oben am Anfang ist
+      nichts abzuschneiden.
+
+      Deshalb liegen die Leisten jetzt ueber den Spalten statt in ihnen. Die
+      Spalten sind immer bildschirmhoch, ihre Hoehe aendert sich beim
+      Verstecken nie, und das Verstecken ist eine reine Verschiebung ohne
+      Umbruch – es kann keinen Bildlauf mehr ausloesen. Den Platz, den die
+      Leisten verdecken, halten die Spalten oben als Polster frei; --chrome-h
+      und --bar-h messen ihn in builder.js. */
+  .app-chrome {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    transition: transform 200ms ease;
   }
 
-  body.chrome-away .app-header,
-  body.chrome-away .mobile-tabs,
-  body.chrome-away .preview-bar {
-    margin-top: calc(-1 * var(--shift, 0px));
+  body.chrome-away .app-chrome {
+    /*  -100% ist die eigene Hoehe: die Kopfzeile bricht je nach Breite
+        unterschiedlich um, eine feste Zahl waere hier falsch. */
+    transform: translateY(-100%);
   }
 
   /*  Der Rahmen bleibt genau bildschirmbreit und schneidet ab. Das ist
@@ -893,12 +925,42 @@ textarea {
     display: none;
   }
 
+  /*  Das Polster fuer die Leisten gehoert in die scrollende Flaeche, nicht
+      um sie herum: so laeuft es beim Scrollen mit nach oben weg und gibt
+      den Platz frei, sobald die Leisten fort sind – ohne dass sich dabei
+      irgendeine Hoehe aendert. */
+  .editor-pane {
+    padding-top: var(--chrome-h, 0px);
+  }
+
+  .preview-scroll {
+    padding-top: calc(var(--chrome-h, 0px) + var(--bar-h, 0px) + 16px);
+  }
+
+  /*  Die Vorschauleiste gehoert zur Vorschau, darf aber nicht in deren Fluss
+      stehen – sonst bestimmte sie wieder die Hoehe der scrollenden Flaeche
+      und das Verstecken riefe denselben Bildlauf hervor wie zuvor. Sie liegt
+      darum unter der Kopfzeile auf der Vorschau und faehrt mit ihr hinaus. */
+  .preview {
+    position: relative;
+  }
+
   /*  Zoom, Seitenzahl, Hinweis und Status passen nebeneinander nicht in
       eine Telefonbreite – sie legen sich um, statt hinauszuragen. */
   .preview-bar {
+    position: absolute;
+    top: var(--chrome-h, 0px);
+    left: 0;
+    right: 0;
+    z-index: 25;
+    margin: 0;
     flex-wrap: wrap;
     row-gap: 6px;
-    margin: auto;
+    transition: transform 200ms ease;
+  }
+
+  body.chrome-away .preview-bar {
+    transform: translateY(calc(-100% - var(--chrome-h, 0px)));
   }
 
   .browser-warn {
@@ -911,14 +973,28 @@ textarea {
     padding: 8px 14px;
     border-bottom: 1px solid var(--ui-line);
     background: var(--ui-panel);
-    position: sticky;
-    top: 0;
-    z-index: 15;
   }
 
   .mobile-tabs .btn {
     flex: 1;
     justify-content: center;
+  }
+
+  /*  Welche Spalte man sieht, sagt der Reiter – und zwar unabhaengig davon,
+      wie man dort hingekommen ist. Nach einem Wisch beruehrt niemand eine
+      Schaltflaeche, ein Zustand aus :focus oder :hover waere danach falsch
+      oder gar nicht da. aria-pressed setzt showColumn(), egal welcher Weg
+      es war, und sagt dasselbe auch der Vorlesesoftware. */
+  .mobile-tabs .btn[aria-pressed="true"] {
+    background: var(--ui-accent);
+    border-color: var(--ui-accent);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .mobile-tabs .btn[aria-pressed="true"]:hover {
+    background: var(--ui-accent);
+    color: #fff;
   }
 
   .header-actions .btn span.label {

@@ -24,37 +24,42 @@
     <link rel="stylesheet" href="builder.css" />
   </head>
   <body>
-    <header class="app-header">
-      <div class="brand">RickCV <small id="brand-tagline">Lebenslauf-Baukasten</small></div>
+    <!--  Kopfzeile und Reiter bilden auf dem Telefon einen Block, der beim
+          Scrollen als Ganzes hinausfaehrt. Auf breiten Bildschirmen reicht
+          display:contents die beiden unveraendert an <body> durch. -->
+    <div class="app-chrome" id="app-chrome">
+      <header class="app-header">
+        <div class="brand">RickCV <small id="brand-tagline">Lebenslauf-Baukasten</small></div>
 
-      <div class="header-spacer"></div>
+        <div class="header-spacer"></div>
 
-      <div class="header-actions">
-        <select class="header-select" id="lang-switch" aria-label="Sprache">
-          <option value="de">Deutsch</option>
-          <option value="en">English</option>
-        </select>
-        <button class="btn btn-icon btn-theme" id="btn-theme" type="button">
-          <span class="material-symbols-outlined" id="btn-theme-icon" aria-hidden="true"
-            >contrast</span
-          >
-        </button>
+        <div class="header-actions">
+          <select class="header-select" id="lang-switch" aria-label="Sprache">
+            <option value="de">Deutsch</option>
+            <option value="en">English</option>
+          </select>
+          <button class="btn btn-icon btn-theme" id="btn-theme" type="button">
+            <span class="material-symbols-outlined" id="btn-theme-icon" aria-hidden="true"
+              >contrast</span
+            >
+          </button>
 
-        <span class="header-divider" aria-hidden="true"></span>
+          <span class="header-divider" aria-hidden="true"></span>
 
-        <button class="btn" id="btn-example">Beispiel</button>
-        <button class="btn" id="btn-reset">Neu</button>
-        <button class="btn" id="btn-import">Importieren</button>
-        <button class="btn" id="btn-export">Exportieren</button>
-        <button class="btn" id="btn-open">Neuer Tab</button>
-        <button class="btn btn-primary" id="btn-print">Als PDF speichern</button>
-      </div>
-    </header>
+          <button class="btn" id="btn-example">Beispiel</button>
+          <button class="btn" id="btn-reset">Neu</button>
+          <button class="btn" id="btn-import">Importieren</button>
+          <button class="btn" id="btn-export">Exportieren</button>
+          <button class="btn" id="btn-open">Neuer Tab</button>
+          <button class="btn btn-primary" id="btn-print">Als PDF speichern</button>
+        </div>
+      </header>
 
-    <nav class="mobile-tabs">
-      <button class="btn" id="tab-edit">Bearbeiten</button>
-      <button class="btn" id="tab-preview">Vorschau</button>
-    </nav>
+      <nav class="mobile-tabs">
+        <button class="btn" id="tab-edit" type="button" aria-pressed="true">Bearbeiten</button>
+        <button class="btn" id="tab-preview" type="button" aria-pressed="false">Vorschau</button>
+      </nav>
+    </div>
 
     <main class="app-main">
       <!--  Die Schiene traegt beide Spalten nebeneinander. Auf breiten

@@ -594,14 +594,36 @@
       applyZoom();
     });
     document.getElementById("tab-edit").addEventListener("click", function () {
-      document.body.classList.remove("show-preview");
+      showColumn(false);
     });
     document.getElementById("tab-preview").addEventListener("click", function () {
-      document.body.classList.add("show-preview");
-      //  Erst jetzt hat die Vorschau eine Breite, auf die sich "Einpassen"
-      //  beziehen kann.
-      applyZoom();
+      showColumn(true);
     });
+  }
+
+  /*  Der einzige Weg, die Spalte zu wechseln.
+   *
+   *  Vorher setzten drei Stellen die Klasse selbst – die Reiter und die
+   *  beiden Enden der Wischgeste. Was daran haengt, stand nur bei den
+   *  Reitern, und deshalb sagten die Reiter nach einem Wisch das Falsche:
+   *  aria-pressed blieb stehen, wo der Finger die Spalte laengst gewechselt
+   *  hatte. Hier steht es einmal, und jeder Weg kommt hier vorbei.
+   */
+  var onColumnChange = [];
+
+  function showColumn(preview) {
+    document.body.classList.toggle("show-preview", preview);
+
+    document.getElementById("tab-edit")
+      .setAttribute("aria-pressed", String(!preview));
+    document.getElementById("tab-preview")
+      .setAttribute("aria-pressed", String(preview));
+
+    //  Erst jetzt hat die Vorschau eine Breite, auf die sich "Einpassen"
+    //  beziehen kann.
+    if (preview) applyZoom();
+
+    onColumnChange.forEach(function (fn) { fn(preview); });
   }
 
   /*  Wischen zwischen Bearbeiten und Vorschau.
@@ -713,10 +735,9 @@
 
         if (sliding && far && type === "pointerup") {
           if (deltaX < 0 && !showing()) {
-            document.body.classList.add("show-preview");
-            applyZoom();
+            showColumn(true);
           } else if (deltaX > 0 && showing()) {
-            document.body.classList.remove("show-preview");
+            showColumn(false);
           }
         }
         release();
@@ -740,11 +761,18 @@
   var CHROME_TOP = 24;      // so weit oben bleiben sie ohnehin stehen
 
   function bindChromeAutoHide() {
-    var bars = [document.querySelector(".app-header"),
-                document.querySelector(".mobile-tabs"),
-                document.getElementById("preview-bar")];
-    var panes = [document.querySelector(".editor-pane"),
-                 document.getElementById("preview-scroll")];
+    var root = document.documentElement;
+    var header = document.querySelector(".app-header");
+    var tabs = document.querySelector(".mobile-tabs");
+    var bar = document.getElementById("preview-bar");
+
+    //  Beide Spalten scrollen, aber nur die sichtbare darf mitreden: die
+    //  andere bewegt sich beim Umschalten und beim Neuzeichnen mit, und das
+    //  ist keine Handbewegung.
+    var lanes = [
+      { pane: document.querySelector(".editor-pane"), preview: false, last: 0 },
+      { pane: document.getElementById("preview-scroll"), preview: true, last: 0 }
+    ];
     var carry = 0;
 
     function narrow() {
@@ -756,24 +784,58 @@
       document.body.classList.remove("chrome-away");
     }
 
+    /*  Wieviel Platz die Leisten verdecken. Das aendert sich, wenn die
+     *  Kopfzeile anders umbricht oder der Status umlaeuft – nicht aber beim
+     *  Verstecken, denn das ist eine reine Verschiebung. Genau deshalb darf
+     *  hier ueberhaupt gemessen werden, ohne dass Messen und Verstecken sich
+     *  gegenseitig aufschaukeln.
+     */
     function measure() {
-      bars.forEach(function (bar) {
-        if (bar) bar.style.setProperty("--shift", bar.offsetHeight + "px");
-      });
+      if (!narrow()) {
+        root.style.removeProperty("--chrome-h");
+        root.style.removeProperty("--bar-h");
+        return;
+      }
+      var chromeH = (header ? header.offsetHeight : 0) +
+                    (tabs ? tabs.offsetHeight : 0);
+      root.style.setProperty("--chrome-h", chromeH + "px");
+      root.style.setProperty("--bar-h", (bar ? bar.offsetHeight : 0) + "px");
     }
 
-    panes.forEach(function (pane) {
-      if (!pane) return;
-      var last = 0;
+    //  Nach einem Sprung im Inhalt – Spalte gewechselt, Abschnitt auf- oder
+    //  zugeklappt – faengt die Richtungsmessung von vorn an. Sonst ergaebe
+    //  der alte Stand beim naechsten Ereignis einen Riesenschritt in
+    //  irgendeine Richtung.
+    function resync() {
+      lanes.forEach(function (lane) {
+        lane.last = lane.pane ? Math.max(0, lane.pane.scrollTop) : 0;
+      });
+      carry = 0;
+    }
 
-      pane.addEventListener("scroll", function () {
+    lanes.forEach(function (lane) {
+      if (!lane.pane) return;
+
+      lane.pane.addEventListener("scroll", function () {
         if (!narrow()) return;
 
-        var top = pane.scrollTop;
-        var step = top - last;
-        last = top;
+        if (lane.preview !== document.body.classList.contains("show-preview")) {
+          lane.last = Math.max(0, lane.pane.scrollTop);
+          return;
+        }
+
+        //  Gummiband: iOS meldet oberhalb des Anfangs negative Werte, die
+        //  beim Zurueckschnappen einen Abwaertsschritt vortaeuschen wuerden.
+        var top = Math.max(0, lane.pane.scrollTop);
+        var step = top - lane.last;
+        lane.last = top;
 
         if (top <= CHROME_TOP) { show(); return; }
+
+        //  Meldungen ohne Weg kommen haeufig – am Ende eines Schwungs, beim
+        //  Abfangen des Gummibands. Sie sagen nichts ueber die Richtung und
+        //  wuerden unten als Wechsel gelesen.
+        if (step === 0) return;
 
         //  Richtungswechsel setzt den Zaehler zurueck, sonst muesste man
         //  erst den ganzen bisherigen Weg wieder aufholen.
@@ -781,7 +843,6 @@
         carry += step;
 
         if (carry > CHROME_HIDE) {
-          measure();
           document.body.classList.add("chrome-away");
         } else if (carry < -CHROME_REVEAL) {
           show();
@@ -789,13 +850,21 @@
       }, { passive: true });
     });
 
-    //  Beim Umschalten der Spalte und beim Verlassen der schmalen Ansicht
-    //  sollen die Leisten sichtbar sein.
-    document.getElementById("tab-edit").addEventListener("click", show);
-    document.getElementById("tab-preview").addEventListener("click", show);
+    //  Beim Umschalten der Spalte sollen die Leisten sichtbar sein – egal ob
+    //  ueber die Reiter oder per Wisch.
+    onColumnChange.push(function () { show(); resync(); });
+
+    //  Sprache, Erscheinungsbild und Drehung aendern den Umbruch der
+    //  Kopfzeile und damit das Polster. Der Beobachter faengt das ab, ohne
+    //  dass jede Stelle daran denken muss.
+    if (global.ResizeObserver) {
+      var watcher = new global.ResizeObserver(function () { measure(); });
+      [header, tabs, bar].forEach(function (el) { if (el) watcher.observe(el); });
+    }
+
     global.addEventListener("resize", debounce(function () {
+      measure();
       if (!narrow()) show();
-      else measure();
     }, 150));
 
     measure();
