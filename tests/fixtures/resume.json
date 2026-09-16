@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "Ada Lovelace", "label": "Analytikerin", "email": "ada@example.org",
+    "phone": "+49 30 123456", "url": "https://ada.example.org",
+    "summary": "Rechnet mit Maschinen, bevor es Maschinen gibt.",
+    "location": {"address": "Bahnhofstr. 1", "postalCode": "10115", "city": "Berlin"},
+    "profiles": [{"network": "GitHub", "username": "ada", "url": "https://github.com/ada"}]
+  },
+  "work": [{"name": "Analytical Engines Ltd", "position": "Chefprogrammiererin",
+            "location": "London", "startDate": "2019-07-01", "endDate": "",
+            "summary": "Erste Programme der Welt.",
+            "highlights": ["Bernoulli-Zahlen", "Notizen G"]}],
+  "volunteer": [{"organization": "Maschinenclub", "position": "Vorsitz", "startDate": "2020-01", "endDate": "2021-06"}],
+  "education": [{"institution": "Privatunterricht", "area": "Mathematik", "studyType": "Studium",
+                 "startDate": "1833", "endDate": "1842", "score": "sehr gut", "courses": ["Analysis"]}],
+  "certificates": [{"name": "Rechenschein", "issuer": "TÜV", "date": "2022-05"}],
+  "skills": [{"name": "Algorithmen", "level": "Expert", "keywords": ["Schleifen"]}],
+  "languages": [{"language": "Englisch", "fluency": "Native speaker"},
+                {"language": "Deutsch", "fluency": "B2"}],
+  "interests": [{"name": "Weberei"}],
+  "projects": [{"name": "Notes G", "description": "Erstes Programm", "url": "https://example.org/g"}],
+  "references": [{"name": "Charles Babbage", "reference": "Auf Anfrage"}]
+}

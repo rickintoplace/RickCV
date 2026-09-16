@@ -1,0 +1,31 @@
+Max Mustermann
+Systemadministrator
+
+max.mustermann@example.com
++49 171 2345678
+
+Berufserfahrung
+03/2019 – heute
+Systemadministrator
+Beispiel GmbH, München
+Betrieb der internen Serverlandschaft
+- Migration auf Linux
+- Rufbereitschaft
+
+01/2016 - 02/2019
+IT-Support
+Kleine AG | Augsburg
+
+Ausbildung
+09/2012 – 12/2015
+Fachinformatiker Systemintegration
+Berufsschule Augsburg
+
+Kenntnisse
+Linux, Bash, Ansible, PostgreSQL
+
+Sprachen
+Deutsch (Muttersprache), Englisch (B2)
+
+Interessen
+Radfahren, Löten

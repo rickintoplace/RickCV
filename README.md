@@ -49,8 +49,13 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
   The cover letter needs no switch: it breaks onto further A4 sheets by itself once the text no longer fits,
   keeping your margins on every page and numbering them per DIN 5008 — and it says so when that happens,
   because one page is almost always the right answer.
+- **Bring your data in:** Drop a file anywhere on the page — a RickCV backup, a
+  [JSON Resume](https://jsonresume.org/) `resume.json`, the ZIP from LinkedIn's *Get a copy
+  of your data* (or its single CSV files), an old resume as PDF, or plain text pasted into
+  the dialog. RickCV shows what it found before anything is changed, and you choose whether
+  it replaces the document or is added to it. Reading happens in your browser; no upload.
 - **Export to PDF:** Crisp A4 pages, straight from the browser's print dialog.
-- **Your data stays yours:** Everything is stored in your browser only. Export and import it as a JSON file to back it up or move it to another computer.
+- **Your data stays yours:** Everything is stored in your browser only. Export it as a RickCV backup (everything, including styling and photo) or as `resume.json` in the open JSON Resume format that other tools can read.
 
 ### Dynamically change the color
 ![color changes](https://github.com/rickintoplace/RickCV/blob/main/examples/dynamic%20accent%20color.png?raw=true)
@@ -167,6 +172,39 @@ other browsers handle margins, page breaks and background colors differently.
 RickCV shows a reminder in the preview bar when you are not using a
 Chromium-based browser.
 
+## Bringing your data in
+
+Nobody types their career twice. The **Importieren** button — or dropping a file anywhere on
+the page — opens one dialog that takes whatever you have:
+
+| What you have | What to do |
+| --- | --- |
+| A RickCV backup (`*.rickcv.json`) | Drop it in. Everything comes back, styling included. |
+| A `resume.json` ([JSON Resume](https://jsonresume.org/schema)) | Drop it in. Work, education, volunteering, awards, certificates, skills, languages, interests, projects and references are mapped onto RickCV's sections. |
+| Your LinkedIn data | *Settings → Data privacy → Get a copy of your data*. Drop the ZIP in — or the single CSV files, if your browser cannot unpack ZIPs. |
+| An old resume as PDF | Drop it in. RickCV pulls the text out, separates columns and sorts it into sections. Scanned PDFs hold no text, so those cannot work. |
+| Anything else | Copy the text into the dialog's text box. |
+
+Whatever the source, the dialog first shows **what it found** — name, number of stations,
+skills, languages — and lets you decide between *Ersetzen* (a new document, keeping your
+styling) and *Ergänzen* (append to what is already there, fill empty fields). Nothing is
+changed until you confirm.
+
+Text and PDF imports are a **draft**: a PDF knows about coordinates, not about careers, so
+the guesses are labelled as such and want checking. The structured formats — RickCV, JSON
+Resume, LinkedIn — are exact.
+
+### Going the other way
+
+*Exportieren* offers the same two doors: the complete RickCV backup, and `resume.json` in
+the JSON Resume format, which other resume tools, themes and CLI renderers can read. Your
+career data is yours to take elsewhere. The two differ on purpose: the backup holds
+everything, the `resume.json` holds what the document actually shows — a section switched
+off is not part of your resume.
+
+None of this involves a server. Files are read in the browser, including the PDF: pdf.js
+lives in `vendor/` and is loaded from your own copy of the site.
+
 ## Hosting it yourself
 
 RickCV is a static site. Upload the files and you are done.
@@ -202,6 +240,10 @@ Copy `index.html`, `cv.html`, `builder.css`, `builder.js`, `render.js`, `default
 | `js/fields.js` | Reusable form controls |
 | `js/sections.js` | What each editor section contains |
 | `js/builder.js` | Wiring: state, history, saving, preview, printing |
+| `js/import.js` | Reading and writing other formats: JSON Resume, LinkedIn, CSV, text |
+| `js/import-dialog.js` | The dialog behind *Importieren* |
+| `js/pdf-import.js` | Text extraction from PDFs, loads `vendor/pdfjs` on demand |
+| `vendor/pdfjs/` | Mozilla's pdf.js (Apache-2.0), only fetched when a PDF is imported |
 | `tools/gen-icons.py` | Regenerates `js/icon-data.js` from lucide-static |
 
 Every file is a plain script which is what lets you
@@ -245,11 +287,34 @@ stylesheet compensates for.
 
 If you’d like to contribute to the development of RickCV, feel free to fork the repository, make your changes, and create a pull request. I welcome any improvements or new features that could enhance this template.
 
+There is no build step and there are no dependencies to install: open `index.html` and you
+are developing. The import path has a test suite, because parsing other people's file
+formats is where silent breakage lives:
+
+```bash
+node tests/import.test.mjs
+```
+
+It needs nothing but Node (20 or newer) — the browser code runs in a small sandbox that
+pretends to be a `window`. Fixtures live in `tests/fixtures/`: a JSON Resume, a plain-text
+resume, a LinkedIn export ZIP and a two-column PDF (its source HTML sits next to it). If you
+add a format or touch the heuristics, add a fixture.
+
 ## License
 
-The MIT license, with the following restriction:
+RickCV is free software under the **GNU Affero General Public License, version 3 or
+later** (AGPL-3.0-or-later). The full text is in [`LICENSE`](LICENSE).
 
-- **Commercial use** of this code or derivative works is permitted only with express written permission of the author.
+In plain words: use it, run it, change it, host it — for yourself, inside a company, or as
+a public service. The one condition is that anyone who uses your version, **including over
+a network**, can get its source code. That is section 13 of the licence, and it is the
+reason this project picked the AGPL over the MIT licence: it keeps a hosted fork open
+instead of closed behind a paywall.
+
+Third-party components keep their own licences: [Lucide](https://lucide.dev) icons (ISC),
+the document typefaces (SIL Open Font Licence) and Material Symbols (Apache-2.0) in
+[`licenses/`](licenses/), and, for the optional PDF import, Mozilla's
+[pdf.js](https://mozilla.github.io/pdf.js/) (Apache-2.0) in `vendor/`.
 
 
 

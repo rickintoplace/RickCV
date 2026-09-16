@@ -436,20 +436,103 @@
     toast(t("exported"));
   }
 
-  function importJson(file) {
-    var reader = new FileReader();
-    reader.onload = function () {
-      try {
-        var migrated = Model.migrate(JSON.parse(String(reader.result)));
-        if (!migrated) throw new Error("kein gültiges Dokument");
+  //  Dieselben Daten im offenen Standard: resume.json laesst sich von
+  //  anderen Programmen lesen, traegt dafuer kein Aussehen mit sich.
+  function exportJsonResume() {
+    download(slug(state.contact.name) + ".resume.json",
+      JSON.stringify(global.RickCVImport.toJsonResume(state), null, 2), "application/json");
+    toast(t("exported"));
+  }
+
+  function openImport(file) {
+    global.RickCVImportDialog.open({
+      t: t,
+      state: function () { return state; },
+      onApply: function (next, info) {
         history.push(committed);
-        replaceState(migrated);
-        toast(t("imported"));
-      } catch (error) {
-        toast(t("importFailed"));
-      }
-    };
-    reader.readAsText(file);
+        replaceState(next);
+        toast(t("impDone").replace("{count}", info.count));
+      },
+    }, file);
+  }
+
+  /* ----------------------------------------------------------- Kleines Menue */
+
+  var openPopup = null;
+
+  function closePopup() {
+    if (!openPopup) return;
+    openPopup.parentNode.removeChild(openPopup);
+    openPopup = null;
+    document.removeEventListener("mousedown", onPopupOutside, true);
+    document.removeEventListener("keydown", onPopupKey, true);
+  }
+
+  function onPopupOutside(event) {
+    if (openPopup && !openPopup.contains(event.target)) closePopup();
+  }
+
+  function onPopupKey(event) {
+    if (event.key === "Escape") closePopup();
+  }
+
+  //  entries: [{ label, hint, action }]
+  function popupMenu(anchor, entries) {
+    if (openPopup) { closePopup(); return; }
+
+    var menu = el("div", "menu-pop");
+    entries.forEach(function (entry) {
+      var item = el("button", "menu-item");
+      item.type = "button";
+      item.appendChild(el("strong", null, entry.label));
+      if (entry.hint) item.appendChild(el("small", null, entry.hint));
+      item.addEventListener("click", function () {
+        closePopup();
+        entry.action();
+      });
+      menu.appendChild(item);
+    });
+
+    document.body.appendChild(menu);
+    var rect = anchor.getBoundingClientRect();
+    var width = menu.offsetWidth;
+    //  Am rechten Rand ausrichten, aber nie aus dem Fenster laufen lassen.
+    var left = Math.max(8, Math.min(rect.right - width, global.innerWidth - width - 8));
+    menu.style.left = left + "px";
+    menu.style.top = (rect.bottom + 6) + "px";
+
+    openPopup = menu;
+    document.addEventListener("mousedown", onPopupOutside, true);
+    document.addEventListener("keydown", onPopupKey, true);
+    menu.querySelector(".menu-item").focus();
+  }
+
+  /*  Eine Datei irgendwo ins Fenster ziehen heisst: uebernimm das. Der
+   *  Dialog kuemmert sich um den Rest, Eingabefelder behalten ihr eigenes
+   *  Verhalten.
+   */
+  function bindFileDrop() {
+    ["dragenter", "dragover"].forEach(function (name) {
+      document.addEventListener(name, function (event) {
+        if (!hasFiles(event)) return;
+        event.preventDefault();
+      });
+    });
+
+    document.addEventListener("drop", function (event) {
+      if (!hasFiles(event)) return;
+      var tag = (event.target.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea") return;
+      event.preventDefault();
+      openImport(event.dataTransfer.files[0]);
+    });
+  }
+
+  function hasFiles(event) {
+    var data = event.dataTransfer;
+    if (!data) return false;
+    if (data.files && data.files.length) return true;
+    return data.types && Array.prototype.indexOf.call(data.types, "Files") !== -1;
   }
 
   //  Das Layout ist auf Chromes Druckausgabe abgestimmt. Andere Browser
@@ -585,13 +668,14 @@
     });
 
     document.getElementById("btn-print").addEventListener("click", printCv);
-    document.getElementById("btn-export").addEventListener("click", exportJson);
-    document.getElementById("btn-import").addEventListener("click", function () {
-      document.getElementById("import-file").click();
+    document.getElementById("btn-export").addEventListener("click", function (event) {
+      popupMenu(event.currentTarget, [
+        { label: t("expRickcv"), hint: t("expRickcvHint"), action: exportJson },
+        { label: t("expJsonResume"), hint: t("expJsonResumeHint"), action: exportJsonResume },
+      ]);
     });
-    document.getElementById("import-file").addEventListener("change", function (event) {
-      if (event.target.files[0]) importJson(event.target.files[0]);
-      event.target.value = "";
+    document.getElementById("btn-import").addEventListener("click", function () {
+      openImport();
     });
     document.getElementById("btn-example").addEventListener("click", function () {
       history.push(committed);
@@ -971,6 +1055,7 @@
     bindSwipe();
     bindChromeAutoHide();
     bindWideLayout();
+    bindFileDrop();
     bindKeys();
     global.addEventListener("resize", debounce(applyZoom, 100));
     applyZoom();
