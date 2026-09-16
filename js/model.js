@@ -161,12 +161,12 @@
       languages: { show: false, title: d("languages"), items: [], page: 1 },
       interests: { show: true, title: d("interests"), items: [], page: 1 },
       projects: { show: true, title: d("projects"), items: [], page: 1 },
-      //  Ein Eintrag steht schon drin: ein leerer Block wirkt wie ein
-      //  Fehler – man schaltet ihn ein und es passiert nichts.
-      mobility: { show: true, title: d("mobility"), icon: icon("lucide", "car-front"),
-                  items: [{ name: d("licence") }], page: 1 },
-      mobilitySB: { show: false, title: d("mobility"),
-                    items: [{ name: d("licence") }], page: 1 },
+      //  Leer und ausgeschaltet. Frueher stand hier ein Fuehrerschein als
+      //  Beispiel – der ueberlebte aber jedes "Neu" und jeden Import und
+      //  landete so in Lebenslaeufen von Leuten, die keinen haben.
+      mobility: { show: false, title: d("mobility"), icon: icon("lucide", "car-front"),
+                  items: [], page: 1 },
+      mobilitySB: { show: false, title: d("mobility"), items: [], page: 1 },
       references: { show: false, title: d("references"), icon: icon("lucide", "users"), items: [], page: 1 },
 
       //  Zwei unabhaengige Link-Leisten am unteren Rand: eine in der Sidebar,
@@ -316,9 +316,132 @@
     },
   };
 
+  //  Das englische Beispiel ist keine Uebersetzung des deutschen, sondern
+  //  ein eigener Unsinn im selben Ton: wer den Baukasten auf Englisch
+  //  oeffnet, soll etwas vorfinden, das in seiner Sprache komisch ist und
+  //  nicht nach Uebersetzung klingt.
+  var EXAMPLE_EN = {
+    profileText:
+      "Retired champion of competitive interpretive dance, now devoted to punching " +
+      "tickets with feeling. Knows every level crossing between here and the coast, " +
+      "and the name of the cat at each one.",
+    contact: {
+      name: "Ada Wheelwright",
+      role: "Train Conductor",
+      address: "12 Sidings Lane",
+      city: "Lower Piddling, LP3 4RW",
+      email: "linked@email.com",
+      phone: "+44 7700 900123",
+    },
+    interests: [
+      { name: "Trains", icon: icon("lucide", "train-front") },
+      { name: "The number 9", icon: icon("lucide", "dices") },
+      { name: "Saying yes to wine", icon: icon("lucide", "wine") },
+      { name: "Card tricks", icon: icon("lucide", "wand-sparkles") },
+    ],
+    skills: [
+      { name: "Model railways", rank: 5 },
+      { name: "Interlocking bricks", rank: 4 },
+      { name: "MS Paint", rank: 4 },
+      { name: "The internet", rank: 3.5 },
+    ],
+    languages: [
+      { name: "English", percentage: 100, level: "Native" },
+      { name: "Klingon", percentage: 60, level: "B2" },
+      { name: "Elvish", percentage: 30, level: "A2" },
+    ],
+    mobility: [{ name: "Driving licence category B" }],
+    projects: [
+      {
+        name: "outonalimb.co.uk",
+        img: "https://opengameart.org/sites/default/files/1_7.jpg",
+        url: "https://github.com/rickintoplace/RickCV",
+        description: "A nursery for difficult houseplants",
+      },
+      {
+        name: "The collection",
+        img: "https://images.pexels.com/photos/1724184/pexels-photo-1724184.jpeg?auto=compress&cs=tinysrgb&w=200",
+        url: "https://github.com/rickintoplace/RickCV",
+        description: "Devoted hoarding of antique porcelain",
+      },
+    ],
+    references: [
+      { name: "Available on request", role: "", company: "", contact: "" },
+    ],
+    events: [
+      { title: "A-levels", start: "10/2010", end: "11/2013", icon: icon("lucide", "graduation-cap"),
+        color: "var(--accent-color-shade3)", company: "St Cuthbert's School of Magic and Art",
+        place: "Lower Piddling", sectionId: "education" },
+      { title: "Work experience", start: "07/2013", end: "11/2013", icon: icon("lucide", "gamepad-2"),
+        color: "var(--accent-color-shade1)", company: "A friend's garage",
+        place: "Manchester", sectionId: "experience", hoffset: 20 },
+      { title: "Apprenticeship in animal care (unfinished)", start: "11/2013", end: "09/2015",
+        icon: icon("lucide", "cat"), color: "var(--accent-color-shade3)", company: "Zoolino",
+        place: "Lower Piddling", description: ["Hands-on care in the petting section"],
+        list: ["Stroking tortoises", "Stroking rabbits"], sectionId: "education" },
+      { title: "Environmental commitment", start: "09/2015", end: "07/2021",
+        icon: icon("lucide", "recycle"), color: "var(--accent-color-shade1)",
+        company: "Discount supermarket", place: "Salford",
+        description: ["Returning bottles, daily, without fail"], sectionId: "volunteer" },
+      { title: "Summer programme", start: "07/2021", end: "10/2021", icon: icon("lucide", "train-front"),
+        color: "var(--accent-color-shade2)", company: "Jolly Outings Ltd", place: "Manchester",
+        description: ["An educational trip with a little free time"],
+        list: ["We went there by train", "We visited the railway museum"], sectionId: "experience" },
+      { title: "Self-employment", start: "07/2021", end: "05/2022", icon: icon("lucide", "briefcase"),
+        color: "var(--accent-color-shade2)", company: "An online marketplace", place: "The sofa",
+        description: ["Auctioneer of private collections, working from home"],
+        sectionId: "experience" },
+      { title: "Rainforest project", start: "09/2021", end: "05/2023",
+        icon: icon("lucide", "sprout"), color: "var(--accent-color-shade1)", company: "A large brewery",
+        place: "Burton upon Trent", description: ["Helping preserve rainforest, allegedly"],
+        sectionId: "volunteer", hoffset: 20 },
+      { title: "Social security", start: "05/2023", end: "01/2025", present: true,
+        icon: icon("lucide", "wine"), color: "var(--accent-color-shade3)",
+        company: "The Jobcentre", place: "Manchester",
+        description: ["Largely on the receiving end"], sectionId: "volunteer" },
+    ],
+    footers: {
+      left: {
+        show: true,
+        mode: "iconText",
+        intro: "More of this in the portfolio:",
+        page: "last",
+        links: [
+          { label: "Portfolio", text: "rickinto.place", url: "https://rickinto.place",
+            icon: icon("lucide", "globe") },
+        ],
+      },
+      right: {
+        show: true,
+        mode: "iconText",
+        intro: "",
+        page: "last",
+        links: [
+          { label: "GitHub", text: "github.com/rickintoplace",
+            url: "https://github.com/rickintoplace", icon: icon("brands", "github") },
+          { label: "LinkedIn", text: "LinkedIn", url: "https://www.linkedin.com/",
+            icon: icon("brands", "linkedin") },
+        ],
+      },
+    },
+    coverLetter: {
+      recipient: "Northern Rail Ltd\nAttn. Ms Beatrice Sample\n2 Station Approach\nManchester M1 2AB",
+      place: "Lower Piddling",
+      date: "1 January 2025",
+      subject: "Application for the position of train conductor",
+      salutation: "Dear Sir or Madam,",
+      paragraphs: [
+        "I am writing to apply for the position of train conductor and ticket inspector with Northern Rail.",
+        "As a lifelong enthusiast of model railways I bring considerable relevant experience, at a scale of 1:87, and I am convinced that I would be a valuable addition to your team.",
+        "I would be glad to convince you in person over a pleasant glass of wine, and to explain why 9 has been my favourite number since primary school.",
+      ],
+      closing: "Yours faithfully,",
+    },
+  };
+
   function createExample(locale) {
     var data = createBase(locale || "de");
-    var ex = EXAMPLE_DE;
+    var ex = (locale || "de") === "en" ? EXAMPLE_EN : EXAMPLE_DE;
 
     data.photo.src = "https://i.ibb.co/QKnK1ry/image.webp";
     data.profile.text = ex.profileText;
@@ -327,6 +450,7 @@
     data.skills.items = JSON.parse(JSON.stringify(ex.skills));
     data.languages.items = JSON.parse(JSON.stringify(ex.languages));
     data.mobility.items = JSON.parse(JSON.stringify(ex.mobility));
+    data.mobility.show = true;
     data.projects.items = JSON.parse(JSON.stringify(ex.projects));
     data.references.items = JSON.parse(JSON.stringify(ex.references));
     data.footers = JSON.parse(JSON.stringify(ex.footers));

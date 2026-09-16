@@ -1907,6 +1907,14 @@
     if (!textProfile.events.length) textProfile.warnings.push("thin");
     if (textProfile.images) textProfile.warnings.push("images");
 
+    //  Aus Text laesst sich keine Selbsteinschaetzung lesen: die Punkte
+    //  eines Kenntnis-Balkens sind Grafik. Lieber sagen, dass sie auf null
+    //  stehen, als sie stillschweigend zu erfinden.
+    var unrated = textProfile.skills.length && textProfile.skills.every(function (skill) {
+      return !Number(skill.rank);
+    });
+    if (unrated) textProfile.warnings.push("skillRanks");
+
     return result("text", textProfile, null, text);
   }
 

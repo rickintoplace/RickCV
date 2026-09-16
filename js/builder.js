@@ -85,7 +85,21 @@
         console.warn("Gespeicherte Daten unlesbar, starte mit Beispiel:", error);
       }
     }
-    return Model.createExample("de");
+    return Model.createExample(startLocale());
+  }
+
+  //  Beim allerersten Besuch entscheidet die Spracheinstellung des
+  //  Browsers, in welcher Sprache Oberflaeche und Beispiel erscheinen.
+  //  Vorher landete jeder in einem deutschen Baukasten, auch wer kein Wort
+  //  Deutsch spricht.
+  function startLocale() {
+    var languages = global.navigator.languages || [global.navigator.language || ""];
+    for (var i = 0; i < languages.length; i++) {
+      var code = String(languages[i]).toLowerCase();
+      if (code.indexOf("de") === 0) return "de";
+      if (code.indexOf("en") === 0) return "en";
+    }
+    return "de";
   }
 
   var save = debounce(function () {
