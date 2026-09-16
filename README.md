@@ -182,7 +182,7 @@ the page — opens one dialog that takes whatever you have:
 | A RickCV backup (`*.rickcv.json`) | Drop it in. Everything comes back, styling included. |
 | A `resume.json` ([JSON Resume](https://jsonresume.org/schema)) | Drop it in. Work, education, volunteering, awards, certificates, skills, languages, interests, projects and references are mapped onto RickCV's sections. |
 | Your LinkedIn data | *Settings → Data privacy → Get a copy of your data*. Drop the ZIP in — or the single CSV files, if your browser cannot unpack ZIPs. |
-| An old resume as PDF | Drop it in. RickCV pulls the text out, separates columns and sorts it into sections. Scanned PDFs hold no text, so those cannot work. |
+| An old resume as PDF | Drop it in. RickCV pulls the text out, separates columns, sorts it into sections and takes the pictures with it. Scanned PDFs hold no text, so those cannot work. |
 | Anything else | Copy the text into the dialog's text box. |
 
 Whatever the source, the dialog first shows **what it found** — name, number of stations,
@@ -193,6 +193,32 @@ changed until you confirm.
 Text and PDF imports are a **draft**: a PDF knows about coordinates, not about careers, so
 the guesses are labelled as such and want checking. The structured formats — RickCV, JSON
 Resume, LinkedIn — are exact.
+
+### What a PDF gives away
+
+A PDF holds no sections, no headings and no dates — only characters at coordinates. RickCV
+puts the document back together from what *is* there:
+
+- **Columns** are found by looking for the widest vertical lane no line of text crosses, so a
+  sidebar is read as a sidebar and not woven into the main column.
+- **Headings** are recognised by their keywords, and letter-spaced titles (`B E R U F S -
+  E R F A H R U N G`) are closed up first. Unknown headings are measured against the ones
+  that were recognised — same size, same spacing — so a section ends where it really ends.
+- **The name** is the largest type on the sheet, not the first line. In a two-column layout
+  the first line is usually the sidebar; and where a narrow column breaks the name across two
+  lines, the two are put back together.
+- **Dates** are read wherever they sit: in front of the entry, at the end of the line, split
+  over two lines (`Ausbildung 11/13` / `ZOOLINO, Bad Wimpeln – 09/15`), with two-digit years,
+  German or English month names, and an open end (`heute`, `present`).
+- **Pictures** are placed by where they sit on the page: the large upright one at the top
+  becomes the photo, a flat wide one on a letter page becomes the signature, and a small
+  image beside a project becomes that project's picture. What cannot be placed is left out
+  rather than dropped somewhere random.
+- **The cover letter** stops the reading: from the salutation on, nothing else is treated as
+  part of the resume.
+
+Where little is recognised, RickCV says so and shows you the text it read, so you can sort it
+in by hand instead of hunting for what went missing.
 
 ### Going the other way
 
@@ -242,7 +268,7 @@ Copy `index.html`, `cv.html`, `builder.css`, `builder.js`, `render.js`, `default
 | `js/builder.js` | Wiring: state, history, saving, preview, printing |
 | `js/import.js` | Reading and writing other formats: JSON Resume, LinkedIn, CSV, text |
 | `js/import-dialog.js` | The dialog behind *Importieren* |
-| `js/pdf-import.js` | Text extraction from PDFs, loads `vendor/pdfjs` on demand |
+| `js/pdf-import.js` | Text and picture extraction from PDFs, loads `vendor/pdfjs` on demand |
 | `vendor/pdfjs/` | Mozilla's pdf.js (Apache-2.0), only fetched when a PDF is imported |
 | `tools/gen-icons.py` | Regenerates `js/icon-data.js` from lucide-static |
 

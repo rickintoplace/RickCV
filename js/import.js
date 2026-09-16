@@ -57,6 +57,14 @@
     var slash = raw.match(/^(\d{1,2})[./](\d{4})$/);
     if (slash) return pad(Number(slash[1])) + "/" + slash[2];
 
+    //  "11/13" heisst November 2013. Zweistellige Jahre unter 50 liegen im
+    //  neuen Jahrhundert – ein Lebenslauf reicht nicht 80 Jahre zurueck.
+    var short = raw.match(/^(\d{1,2})[./](\d{2})$/);
+    if (short) {
+      var year = Number(short[2]);
+      return pad(Number(short[1])) + "/" + (year < 50 ? 2000 + year : 1900 + year);
+    }
+
     var german = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
     if (german) return pad(Number(german[2])) + "/" + german[3];
 
@@ -93,6 +101,9 @@
       projects: [],    // { name, url, description }
       references: [],  // { name, role, company, contact }
       links: [],       // { label, text, url }
+      photo: "",       // Bewerbungsfoto als Datenadresse
+      signature: "",   // Unterschrift aus dem Anschreiben
+      images: 0,       // wieviele Bilder insgesamt gefunden wurden
       warnings: [],
     };
   }
@@ -716,70 +727,172 @@
   /* --------------------------------------------------------------- Text */
 
   //  Der Heuristik-Pfad: eingefuegter Text oder das, was aus einem PDF
-  //  faellt. Das Ergebnis ist ausdruecklich ein Entwurf – es wird nichts
-  //  erfunden, aber die Zuordnung kann danebenliegen.
+  //  faellt. Aus einem PDF kommen zusaetzlich Schriftgrad und Sperrung je
+  //  Zeile – damit laesst sich eine Ueberschrift erkennen, ohne sie zu
+  //  kennen, und der Name ist schlicht die groesste Schrift auf dem Blatt.
+  //  Das Ergebnis bleibt ein Entwurf: erfunden wird nichts, aber die
+  //  Zuordnung kann danebenliegen.
   var HEADINGS = [
-    { role: "experience", pattern: /^(berufs?erfahrung|beruflicher werdegang|praxiserfahrung|work experience|professional experience|experience|employment)\b/i },
-    { role: "education", pattern: /^(ausbildung|schulbildung|studium|bildungsweg|education|academic)\b/i },
+    { role: "experience", pattern: /^(berufs?erfahrung|beruflicher werdegang|berufliche erfahrung|praxiserfahrung|werdegang|work experience|professional experience|experience|employment)\b/i },
+    { role: "education", pattern: /^(ausbildung|schulbildung|studium|bildungsweg|schule|education|academic)\b/i },
     { role: "volunteer", pattern: /^(ehrenamt|engagement|freiwillig|volunteer|volunteering)\b/i },
-    { role: "skills", pattern: /^(kenntnisse|f[äa]higkeiten|skills|kompetenzen|technical skills|it-kenntnisse)\b/i },
+    { role: "skills", pattern: /^(kenntnisse|f[äa]higkeiten|skills|kompetenzen|technical skills|it-kenntnisse|edv)\b/i },
     { role: "languages", pattern: /^(sprachen|languages|sprachkenntnisse)\b/i },
     { role: "interests", pattern: /^(interessen|hobbys?|interests|freizeit)\b/i },
     { role: "projects", pattern: /^(projekte|projects|portfolio)\b/i },
     { role: "profile", pattern: /^(profil|über mich|ueber mich|kurzprofil|summary|about|profile|objective)\b/i },
-    { role: "other", pattern: /^(weiterbildung|zertifikate|certificates|awards|auszeichnungen|publikationen|publications)\b/i },
+    { role: "other", pattern: /^(weiterbildung|fortbildung|zertifikate|zertifizierungen|certificates|certifications|awards|auszeichnungen|publikationen|publications)\b/i },
+    //  Bekannt, aber ohne eigenen Block: Hauptsache, die Zeilen darunter
+    //  landen nicht im vorigen Abschnitt.
+    { role: "ignore", pattern: /^(kontakt|contact|persönliche daten|persoenliche daten|personal details|mobilit[äa]t|mobility|referenzen|references|anschrift|adresse)\b/i },
   ];
 
-  //  Eine Zeile, die einen Zeitraum traegt: "09/2015 – 07/2021",
-  //  "2015 - heute", "Jan 2015 – Dez 2018".
+  //  Ein Zeitraum in einer Zeile: "09/2015 – 07/2021", "2015 - heute",
+  //  "Jan 2015 – Dez 2018". Zweistellige Jahre sind erlaubt, die kommen aus
+  //  gestalteten Lebenslaeufen ("11/13").
+  var DATE = "(?:\\d{1,2}[./])?\\d{2,4}|[A-Za-zÄÖÜäöü]{3,9}\\.?\\s+\\d{2,4}";
+  var OPEN = "heute|present|current|aktuell|now|jetzt|dato|today|ongoing|bis heute";
+
   var RANGE = new RegExp(
-    "(\\b(?:\\d{1,2}[./])?\\d{4}\\b|\\b[A-Za-zÄÖÜäöü]{3,9}\\.?\\s+\\d{4}\\b)" +
-    "\\s*(?:–|—|-|bis|to|until|\\u2013)\\s*" +
-    "(\\b(?:\\d{1,2}[./])?\\d{4}\\b|\\b[A-Za-zÄÖÜäöü]{3,9}\\.?\\s+\\d{4}\\b|heute|present|current|aktuell|now|jetzt|dato)", "i");
+    "(\\b(?:" + DATE + ")\\b)\\s*(?:–|—|-|bis|to|until|\\u2013)\\s*(\\b(?:" + DATE + ")\\b|" + OPEN + ")", "i");
 
-  var SINGLE = /^\s*((?:\d{1,2}[./])?\d{4})\s*$/;
+  var SINGLE = new RegExp("^\\s*((?:\\d{1,2}[./])?\\d{4})\\s*$");
 
-  function fromText(text) {
-    var profile = emptyProfile();
-    var lines = String(text).replace(/\r/g, "").split("\n").map(function (line) {
-      return line.replace(/\s+$/, "");
+  //  Ein Datum am Zeilenende – die haeufigste Form in gestalteten
+  //  Lebenslaeufen. Steht ein Gedankenstrich davor, ist es das Ende eines
+  //  Zeitraums, dessen Anfang eine Zeile hoeher steht.
+  var TRAILING = new RegExp(
+    "^(.*?)[\\t ]*(?:(–|—|-|bis|to)[\\t ]*)?(" + DATE + "|" + OPEN + ")[.,;]?$", "i");
+
+  function trailingDate(text) {
+    var match = String(text).match(TRAILING);
+    if (!match) return null;
+
+    var rest = clean(match[1]).replace(/[\t]/g, " ").replace(/[,;–—-]\s*$/, "").trim();
+    var value = clean(match[3]);
+
+    //  Eine blosse Hausnummer oder Postleitzahl ist kein Datum.
+    if (!/[./]/.test(value) && !/^(19|20)\d{2}$/.test(value) &&
+        !new RegExp("^(?:" + OPEN + ")$", "i").test(value) &&
+        !/[A-Za-zÄÖÜäöü]/.test(value)) {
+      return null;
+    }
+
+    return {
+      rest: rest,
+      date: isPresent(value) ? "" : normDate(value),
+      isEnd: !!match[2],
+      present: isPresent(value),
+    };
+  }
+
+  function normalizeHeading(value) {
+    return clean(value).replace(/^[•·\-–—*\s]+/, "").replace(/[:•|.\s]+$/, "");
+  }
+
+  function headingOf(line) {
+    var value = normalizeHeading(line);
+    if (!value || value.length > 40) return null;
+    for (var i = 0; i < HEADINGS.length; i++) {
+      if (HEADINGS[i].pattern.test(value)) return HEADINGS[i].role;
+    }
+    return null;
+  }
+
+  //  Wie sehen die Ueberschriften in genau diesem Dokument aus? Das laesst
+  //  sich an den erkannten ablesen – Schriftgrad und Sperrung. Damit wird
+  //  aus "groesser als der Fliesstext" ein Vergleich mit dem, was hier
+  //  tatsaechlich eine Ueberschrift ist. Ohne diesen Massstab gilt jede
+  //  hervorgehobene Zeile als Ueberschrift, und ein Projektname beendet
+  //  den Abschnitt, in dem er steht.
+  function headingStyle(rows) {
+    var sizes = [];
+    var spaced = 0;
+    var known = 0;
+
+    rows.forEach(function (row) {
+      if (!headingOf(row.text)) return;
+      known++;
+      if (row.size) sizes.push(row.size);
+      if (row.spaced) spaced++;
     });
 
-    var mail = String(text).match(/[\w.+-]+@[\w-]+\.[\w.]{2,}/);
-    if (mail) profile.contact.email = mail[0];
-    profile.contact.phone = findPhone(lines);
+    if (!known || !sizes.length) return null;
+    return { size: median(sizes), spaced: spaced >= known * 0.6 };
+  }
 
-    var postal = findAddress(lines);
+  //  Eine unbekannte Ueberschrift soll den laufenden Abschnitt trotzdem
+  //  beenden – sonst sammelt "Kenntnisse" den halben Rest des Blattes ein.
+  //  Ohne Schriftgrade (eingefuegter Text) wird nicht geraten.
+  function looksLikeHeading(row, bodySize, style) {
+    if (!row || !bodySize) return false;
+    var value = normalizeHeading(row.text);
+    if (!value || value.length > 34 || /\d/.test(value) || value.indexOf(",") !== -1) return false;
+    if (value.indexOf("\t") !== -1) return false;
+
+    if (style) {
+      //  Sind die Ueberschriften dieses Dokuments gesperrt, ist eine nicht
+      //  gesperrte Zeile keine – egal wie gross sie ist.
+      if (style.spaced && !row.spaced) return false;
+      if (!row.size) return false;
+      //  Liegt der Ueberschriftsgrad dicht am Fliesstext (12 zu 11 Punkt
+      //  ist ueblich), traefe die blosse Aehnlichkeit jede Zeile. Eine
+      //  Ueberschrift muss sich auch vom Fliesstext abheben.
+      if (!row.spaced && row.size < bodySize * 1.08) return false;
+      return Math.abs(row.size - style.size) <= style.size * 0.15;
+    }
+
+    if (row.spaced) return true;
+    return row.size >= bodySize * 1.12 && value === value.toUpperCase();
+  }
+
+  var SALUTATION = /^(sehr geehrte|liebe[rs]?\s|dear\s|hallo\s)/i;
+
+  function median(values) {
+    if (!values.length) return 0;
+    var sorted = values.slice().sort(function (a, b) { return a - b; });
+    return sorted[Math.floor(sorted.length / 2)];
+  }
+
+  function fromText(text, lines) {
+    var profile = emptyProfile();
+
+    //  Aus einem PDF kommen fertige Zeilen mit Zusatzwissen, aus der
+    //  Zwischenablage nur Text. Beides wird hier zur selben Form.
+    var rows = (lines && lines.length ? lines : String(text).replace(/\r/g, "").split("\n")
+      .map(function (line) { return { text: line }; }))
+      .map(function (row) {
+        return {
+          text: clean(row.text), size: row.size || 0, spaced: !!row.spaced,
+          x: row.x || 0, y: row.y || 0, page: row.page || 1,
+        };
+      })
+      .filter(function (row) { return row.text; });
+
+    if (!rows.length) return profile;
+
+    var bodySize = median(rows.map(function (row) { return row.size; })
+      .filter(function (size) { return size > 0; }));
+    var style = headingStyle(rows);
+
+    var plain = rows.map(function (row) { return row.text; });
+
+    var mail = plain.join("\n").match(/[\w.+-]+@[\w-]+\.[\w.]{2,}/);
+    if (mail) profile.contact.email = mail[0];
+    profile.contact.phone = findPhone(plain);
+
+    var postal = findAddress(plain);
     profile.contact.address = postal.address;
     profile.contact.city = postal.city;
 
-    //  Der Name steht fast immer oben: eine kurze Zeile ohne Ziffern,
-    //  Klammern und @. In schmalen Spalten bricht er allerdings um, dann
-    //  liegen Vor- und Nachname untereinander.
-    var candidates = [];
-    for (var i = 0; i < Math.min(lines.length, 14) && candidates.length < 3; i++) {
-      var candidate = clean(lines[i]);
-      if (!candidate || /[@\d|]/.test(candidate)) continue;
-      if (candidate.split(/\s+/).length > 5 || candidate.length > 48) continue;
-      if (headingOf(candidate)) continue;
-      candidates.push(candidate);
-    }
-
-    function oneWord(value) {
-      return !!value && /^[A-ZÄÖÜ][^\s]*$/.test(value);
-    }
-
-    if (oneWord(candidates[0]) && oneWord(candidates[1])) {
-      profile.contact.name = candidates[0] + " " + candidates[1];
-      profile.contact.role = candidates[2] || "";
-    } else {
-      profile.contact.name = candidates[0] || "";
-      profile.contact.role = candidates[1] || "";
-    }
+    var named = findName(rows, bodySize);
+    profile.contact.name = named.name;
+    profile.contact.role = named.role;
 
     var current = null;      // laufender Abschnitt
     var event = null;        // laufende Station
-    var buffer = [];         // Zeilen des laufenden Abschnitts ohne Station
+    var buffer = [];         // Zeilen des Abschnitts ausserhalb einer Station
+    var stopped = false;
 
     function closeEvent() {
       if (event && (event.title || event.company)) profile.events.push(event);
@@ -788,10 +901,11 @@
 
     function flushBuffer() {
       if (!current || !buffer.length) { buffer = []; return; }
-      var joined = buffer.join("\n");
+      var joined = buffer.map(function (row) { return row.text; }).join("\n");
+
       if (current === "profile") {
-        //  Im PDF bricht ein Satz mitten im Wort um – aus den Zeilen wird
-        //  wieder ein Absatz.
+        //  Im PDF bricht ein Satz mitten im Wort um – daraus wird wieder
+        //  ein Absatz.
         profile.profileText = clean(profile.profileText + " " + joined.replace(/\n/g, " "))
           .replace(/\s+/g, " ").trim();
       } else if (current === "skills") {
@@ -811,48 +925,88 @@
           }
         });
       } else if (current === "projects") {
-        listItems(joined).forEach(function (entry) {
-          var url = (entry.match(/https?:\/\/\S+/) || [""])[0];
-          profile.projects.push({
-            name: clean(entry.replace(url, "").replace(/[–—:-]\s*$/, "")).slice(0, 60),
-            url: url,
-            description: "",
-          });
+        collectProjects(buffer, bodySize).forEach(function (project) {
+          profile.projects.push(project);
         });
       }
       buffer = [];
     }
 
-    lines.forEach(function (raw) {
-      var line = clean(raw);
-      if (!line) return;
+    rows.forEach(function (row, index) {
+      if (stopped) return;
+      var line = row.text;
+
+      //  Ab der Anrede beginnt das Anschreiben. Was danach kommt, gehoert
+      //  nicht in den Lebenslauf.
+      if (SALUTATION.test(line)) {
+        closeEvent(); flushBuffer(); stopped = true; return;
+      }
+
+      if (index === named.roleIndex) return;
+      if (index >= named.nameIndex && index <= (named.nameEnd === undefined ? named.nameIndex : named.nameEnd)
+          && named.nameIndex >= 0) return;
 
       var heading = headingOf(line);
       if (heading) {
-        closeEvent();
-        flushBuffer();
-        current = heading;
+        closeEvent(); flushBuffer();
+        current = heading === "ignore" ? null : heading;
         return;
       }
 
-      var range = line.match(RANGE);
-      var single = line.match(SINGLE);
+      //  In der Projektliste ist eine hervorgehobene Zeile der Projektname
+      //  und keine neue Ueberschrift – dort endet der Abschnitt erst bei
+      //  einer bekannten Ueberschrift. Ueberall sonst beendet eine
+      //  unbekannte Ueberschrift den Abschnitt, sonst sammelt er den Rest
+      //  des Blattes ein.
+      if (current !== "projects" && looksLikeHeading(row, bodySize, style)) {
+        closeEvent(); flushBuffer();
+        current = null;
+        return;
+      }
+
       var isStation = current === "experience" || current === "education" ||
                       current === "volunteer" || current === "other";
 
-      if (isStation && (range || single)) {
-        closeEvent();
-        event = newEvent(current);
+      if (isStation) {
+        var range = line.match(RANGE);
+        var single = line.match(SINGLE);
+
         if (range) {
+          //  Ein vollstaendiger Zeitraum beginnt immer eine neue Station.
+          closeEvent();
+          event = newEvent(current);
           event.start = normDate(range[1]);
-          event.end = isPresent(range[2]) ? "" : normDate(range[2]);
           event.present = isPresent(range[2]);
-          var rest = clean(line.replace(range[0], "").replace(/^[|–—,-]\s*/, ""));
+          event.end = event.present ? "" : normDate(range[2]);
+          var rest = clean(line.replace(range[0], "").replace(/^[|–—,\t-]\s*/, ""));
           if (rest) assignStationLine(event, rest);
-        } else {
-          event.start = normDate(single[1]);
+          return;
         }
-        return;
+
+        if (single) {
+          closeEvent();
+          event = newEvent(current);
+          event.start = normDate(single[1]);
+          return;
+        }
+
+        var trailing = trailingDate(line);
+        if (trailing) {
+          //  "ZOOLINO, Bad Wimpeln – 09/15" schliesst die Station ab,
+          //  "Praktikum 07/13" beginnt eine neue.
+          if (trailing.isEnd && event) {
+            event.end = trailing.date;
+            event.present = trailing.present;
+            if (trailing.rest) assignStationLine(event, trailing.rest);
+          } else {
+            closeEvent();
+            event = newEvent(current);
+            if (trailing.present) event.present = true;
+            else event.start = trailing.date;
+            if (trailing.rest) assignStationLine(event, trailing.rest);
+          }
+          return;
+        }
       }
 
       if (event) {
@@ -861,7 +1015,7 @@
         return;
       }
 
-      if (current) buffer.push(line);
+      if (current) buffer.push(row);
     });
 
     closeEvent();
@@ -869,6 +1023,121 @@
 
     if (profile.events.length) profile.warnings.push("draft");
     return profile;
+  }
+
+  //  Ein Projekt ist ueblich gesetzt: Name hervorgehoben (groesser, in
+  //  Grossbuchstaben oder eine Adresse), darunter ein paar Zeilen Text.
+  //  Ohne diese Unterscheidung wird aus jeder Zeile ein eigenes Projekt.
+  function collectProjects(rows, bodySize) {
+    var projects = [];
+    var current = null;
+
+    function isName(row) {
+      var value = clean(row.text);
+      if (!value) return false;
+      if (/https?:\/\//.test(value)) return true;
+      if (/^[\w.-]+\.(de|com|org|net|io|dev|eu|ch|at)$/i.test(value)) return true;
+      if (bodySize && row.size > bodySize * 1.1) return true;
+      return value.length < 40 && value === value.toUpperCase() && /[A-ZÄÖÜ]/.test(value);
+    }
+
+    rows.forEach(function (row) {
+      var value = clean(row.text).replace(/\t+/g, " ");
+      if (!value) return;
+
+      if (isName(row) || !current) {
+        var url = (value.match(/https?:\/\/\S+/) || [""])[0];
+        var name = clean(value.replace(url, "")) || shortUrl(url);
+        if (!url && /^[\w.-]+\.(de|com|org|net|io|dev|eu|ch|at)$/i.test(name)) {
+          url = "https://" + name.toLowerCase();
+        }
+        //  y und Seite bleiben stehen: daran wird gleich das Bild
+        //  gefunden, das neben dem Projekt liegt.
+        current = { name: name.slice(0, 60), url: url, description: "",
+                    img: "", y: row.y || 0, page: row.page || 1 };
+        projects.push(current);
+        return;
+      }
+
+      current.description = clean(current.description + " " + value);
+    });
+
+    return projects.filter(function (project) { return project.name; });
+  }
+
+  //  Der Name ist die groesste Schrift auf dem Blatt – das gilt quer durch
+  //  alle Vorlagen und ist verlaesslicher als "steht oben": in
+  //  zweispaltigen Lebenslaeufen kommt zuerst die Seitenspalte. Fehlen die
+  //  Schriftgrade, bleibt es bei der Suche von oben.
+  function findName(rows, bodySize) {
+    function usable(row) {
+      var value = clean(row.text);
+      if (!value || /[@|]/.test(value) || /\d/.test(value)) return false;
+      if (value.split(/\s+/).length > 5 || value.length > 48) return false;
+      return !headingOf(value) && !row.spaced;
+    }
+
+    if (bodySize) {
+      var best = -1;
+      rows.forEach(function (row, index) {
+        if (!usable(row) || row.size <= bodySize) return;
+        if (best < 0 || row.size > rows[best].size) best = index;
+      });
+
+      if (best >= 0) {
+        //  In einer schmalen Spalte bricht auch der Name um. Die
+        //  Folgezeile im selben Schriftgrad gehoert dann noch dazu.
+        var name = rows[best].text;
+        var after = best + 1;
+        if (rows[after] && usable(rows[after]) &&
+            Math.abs(rows[after].size - rows[best].size) <= rows[best].size * 0.05 &&
+            (name + " " + rows[after].text).split(/\s+/).length <= 4) {
+          name += " " + rows[after].text;
+          after++;
+        }
+
+        //  Die Rolle steht direkt darunter: kurz, keine Ueberschrift.
+        var roleIndex = -1;
+        for (var i = after; i < Math.min(rows.length, after + 2); i++) {
+          if (usable(rows[i]) && rows[i].size < rows[best].size) { roleIndex = i; break; }
+        }
+
+        return {
+          name: name,
+          role: roleIndex >= 0 ? rows[roleIndex].text : "",
+          nameIndex: best,
+          nameEnd: after - 1,
+          roleIndex: roleIndex,
+        };
+      }
+    }
+
+    var candidates = [];
+    for (var n = 0; n < Math.min(rows.length, 14) && candidates.length < 3; n++) {
+      if (usable(rows[n])) candidates.push({ text: rows[n].text, index: n });
+    }
+
+    function oneWord(entry) {
+      return !!entry && /^[A-ZÄÖÜ][^\s]*$/.test(entry.text);
+    }
+
+    //  In schmalen Spalten bricht der Name um, dann stehen Vor- und
+    //  Nachname untereinander.
+    if (oneWord(candidates[0]) && oneWord(candidates[1])) {
+      return {
+        name: candidates[0].text + " " + candidates[1].text,
+        role: candidates[2] ? candidates[2].text : "",
+        nameIndex: candidates[0].index,
+        roleIndex: candidates[1].index,
+      };
+    }
+
+    return {
+      name: candidates[0] ? candidates[0].text : "",
+      role: candidates[1] ? candidates[1].text : "",
+      nameIndex: candidates[0] ? candidates[0].index : -1,
+      roleIndex: candidates[1] ? candidates[1].index : -1,
+    };
   }
 
   //  Eine Telefonnummer ist entweder eine Zeile, die aus nichts anderem
@@ -896,16 +1165,25 @@
   }
 
   //  Anschrift: gesucht wird die Zeile "PLZ Ort"; die Zeile davor ist die
-  //  Strasse, sofern sie wie eine aussieht.
+  //  Strasse, sofern sie wie eine aussieht. Beides kann auch in einer
+  //  Zeile stehen ("Musterstrasse 4, 12345 Musterstadt").
   function findAddress(lines) {
     var found = { address: "", city: "" };
 
     for (var i = 0; i < lines.length; i++) {
-      var line = clean(lines[i]);
+      var line = clean(lines[i]).replace(/,\s*$/, "");
+
+      var together = line.match(/^(.{3,60}?),\s*(\d{4,5}\s+[A-ZÄÖÜ][\wäöüßA-ZÄÖÜ.\- ]{2,})$/);
+      if (together && /\d/.test(together[1])) {
+        found.address = clean(together[1]);
+        found.city = clean(together[2]);
+        return found;
+      }
+
       if (!/^\d{4,5}\s+[A-ZÄÖÜ][\wäöüßA-ZÄÖÜ.\- ]{2,}$/.test(line)) continue;
 
       found.city = line;
-      var before = clean(lines[i - 1] || "");
+      var before = clean(lines[i - 1] || "").replace(/,\s*$/, "");
       if (before && !/[@]/.test(before) && !headingOf(before) &&
           (/\d/.test(before) || /(stra(ß|ss)e|str\.|weg|allee|platz|gasse|ring|damm)/i.test(before))) {
         found.address = before;
@@ -917,30 +1195,68 @@
   }
 
   function assignStationLine(event, line) {
-    if (!event.title) { event.title = line; return; }
+    var value = clean(line).replace(/\t+/g, " ");
+    if (!value) return;
+    if (!event.title) { event.title = value; return; }
     if (!event.company) {
       //  "Firma, Ort" oder "Firma | Ort"
-      var parts = line.split(/\s*[|·]\s*|,\s(?=[^,]*$)/);
+      var parts = value.split(/\s*[|·]\s*|,\s(?=[^,]*$)/);
       event.company = clean(parts[0]);
       if (parts[1]) event.place = clean(parts[1]);
       return;
     }
-    event.description.push(line);
+    event.description.push(value);
   }
 
-  function headingOf(line) {
-    var value = clean(line).replace(/[:•]+$/, "");
-    if (value.length > 40) return null;
-    for (var i = 0; i < HEADINGS.length; i++) {
-      if (HEADINGS[i].pattern.test(value)) return HEADINGS[i].role;
-    }
-    return null;
-  }
-
+  //  Nebeneinander gesetzte Eintraege (Kenntnisse stehen gern in zwei
+  //  Spalten) trennt der Tabulator, den die PDF-Ebene gesetzt hat.
   function listItems(text) {
-    return String(text).split(/\n|[;,•·]|\s{3,}|\s\|\s/)
+    return String(text).split(/\n|\t|[;,•·]|\s{3,}|\s\|\s/)
       .map(function (entry) { return clean(entry).replace(/^[-–—•*·]\s*/, ""); })
       .filter(function (entry) { return entry && entry.length < 60; });
+  }
+
+  /* -------------------------------------------------------------- Bilder */
+
+  //  Ein PDF kennt keine Bildunterschriften – nur Rechtecke auf Papier.
+  //  Zugeordnet wird deshalb nach Lage und Form: das grosse Bild oben auf
+  //  Seite eins ist das Bewerbungsfoto, ein breites flaches auf einer
+  //  spaeteren Seite die Unterschrift, und was neben einem Projekt liegt,
+  //  gehoert zu diesem Projekt. Was uebrig bleibt – Ziersymbole, Logos
+  //  ohne Bezug – bleibt liegen, statt irgendwo aufzutauchen.
+  function attachImages(profile, images) {
+    if (!images || !images.length) return;
+    profile.images = images.length;
+
+    var free = images.slice().sort(function (a, b) { return b.area - a.area; });
+
+    function take(test) {
+      for (var i = 0; i < free.length; i++) {
+        if (test(free[i])) return free.splice(i, 1)[0];
+      }
+      return null;
+    }
+
+    var photo = take(function (image) {
+      if (image.page !== 1 || image.w < 60) return false;
+      if (image.ratio < 0.45 || image.ratio > 1.9) return false;
+      //  Im oberen Drittel des Blattes – dort steht ein Bewerbungsfoto.
+      return image.y + image.h >= image.pageHeight * 0.6;
+    });
+    if (photo) profile.photo = photo.src;
+
+    var signature = take(function (image) {
+      return image.page > 1 && image.ratio >= 1.5 && image.h <= image.pageHeight * 0.12;
+    });
+    if (signature) profile.signature = signature.src;
+
+    profile.projects.forEach(function (project) {
+      if (!project.y) return;
+      var near = take(function (image) {
+        return image.page === project.page && Math.abs(image.y - project.y) < 160;
+      });
+      if (near) project.img = near.src;
+    });
   }
 
   /* ------------------------------------------------------------ Einspielen */
@@ -1033,6 +1349,13 @@
         company: clean(item.company), contact: clean(item.contact),
       };
     });
+
+    if (clean(profile.photo)) {
+      target.photo.src = profile.photo;
+      target.photo.show = true;
+    }
+
+    if (clean(profile.signature)) target.coverLetter.signatureImg = profile.signature;
 
     if (profile.links && profile.links.length) {
       var footer = target.footers.right;
@@ -1137,22 +1460,29 @@
       projects: profile.projects.length,
       references: profile.references.length,
       links: profile.links.length,
+      images: (profile.photo ? 1 : 0) + (profile.signature ? 1 : 0) +
+        profile.projects.filter(function (project) { return clean(project.img); }).length,
     };
   }
 
-  function result(format, profile, state) {
+  function result(format, profile, state, text) {
     return {
       format: format,
       profile: profile || null,
       state: state || null,
       summary: profile ? summarize(profile) : summarize(stateToProfile(state)),
       warnings: (profile && profile.warnings) || [],
+      //  Bei Text und PDF steht daneben, was gelesen wurde: findet die
+      //  Heuristik wenig, kann man immer noch selbst zuordnen.
+      text: text || "",
     };
   }
 
   /* ------------------------------------------------------------- Eingang */
 
-  function parseText(text, name) {
+  //  lines: die Zeilen aus dem PDF mitsamt Schriftgrad – sie machen aus
+  //  Raten eine Auswertung. Fehlen sie, bleibt es beim reinen Text.
+  function parseText(text, name, lines, images) {
     var format = detect(name, text);
 
     if (format === "rickcv" || format === "jsonresume" || format === "json-unknown") {
@@ -1174,7 +1504,8 @@
       return result("linkedin", profile);
     }
 
-    var textProfile = fromText(text);
+    var textProfile = fromText(text, lines);
+    attachImages(textProfile, images);
     //  Ein einzelner erkannter Name ist noch kein Lebenslauf – sonst wird
     //  aus jedem hineingeworfenen Schnipsel ein "Import".
     var substance = textProfile.events.length + textProfile.skills.length +
@@ -1182,7 +1513,13 @@
       (clean(textProfile.contact.email) ? 1 : 0) + (clean(textProfile.contact.phone) ? 1 : 0) +
       (clean(textProfile.profileText) ? 1 : 0);
     if (!substance) throw new Error("nothingFound");
-    return result("text", textProfile);
+
+    //  Kontaktdaten allein sind ein schlechter Import. Dann lieber sagen,
+    //  dass wenig erkannt wurde, statt es als Erfolg auszugeben.
+    if (!textProfile.events.length) textProfile.warnings.push("thin");
+    if (textProfile.images) textProfile.warnings.push("images");
+
+    return result("text", textProfile, null, text);
   }
 
   //  readFile(file, callback) – callback(error, result)
@@ -1201,10 +1538,10 @@
 
     if (format === "pdf") {
       if (!global.RickCVPdf) return callback(new Error("noPdfSupport"));
-      global.RickCVPdf.extract(file, function (error, text) {
+      global.RickCVPdf.extract(file, function (error, data) {
         if (error) return callback(error);
         try {
-          var parsed = parseText(text, "extracted.txt");
+          var parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
           parsed.format = "pdf";
           callback(null, parsed);
         } catch (parseError) { callback(parseError); }

@@ -21,12 +21,29 @@ const ok = (cond, label, extra) => {
   else { fails++; console.log("  FAIL " + label + (extra === undefined ? "" : " → " + extra)); }
 };
 
+//  Node kennt keine Leinwand. Die Attrappe zeichnet nichts, meldet aber
+//  ihre Maße zurück – damit lassen sich Zuordnung und Verkleinerung der
+//  Bilder prüfen, ohne einen Browser zu starten.
+function fakeCanvas() {
+  const canvas = { width: 0, height: 0 };
+  canvas.getContext = () => ({
+    fillStyle: "", fillRect() {}, drawImage() {},
+    createImageData: (w, h) => ({ width: w, height: h, data: new Uint8ClampedArray(w * h * 4) }),
+    putImageData() {},
+  });
+  canvas.toDataURL = () => `data:image/jpeg;base64,W${canvas.width}H${canvas.height}`;
+  return canvas;
+}
+
 function sandboxWith(files) {
   const box = {
     console, TextDecoder, TextEncoder, Blob, Response, DecompressionStream, URL,
     atob, btoa, setTimeout, clearTimeout, queueMicrotask, structuredClone, crypto,
-    ReadableStream, Uint8Array, Promise, Math, JSON, Date, process,
-    document: { createElement: () => ({ style: {} }), head: { appendChild() {} } },
+    ReadableStream, Uint8Array, Uint8ClampedArray, Promise, Math, JSON, Date, process,
+    document: {
+      createElement: (tag) => (tag === "canvas" ? fakeCanvas() : { style: {} }),
+      head: { appendChild() {} },
+    },
     navigator: { userAgent: "node", platform: "linux" },
   };
   box.window = box; box.globalThis = box; box.self = box;
@@ -138,11 +155,25 @@ if (!fs.existsSync(pdfLib)) {
     name: "zweispaltig.pdf",
     arrayBuffer: async () => pdf.buffer.slice(pdf.byteOffset, pdf.byteOffset + pdf.byteLength),
   };
+  const readPdf = async (name) => {
+    const bytes = fs.readFileSync(fixture(name));
+    const file = {
+      name,
+      arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+    };
+    const data = await new Promise((res, rej) =>
+      pbox.RickCVPdf.extract(file, (error, value) => (error ? rej(error) : res(value))));
+    const parsed = pbox.RickCVImport.parseText(data.text, "aus-pdf.txt", data.lines, data.images);
+    return {
+      data,
+      parsed,
+      state: pbox.RickCVImport.apply(pbox.RickCVModel.createBase("de"), parsed, "replace"),
+    };
+  };
+
   try {
-    const text = await new Promise((res, rej) =>
-      pbox.RickCVPdf.extract(pdfFile, (error, value) => (error ? rej(error) : res(value))));
-    const parsed = pbox.RickCVImport.parseText(text, "aus-pdf.txt");
-    const ps = pbox.RickCVImport.apply(pbox.RickCVModel.createBase("de"), parsed, "replace");
+    const { data, state: ps } = await readPdf("zweispaltig.pdf");
+    ok(data.lines.length > 0 && data.lines[0].size > 0, "Zeilen tragen einen Schriftgrad");
     ok(ps.contact.name === "Erika Musterfrau", "über zwei Zeilen umbrochener Name", ps.contact.name);
     ok(ps.contact.email === "erika.musterfrau@example.de", "E-Mail aus der Seitenspalte");
     ok(ps.contact.phone.replace(/\s/g, "") === "+49891234567", "Telefon statt Hausnummer", ps.contact.phone);
@@ -151,7 +182,73 @@ if (!fs.existsSync(pdfLib)) {
     ok(/wenig beweglichen Teilen\.$/.test(ps.profile.text), "Zeilenumbrüche im Profiltext geglättet");
     ok(ps.skills.items.length === 4, "Kenntnisse aus der Seitenspalte", ps.skills.items.length);
   } catch (error) {
-    ok(false, "PDF gelesen", error.message);
+    ok(false, "zweispaltiges PDF gelesen", error.message);
+  }
+
+  //  RickCVs eigene Ausgabe ist der härteste Fall: gesperrt gesetzte
+  //  Überschriften ("B E R U F S E R F A H R U N G"), der Name erst nach
+  //  der Seitenspalte, Datum am Zeilenende mit zweistelligem Jahr,
+  //  Kenntnisse nebeneinander – und hinten dran ein Anschreiben.
+  console.log("\n— PDF: eigene Ausgabe —");
+  try {
+    const { state: rs } = await readPdf("rickcv-ausgabe.pdf");
+    ok(rs.contact.name === "Harald Töpfer", "Name über den größten Schriftgrad", rs.contact.name);
+    ok(rs.contact.role === "ZUGBEGLEITER", "Rolle darunter", rs.contact.role);
+    ok(rs.contact.email === "verlinkte@email.com", "E-Mail");
+    ok(rs.contact.address === "Musterstraße 4" && rs.contact.city === "12345 Musterstadt",
+       "Anschrift aus zwei Zeilen", rs.contact.address + " / " + rs.contact.city);
+    ok(rs.events.length === 8, "alle acht Stationen", rs.events.length);
+
+    const tier = rs.events.find((e) => /Tierpfleger/.test(e.title));
+    ok(!!tier && tier.start === "11/2013" && tier.end === "09/2015",
+       "zweistelliges Jahr am Zeilenende", tier && tier.start + "–" + tier.end);
+    ok(!!tier && tier.company === "ZOOLINO" && tier.place === "Bad Wimpeln",
+       "Firma und Ort aus der Folgezeile");
+    ok(!!tier && tier.list.length === 2, "Aufzählung unter der Station", tier && tier.list.length);
+
+    const heute = rs.events.find((e) => e.present);
+    ok(!!heute && heute.company === "BUNDESAGENTUR FÜR ARBEIT", "'heute' als offenes Ende");
+
+    const roles = rs.events.map((e) => rs.sections.find((s) => s.id === e.sectionId).atsRole);
+    ok(roles.filter((r) => r === "education").length === 2, "zwei Ausbildungen");
+    ok(roles.filter((r) => r === "volunteer").length === 3, "drei Ehrenämter");
+
+    ok(rs.skills.items.length === 4, "nebeneinander gesetzte Kenntnisse getrennt",
+       rs.skills.items.map((i) => i.name).join("|"));
+    ok(rs.interests.items.length === 4, "Interessen", rs.interests.items.length);
+    ok(rs.projects.items.length === 2, "Projekte statt einer Zeile je Wort",
+       rs.projects.items.map((i) => i.name).join("|"));
+    ok(/Bezwinger des Dunklen Lords/.test(rs.profile.text), "Profiltext aus der Seitenspalte");
+    ok(!/Sehr geehrte/.test(JSON.stringify(rs.events)), "das Anschreiben bleibt draußen");
+  } catch (error) {
+    ok(false, "eigene Ausgabe gelesen", error.message);
+  }
+
+  //  Bilder: Foto, zwei Projektlogos und eine Unterschrift auf Seite zwei.
+  //  Geprüft wird die Zuordnung nach Lage und Form – die Pixel selbst
+  //  entstehen im Browser.
+  console.log("\n— PDF: Bilder und Logos —");
+  try {
+    const { data, parsed, state: bs } = await readPdf("mit-bildern.pdf");
+    ok(data.images.length === 4, "vier Bilder gefunden", data.images.length);
+    ok(/^data:image\/jpeg/.test(bs.photo.src), "Hochformat oben wird zum Bewerbungsfoto",
+       bs.photo.src.slice(0, 30));
+    ok(bs.photo.show === true, "Foto ist eingeschaltet");
+    ok(bs.photo.src.indexOf("W240H320") !== -1, "Foto behält sein Seitenverhältnis",
+       bs.photo.src.slice(23));
+    ok(/^data:image\/jpeg/.test(bs.coverLetter.signatureImg),
+       "flaches Bild im Anschreiben wird zur Unterschrift");
+    ok(bs.projects.items.length === 2, "zwei Projekte", bs.projects.items.length);
+    ok(bs.projects.items.every((p) => /^data:image/.test(p.img)),
+       "jedes Projekt bekommt das Logo daneben",
+       bs.projects.items.map((p) => p.name + ":" + (p.img ? "Bild" : "—")).join(" "));
+    ok(bs.projects.items[0].name === "Fahrplanquelle" &&
+       bs.projects.items[0].description === "Offene Daten für Nahverkehr",
+       "Projektname und Beschreibung getrennt", bs.projects.items[0].name);
+    ok(parsed.summary.images === 4, "alle vier in der Zusammenfassung", parsed.summary.images);
+    ok(parsed.warnings.includes("images"), "weist auf übernommene Bilder hin");
+  } catch (error) {
+    ok(false, "PDF mit Bildern gelesen", error.message);
   }
 }
 

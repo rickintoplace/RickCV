@@ -1844,3 +1844,29 @@ body.legal-body {
     border-radius: 14px 14px 0 0;
   }
 }
+
+/*  Der gelesene Text zum Nachsehen: bei einem mageren Ergebnis ist er das
+    Einzige, womit man noch etwas anfangen kann. */
+.imp-peek {
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  background: var(--ui-panel-2);
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.imp-peek summary {
+  cursor: pointer;
+  color: var(--ui-muted);
+}
+
+.imp-peek-text {
+  margin: 8px 0 0;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ui-text);
+  tab-size: 8;
+}

@@ -84,9 +84,13 @@
         sumProjects: "Projekte",
         sumReferences: "Referenzen",
         sumLinks: "Links",
+        sumImages: "Bilder",
 
         warnDraft: "Aus Fließtext erkannt – das ist ein Entwurf. Bitte jede Station nachsehen.",
         warnSkillRanks: "Die Kenntnisse kamen ohne Bewertung. Die Punkte stehen auf null – du vergibst sie selbst.",
+        warnThin: "Außer den Kontaktdaten war wenig zu erkennen – dieses Layout gibt wenig her. Der gelesene Text steht unten: du kannst ihn von dort selbst einsortieren.",
+        warnImages: "Bilder wurden mit übernommen: das große Bild oben als Bewerbungsfoto, flache Bilder im Anschreiben als Unterschrift, der Rest zu den Projekten daneben. Sieh nach, ob das passt.",
+        impTextPeek: "Gelesener Text",
 
         errUnknownJson: "Diese JSON-Datei kennt RickCV nicht. Erwartet wird eine eigene Sicherung oder ein JSON Resume.",
         errNothingFound: "In diesem Text war kein Lebenslauf zu erkennen.",
@@ -470,9 +474,13 @@
         sumProjects: "Projects",
         sumReferences: "References",
         sumLinks: "Links",
+        sumImages: "Images",
 
         warnDraft: "Recognised from running text – this is a draft. Please check every station.",
         warnSkillRanks: "The skills arrived without a rating. The dots are at zero – you decide them yourself.",
+        warnThin: "Beyond the contact details there was little to recognise – this layout gives up very little. The text that was read is below: you can sort it in yourself.",
+        warnImages: "Images came along: the large one at the top as the photo, flat ones in the letter as a signature, the rest to the projects beside them. Have a look whether that fits.",
+        impTextPeek: "Text that was read",
 
         errUnknownJson: "RickCV does not know this JSON file. It expects its own backup or a JSON Resume.",
         errNothingFound: "No resume could be recognised in this text.",

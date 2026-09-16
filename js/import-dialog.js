@@ -174,6 +174,7 @@
     { key: "projects", label: "sumProjects" },
     { key: "references", label: "sumReferences" },
     { key: "links", label: "sumLinks" },
+    { key: "images", label: "sumImages" },
   ];
 
   var FORMAT_LABEL = {
@@ -208,11 +209,23 @@
     });
     body.appendChild(list);
 
+    var WARNINGS = {
+      draft: "warnDraft", skillRanks: "warnSkillRanks",
+      thin: "warnThin", images: "warnImages",
+    };
     (parsed.warnings || []).forEach(function (key) {
-      var text = key === "draft" ? t("warnDraft")
-        : key === "skillRanks" ? t("warnSkillRanks") : "";
-      if (text) body.appendChild(el("p", "imp-warn", text));
+      if (WARNINGS[key]) body.appendChild(el("p", "imp-warn", t(WARNINGS[key])));
     });
+
+    //  Bei Text und PDF steht der gelesene Text zum Nachsehen daneben –
+    //  aufgeklappt, wenn wenig erkannt wurde, sonst zusammengefaltet.
+    if (parsed.text) {
+      var peek = el("details", "imp-peek");
+      peek.open = (parsed.warnings || []).indexOf("thin") !== -1;
+      peek.appendChild(el("summary", null, t("impTextPeek")));
+      peek.appendChild(el("pre", "imp-peek-text", parsed.text));
+      body.appendChild(peek);
+    }
 
     body.appendChild(el("p", "imp-label", t("impMode")));
     var modes = el("div", "imp-modes");
