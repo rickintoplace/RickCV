@@ -214,8 +214,21 @@ puts the document back together from what *is* there:
   becomes the photo, a flat wide one on a letter page becomes the signature, and a small
   image beside a project becomes that project's picture. What cannot be placed is left out
   rather than dropped somewhere random.
+- **Label columns** — the shape most German templates use — are understood: a line like
+  `Sprachkenntnisse   Deutsch, Muttersprache` puts its content where the label says, a date in
+  the left column starts the entry, and `Führerschein   Klasse B` lands in the mobility
+  section. Where a label carries no meaning, it is kept, because the same gap can equally
+  separate two skills set side by side.
+- **Employer before role** is handled: `Nordwind Energie GmbH, Kassel` followed by
+  `Projektleiterin Netzausbau` is read as company, place and title — not as a title and a
+  company.
+- **Icon fonts** put their glyphs in Unicode's private use area, where they stick to the
+  headings they decorate and quietly break them. Those characters are removed — unless most of
+  the page is private-use, which means the PDF maps its whole text that way and removing
+  anything would leave an empty page.
 - **The cover letter** stops the reading: from the salutation on, nothing else is treated as
-  part of the resume.
+  part of the resume. So does the closing line of a German resume (`Beispielstadt, 16.09.2026`),
+  which is followed only by a signature.
 
 Where little is recognised, RickCV says so and shows you the text it read, so you can sort it
 in by hand instead of hunting for what went missing.

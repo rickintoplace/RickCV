@@ -84,6 +84,7 @@
         sumProjects: "Projekte",
         sumReferences: "Referenzen",
         sumLinks: "Links",
+        sumMobility: "Mobilität",
         sumImages: "Bilder",
 
         warnDraft: "Aus Fließtext erkannt – das ist ein Entwurf. Bitte jede Station nachsehen.",
@@ -474,6 +475,7 @@
         sumProjects: "Projects",
         sumReferences: "References",
         sumLinks: "Links",
+        sumMobility: "Mobility",
         sumImages: "Images",
 
         warnDraft: "Recognised from running text – this is a draft. Please check every station.",

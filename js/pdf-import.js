@@ -335,12 +335,38 @@
 
   /* --------------------------------------------------------------- Seite */
 
+  //  Symbolschriften (Material Symbols, Font Awesome und Verwandte) legen
+  //  ihre Zeichen in den Privatbereich von Unicode. Im Text sind das
+  //  unsichtbare Fremdkoerper, die an Ueberschriften kleben und ihre
+  //  Erkennung zerstoeren – also raus damit.
+  //
+  //  Vorsicht ist trotzdem geboten: schlecht gebaute PDFs bilden ihren
+  //  ganzen Text in den Privatbereich ab. Ueberwiegt er, wird nichts
+  //  entfernt – lieber merkwuerdige Zeichen als eine leere Seite.
+  var PRIVATE_USE = /[\uE000-\uF8FF]|[\uDB80-\uDBBF][\uDC00-\uDFFF]/g;
+
+  function stripSymbols(items) {
+    var total = 0;
+    var symbols = 0;
+    items.forEach(function (item) {
+      total += item.str.length;
+      symbols += (item.str.match(PRIVATE_USE) || []).length;
+    });
+
+    if (!total || symbols / total > 0.15) return items;
+
+    return items.map(function (item) {
+      var str = item.str.replace(PRIVATE_USE, "");
+      return str === item.str ? item : Object.assign({}, item, { str: str });
+    });
+  }
+
   function pageText(page, number) {
     return page.getTextContent().then(function (content) {
       var view = page.view || [0, 0, 595, 842];
       var width = view[2] - view[0];
 
-      var items = content.items.filter(function (item) {
+      var items = stripSymbols(content.items).filter(function (item) {
         return item.str && item.str.trim();
       }).map(function (item) {
         return {

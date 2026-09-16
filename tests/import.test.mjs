@@ -224,6 +224,76 @@ if (!fs.existsSync(pdfLib)) {
     ok(false, "eigene Ausgabe gelesen", error.message);
   }
 
+  //  Vorlagen mit Beschriftungsspalten: links die Bezeichnung oder das
+  //  Datum, rechts der Inhalt. Sehr verbreitet in deutschen Vorlagen und
+  //  die Form, an der die erste Fassung scheiterte.
+  console.log("\n— PDF: Beschriftungsspalten —");
+  try {
+    const { state: ks } = await readPdf("beschriftungsspalten.pdf");
+    ok(ks.contact.name === "Mara Kessler", "Name", ks.contact.name);
+    ok(ks.contact.address === "Ahornweg 12" && ks.contact.city === "34117 Beispielstadt",
+       "Anschrift aus einer Zeile mit Trennstrich", ks.contact.address + " / " + ks.contact.city);
+    ok(ks.contact.phone.replace(/\s/g, "") === "015198765432", "Telefon neben der E-Mail", ks.contact.phone);
+    ok(ks.events.length === 7, "sieben Stationen", ks.events.length);
+
+    const role = (event) => ks.sections.find((s) => s.id === event.sectionId).atsRole;
+    const netz = ks.events.find((e) => /Netzausbau/.test(e.title));
+    ok(!!netz && role(netz) === "experience", "Berufserfahrung erkannt");
+    ok(!!netz && netz.company === "Nordwind Energie GmbH" && netz.place === "Kassel",
+       "Arbeitgeber steht vor der Tätigkeit und wird trotzdem als Arbeitgeber gelesen",
+       netz && netz.company);
+    ok(!!netz && netz.present === true, "'heute' als laufende Stelle");
+    ok(!!netz && netz.list.length === 1, "'Schwerpunkt: …' wird ein Aufzählungspunkt");
+
+    ok(ks.events.filter((e) => role(e) === "education").length === 2, "zwei Ausbildungen");
+    ok(ks.events.filter((e) => role(e) === "other").length === 2,
+       "Weiterbildungen mit Jahr links", ks.events.filter((e) => role(e) === "other").length);
+    const weiter = ks.events.find((e) => /IPMA/.test(e.title));
+    ok(!!weiter && weiter.start === "2023", "Jahr am Zeilenanfang", weiter && weiter.start);
+
+    const ehren = ks.events.find((e) => /Turnverein/.test(e.title));
+    ok(!!ehren && role(ehren) === "volunteer", "Beschriftung 'Ehrenamt' setzt den Abschnitt");
+
+    ok(ks.skills.items.length === 3, "Kenntnisse hinter der Beschriftung 'EDV'",
+       ks.skills.items.map((i) => i.name).join("|"));
+    ok(ks.languages.items.length === 3, "drei Sprachen", ks.languages.items.length);
+    ok(ks.languages.items[0].name === "Deutsch" && ks.languages.items[0].level === "Muttersprache",
+       "Sprache und Stufe getrennt", ks.languages.items[0].name + "/" + ks.languages.items[0].level);
+    ok(ks.mobility.items.some((i) => /Führerschein Klasse B/.test(i.name)),
+       "Führerschein landet in der Mobilität", ks.mobility.items.map((i) => i.name).join("|"));
+    ok(/^data:image/.test(ks.photo.src), "Foto oben rechts");
+    ok(/^data:image/.test(ks.coverLetter.signatureImg), "Unterschrift unten auf Seite eins");
+    ok(!ks.events.some((e) => /16\.09\.2026/.test(e.title + e.company)),
+       "Ort und Datum am Schluss werden keine Station");
+  } catch (error) {
+    ok(false, "Vorlage mit Beschriftungsspalten gelesen", error.message);
+  }
+
+  //  Symbolschriften: RickCV kann seine Symbole als Schrift setzen, und
+  //  deren Zeichen liegen im privaten Unicode-Bereich. Unentfernt kleben
+  //  sie an den Überschriften und zerlegen die Zuordnung.
+  console.log("\n— PDF: Symbolschrift und Projektbilder —");
+  try {
+    const { data, state: ms } = await readPdf("rickcv-material.pdf");
+    ok(!/[\uE000-\uF8FF]/.test(data.text), "keine Symbolzeichen im Text");
+    ok(data.lines.some((l) => l.text === "AUSBILDUNG"),
+       "Überschrift bleibt lesbar, obwohl ein Symbol davor stand");
+    ok(ms.events.length === 8, "alle acht Stationen trotz Symbolschrift", ms.events.length);
+    ok(ms.skills.items.length === 4, "Kenntnisse", ms.skills.items.length);
+    ok(ms.languages.items.length === 3, "Sprachen", ms.languages.items.length);
+    ok(ms.languages.items[1].level === "B2", "Stufe ohne Trennzeichen erkannt",
+       ms.languages.items[1].name + "/" + ms.languages.items[1].level);
+    ok(ms.projects.items.length === 2 && ms.projects.items.every((p) => /^data:image/.test(p.img)),
+       "beide Projekte behalten ihr Bild",
+       ms.projects.items.map((p) => p.name + (p.img ? "+Bild" : "-")).join(" "));
+    ok(/^data:image/.test(ms.photo.src), "Bewerbungsfoto");
+    ok(!ms.mobility.items.some((i) => /github|linkedin/i.test(i.name)),
+       "Fußzeilen-Links landen nicht in der Mobilität",
+       ms.mobility.items.map((i) => i.name).join("|"));
+  } catch (error) {
+    ok(false, "PDF mit Symbolschrift gelesen", error.message);
+  }
+
   //  Bilder: Foto, zwei Projektlogos und eine Unterschrift auf Seite zwei.
   //  Geprüft wird die Zuordnung nach Lage und Form – die Pixel selbst
   //  entstehen im Browser.

@@ -101,6 +101,7 @@
       projects: [],    // { name, url, description }
       references: [],  // { name, role, company, contact }
       links: [],       // { label, text, url }
+      mobility: [],    // { name } – Führerschein und Ähnliches
       photo: "",       // Bewerbungsfoto als Datenadresse
       signature: "",   // Unterschrift aus dem Anschreiben
       images: 0,       // wieviele Bilder insgesamt gefunden wurden
@@ -732,20 +733,35 @@
   //  kennen, und der Name ist schlicht die groesste Schrift auf dem Blatt.
   //  Das Ergebnis bleibt ein Entwurf: erfunden wird nichts, aber die
   //  Zuordnung kann danebenliegen.
+  //  Ohne \b am Ende: "Weiterbildungen" ist dieselbe Ueberschrift wie
+  //  "Weiterbildung", und Vorlagen setzen mal so, mal so.
   var HEADINGS = [
-    { role: "experience", pattern: /^(berufs?erfahrung|beruflicher werdegang|berufliche erfahrung|praxiserfahrung|werdegang|work experience|professional experience|experience|employment)\b/i },
-    { role: "education", pattern: /^(ausbildung|schulbildung|studium|bildungsweg|schule|education|academic)\b/i },
-    { role: "volunteer", pattern: /^(ehrenamt|engagement|freiwillig|volunteer|volunteering)\b/i },
-    { role: "skills", pattern: /^(kenntnisse|f[äa]higkeiten|skills|kompetenzen|technical skills|it-kenntnisse|edv)\b/i },
-    { role: "languages", pattern: /^(sprachen|languages|sprachkenntnisse)\b/i },
-    { role: "interests", pattern: /^(interessen|hobbys?|interests|freizeit)\b/i },
-    { role: "projects", pattern: /^(projekte|projects|portfolio)\b/i },
-    { role: "profile", pattern: /^(profil|über mich|ueber mich|kurzprofil|summary|about|profile|objective)\b/i },
-    { role: "other", pattern: /^(weiterbildung|fortbildung|zertifikate|zertifizierungen|certificates|certifications|awards|auszeichnungen|publikationen|publications)\b/i },
+    { role: "experience", pattern: /^(berufs?erfahrung|beruflicher werdegang|berufliche erfahrung|praxiserfahrung|berufspraxis|werdegang|work experience|professional experience|experience|employment)/i },
+    { role: "education", pattern: /^(ausbildung|schulbildung|studium|bildungsweg|schulischer werdegang|schule|education|academic)/i },
+    { role: "volunteer", pattern: /^(ehrenamt|engagement|freiwillig|volunteer)/i },
+    { role: "skills", pattern: /^(kenntnisse|f[äa]higkeiten|skills|kompetenzen|technical skills|it-kenntnisse|edv|software)/i },
+    { role: "languages", pattern: /^(sprachen|languages|sprachkenntnisse)/i },
+    { role: "interests", pattern: /^(interessen|hobbys?|interests|freizeit)/i },
+    { role: "projects", pattern: /^(projekte|projects|portfolio)/i },
+    { role: "profile", pattern: /^(profil|über mich|ueber mich|kurzprofil|summary|about|profile|objective)/i },
+    { role: "other", pattern: /^(weiterbildung|fortbildung|seminare|zertifikate|zertifizierungen|certificates|certifications|awards|auszeichnungen|publikationen|publications)/i },
+    { role: "mobility", pattern: /^(f[üu]hrerschein|fahrerlaubnis|driving licen[cs]e|mobilit[äa]t|mobility)/i },
     //  Bekannt, aber ohne eigenen Block: Hauptsache, die Zeilen darunter
     //  landen nicht im vorigen Abschnitt.
-    { role: "ignore", pattern: /^(kontakt|contact|persönliche daten|persoenliche daten|personal details|mobilit[äa]t|mobility|referenzen|references|anschrift|adresse)\b/i },
+    { role: "ignore", pattern: /^(kontakt|contact|persönliche daten|persoenliche daten|zur person|personal details|referenzen|references|anschrift|adresse|lebenslauf|curriculum vitae|resume)/i },
   ];
+
+  //  Manche Vorlagen stellen der Ueberschrift etwas voran: "Weitere
+  //  Faehigkeiten und Kenntnisse". Dann zaehlt das Schluesselwort auch
+  //  mitten in der Zeile – aber nur, wenn die Zeile ueberhaupt wie eine
+  //  Ueberschrift gesetzt ist.
+  function headingInside(value) {
+    for (var i = 0; i < HEADINGS.length; i++) {
+      var body = HEADINGS[i].pattern.source.replace(/^\^/, "");
+      if (new RegExp("(^|\\s)" + body, "i").test(value)) return HEADINGS[i].role;
+    }
+    return null;
+  }
 
   //  Ein Zeitraum in einer Zeile: "09/2015 – 07/2021", "2015 - heute",
   //  "Jan 2015 – Dez 2018". Zweistellige Jahre sind erlaubt, die kommen aus
@@ -757,6 +773,10 @@
     "(\\b(?:" + DATE + ")\\b)\\s*(?:–|—|-|bis|to|until|\\u2013)\\s*(\\b(?:" + DATE + ")\\b|" + OPEN + ")", "i");
 
   var SINGLE = new RegExp("^\\s*((?:\\d{1,2}[./])?\\d{4})\\s*$");
+
+  //  "2020   Schweissen unter Wasser" – Jahr links, Inhalt rechts. Das ist
+  //  die uebliche Form von Weiterbildungslisten.
+  var LEADING = new RegExp("^((?:\\d{1,2}[./])?\\d{4})[\\t ]+(\\S.*)$");
 
   //  Ein Datum am Zeilenende – die haeufigste Form in gestalteten
   //  Lebenslaeufen. Steht ein Gedankenstrich davor, ist es das Ende eines
@@ -790,6 +810,20 @@
     return clean(value).replace(/^[•·\-–—*\s]+/, "").replace(/[:•|.\s]+$/, "");
   }
 
+  //  Viele Vorlagen setzen Beschriftung und Inhalt nebeneinander:
+  //  "Sprachkenntnisse    Deutsch, Muttersprache". Die PDF-Ebene hat den
+  //  Spaltensprung als Tabulator hinterlassen – daran laesst sich beides
+  //  trennen. Eine Beschriftung ist kurz, traegt keine Ziffern und endet
+  //  hoechstens auf einen Doppelpunkt.
+  function labelSplit(text) {
+    var parts = String(text).split("\t");
+    if (parts.length < 2) return null;
+    var label = clean(parts[0]).replace(/:$/, "");
+    var value = clean(parts.slice(1).join(" "));
+    if (!label || !value || label.length > 28 || /\d/.test(label)) return null;
+    return { label: label, value: value };
+  }
+
   function headingOf(line) {
     var value = normalizeHeading(line);
     if (!value || value.length > 40) return null;
@@ -811,7 +845,13 @@
     var known = 0;
 
     rows.forEach(function (row) {
+      //  Nur Zeilen, die nichts als die Ueberschrift enthalten. Eine
+      //  Beschriftung mit Wert daneben ("Führerschein  Klasse B") und ein
+      //  Satz, der zufaellig so anfaengt ("Ausbildung zum Berufstaucher"),
+      //  wuerden den Massstab verderben.
       if (!headingOf(row.text)) return;
+      if (labelSplit(row.text)) return;
+      if (clean(row.text).split(/\s+/).length > 3) return;
       known++;
       if (row.size) sizes.push(row.size);
       if (row.spaced) spaced++;
@@ -819,6 +859,13 @@
 
     if (!known || !sizes.length) return null;
     return { size: median(sizes), spaced: spaced >= known * 0.6 };
+  }
+
+  //  Eine Ueberschrift ist kurz. Wo Schriftgrade vorliegen, entscheidet das
+  //  Layout; ohne sie bleibt nur die Form der Zeile.
+  function headingShape(line) {
+    var value = normalizeHeading(line);
+    return value.split(/\s+/).length <= 2 || /:$/.test(clean(line));
   }
 
   //  Eine unbekannte Ueberschrift soll den laufenden Abschnitt trotzdem
@@ -846,7 +893,18 @@
     return row.size >= bodySize * 1.12 && value === value.toUpperCase();
   }
 
+  //  Eine Zeile, die nichts als eine Adresse ist, gehoert in die
+  //  Linkleiste – nicht in den Abschnitt, unter dem sie zufaellig steht.
+  //  Ein blosser Netzwerkname ohne Ziel ("LinkedIn") ist dagegen nichts,
+  //  womit sich etwas anfangen liesse.
+  var LINK_LINE = /^(https?:\/\/\S+|www\.\S+|[\w.-]{2,}\.(?:de|com|org|net|io|dev|eu|ch|at|me|page|place|blog|xyz)(?:\/\S*)?)$/i;
+  var NETWORK_NAME = /^(linked ?in|github|gitlab|xing|mastodon|bluesky|twitter|instagram|portfolio|webseite|website)$/i;
+
   var SALUTATION = /^(sehr geehrte|liebe[rs]?\s|dear\s|hallo\s)/i;
+
+  //  "Musterstadt, 16.09.2026" unter dem Lebenslauf ist die Schlussformel
+  //  vor der Unterschrift – ab da kommt nichts Inhaltliches mehr.
+  var CLOSING = /^[A-ZÄÖÜ][\wäöüß.\- ]{1,30},\s*\d{1,2}\.\d{1,2}\.\d{2,4}$/;
 
   function median(values) {
     if (!values.length) return 0;
@@ -879,9 +937,21 @@
 
     var mail = plain.join("\n").match(/[\w.+-]+@[\w-]+\.[\w.]{2,}/);
     if (mail) profile.contact.email = mail[0];
-    profile.contact.phone = findPhone(plain);
 
-    var postal = findAddress(plain);
+    //  Kopfzeilen setzen mehrere Angaben nebeneinander: "Musterstraße 78 |
+    //  23456 Musterstadt". Fuer Telefon und Anschrift wird deshalb an den
+    //  Trennern zerlegt, sonst passt keine Zeile auf ihr Muster.
+    var segments = [];
+    plain.forEach(function (line) {
+      line.split(/\t|\s*\|\s*|\s{3,}/).forEach(function (part) {
+        var value = clean(part);
+        if (value) segments.push(value);
+      });
+    });
+
+    profile.contact.phone = findPhone(segments);
+
+    var postal = findAddress(segments);
     profile.contact.address = postal.address;
     profile.contact.city = postal.city;
 
@@ -895,6 +965,12 @@
     var stopped = false;
 
     function closeEvent() {
+      //  Stand am Ende nur die Einrichtung da ("Engagement im Sportverein"),
+      //  ist sie der Eintrag – eine Station ohne Titel zeigt nichts an.
+      if (event && !clean(event.title) && clean(event.company)) {
+        event.title = event.company;
+        event.company = "";
+      }
       if (event && (event.title || event.company)) profile.events.push(event);
       event = null;
     }
@@ -912,17 +988,14 @@
         listItems(joined).forEach(function (name) { profile.skills.push({ name: name, rank: 0 }); });
       } else if (current === "interests") {
         listItems(joined).forEach(function (name) { profile.interests.push({ name: name }); });
+      } else if (current === "mobility") {
+        listItems(joined).forEach(function (name) { profile.mobility.push({ name: name }); });
       } else if (current === "languages") {
         //  "Deutsch" / "(Muttersprache)" untereinander ist ein Umbruch,
         //  keine zweite Sprache.
         var glued = joined.replace(/\n\s*\(/g, " (");
-        listItems(glued).forEach(function (entry) {
-          var parts = entry.split(/\s*[:–—-]\s*|\s{2,}|\s*\(/);
-          var name = clean(parts[0]);
-          var level = clean((parts[1] || "").replace(/\)$/, ""));
-          if (name) {
-            profile.languages.push({ name: name, level: level, percentage: fluencyToPercent(level) });
-          }
+        languageEntries(glued).forEach(function (entry) {
+          profile.languages.push(entry);
         });
       } else if (current === "projects") {
         collectProjects(buffer, bodySize).forEach(function (project) {
@@ -932,36 +1005,33 @@
       buffer = [];
     }
 
-    rows.forEach(function (row, index) {
-      if (stopped) return;
-      var line = row.text;
+    //  Der Inhalt einer Zeile – getrennt vom Erkennen der Ueberschrift,
+    //  weil hinter einer Beschriftung derselbe Inhalt stehen kann:
+    //  "Ehrenamt    Engagement im Sportverein".
+    function content(row, text) {
+      var line = clean(text);
+      if (!line) return;
 
-      //  Ab der Anrede beginnt das Anschreiben. Was danach kommt, gehoert
-      //  nicht in den Lebenslauf.
-      if (SALUTATION.test(line)) {
-        closeEvent(); flushBuffer(); stopped = true; return;
-      }
+      //  In der Projektliste ist eine Adresse das Ziel des Projekts, sonst
+      //  ein Link fuer die Fussleiste. Eine Fussleiste setzt ihre Links
+      //  gern nebeneinander, deshalb wird an der Spalte zerlegt.
+      if (current !== "projects") {
+        var parts = line.split("\t").map(clean).filter(Boolean);
+        var onlyLinks = parts.length && parts.every(function (part) {
+          return LINK_LINE.test(part) || NETWORK_NAME.test(part);
+        });
 
-      if (index === named.roleIndex) return;
-      if (index >= named.nameIndex && index <= (named.nameEnd === undefined ? named.nameIndex : named.nameEnd)
-          && named.nameIndex >= 0) return;
-
-      var heading = headingOf(line);
-      if (heading) {
-        closeEvent(); flushBuffer();
-        current = heading === "ignore" ? null : heading;
-        return;
-      }
-
-      //  In der Projektliste ist eine hervorgehobene Zeile der Projektname
-      //  und keine neue Ueberschrift – dort endet der Abschnitt erst bei
-      //  einer bekannten Ueberschrift. Ueberall sonst beendet eine
-      //  unbekannte Ueberschrift den Abschnitt, sonst sammelt er den Rest
-      //  des Blattes ein.
-      if (current !== "projects" && looksLikeHeading(row, bodySize, style)) {
-        closeEvent(); flushBuffer();
-        current = null;
-        return;
+        if (onlyLinks) {
+          parts.forEach(function (part) {
+            if (!LINK_LINE.test(part)) return; // blosser Name ohne Ziel
+            profile.links.push({
+              label: shortUrl(part).split("/")[0],
+              text: shortUrl(part),
+              url: /^https?:\/\//i.test(part) ? part : "https://" + part,
+            });
+          });
+          return;
+        }
       }
 
       var isStation = current === "experience" || current === "education" ||
@@ -969,8 +1039,6 @@
 
       if (isStation) {
         var range = line.match(RANGE);
-        var single = line.match(SINGLE);
-
         if (range) {
           //  Ein vollstaendiger Zeitraum beginnt immer eine neue Station.
           closeEvent();
@@ -983,6 +1051,16 @@
           return;
         }
 
+        var leading = line.match(LEADING);
+        if (leading) {
+          closeEvent();
+          event = newEvent(current);
+          event.start = normDate(leading[1]);
+          assignStationLine(event, leading[2]);
+          return;
+        }
+
+        var single = line.match(SINGLE);
         if (single) {
           closeEvent();
           event = newEvent(current);
@@ -1007,6 +1085,14 @@
           }
           return;
         }
+
+        //  Eine Station ohne jedes Datum ist trotzdem eine: "Engagement im
+        //  Sportverein" unter "Ehrenamt".
+        if (!event) {
+          event = newEvent(current);
+          assignStationLine(event, line);
+          return;
+        }
       }
 
       if (event) {
@@ -1015,7 +1101,72 @@
         return;
       }
 
-      if (current) buffer.push(row);
+      if (current) buffer.push({ text: line, size: row.size, y: row.y, page: row.page });
+    }
+
+    rows.forEach(function (row, index) {
+      if (stopped) return;
+      var line = row.text;
+
+      //  Ab der Anrede beginnt das Anschreiben, ab der Schlussformel steht
+      //  nur noch die Unterschrift. Beides gehoert nicht in den Lebenslauf.
+      if (SALUTATION.test(line) || CLOSING.test(line)) {
+        closeEvent(); flushBuffer(); stopped = true; return;
+      }
+
+      if (index === named.roleIndex) return;
+      if (named.nameIndex >= 0 && index >= named.nameIndex &&
+          index <= (named.nameEnd === undefined ? named.nameIndex : named.nameEnd)) return;
+
+      var styled = looksLikeHeading(row, bodySize, style);
+
+      //  Beschriftung und Inhalt nebeneinander: die Beschriftung sagt, wohin
+      //  es gehoert, der Wert ist der Inhalt.
+      var label = labelSplit(line);
+      if (label) {
+        var labelRole = headingOf(label.label);
+        if (labelRole) {
+          closeEvent(); flushBuffer();
+          current = labelRole === "ignore" ? null : labelRole;
+          //  Beim Fuehrerschein gehoert die Beschriftung zum Inhalt:
+          //  "Führerschein Klasse B" ist der ganze Eintrag.
+          if (current === "mobility") content(row, label.label + " " + label.value);
+          else if (current) content(row, label.value);
+          return;
+        }
+
+        //  Traegt die Beschriftung keine Bedeutung, bleibt sie stehen: der
+        //  Tabulator kann auch zwei nebeneinander gesetzte Eintraege
+        //  trennen ("Modelleisenbahn    Klemmbausteine"), und dann waere
+        //  das Weglassen der linken Spalte ein Datenverlust.
+      }
+
+      //  "Ausbildung" ist eine Ueberschrift, "Ausbildung zum Berufstaucher"
+      //  ist eine Station. Liegen Schriftgrade vor, entscheidet das Layout;
+      //  sonst die Kuerze der Zeile.
+      var keyword = headingOf(line);
+      var heading = null;
+      if (keyword && (styled || headingShape(line) || !bodySize)) heading = keyword;
+      else if (styled) heading = headingInside(line);
+
+      if (heading) {
+        closeEvent(); flushBuffer();
+        current = heading === "ignore" ? null : heading;
+        return;
+      }
+
+      //  In der Projektliste ist eine hervorgehobene Zeile der Projektname
+      //  und keine neue Ueberschrift – dort endet der Abschnitt erst bei
+      //  einer bekannten Ueberschrift. Ueberall sonst beendet eine
+      //  unbekannte Ueberschrift den Abschnitt, sonst sammelt er den Rest
+      //  des Blattes ein.
+      if (current !== "projects" && styled) {
+        closeEvent(); flushBuffer();
+        current = null;
+        return;
+      }
+
+      content(row, line);
     });
 
     closeEvent();
@@ -1194,18 +1345,70 @@
     return found;
   }
 
+  //  Woran man einen Arbeitgeber oder eine Schule erkennt. Steht so etwas
+  //  in der ersten Zeile einer Station, ist es die Einrichtung und nicht
+  //  die Taetigkeit – die kommt dann eine Zeile spaeter.
+  var ORGANISATION = /(gmbh|mbh|\bag\b|\bkg\b|\bse\b|\bohg\b|\be\.?\s?v\b|\binc\b|\bltd\b|schule|gymnasium|universit|hochschule|akademie|institut|klinik|krankenhaus|betrieb|werke?\b|zentrum|verein|kanzlei|praxis|agentur|\bamt\b|bundes|stadt\b|gemeinde)/i;
+
+  function splitPlace(event, value) {
+    var parts = value.split(/\s*[|·]\s*|,\s(?=[^,]*$)/);
+    event.company = clean(parts[0]);
+    if (parts[1]) event.place = clean(parts[1]);
+  }
+
   function assignStationLine(event, line) {
     var value = clean(line).replace(/\t+/g, " ");
     if (!value) return;
-    if (!event.title) { event.title = value; return; }
-    if (!event.company) {
-      //  "Firma, Ort" oder "Firma | Ort"
-      var parts = value.split(/\s*[|·]\s*|,\s(?=[^,]*$)/);
-      event.company = clean(parts[0]);
-      if (parts[1]) event.place = clean(parts[1]);
+
+    if (!event.title) {
+      //  "Mechaniker GmbH, Standort" ist der Arbeitgeber, nicht der Titel.
+      if (!event.company && ORGANISATION.test(value)) { splitPlace(event, value); return; }
+      //  Bleibt nur "Abschluss: Mittlere Reife" uebrig, ist der Abschluss
+      //  der Eintrag – die Beschriftung davor sagt nichts Eigenes.
+      event.title = value.replace(/^(abschluss|abgeschlossen als|degree|qualification)\s*:\s*/i, "");
       return;
     }
-    event.description.push(value);
+
+    if (!event.company) { splitPlace(event, value); return; }
+
+    //  "Abschluss: Geprüfter Taucher" liest sich als Aufzählungspunkt
+    //  besser denn als Absatz.
+    if (/^[A-ZÄÖÜ][\wäöüß ]{2,24}:\s/.test(value)) event.list.push(value);
+    else event.description.push(value);
+  }
+
+  //  Eine Sprachangabe ist ein Paar: "Englisch, fliessend in Wort und
+  //  Schrift", "Deutsch (Muttersprache)", "Spanisch - B1". Am Komma zu
+  //  trennen wie bei Kenntnissen wuerde die Stufe zur eigenen Sprache
+  //  machen – ausser es stehen erkennbar mehrere Paare in einer Zeile.
+  function languageEntries(text) {
+    var out = [];
+
+    //  Stufen, die ohne Trennzeichen hinter der Sprache stehen:
+    //  "Klingonisch B2", "Deutsch Muttersprache".
+    var BARE_LEVEL = /^(.{2,30}?)\s+([ABC][12]|muttersprache|native speaker|native|verhandlungssicher|fließend|fliessend|fluent|grundkenntnisse|basic)$/i;
+
+    function add(value) {
+      var entry = clean(value);
+      if (!entry) return;
+      var match = entry.match(/^(.{2,30}?)\s*(?:[,(:–—]|\s-\s|\s{2,})\s*(.+?)\)?$/) ||
+        entry.match(BARE_LEVEL);
+      var name = clean(match ? match[1] : entry);
+      var level = clean(match ? match[2] : "");
+      if (!name || name.length > 30) return;
+      out.push({ name: name, level: level, percentage: fluencyToPercent(level) });
+    }
+
+    String(text).split(/\n|\t/).forEach(function (part) {
+      var value = clean(part);
+      if (!value) return;
+      //  "Deutsch (Muttersprache), Englisch (B2)" – zwei Klammern, also
+      //  zwei Sprachen in einer Zeile.
+      if ((value.match(/\(/g) || []).length >= 2) value.split(/,\s*/).forEach(add);
+      else add(value);
+    });
+
+    return out;
   }
 
   //  Nebeneinander gesetzte Eintraege (Kenntnisse stehen gern in zwei
@@ -1245,8 +1448,11 @@
     });
     if (photo) profile.photo = photo.src;
 
+    //  Eine Unterschrift ist breit, flach und steht unten – im Anschreiben
+    //  ebenso wie unter einem Lebenslauf, der mit Ort und Datum schliesst.
     var signature = take(function (image) {
-      return image.page > 1 && image.ratio >= 1.5 && image.h <= image.pageHeight * 0.12;
+      if (image.ratio < 1.5 || image.h > image.pageHeight * 0.12) return false;
+      return image.page > 1 || image.y < image.pageHeight * 0.25;
     });
     if (signature) profile.signature = signature.src;
 
@@ -1336,6 +1542,9 @@
     });
     appendItems(target, "interests", profile.interests, function (item) {
       return { name: clean(item.name), icon: Model.icon("lucide", "star") };
+    });
+    appendItems(target, "mobility", profile.mobility, function (item) {
+      return { name: clean(item.name) };
     });
     appendItems(target, "projects", profile.projects, function (item) {
       return {
@@ -1457,6 +1666,7 @@
       skills: profile.skills.length,
       languages: profile.languages.length,
       interests: profile.interests.length,
+      mobility: profile.mobility.length,
       projects: profile.projects.length,
       references: profile.references.length,
       links: profile.links.length,

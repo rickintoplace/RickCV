@@ -171,6 +171,7 @@
     { key: "skills", label: "sumSkills" },
     { key: "languages", label: "sumLanguages" },
     { key: "interests", label: "sumInterests" },
+    { key: "mobility", label: "sumMobility" },
     { key: "projects", label: "sumProjects" },
     { key: "references", label: "sumReferences" },
     { key: "links", label: "sumLinks" },
