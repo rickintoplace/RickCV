@@ -256,13 +256,25 @@
       '<div class="resume_info">' + body + "</div></div>";
   }
 
+  //  Der Balken traegt seine Stufe im Inneren – das passt fuer "B2" und
+  //  "C1", nicht aber fuer "verhandlungssicher": laengerer Text wird dort
+  //  beschnitten und steht auf halber Fuellung ohne Kontrast. Ab einer
+  //  Handvoll Zeichen wandert er deshalb unter den Balken.
+  var LEVEL_INSIDE = 5;
+
   function languageBlock(list) {
     return list.map(function (language) {
       var width = Math.max(0, Math.min(100, Number(language.percentage) || 0));
-      return '<div class="language_list">' +
+      var level = String(language.level || "");
+      var inside = level.length <= LEVEL_INSIDE;
+
+      return '<div class="language_entry">' +
+        '<div class="language_list">' +
         '<div class="language_left">' + esc(language.name) + "</div>" +
         '<div class="language_bar"><p><span style="width:' + width + '%">' +
-        esc(language.level || "") + "</span></p></div></div>";
+        (inside ? esc(level) : "") + "</span></p></div></div>" +
+        (inside || !level ? "" : '<div class="language_note">' + esc(level) + "</div>") +
+        "</div>";
     }).join("");
   }
 
@@ -492,6 +504,28 @@
 
   /* ------------------------------------------------------------- Zeitleiste */
 
+  //  Ein Eintrag ohne Enddatum soll keinen Gedankenstrich ins Leere
+  //  ziehen. "auto" entscheidet das anhand der Eintraege selbst; wer es
+  //  anders will, stellt den Modus fest ein.
+  function dateMode(event) {
+    var mode = event.dateMode || "auto";
+    if (mode !== "auto") return mode;
+    if (!event.start && !event.end && !event.present) return "none";
+    if (!event.end && !event.present) return "start";
+    return "range";
+  }
+
+  function dateHtml(event, format, present) {
+    var mode = dateMode(event);
+    if (mode === "none") return "";
+
+    var start = esc(formatDate(event.start, format));
+    if (mode === "start") return start;
+
+    var endLabel = event.present ? present : formatDate(event.end, format);
+    return start + "<br>&ndash; " + esc(endLabel);
+  }
+
   function fillTimeline(doc, events, timeline, data) {
     if (!timeline || !events.length) return;
     var span = spanMonths(events);
@@ -504,8 +538,7 @@
 
       var date = doc.createElement("div");
       date.className = "date";
-      var endLabel = event.present ? present : formatDate(event.end, format);
-      date.innerHTML = esc(formatDate(event.start, format)) + "<br>&ndash; " + esc(endLabel);
+      date.innerHTML = dateHtml(event, format, present);
       node.appendChild(date);
 
       var dot = doc.createElement("div");

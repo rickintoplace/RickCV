@@ -49,6 +49,11 @@
       start: "",
       end: "",
       present: false,
+      //  Wie der Zeitraum erscheint: "auto" richtet sich nach dem, was
+      //  eingetragen ist – ohne Enddatum steht nur der Beginn da, ohne
+      //  beides gar nichts. Sonst laesst sich das Datum auch von Hand auf
+      //  Zeitraum, nur Beginn oder gar nichts stellen.
+      dateMode: "auto",
       icon: icon("lucide", "briefcase"),
       color: "var(--accent-color-shade2)",
       company: "",

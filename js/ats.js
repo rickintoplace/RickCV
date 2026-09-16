@@ -55,6 +55,21 @@
     return table[key] || ROLE_HEADINGS.de[key] || key;
   }
 
+  //  Dieselbe Regel wie im Dokument: ohne Enddatum kein "bis", ohne
+  //  jedes Datum keine Zeitangabe.
+  function dateText(event, h) {
+    var mode = event.dateMode || "auto";
+    if (mode === "none") return "";
+    if (mode === "auto" && !clean(event.start) && !clean(event.end) && !event.present) return "";
+
+    var start = clean(event.start);
+    if (mode === "start") return start;
+    if (mode === "auto" && !clean(event.end) && !event.present) return start;
+
+    if (event.present) return start + " " + h("until") + " " + h("present");
+    return clean(event.end) ? start + " " + h("until") + " " + clean(event.end) : start;
+  }
+
   function clean(value) {
     return String(value === null || value === undefined ? "" : value).trim();
   }
@@ -125,9 +140,7 @@
 
       add(h(role), events.map(function (event) {
         var period =
-          clean(event.start) +
-          (event.present ? " " + h("until") + " " + h("present")
-                         : clean(event.end) ? " " + h("until") + " " + clean(event.end) : "");
+          dateText(event, h);
         var where = [clean(event.company), clean(event.place)].filter(Boolean).join(", ");
         var head = [clean(event.title), where, period].filter(Boolean).join(" | ");
         var details = (event.description || []).concat(event.list || [])

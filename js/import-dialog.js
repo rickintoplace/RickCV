@@ -117,7 +117,7 @@
     var input = el("input");
     input.type = "file";
     input.hidden = true;
-    input.accept = ".json,.zip,.csv,.pdf,.txt,application/json,application/zip,text/csv,application/pdf,text/plain";
+    input.accept = ".json,.zip,.csv,.pdf,.docx,.txt,application/json,application/zip,text/csv,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain";
     input.addEventListener("change", function () {
       if (input.files[0]) readFile(input.files[0]);
       input.value = "";
@@ -180,7 +180,7 @@
 
   var FORMAT_LABEL = {
     rickcv: "fmtRickcv", jsonresume: "fmtJsonresume",
-    linkedin: "fmtLinkedin", pdf: "fmtPdf", text: "fmtText",
+    linkedin: "fmtLinkedin", pdf: "fmtPdf", docx: "fmtDocx", text: "fmtText",
   };
 
   function stepReview() {
@@ -282,6 +282,8 @@
     unreadable: "errUnreadable", emptyZip: "errEmptyZip", emptyCsv: "errEmptyCsv",
     noDecompression: "errNoDecompression", noPdfSupport: "errNoPdfSupport",
     pdfNoText: "errPdfNoText", pdfFailed: "errPdfFailed",
+    noDocxSupport: "errNoDocxSupport", noDocx: "errNoDocx",
+    noDocxText: "errNoDocxText", docxFailed: "errDocxFailed",
   };
 
   function message(error) {

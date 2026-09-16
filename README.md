@@ -43,6 +43,9 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 - **Two languages:** German and English for the interface and the document, including the language marking inside the PDF. Switch it straight from the header, or under *Optionen*.
 - **Light and dark editor:** The button next to the language follows your system by default, and cycles to light or dark if you would rather decide yourself. Only the editor changes — the resume stays on white paper, because that is what gets printed.
 - **Honest machine readability:** See exactly what an applicant tracking system reads, and edit it yourself if you want. No hidden text — see below.
+- **Dates as far as they exist:** a station can show a period, only its start, or no date at
+  all. By default RickCV decides from what you typed — a further-education entry with a single
+  year no longer drags an empty dash behind it.
 - **Multiple layouts:** 'clean', 'icons', and 'dynaline'.
 - **Customizable styling:** colors, typeface, font size, sidebar width, headline sizes and DIN 5008 margins.
 - **One page or many:** The resume stops after one page by default; switch on multi-page mode for longer careers.
@@ -182,6 +185,7 @@ the page — opens one dialog that takes whatever you have:
 | A RickCV backup (`*.rickcv.json`) | Drop it in. Everything comes back, styling included. |
 | A `resume.json` ([JSON Resume](https://jsonresume.org/schema)) | Drop it in. Work, education, volunteering, awards, certificates, skills, languages, interests, projects and references are mapped onto RickCV's sections. |
 | Your LinkedIn data | *Settings → Data privacy → Get a copy of your data*. Drop the ZIP in — or the single CSV files, if your browser cannot unpack ZIPs. |
+| A Word file (`.docx`) | Drop it in. This is the best route of all, see below. The old `.doc` format is not readable — save it as `.docx` in Word first. |
 | An old resume as PDF | Drop it in. RickCV pulls the text out, separates columns, sorts it into sections and takes the pictures with it. Scanned PDFs hold no text, so those cannot work. |
 | Anything else | Copy the text into the dialog's text box. |
 
@@ -193,6 +197,18 @@ changed until you confirm.
 Text and PDF imports are a **draft**: a PDF knows about coordinates, not about careers, so
 the guesses are labelled as such and want checking. The structured formats — RickCV, JSON
 Resume, LinkedIn — are exact.
+
+### Word documents
+
+If your resume still exists as a `.docx`, use that rather than a PDF. A Word file is a ZIP
+with XML inside, and that XML *states* what a PDF only implies: this paragraph is a heading,
+this is a table cell, this is a bullet, this image belongs here. RickCV reads it directly —
+headings from Word's own styles, table rows as label-and-value pairs, line breaks inside a
+cell as separate lines (which is where templates hide the difference between employer, role
+and degree), and the pictures out of `word/media`.
+
+No converter, no upload: the same ZIP reader that opens a LinkedIn export opens the `.docx`,
+and the XML is read in the browser.
 
 ### What a PDF gives away
 
@@ -293,6 +309,7 @@ Copy `index.html`, `cv.html`, `builder.css`, `builder.js`, `render.js`, `default
 | `js/import.js` | Reading and writing other formats: JSON Resume, LinkedIn, CSV, text |
 | `js/import-dialog.js` | The dialog behind *Importieren* |
 | `js/pdf-import.js` | Text and picture extraction from PDFs, loads `vendor/pdfjs` on demand |
+| `js/docx-import.js` | Reads Word documents: ZIP, XML, tables, pictures |
 | `vendor/pdfjs/` | Mozilla's pdf.js (Apache-2.0), only fetched when a PDF is imported |
 | `tools/gen-icons.py` | Regenerates `js/icon-data.js` from lucide-static |
 

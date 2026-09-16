@@ -361,7 +361,12 @@
         },
         title: function (event) { return event.title; },
         badge: function (event) {
-          if (!event.start && !event.end) return "";
+          var mode = event.dateMode || "auto";
+          if (mode === "none") return "";
+          if (!event.start && !event.end && !event.present) return "";
+          if (mode === "start" || (mode === "auto" && !event.end && !event.present)) {
+            return event.start;
+          }
           return event.start + " – " + (event.present ? t("today") : event.end);
         },
         body: function (container, index, path, refresh) {
@@ -383,6 +388,17 @@
           var present = F.toggle(path + ".present", t("untilToday"));
           present.querySelector("input").addEventListener("change", refresh);
           container.appendChild(present);
+
+          //  Nicht jede Station hat einen Zeitraum: eine Weiterbildung
+          //  traegt ein Jahr, eine Auszeichnung manchmal gar nichts.
+          var dateMode = F.select(path + ".dateMode", t("dateDisplay"), [
+            { value: "auto", label: t("dateAuto") },
+            { value: "range", label: t("dateRange") },
+            { value: "start", label: t("dateStart") },
+            { value: "none", label: t("dateNone") },
+          ]);
+          dateMode.querySelector("select").addEventListener("change", refresh);
+          container.appendChild(dateMode);
 
           container.appendChild(F.row(
             F.text(path + ".company", t("company")),

@@ -138,6 +138,53 @@ for (const [input, label] of [['{"foo":1}', "fremdes JSON"], ["", "leerer Text"]
   ok(threw, "wird abgelehnt: " + label);
 }
 
+//  Word-Dokumente sind der haeufigste Ausgangspunkt ueberhaupt, und sie
+//  sind der bessere: im .docx steht ausgeschrieben, was im PDF erraten
+//  werden muss – Ueberschrift, Tabellenzelle, Aufzaehlung, Bild.
+console.log("\n— Word (.docx) —");
+{
+  const dbox = sandboxWith(["js/i18n.js", "js/model.js", "js/import.js", "js/docx-import.js"]);
+  const bytes = fs.readFileSync(fixture("beschriftungsspalten.docx"));
+  const file = {
+    name: "lebenslauf.docx",
+    arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+  };
+
+  try {
+    const data = await new Promise((res, rej) =>
+      dbox.RickCVDocx.read(file, (error, value) => (error ? rej(error) : res(value))));
+    const parsed = dbox.RickCVImport.parseText(data.text, "aus-docx.txt", data.lines, data.images);
+    const ws = dbox.RickCVImport.apply(dbox.RickCVModel.createBase("de"), parsed, "replace");
+
+    ok(ws.contact.name === "Mara Kessler", "Name", ws.contact.name);
+    ok(ws.contact.address === "Ahornweg 12" && ws.contact.city === "34117 Beispielstadt",
+       "Anschrift", ws.contact.address + " / " + ws.contact.city);
+    ok(ws.contact.phone.replace(/\s/g, "") === "015198765432", "Telefon", ws.contact.phone);
+    ok(ws.events.length === 7, "sieben Stationen", ws.events.length);
+
+    const netz = ws.events.find((e) => /Netzausbau/.test(e.title));
+    ok(!!netz && netz.company === "Nordwind Energie GmbH" && netz.place === "Kassel",
+       "Arbeitgeber und Ort aus derselben Tabellenzelle", netz && netz.company);
+    ok(!!netz && netz.present === true, "'heute' als laufende Stelle");
+    ok(!!netz && netz.list.length === 1, "Zeilenumbruch in der Zelle wird ein eigener Punkt");
+
+    ok(ws.skills.items.length === 3, "Kenntnisse hinter der Beschriftung",
+       ws.skills.items.map((i) => i.name).join("|"));
+    ok(ws.languages.items.length === 3, "drei Sprachen aus einer Zelle",
+       ws.languages.items.map((i) => i.name).join("|"));
+    ok(ws.languages.items[1].level === "verhandlungssicher", "Stufe als Text",
+       ws.languages.items[1].level);
+    ok(ws.mobility.items.some((i) => /Führerschein Klasse B/.test(i.name)), "Führerschein");
+    ok(/^data:image/.test(ws.photo.src), "Bild aus word/media wird zum Foto");
+    ok(/^data:image/.test(ws.coverLetter.signatureImg), "flaches Bild unten wird zur Unterschrift");
+    ok(data.lines.some((l) => l.text === "Berufserfahrung" && l.size > 13),
+       "Word-Formatvorlage macht die Überschrift erkennbar",
+       JSON.stringify(data.lines.filter((l) => l.text === "Berufserfahrung")));
+  } catch (error) {
+    ok(false, "Word-Dokument gelesen", error.message);
+  }
+}
+
 console.log("\n— PDF —");
 const pdfLib = path.join(root, "vendor/pdfjs/pdf.min.js");
 if (!fs.existsSync(pdfLib)) {

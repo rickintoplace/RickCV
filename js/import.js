@@ -541,8 +541,12 @@
       var out = new Uint8Array(total);
       var at = 0;
       parts.forEach(function (part) { out.set(part, at); at += part.length; });
-      return new TextDecoder().decode(out);
+      return out;
     });
+  }
+
+  function decodeText(bytes) {
+    return bytes ? new TextDecoder().decode(bytes) : "";
   }
 
   function readZip(buffer) {
@@ -583,12 +587,9 @@
       var start = head + 30 + view.getUint16(head + 26, true) + view.getUint16(head + 28, true);
 
       if (entry.method === 0) {
-        return {
-          name: entry.name,
-          text: new TextDecoder().decode(bytes.subarray(start, start + entry.size)),
-        };
+        return { name: entry.name, bytes: bytes.slice(start, start + entry.size) };
       }
-      if (entry.method !== 8) return { name: entry.name, text: "" };
+      if (entry.method !== 8) return { name: entry.name, bytes: new Uint8Array(0) };
 
       //  Nur den eigenen Block fuettern. Steht dort keine Laenge (Zip64
       //  oder Datenbeschreibung), nimmt inflateRaw den Rest und hoert von
@@ -596,13 +597,18 @@
       var slice = entry.packed
         ? bytes.subarray(start, start + entry.packed)
         : bytes.subarray(start);
-      return inflateRaw(slice).then(function (text) {
-        return { name: entry.name, text: text };
+      return inflateRaw(slice).then(function (data) {
+        return { name: entry.name, bytes: data };
       });
     })).then(function (files) {
+      //  Zwei Schluessel je Datei: der volle Pfad (dafuer interessiert sich
+      //  ein docx) und der blosse Dateiname (so sucht der LinkedIn-Adapter).
       var map = {};
       files.forEach(function (file) {
-        if (file) map[file.name.replace(/^.*\//, "")] = file.text;
+        if (!file) return;
+        map[file.name] = file.bytes;
+        var base = file.name.replace(/^.*\//, "");
+        if (base && map[base] === undefined) map[base] = file.bytes;
       });
       return map;
     });
@@ -614,7 +620,7 @@
     var key = Object.keys(map).filter(function (entry) {
       return entry.toLowerCase() === name.toLowerCase();
     })[0];
-    return key ? map[key] : "";
+    return key ? decodeText(map[key]) : "";
   }
 
   function fromLinkedIn(files) {
@@ -929,6 +935,29 @@
     return sorted[Math.floor(sorted.length / 2)];
   }
 
+  //  Der Fliesstext eines Dokuments ist der haeufigste Schriftgrad, nicht
+  //  der mittlere. Der Unterschied zaehlt, sobald ein Blatt dazwischen
+  //  liegt, das anders gesetzt ist – Vorlagen aus dem Netz stellen dem
+  //  Lebenslauf gern eine Seite Werbung voran, und deren Grad zoege den
+  //  Mittelwert genau auf die Groesse der Ueberschriften.
+  function commonSize(values) {
+    var counts = {};
+    var best = 0;
+    var bestCount = 0;
+
+    values.forEach(function (value) {
+      if (!value) return;
+      var key = Math.round(value * 2) / 2; // halbe Punkt genuegen
+      counts[key] = (counts[key] || 0) + 1;
+      if (counts[key] > bestCount || (counts[key] === bestCount && key < best)) {
+        best = key;
+        bestCount = counts[key];
+      }
+    });
+
+    return best || median(values);
+  }
+
   function fromText(text, lines) {
     var profile = emptyProfile();
 
@@ -946,8 +975,28 @@
 
     if (!rows.length) return profile;
 
-    var bodySize = median(rows.map(function (row) { return row.size; })
+    //  Der Fliesstext wird je Blatt bestimmt. Vorlagen aus dem Netz legen
+    //  dem Lebenslauf gern eine Werbeseite bei, die groesser gesetzt ist –
+    //  ueber das ganze Dokument gemittelt waere deren Grad der "normale",
+    //  und die Ueberschriften des Lebenslaufs faenden sich darunter wieder.
+    var sizesByPage = {};
+    rows.forEach(function (row) {
+      if (!row.size) return;
+      (sizesByPage[row.page] = sizesByPage[row.page] || []).push(row.size);
+    });
+
+    var bodyByPage = {};
+    Object.keys(sizesByPage).forEach(function (page) {
+      bodyByPage[page] = commonSize(sizesByPage[page]);
+    });
+
+    var bodySize = commonSize(rows.map(function (row) { return row.size; })
       .filter(function (size) { return size > 0; }));
+
+    function bodyFor(row) {
+      return bodyByPage[row.page] || bodySize;
+    }
+
     var style = headingStyle(rows);
 
     var plain = rows.map(function (row) { return row.text; });
@@ -1154,7 +1203,7 @@
       if (named.nameIndex >= 0 && index >= named.nameIndex &&
           index <= (named.nameEnd === undefined ? named.nameIndex : named.nameEnd)) return;
 
-      var styled = looksLikeHeading(row, bodySize, style);
+      var styled = looksLikeHeading(row, bodyFor(row), style);
 
       //  Beschriftung und Inhalt nebeneinander: die Beschriftung sagt, wohin
       //  es gehoert, der Wert ist der Inhalt.
@@ -1535,11 +1584,23 @@
       return null;
     }
 
-    var photo = take(function (image) {
-      if (image.page !== 1 || image.w < 60) return false;
+    //  Ein Bewerbungsfoto ist hochkant bis quadratisch, nicht klein und
+    //  steht oben auf dem Blatt. Welches Blatt, ist nicht gesetzt: Vorlagen
+    //  aus dem Netz stellen dem Lebenslauf gern ein, zwei Seiten voran.
+    //  Gesucht wird deshalb das fruehste Blatt, auf dem so ein Bild steht.
+    function photoShaped(image) {
+      if (image.w < 60) return false;
       if (image.ratio < 0.45 || image.ratio > 1.9) return false;
-      //  Im oberen Drittel des Blattes – dort steht ein Bewerbungsfoto.
       return image.y + image.h >= image.pageHeight * 0.6;
+    }
+
+    var firstPhotoPage = free.reduce(function (earliest, image) {
+      if (!photoShaped(image)) return earliest;
+      return earliest === null ? image.page : Math.min(earliest, image.page);
+    }, null);
+
+    var photo = firstPhotoPage === null ? null : take(function (image) {
+      return image.page === firstPhotoPage && photoShaped(image);
     });
     if (photo) profile.photo = photo.src;
 
@@ -1750,6 +1811,7 @@
 
   function detect(name, text) {
     var filename = clean(name).toLowerCase();
+    if (/\.docx$/.test(filename)) return "docx";
     if (/\.zip$/.test(filename)) return "linkedin-zip";
     if (/\.csv$/.test(filename)) return "linkedin-csv";
     if (/\.pdf$/.test(filename)) return "pdf";
@@ -1862,6 +1924,19 @@
       return;
     }
 
+    if (format === "docx") {
+      if (!global.RickCVDocx) return callback(new Error("noDocxSupport"));
+      global.RickCVDocx.read(file, function (error, data) {
+        if (error) return callback(error);
+        try {
+          var parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
+          parsed.format = "docx";
+          callback(null, parsed);
+        } catch (parseError) { callback(parseError); }
+      });
+      return;
+    }
+
     if (format === "pdf") {
       if (!global.RickCVPdf) return callback(new Error("noPdfSupport"));
       global.RickCVPdf.extract(file, function (error, data) {
@@ -1907,5 +1982,16 @@
     stateToProfile: stateToProfile,
     parseCsv: parseCsv,
     normDate: normDate,
+    //  Der ZIP-Leser wird auch vom docx-Import gebraucht: ein Word-Dokument
+    //  ist nichts anderes als ein ZIP mit XML darin.
+    readZip: readZip,
+    decodeText: decodeText,
+    emptyProfile: emptyProfile,
+    newEvent: newEvent,
+    attachImages: attachImages,
+    summarize: summarize,
+    result: result,
+    hasContent: hasContent,
+    clean: clean,
   };
 })(typeof window !== "undefined" ? window : this);
