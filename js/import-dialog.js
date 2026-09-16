@@ -212,7 +212,7 @@
 
     var WARNINGS = {
       draft: "warnDraft", skillRanks: "warnSkillRanks",
-      thin: "warnThin", images: "warnImages",
+      thin: "warnThin", images: "warnImages", noStructure: "warnNoStructure", unmapped: "warnUnmapped",
     };
     (parsed.warnings || []).forEach(function (key) {
       if (WARNINGS[key]) body.appendChild(el("p", "imp-warn", t(WARNINGS[key])));

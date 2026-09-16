@@ -82,6 +82,13 @@
   list-style: none;
   box-sizing: border-box;
   font-family: var(--font-family);
+
+  /*  Keine Ligaturen: "fl" und "fi" als eine Glyphe sehen minimal besser
+      aus, kosten aber Maschinenlesbarkeit. Manche Druckwege (Firefox ueber
+      cairo) geben der Ligaturglyphe keine Zuordnung mit, und dann steht im
+      PDF-Text "Tierp?ege" statt "Tierpflege" - fuer ein Bewerbersystem ein
+      unbekanntes Wort. */
+  font-variant-ligatures: none;
 }
 
 /*Icon-Fonts duerfen nicht von der gewaehlten Schriftart ueberschrieben werden*/
@@ -90,6 +97,9 @@
 }
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined" !important;
+  /*  Diese Schrift baut ihre Symbole gerade aus Ligaturen: der Name des
+      Symbols wird zur Glyphe. Hier muessen sie also bleiben. */
+  font-variant-ligatures: normal;
 }
 
 body {

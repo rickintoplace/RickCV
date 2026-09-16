@@ -142,36 +142,53 @@ def parse_css(css):
 
 
 def text_fonts(families):
-    """Laedt die Textschriften und liefert die @font-face-Regeln dazu."""
+    """Laedt die Textschriften und liefert die @font-face-Regeln dazu.
+
+    Jeder Schnitt wird einzeln angefragt. Das ist wichtiger, als es
+    aussieht: fragt man 400 und 700 zusammen an, liefert Google fuer viele
+    Familien eine einzige variable Datei mit dem Bereich "400 700". Der
+    Browser stellt daraus den Fettschnitt selbst her – und beim Druck ins
+    PDF kann das schiefgehen. Firefox (cairo) zeichnet solche Instanzen als
+    Vektorkonturen: das Dokument sieht richtig aus, aber der fett gesetzte
+    Text ist kein Text mehr. Name, Ueberschriften und Stationstitel fehlen
+    dann in jeder Textauswertung – auch in der eines Bewerbersystems.
+
+    Einzeln angefragt liefert Google echte statische Schnitte, die jeder
+    Browser unveraendert einbettet.
+    """
     rules = []
+    written = set()
+
     for family in families:
-        query = family.replace(" ", "+") + ":wght@" + ";".join(WEIGHTS)
-        css = fetch("https://fonts.googleapis.com/css2?family=" + query + "&display=swap")
+        for weight in WEIGHTS:
+            query = family.replace(" ", "+") + ":wght@" + weight
+            css = fetch("https://fonts.googleapis.com/css2?family=" + query + "&display=swap")
 
-        #  Variable Familien liefern fuer jeden Schnitt dieselbe Datei. Dann
-        #  genuegt eine Datei und eine Regel mit einem Gewichtsbereich; nur
-        #  bei getrennten Dateien wird je Schnitt eine Regel geschrieben.
-        for name in SUBSETS:
-            blocks = [b for b in parse_css(css) if b[0] == name]
-            if not blocks:
-                continue
-            urls = {block[2] for block in blocks}
-            weights = [block[1] for block in blocks]
-            ranges = blocks[0][3]
+            for name in SUBSETS:
+                blocks = [b for b in parse_css(css) if b[0] == name]
+                if not blocks:
+                    continue
+                url = blocks[0][2]
+                ranges = blocks[0][3]
 
-            if len(urls) == 1:
-                spans = [("%s %s" % (min(weights), max(weights)) if len(weights) > 1
-                          else weights[0], blocks[0][2], "%s-%s" % (slug(family), name))]
-            else:
-                spans = [(block[1], block[2], "%s-%s-%s" % (slug(family), block[1], name))
-                         for block in blocks]
-
-            for weight, url, stem in spans:
-                filename = stem + ".woff2"
+                filename = "%s-%s-%s.woff2" % (slug(family), weight, name)
                 path = os.path.join(OUT, filename)
                 open(path, "wb").write(fetch(url, binary=True))
-                rules.append(face(family, weight, filename, ranges, "%s %s" % (family, name)))
+                written.add(filename)
+                rules.append(face(family, weight, filename, ranges,
+                                  "%s %s %s" % (family, weight, name)))
                 print("  %-40s %6.1f kB" % (filename, os.path.getsize(path) / 1024.0))
+
+    #  Aus frueheren Laeufen koennen Dateien mit anderem Namensschema
+    #  liegenbleiben; sie wuerden nur Platz kosten und verwirren.
+    for stale in sorted(os.listdir(OUT)):
+        if not stale.endswith(".woff2") or stale in written:
+            continue
+        if stale.startswith("material-symbols"):
+            continue
+        os.remove(os.path.join(OUT, stale))
+        print("  entfernt: %s" % stale)
+
     return rules
 
 

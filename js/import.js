@@ -772,7 +772,9 @@
   var RANGE = new RegExp(
     "(\\b(?:" + DATE + ")\\b)\\s*(?:–|—|-|bis|to|until|\\u2013)\\s*(\\b(?:" + DATE + ")\\b|" + OPEN + ")", "i");
 
-  var SINGLE = new RegExp("^\\s*((?:\\d{1,2}[./])?\\d{4})\\s*$");
+  //  Eine Zeile, die nur ein Datum traegt – auch zweistellig ("11/13"),
+  //  wie es gestaltete Lebenslaeufe setzen.
+  var SINGLE = new RegExp("^\\s*((?:\\d{1,2}[./])?\\d{4}|\\d{1,2}[./]\\d{2})\\s*$");
 
   //  "2020   Schweissen unter Wasser" – Jahr links, Inhalt rechts. Das ist
   //  die uebliche Form von Weiterbildungslisten.
@@ -900,11 +902,26 @@
   var LINK_LINE = /^(https?:\/\/\S+|www\.\S+|[\w.-]{2,}\.(?:de|com|org|net|io|dev|eu|ch|at|me|page|place|blog|xyz)(?:\/\S*)?)$/i;
   var NETWORK_NAME = /^(linked ?in|github|gitlab|xing|mastodon|bluesky|twitter|instagram|portfolio|webseite|website)$/i;
 
+  //  Abschnitte, die eine Liste fuellen – im Gegensatz zu den Stationen.
+  var LIST_SECTIONS = ["skills", "languages", "interests", "projects", "mobility", "profile"];
+
+  function isContactLine(line, profile) {
+    var value = clean(line);
+    if (!value) return false;
+    if (/[\w.+-]+@[\w-]+\.[\w.]{2,}/.test(value)) return true;
+    if (/^\+?[\d][\d\s().\/-]{6,}$/.test(value)) return true;
+    if (/^\d{4,5}\s+[A-ZÄÖÜ]/.test(value)) return true;
+    var name = clean(profile.contact.name);
+    return !!name && value.toLowerCase() === name.toLowerCase();
+  }
+
   var SALUTATION = /^(sehr geehrte|liebe[rs]?\s|dear\s|hallo\s)/i;
 
   //  "Musterstadt, 16.09.2026" unter dem Lebenslauf ist die Schlussformel
   //  vor der Unterschrift – ab da kommt nichts Inhaltliches mehr.
-  var CLOSING = /^[A-ZÄÖÜ][\wäöüß.\- ]{1,30},\s*\d{1,2}\.\d{1,2}\.\d{2,4}$/;
+  var CLOSING = new RegExp(
+    "^[A-ZÄÖÜ][\\wäöüß.\\- ]{1,30},\\s*(?:\\d{1,2}\\.\\d{1,2}\\.\\d{2,4}|" +
+    "\\d{1,2}\\.?\\s+[A-Za-zÄÖÜäöü]{3,9}\\.?\\s+\\d{4})$");
 
   function median(values) {
     if (!values.length) return 0;
@@ -963,6 +980,8 @@
     var event = null;        // laufende Station
     var buffer = [];         // Zeilen des Abschnitts ausserhalb einer Station
     var stopped = false;
+    var stopIndex = rows.length;
+    var sawHeading = false;  // wurde ueberhaupt eine Ueberschrift gefunden?
 
     function closeEvent() {
       //  Stand am Ende nur die Einrichtung da ("Engagement im Sportverein"),
@@ -1011,6 +1030,10 @@
     function content(row, text) {
       var line = clean(text);
       if (!line) return;
+
+      //  Kopf- und Fusszeilen wiederholen Name und Kontakt. In einer Liste
+      //  von Kenntnissen hat beides nichts verloren.
+      if (LIST_SECTIONS.indexOf(current) !== -1 && isContactLine(line, profile)) return;
 
       //  In der Projektliste ist eine Adresse das Ziel des Projekts, sonst
       //  ein Link fuer die Fussleiste. Eine Fussleiste setzt ihre Links
@@ -1104,14 +1127,27 @@
       if (current) buffer.push({ text: line, size: row.size, y: row.y, page: row.page });
     }
 
+    var page = null;
+
     rows.forEach(function (row, index) {
       if (stopped) return;
       var line = row.text;
 
+      //  Ein Seitenwechsel beendet die Listenabschnitte. Stationen laufen
+      //  ueber Seiten hinweg weiter, Kenntnisse und Interessen nicht – und
+      //  auf dem naechsten Blatt faengt sonst gern ein Anschreiben an,
+      //  dessen Briefkopf dann unter "Mobilität" landet.
+      if (page !== null && row.page !== page &&
+          current && LIST_SECTIONS.indexOf(current) !== -1) {
+        closeEvent(); flushBuffer();
+        current = null;
+      }
+      page = row.page;
+
       //  Ab der Anrede beginnt das Anschreiben, ab der Schlussformel steht
       //  nur noch die Unterschrift. Beides gehoert nicht in den Lebenslauf.
       if (SALUTATION.test(line) || CLOSING.test(line)) {
-        closeEvent(); flushBuffer(); stopped = true; return;
+        closeEvent(); flushBuffer(); stopped = true; stopIndex = index; return;
       }
 
       if (index === named.roleIndex) return;
@@ -1127,6 +1163,7 @@
         var labelRole = headingOf(label.label);
         if (labelRole) {
           closeEvent(); flushBuffer();
+          sawHeading = true;
           current = labelRole === "ignore" ? null : labelRole;
           //  Beim Fuehrerschein gehoert die Beschriftung zum Inhalt:
           //  "Führerschein Klasse B" ist der ganze Eintrag.
@@ -1151,6 +1188,7 @@
 
       if (heading) {
         closeEvent(); flushBuffer();
+        sawHeading = true;
         current = heading === "ignore" ? null : heading;
         return;
       }
@@ -1171,6 +1209,52 @@
 
     closeEvent();
     flushBuffer();
+
+    //  Manche PDFs enthalten ihre Ueberschriften gar nicht als Text: wird
+    //  fett gesetzter Text beim Druck als Vektorkontur gezeichnet – Firefox
+    //  macht das mit variablen Schriften –, fehlen Name, Ueberschriften und
+    //  Titel vollstaendig. Dann bleibt der Aufbau aus Datum, Arbeitgeber
+    //  und Beschreibung, und der ist immer noch etwas wert.
+    if (!sawHeading && !profile.events.length) {
+      current = "experience";
+      event = null;
+      var lastY = null;
+      var lastPage = null;
+
+      //  Im Notlauf wird keine Zeile als Name ausgespart: was ohne
+      //  Ueberschriften als Name geraten wurde, war ohnehin nur die erste
+      //  brauchbare Zeile – und die gehoert meistens zum Inhalt.
+      rows.forEach(function (row, index) {
+        if (index >= stopIndex) return;
+
+        var line = row.text;
+        var carriesDate = RANGE.test(line) || SINGLE.test(line) ||
+                          LEADING.test(line) || !!trailingDate(line);
+
+        //  Ein grosser senkrechter Sprung heisst: hier endet der Block.
+        //  Ohne das sammelt die letzte Station den Rest des Blattes ein.
+        if (event && row.size && lastY !== null &&
+            (row.page !== lastPage || Math.abs(lastY - row.y) > row.size * 3)) {
+          closeEvent();
+        }
+
+        if (!carriesDate && !event) return;
+
+        content(row, line);
+        lastY = row.y;
+        lastPage = row.page;
+      });
+
+      closeEvent();
+      if (profile.events.length) {
+        profile.warnings.push("noStructure");
+        //  Stand der Name in derselben fett gesetzten Ebene wie die
+        //  Ueberschriften, fehlt er ebenfalls – und was hier geraten wurde,
+        //  ist dann ein Satzanfang aus dem Profiltext.
+        profile.contact.name = "";
+        profile.contact.role = "";
+      }
+    }
 
     if (profile.events.length) profile.warnings.push("draft");
     return profile;
@@ -1221,10 +1305,12 @@
   //  zweispaltigen Lebenslaeufen kommt zuerst die Seitenspalte. Fehlen die
   //  Schriftgrade, bleibt es bei der Suche von oben.
   function findName(rows, bodySize) {
-    function usable(row) {
+    function usable(row, maxWords) {
       var value = clean(row.text);
       if (!value || /[@|]/.test(value) || /\d/.test(value)) return false;
-      if (value.split(/\s+/).length > 5 || value.length > 48) return false;
+      //  Ein Aufzaehlungspunkt ist nie ein Name.
+      if (/^[-–—•*·]/.test(value)) return false;
+      if (value.split(/\s+/).length > (maxWords || 5) || value.length > 48) return false;
       return !headingOf(value) && !row.spaced;
     }
 
@@ -1263,9 +1349,12 @@
       }
     }
 
+    //  Ohne Schriftgrade als Anhalt ist jede kurze Zeile ein Kandidat –
+    //  dann darf es wenigstens kein ganzer Satz sein. Drei Woerter reichen
+    //  fuer einen Namen.
     var candidates = [];
     for (var n = 0; n < Math.min(rows.length, 14) && candidates.length < 3; n++) {
-      if (usable(rows[n])) candidates.push({ text: rows[n].text, index: n });
+      if (usable(rows[n], 3)) candidates.push({ text: rows[n].text, index: n });
     }
 
     function oneWord(entry) {
@@ -1361,8 +1450,14 @@
     if (!value) return;
 
     if (!event.title) {
-      //  "Mechaniker GmbH, Standort" ist der Arbeitgeber, nicht der Titel.
-      if (!event.company && ORGANISATION.test(value)) { splitPlace(event, value); return; }
+      //  "Mechaniker GmbH, Standort" ist der Arbeitgeber, nicht der Titel –
+      //  und "ZOOLINO, Bad Wimpeln" ebenso: ein angehaengter Ort macht aus
+      //  der Zeile eine Angabe zur Einrichtung, nicht zur Taetigkeit.
+      if (!event.company &&
+          (ORGANISATION.test(value) || /,\s*[A-ZÄÖÜ][\wäöüß.() -]{2,25}$/.test(value))) {
+        splitPlace(event, value);
+        return;
+      }
       //  Bleibt nur "Abschluss: Mittlere Reife" uebrig, ist der Abschluss
       //  der Eintrag – die Beschriftung davor sagt nichts Eigenes.
       event.title = value.replace(/^(abschluss|abgeschlossen als|degree|qualification)\s*:\s*/i, "");
@@ -1585,6 +1680,8 @@
       return clean(event.title) || clean(event.company);
     });
 
+    if (mode !== "merge") hideEmptyBlocks(target);
+
     return Model.migrate(target);
   }
 
@@ -1620,14 +1717,33 @@
   }
 
   //  Beim Ersetzen bleibt, was zum Aussehen gehoert: Stil, Vorlage,
-  //  Sprache. Der Inhalt geht.
+  //  Sprache. Der Inhalt geht – auch der, den ein leeres Dokument von sich
+  //  aus mitbringt. Ein frischer Stand traegt zum Beispiel schon einen
+  //  Fuehrerschein ein, damit der Abschnitt nicht leer wirkt; in einem
+  //  Import waere das eine Angabe, die niemand gemacht hat.
   function freshFrom(state) {
     var base = Model.createBase(state.locale || "de");
     base.style = copy(state.style);
     base.settings = copy(state.settings);
     base.photo = copy(state.photo);
     base.contactTitle = state.contactTitle;
+
+    ["skills", "languages", "interests", "projects", "references",
+     "mobility", "mobilitySB"].forEach(function (key) {
+      if (base[key] && Array.isArray(base[key].items)) base[key].items = [];
+    });
+
     return base;
+  }
+
+  //  Ein Block ohne Eintraege ist eine Ueberschrift ueber nichts.
+  function hideEmptyBlocks(state) {
+    ["skills", "languages", "interests", "projects", "references",
+     "mobility", "mobilitySB"].forEach(function (key) {
+      var block = state[key];
+      if (block && Array.isArray(block.items) && !block.items.length) block.show = false;
+    });
+    return state;
   }
 
   /* ---------------------------------------------------------- Erkennung */
@@ -1753,6 +1869,11 @@
         try {
           var parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
           parsed.format = "pdf";
+          //  Fehlende Zeichenzuordnung betrifft den Text, nicht den Aufbau –
+          //  deshalb steht die Warnung hier und nicht in der Auswertung.
+          if (data.unmapped && parsed.warnings.indexOf("unmapped") === -1) {
+            parsed.warnings.push("unmapped");
+          }
           callback(null, parsed);
         } catch (parseError) { callback(parseError); }
       });

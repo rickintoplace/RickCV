@@ -145,6 +145,10 @@
       var size = 0;
 
       parts.forEach(function (item) {
+        //  Ein Platzhalter traegt nur noch seine Breite bei: kein Text,
+        //  kein Leerzeichen, aber die Geometrie laeuft weiter.
+        if (item.ghost) { previous = item; return; }
+
         size = Math.max(size, item.h);
         if (previous) {
           var gap = item.x - (previous.x + previous.w);
@@ -160,11 +164,12 @@
       });
 
       var cleaned = unspace(text.replace(/[ ]+/g, " ").trim());
+      var first = parts.filter(function (item) { return !item.ghost; })[0] || parts[0];
       return {
         text: cleaned.text,
         spaced: cleaned.spaced,
         size: size,
-        x: parts[0].x,
+        x: first.x,
         y: row.y,
         page: page,
       };
@@ -345,20 +350,74 @@
   //  entfernt – lieber merkwuerdige Zeichen als eine leere Seite.
   var PRIVATE_USE = /[\uE000-\uF8FF]|[\uDB80-\uDBBF][\uDC00-\uDFFF]/g;
 
+  //  Schriften setzen "fl" und "fi" als eine Glyphe. Im Text steht dann ein
+  //  einzelnes Ligaturzeichen, und aus "Tierpflege" wird "Tierp[fl]ege" –
+  //  jede spaetere Suche geht daran vorbei.
+  var LIGATURES = {
+    "\uFB00": "ff", "\uFB01": "fi", "\uFB02": "fl",
+    "\uFB03": "ffi", "\uFB04": "ffl", "\uFB05": "st", "\uFB06": "st",
+  };
+
+  function expandLigatures(text) {
+    return text.replace(/[\uFB00-\uFB06]/g, function (char) {
+      return LIGATURES[char] || char;
+    });
+  }
+
+  //  Wieviele Zeichen kamen ohne Zuordnung zurueck? Das passiert bei
+  //  Ligaturglyphen in Dateien ohne Zuordnungstabelle: der Leser weiss, dass
+  //  da etwas stand, aber nicht was. Der Zaehler wandert in die Warnung.
+  var unmapped = 0;
+  var UNMAPPED = /\uFFFD/g;
+
   function stripSymbols(items) {
     var total = 0;
     var symbols = 0;
     items.forEach(function (item) {
       total += item.str.length;
       symbols += (item.str.match(PRIVATE_USE) || []).length;
+      unmapped += (item.str.match(UNMAPPED) || []).length;
     });
 
-    if (!total || symbols / total > 0.15) return items;
+    var keepSymbols = !total || symbols / total > 0.15;
 
     return items.map(function (item) {
-      var str = item.str.replace(PRIVATE_USE, "");
-      return str === item.str ? item : Object.assign({}, item, { str: str });
+      var str = keepSymbols ? item.str : item.str.replace(PRIVATE_USE, "");
+      //  Ein Platzhalterzeichen mitten im Wort ist schlechter als eine
+      //  Luecke: es steht in jeder Suche im Weg. Die Warnung sagt, dass
+      //  Buchstaben fehlen koennen.
+      str = expandLigatures(str).replace(UNMAPPED, "");
+      if (str === item.str) return item;
+
+      //  Blieb nichts uebrig, wird daraus ein Platzhalter: er traegt keinen
+      //  Text mehr, wohl aber seine Breite. Ohne die klaffte an der Stelle
+      //  eine Luecke, und aus "Tierpflege" wuerde "Tierp ege".
+      return Object.assign({}, item, { str: str, ghost: !str.trim() });
     });
+  }
+
+  //  Symbolschriften tragen keinen Text bei: was aussieht wie ein Symbol,
+  //  kommt je nach Datei als Privatbereich-Zeichen, als leeres Stueck oder
+  //  als ausgeschriebener Symbolname ("school") zurueck. Am Namen der
+  //  Schrift ist das sicher zu erkennen – und dann faellt der ganze
+  //  Schnipsel weg, nicht nur einzelne Zeichen.
+  var ICON_FONT = /material.?(symbols|icons)|font.?awesome|icomoon|glyphicons|feather|lucide|ionicons|octicons|typicons|entypo/i;
+
+  function iconFontMap(page, items) {
+    var map = {};
+    items.forEach(function (item) {
+      var name = item.fontName;
+      if (!name || map[name] !== undefined) return;
+      var label = "";
+      try {
+        var font = page.commonObjs.get(name);
+        label = (font && (font.name || font.loadedName)) || "";
+      } catch (error) {
+        label = "";
+      }
+      map[name] = ICON_FONT.test(label);
+    });
+    return map;
   }
 
   function pageText(page, number) {
@@ -366,8 +425,17 @@
       var view = page.view || [0, 0, 595, 842];
       var width = view[2] - view[0];
 
-      var items = stripSymbols(content.items).filter(function (item) {
-        return item.str && item.str.trim();
+      //  Entfernte Zeichen bleiben als leere Stuecke stehen: ihre Breite
+      //  wird noch gebraucht. Ohne sie klafft dort eine Luecke, und aus
+      //  "Tierpflege" wuerde "Tierp ege" statt "Tierpege".
+      var icons = iconFontMap(page, content.items);
+      var cleaned = stripSymbols(content.items).map(function (item) {
+        if (!icons[item.fontName]) return item;
+        return Object.assign({}, item, { str: "", ghost: true });
+      });
+
+      var items = cleaned.filter(function (item) {
+        return (item.str && item.str.trim()) || item.ghost;
       }).map(function (item) {
         return {
           str: item.str,
@@ -375,6 +443,7 @@
           y: item.transform[5],
           w: item.width || 0,
           h: Math.abs(item.transform[3]) || item.height || 10,
+          ghost: !!item.ghost,
         };
       });
 
@@ -390,6 +459,7 @@
 
   function extract(file, callback) {
     var library = null;
+    unmapped = 0;
 
     load().then(function (pdfjsLib) {
       library = pdfjsLib;
@@ -410,11 +480,14 @@
         (function (index) {
           chain = chain.then(function () {
             return pdf.getPage(index).then(function (page) {
-              return pageText(page, index).then(function (lines) {
-                rows = rows.concat(lines);
-                return pageImages(page, index, library);
-              }).then(function (found) {
+              //  Erst die Operatorliste: sie laedt nebenbei die Schriften,
+              //  und ohne die laesst sich eine Symbolschrift nicht von
+              //  einer Textschrift unterscheiden.
+              return pageImages(page, index, library).then(function (found) {
                 images = images.concat(found);
+                return pageText(page, index);
+              }).then(function (lines) {
+                rows = rows.concat(lines);
               });
             });
           });
@@ -432,7 +505,9 @@
       //  zusaetzlich Schriftgrad und Seite, die Bilder ihre Platzierung –
       //  damit erkennt die Auswertung Ueberschriften, Namen und Foto,
       //  statt zu raten.
-      callback(null, { text: text, lines: result.rows, images: result.images });
+      callback(null, {
+        text: text, lines: result.rows, images: result.images, unmapped: unmapped,
+      });
     }).catch(function (error) {
       //  Der Grund bleibt in der Konsole: fuer den Nutzer ist "ging nicht"
       //  die richtige Auskunft, fuer einen Fehlerbericht nicht.

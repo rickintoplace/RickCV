@@ -228,7 +228,18 @@ puts the document back together from what *is* there:
   anything would leave an empty page.
 - **The cover letter** stops the reading: from the salutation on, nothing else is treated as
   part of the resume. So does the closing line of a German resume (`Beispielstadt, 16.09.2026`),
-  which is followed only by a signature.
+  which is followed only by a signature. A page break ends list sections too, so a letterhead on
+  sheet two does not end up among your skills.
+- **Icon fonts** contribute no text. They are recognised by the name of the embedded font, which
+  is more reliable than looking at the characters: depending on the file, an icon arrives as a
+  private-use character, as an empty piece, or as its spelled-out name (`school`).
+- **When a PDF has no text for its headings** — bold type drawn as graphics, which is what
+  Firefox does with variable fonts — RickCV says so and still salvages what is left: dates,
+  employers, places and descriptions become stations under one category. It does not invent a
+  name in that case, because the name was in the missing layer too.
+
+Unreadable characters are dropped rather than passed through: a placeholder in the middle of a
+word is worse than a gap, and the import tells you it happened.
 
 Where little is recognised, RickCV says so and shows you the text it read, so you can sort it
 in by hand instead of hunting for what went missing.
@@ -306,6 +317,22 @@ Nothing is fetched from Google at runtime. All nine document typefaces live in
 handed to a third party. Run `python3 tools/fetch-fonts.py` to refresh the
 files after changing the font list or the icon selection; it also pulls in the
 licence texts.
+
+Each typeface ships as **two static files, 400 and 700** — not as one variable
+font covering both. That is deliberate, and it is about machine readability
+rather than looks: with a variable font the browser derives the bold weight
+itself, and some print paths cannot express that in a PDF. Firefox (through
+cairo) draws such text as vector outlines — the page looks right, but the bold
+parts are no longer text. In a resume that is the name, every section heading
+and every job title: an applicant tracking system reads a document without them.
+With real static faces every browser embeds a proper font, and the text stays
+text.
+
+For the same reason the document switches **ligatures off**
+(`font-variant-ligatures: none` in `styles.css`). A single glyph for "fl" saves
+nothing and costs a word: printed through cairo it arrives without a mapping, so
+`Tierpflege` reaches the reader as `Tierp?ege`. The icon font is exempt — it
+builds its symbols out of ligatures.
 
 The two sets measure weight differently: Lucide in stroke pixels on a 24-unit
 grid, Material Symbols on a variable font axis. Their defaults (`stroke 2`

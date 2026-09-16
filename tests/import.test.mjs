@@ -290,8 +290,60 @@ if (!fs.existsSync(pdfLib)) {
     ok(!ms.mobility.items.some((i) => /github|linkedin/i.test(i.name)),
        "Fußzeilen-Links landen nicht in der Mobilität",
        ms.mobility.items.map((i) => i.name).join("|"));
+    ok(ms.mobility.items.length === 1, "der Briefkopf der zweiten Seite bleibt draußen",
+       ms.mobility.items.map((i) => i.name).join("|"));
+    ok(!/Beate Beispiel|Beispielstraße/.test(JSON.stringify(ms.skills.items) +
+       JSON.stringify(ms.interests.items)), "kein Anschreiben in den Listen");
+    ok(!data.text.split("\n").some((line) => /^(school|work|volunteer_activism|star|favorite)$/.test(line)),
+       "Symbolnamen stehen nicht als Wörter im Text");
   } catch (error) {
     ok(false, "PDF mit Symbolschrift gelesen", error.message);
+  }
+
+  //  Firefox zeichnet fett Gesetztes über cairo als Vektorkontur. Dann
+  //  fehlen Überschriften, Name und Titel vollständig – übrig bleiben
+  //  Zeiträume, Arbeitgeber und Beschreibungen. Hier als Zeilen gestellt,
+  //  wie sie aus so einer Datei fallen.
+  console.log("\n— PDF ohne Textebene für fett Gesetztes —");
+  {
+    const lines = [
+      { text: "Bezwinger des Dunklen Lords", size: 10.5, page: 1, y: 700 },
+      { text: "verlinkte@email.com", size: 10.5, page: 1, y: 660 },
+      { text: "11/13", size: 10.5, page: 1, y: 600 },
+      { text: "ZOOLINO, Bad Wimpeln\t– 09/15", size: 10.5, page: 1, y: 588 },
+      { text: "Tierpflege im Kontaktbereich", size: 10, page: 1, y: 576 },
+      { text: "• Schildkröten streicheln", size: 10, page: 1, y: 564 },
+      { text: "07/21", size: 10.5, page: 1, y: 500 },
+      { text: "SPASS AG, Frankfurt\t– 10/21", size: 10.5, page: 1, y: 488 },
+      { text: "Bildungsfahrt mit ein bisschen Freizeit", size: 10, page: 1, y: 476 },
+    ];
+    const text = lines.map((l) => l.text).join("\n");
+    const parsed = Imp.parseText(text, "aus-pdf.txt", lines);
+    const fs2 = Imp.apply(base(), parsed, "replace");
+    ok(parsed.warnings.includes("noStructure"), "meldet die fehlende Struktur",
+       parsed.warnings.join(","));
+    ok(fs2.events.length === 2, "Stationen trotz fehlender Überschriften", fs2.events.length);
+    ok(fs2.events[0].start === "11/2013" && fs2.events[0].end === "09/2015",
+       "Zeitraum aus zwei Zeilen", fs2.events[0].start + "–" + fs2.events[0].end);
+    ok(fs2.events[0].company === "ZOOLINO" && fs2.events[0].place === "Bad Wimpeln",
+       "Arbeitgeber und Ort", fs2.events[0].company);
+    ok(fs2.events[0].list.length === 1, "Aufzählung bleibt erhalten");
+    ok(fs2.contact.name === "", "kein geratener Name aus dem Profiltext",
+       JSON.stringify(fs2.contact.name));
+    ok(fs2.contact.email === "verlinkte@email.com", "Kontaktdaten kommen trotzdem durch");
+  }
+
+  //  Ein frisches Dokument bringt einen Führerschein mit, damit der
+  //  Abschnitt nicht leer wirkt. In einem Import wäre das eine Angabe, die
+  //  niemand gemacht hat.
+  console.log("\n— Keine Vorgaben aus dem leeren Dokument —");
+  {
+    const imported = Imp.apply(base(), jr, "replace");
+    ok(imported.mobility.items.length === 0, "kein voreingetragener Führerschein",
+       imported.mobility.items.map((i) => i.name).join("|"));
+    ok(imported.mobility.show === false, "leerer Abschnitt bleibt aus");
+    ok(imported.skills.items.length > 0 && imported.skills.show === true,
+       "gefüllte Abschnitte bleiben an");
   }
 
   //  Bilder: Foto, zwei Projektlogos und eine Unterschrift auf Seite zwei.

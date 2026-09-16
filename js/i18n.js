@@ -90,6 +90,8 @@
         warnDraft: "Aus Fließtext erkannt – das ist ein Entwurf. Bitte jede Station nachsehen.",
         warnSkillRanks: "Die Kenntnisse kamen ohne Bewertung. Die Punkte stehen auf null – du vergibst sie selbst.",
         warnThin: "Außer den Kontaktdaten war wenig zu erkennen – dieses Layout gibt wenig her. Der gelesene Text steht unten: du kannst ihn von dort selbst einsortieren.",
+        warnNoStructure: "In diesem PDF stehen Überschriften, Name und Titel nicht als Text: fett Gesetztes wurde beim Drucken als Grafik gezeichnet. Übernommen wurde, was lesbar blieb – Zeiträume, Arbeitgeber und Beschreibungen, alle unter einer Kategorie. Stammt das PDF von dir, drucke es neu; RickCV legt dafür jetzt echte fette Schriftschnitte bei.",
+        warnUnmapped: "Einzelne Zeichen ließen sich nicht zuordnen – meist Ligaturen wie fi oder fl. In den betroffenen Wörtern fehlen dadurch Buchstaben; sieh sie dir an.",
         warnImages: "Bilder wurden mit übernommen: das große Bild oben als Bewerbungsfoto, flache Bilder im Anschreiben als Unterschrift, der Rest zu den Projekten daneben. Sieh nach, ob das passt.",
         impTextPeek: "Gelesener Text",
 
@@ -481,6 +483,8 @@
         warnDraft: "Recognised from running text – this is a draft. Please check every station.",
         warnSkillRanks: "The skills arrived without a rating. The dots are at zero – you decide them yourself.",
         warnThin: "Beyond the contact details there was little to recognise – this layout gives up very little. The text that was read is below: you can sort it in yourself.",
+        warnNoStructure: "In this PDF the headings, the name and the titles are not text: bold type was drawn as graphics when it was printed. What stayed readable was taken over – dates, employers and descriptions, all under one category. If the PDF is yours, print it again; RickCV now ships real bold faces for that.",
+        warnUnmapped: "A few characters could not be mapped – usually ligatures such as fi or fl. The affected words are missing those letters; do look them over.",
         warnImages: "Images came along: the large one at the top as the photo, flat ones in the letter as a signature, the rest to the projects beside them. Have a look whether that fits.",
         impTextPeek: "Text that was read",
 
