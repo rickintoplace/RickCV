@@ -1,0 +1,52 @@
+/* @rickcv-theme
+   name:     Kompakt
+   author:   RickCV
+   licence:  CC0-1.0
+   contract: 1
+   about:    Enger gesetzt, damit ein langer Werdegang auf ein Blatt passt:
+             kleinere Schrift, weniger Luft, schmalere Ränder.
+   about-en: Set tighter so a long career fits on one sheet: smaller type,
+             less air, narrower margins.
+*/
+
+[data-template] {
+  --base-font-size: 12.5px;
+  --headline-size: 14px;
+  --title-size: 26px;
+  --left-margin: 1.4cm;
+  --right-margin: 1.2cm;
+  --bottom-margin: 1.2cm;
+  line-height: 1.32;
+}
+
+.resume_item {
+  margin-bottom: 0.45em;
+}
+
+.event {
+  margin: 0.25em 0;
+  padding-top: 0.15em;
+  padding-bottom: 0.15em;
+}
+
+.event .event-content,
+.event .resume_subinfo {
+  line-height: 1.3;
+}
+
+.resume_title {
+  margin-bottom: 0.25em;
+}
+
+/*  Aufzählungen dürfen enger stehen als Fließtext.  */
+.event ul {
+  margin: 0.1em 0 0;
+}
+
+.event li {
+  margin: 0;
+}
+
+[data-column="sidebar"] .resume_item {
+  margin-bottom: 0.5em;
+}

@@ -180,9 +180,21 @@ Chromium-based browser.
 
 ## Themes
 
-A theme is one CSS file. `themes/` holds the ones that ship with RickCV.
-[see them with pictures](themes/README.md). And the same mechanism takes any other file:
-drop a `.css` anywhere on the builder, or pick one in **Themes**.
+A theme is one CSS file. Seven ship with RickCV —
+[see them with pictures](themes/README.md):
+
+| Theme | |
+| --- | --- |
+| **Clean** | the calm baseline: timeline at the edge, dates on the right |
+| **Dynaline** | the timeline as an axis; how long something lasted sets the distance |
+| **Icons** | symbols carry the layout, timeline down the middle |
+| **Einspaltig** | header block, then one full-width column — the same reading order for a person and for a machine |
+| **Klassisch** | serifs and thin rules, for applications where restraint is the message |
+| **Kompakt** | tighter type and spacing, so a long career fits on one sheet |
+| **Terminal** | monospaced, square, green — for people who would rather have written it in an editor |
+
+The same mechanism takes any other file: drop a `.css` anywhere on the builder, or pick one in
+**Themes**.
 
 ### Writing one without cloning anything
 
@@ -232,6 +244,7 @@ the page — opens one dialog that takes whatever you have:
 | --- | --- |
 | A RickCV backup (`*.rickcv.json`) | Drop it in. Everything comes back, styling included. |
 | A `resume.json` ([JSON Resume](https://jsonresume.org/schema)) | Drop it in. Work, education, volunteering, awards, certificates, skills, languages, interests, projects and references are mapped onto RickCV's sections. |
+| An export from [Reactive Resume](https://rxresu.me/) | Drop it in. Its own JSON is read directly, the current shape and v4: periods written as free text (`March 2022 - Present`), HTML descriptions turned back into paragraphs and bullets, and its 0–5 skill levels kept as they are. Hidden items stay hidden. |
 | Your LinkedIn data | *Settings → Data privacy → Get a copy of your data*. Drop the ZIP in — or the single CSV files, if your browser cannot unpack ZIPs. |
 | A Word file (`.docx`) | Drop it in. This is the best route of all, see below. The old `.doc` format is not readable — save it as `.docx` in Word first. |
 | An old resume as PDF | Drop it in. RickCV pulls the text out, separates columns, sorts it into sections and takes the pictures with it. Scanned PDFs hold no text, so those cannot work. |

@@ -291,6 +291,216 @@
     return cefr ? FLUENCY[cefr[1]] : 0;
   }
 
+  /* ------------------------------------------------- Reactive Resume: rein */
+
+  //  Reactive Resume ist der groesste freie Mitbewerber, und wer von dort
+  //  kommt, soll nicht abtippen. Sein Format ist verwandt mit JSON Resume,
+  //  aber eigenstaendig: Zeitraeume stehen als freier Text ("March 2022 -
+  //  Present"), Beschreibungen als HTML, und Kenntnisse tragen eine Stufe
+  //  von 0 bis 5 – die uebernimmt RickCV eins zu eins.
+  //
+  //  Gelesen werden beide Fassungen: v4 nannte die Felder date, institution
+  //  und summary, die heutige period, school und description.
+  function htmlText(html) {
+    return decodeXml(String(html || "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|div|h[1-6])>/gi, "\n")
+      .replace(/<[^>]+>/g, ""))
+      .replace(/[ \t]+/g, " ")
+      .replace(/\n{2,}/g, "\n")
+      .trim();
+  }
+
+  function decodeXml(value) {
+    return String(value)
+      .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"').replace(/&#0?39;|&apos;/g, "'")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&#(\d+);/g, function (match, code) {
+        return String.fromCharCode(Number(code));
+      })
+      .replace(/&amp;/g, "&");
+  }
+
+  //  Eine Beschreibung aus Reactive Resume ist HTML: Absaetze werden zu
+  //  Absaetzen, Listenpunkte zu Listenpunkten.
+  function htmlBlocks(html) {
+    var source = String(html || "");
+    var list = [];
+
+    source.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, function (match, inner) {
+      var text = htmlText(inner);
+      if (text) list.push(text);
+      return "";
+    });
+
+    var rest = source.replace(/<[ou]l[^>]*>[\s\S]*?<\/[ou]l>/gi, "");
+    var description = htmlText(rest).split("\n").map(clean).filter(Boolean);
+
+    return { description: description, list: list };
+  }
+
+  //  "March 2022 - Present", "2014 - 2018", "05/2021 - heute"
+  function splitPeriod(period) {
+    var value = clean(period);
+    if (!value) return { start: "", end: "", present: false };
+
+    var range = value.match(RANGE);
+    if (range) {
+      return {
+        start: normDate(range[1]),
+        end: isPresent(range[2]) ? "" : normDate(range[2]),
+        present: isPresent(range[2]),
+      };
+    }
+    return { start: normDate(value), end: "", present: false };
+  }
+
+  function visible(entry) {
+    return entry && entry.hidden !== true;
+  }
+
+  function itemsOf(sections, name) {
+    var block = sections && sections[name];
+    if (!block || block.hidden === true || !Array.isArray(block.items)) return [];
+    return block.items.filter(visible);
+  }
+
+  function fromReactiveResume(source) {
+    var profile = emptyProfile();
+    var basics = source.basics || {};
+    var sections = source.sections || {};
+
+    profile.contact.name = clean(basics.name);
+    profile.contact.role = clean(basics.headline || basics.label);
+    profile.contact.email = clean(basics.email);
+    profile.contact.phone = clean(basics.phone);
+    profile.contact.city = clean(basics.location);
+
+    var picture = source.picture || basics.picture || {};
+    if (clean(picture.url) && picture.hidden !== true) profile.photo = clean(picture.url);
+
+    var summary = source.summary || sections.summary || {};
+    if (summary.hidden !== true) profile.profileText = htmlText(summary.content);
+
+    //  Webseite, eigene Felder und Profile werden zur Linkleiste.
+    var website = basics.website || {};
+    if (clean(website.url)) {
+      profile.links.push({
+        label: clean(website.label) || "Website",
+        text: clean(website.label) || shortUrl(website.url),
+        url: clean(website.url),
+      });
+    }
+    (basics.customFields || []).forEach(function (field) {
+      if (!clean(field.link)) return;
+      profile.links.push({
+        label: clean(field.icon).replace(/-logo$/, "") || clean(field.text),
+        text: clean(field.text) || shortUrl(field.link),
+        url: clean(field.link),
+      });
+    });
+    itemsOf(sections, "profiles").forEach(function (entry) {
+      if (!clean(entry.url && entry.url.href ? entry.url.href : entry.url)) return;
+      var url = entry.url && entry.url.href ? entry.url.href : entry.url;
+      profile.links.push({
+        label: clean(entry.network),
+        text: clean(entry.username) || shortUrl(url),
+        url: clean(url),
+      });
+    });
+
+    function station(role, entry, title, company) {
+      var event = newEvent(role);
+      var period = splitPeriod(entry.period || entry.date);
+      var text = htmlBlocks(entry.description || entry.summary);
+
+      event.title = clean(title);
+      event.company = clean(company);
+      event.place = clean(entry.location);
+      event.start = period.start;
+      event.end = period.end;
+      event.present = period.present;
+      event.description = text.description;
+      event.list = text.list;
+      return event;
+    }
+
+    itemsOf(sections, "experience").forEach(function (entry) {
+      profile.events.push(station("experience", entry, entry.position, entry.company));
+    });
+
+    itemsOf(sections, "education").forEach(function (entry) {
+      var title = [clean(entry.degree || entry.studyType), clean(entry.area)]
+        .filter(Boolean).join(", ");
+      var event = station("education", entry, title, entry.school || entry.institution);
+      var grade = clean(entry.grade || entry.score);
+      if (grade) event.list.push(grade);
+      profile.events.push(event);
+    });
+
+    itemsOf(sections, "volunteer").forEach(function (entry) {
+      profile.events.push(station("volunteer", entry,
+        entry.position || entry.organization, entry.position ? entry.organization : ""));
+    });
+
+    ["awards", "certifications", "publications"].forEach(function (name) {
+      itemsOf(sections, name).forEach(function (entry) {
+        profile.events.push(station("other", entry,
+          entry.title || entry.name, entry.awarder || entry.issuer || entry.publisher));
+      });
+    });
+
+    itemsOf(sections, "skills").forEach(function (entry) {
+      if (!clean(entry.name)) return;
+      //  Reactive Resume zaehlt 0 bis 5 – dieselbe Skala wie RickCV.
+      profile.skills.push({
+        name: clean(entry.name),
+        rank: Math.max(0, Math.min(5, Number(entry.level) || levelToRank(entry.proficiency))),
+      });
+      (entry.keywords || []).forEach(function (keyword) {
+        if (clean(keyword)) profile.skills.push({ name: clean(keyword), rank: 0 });
+      });
+    });
+
+    itemsOf(sections, "languages").forEach(function (entry) {
+      var name = clean(entry.language || entry.name);
+      if (!name) return;
+      var fluency = clean(entry.fluency || entry.description);
+      profile.languages.push({
+        name: name,
+        level: fluency,
+        percentage: Number(entry.level) ? Number(entry.level) * 20 : fluencyToPercent(fluency),
+      });
+    });
+
+    itemsOf(sections, "interests").forEach(function (entry) {
+      if (clean(entry.name)) profile.interests.push({ name: clean(entry.name) });
+    });
+
+    itemsOf(sections, "projects").forEach(function (entry) {
+      if (!clean(entry.name)) return;
+      var text = htmlBlocks(entry.description || entry.summary);
+      profile.projects.push({
+        name: clean(entry.name),
+        url: clean(entry.url && entry.url.href ? entry.url.href : entry.url),
+        description: text.description.join(" ") || text.list.join(", "),
+      });
+    });
+
+    itemsOf(sections, "references").forEach(function (entry) {
+      if (!clean(entry.name)) return;
+      profile.references.push({
+        name: clean(entry.name),
+        role: clean(entry.position),
+        company: "",
+        contact: clean(entry.phone) || htmlText(entry.description),
+      });
+    });
+
+    return profile;
+  }
+
   /* ----------------------------------------------------- JSON Resume: raus */
 
   function isoDate(value) {
@@ -1821,6 +2031,10 @@
       var data = null;
       try { data = JSON.parse(trimmed); } catch (error) { return "text"; }
       if (data && (data.settings || data.contactTitle) && data.contact) return "rickcv";
+      //  Reactive Resume legt seine Bloecke in ein Objekt "sections"; JSON
+      //  Resume kennt stattdessen Listen auf oberster Ebene.
+      if (data && data.sections && typeof data.sections === "object" &&
+          !Array.isArray(data.sections)) return "reactive";
       if (data && (data.basics || data.work || data.education ||
                    /jsonresume/i.test(clean(data.$schema)))) return "jsonresume";
       return "json-unknown";
@@ -1873,7 +2087,8 @@
   function parseText(text, name, lines, images) {
     var format = detect(name, text);
 
-    if (format === "rickcv" || format === "jsonresume" || format === "json-unknown") {
+    if (format === "rickcv" || format === "jsonresume" || format === "reactive" ||
+        format === "json-unknown") {
       var data = JSON.parse(text);
       if (format === "rickcv") {
         var migrated = Model.migrate(data);
@@ -1881,6 +2096,11 @@
         return result("rickcv", null, migrated);
       }
       if (format === "json-unknown") throw new Error("unknownJson");
+      if (format === "reactive") {
+        var reactive = fromReactiveResume(data);
+        if (!hasContent(reactive)) throw new Error("unknownJson");
+        return result("reactive", reactive);
+      }
       return result("jsonresume", fromJsonResume(data));
     }
 
@@ -1987,6 +2207,7 @@
     },
     toJsonResume: toJsonResume,
     fromJsonResume: fromJsonResume,
+    fromReactiveResume: fromReactiveResume,
     stateToProfile: stateToProfile,
     parseCsv: parseCsv,
     normDate: normDate,

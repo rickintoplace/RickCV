@@ -1,0 +1,67 @@
+/* @rickcv-theme
+   name:     Terminal
+   author:   RickCV
+   licence:  CC0-1.0
+   contract: 1
+   about:    Feste Schrittweite, kantige Kanten, grüner Akzent. Für Leute,
+             die ihren Lebenslauf sowieso lieber in einem Editor hätten.
+   about-en: Monospaced, square edges, a green accent. For people who would
+             rather have written their resume in an editor anyway.
+*/
+
+[data-template] {
+  --accent-color: #1f7a4d;
+  --sidebar-color: #10201a;
+  --sidebar-font-color: #d8e6df;
+  --font-color: #1c2320;
+  font-family: ui-monospace, "SFMono-Regular", "IBM Plex Mono", "Cascadia Mono", Menlo, monospace;
+}
+
+/*  Kanten statt Rundungen, überall.  */
+.resume_item,
+.event,
+.project-img-holder,
+.language_bar,
+[data-column="sidebar"] .resume_image {
+  border-radius: 0 !important;
+}
+
+.resume_title {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+[data-column="main"] .resume_title {
+  border-bottom: 2px solid var(--accent-color);
+  padding-bottom: 0.2em;
+}
+
+/*  Der Punkt wird ein Quadrat auf der Leiste.  */
+.event .dot {
+  border-radius: 0 !important;
+}
+
+/*  In der dunklen Spalte darf nichts in der Akzentfarbe stehen: grün auf
+    dunkelgrün liest niemand.  */
+[data-column="sidebar"] .project-title,
+[data-column="sidebar"] .project a,
+[data-column="sidebar"] .resume_title {
+  color: var(--sidebar-font-color);
+}
+
+[data-column="sidebar"] .resume_title {
+  border-bottom: 1px solid color-mix(in oklab, var(--sidebar-font-color), transparent 70%);
+  padding-bottom: 0.2em;
+}
+
+.event .date {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/*  Kenntnisse als Balken, nicht als Punkte: Punkte sehen in einer
+    Schrift fester Schrittweite verloren aus.  */
+.skills-container .rank-dots {
+  filter: saturate(0.8);
+}

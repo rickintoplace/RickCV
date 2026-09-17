@@ -179,7 +179,7 @@
   ];
 
   var FORMAT_LABEL = {
-    rickcv: "fmtRickcv", jsonresume: "fmtJsonresume",
+    rickcv: "fmtRickcv", jsonresume: "fmtJsonresume", reactive: "fmtReactive",
     linkedin: "fmtLinkedin", pdf: "fmtPdf", docx: "fmtDocx", text: "fmtText",
   };
 

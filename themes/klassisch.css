@@ -1,0 +1,65 @@
+/* @rickcv-theme
+   name:     Klassisch
+   author:   RickCV
+   licence:  CC0-1.0
+   contract: 1
+   about:    Serifen, feine Linien, keine Flächen. Für Bewerbungen, bei
+             denen Zurückhaltung die Botschaft ist – Behörden, Kanzleien,
+             Banken.
+   about-en: Serifs, thin rules, no filled areas. For applications where
+             restraint is the message – public service, law, banking.
+*/
+
+[data-template] {
+  --font-family: "EB Garamond", "Merriweather", Georgia, serif;
+  --sidebar-color: #f4f2ee;
+  --accent-color: #4a4a52;
+  font-family: var(--font-family);
+}
+
+/*  Überschriften: Kapitälchen statt Farbe.  */
+.resume_title {
+  font-variant-caps: small-caps;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.15em;
+}
+
+[data-block="namerole"] h1 {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+[data-block="namerole"] .role {
+  font-variant-caps: small-caps;
+  letter-spacing: 0.14em;
+}
+
+/*  Der Punkt auf der Zeitleiste wird ein feiner Ring – das Symbol darin
+    bleibt sichtbar und nimmt die Linienfarbe an.  */
+.event .dot {
+  background: var(--background-color) !important;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  transform: scale(0.85);
+}
+
+.event .dot svg {
+  stroke: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.event .dot .material-symbols-outlined {
+  color: var(--accent-color);
+}
+
+.event {
+  border: 0;
+  box-shadow: none;
+}
+
+/*  Kenntnisse als Punkte wirken hier fremd – eine Linie genügt.  */
+.rank-dots {
+  opacity: 0.55;
+}

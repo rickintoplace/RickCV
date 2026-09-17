@@ -93,6 +93,44 @@ const round = Imp.apply(base(), Imp.parseText(JSON.stringify(out), "resume.json"
 ok(round.events.length === st.events.length, "Rundlauf verliert keine Station",
    `${round.events.length} statt ${st.events.length}`);
 
+//  Reactive Resume ist der groesste freie Mitbewerber. Wer von dort kommt,
+//  soll nichts abtippen muessen – und bringt sogar etwas mit, das JSON
+//  Resume nicht kennt: die Stufe einer Kenntnis als Zahl.
+console.log("\n— Reactive Resume —");
+const rr = Imp.parseText(fs.readFileSync(fixture("reactive-resume.json"), "utf8"), "resume.json");
+ok(rr.format === "reactive", "als Reactive Resume erkannt", rr.format);
+const rs = Imp.apply(base(), rr, "replace");
+ok(rs.contact.name === "Tomás Berger", "Name", rs.contact.name);
+ok(rs.contact.role === "Datenbankadministrator", "headline wird zur Rolle");
+ok(rs.contact.city === "Leipzig", "Ort");
+ok(/Hält Datenbanken am Leben/.test(rs.profile.text), "HTML im Profiltext wird zu Text", rs.profile.text);
+ok(!/<p>|<strong>/.test(rs.profile.text), "keine Reste von Auszeichnungen");
+ok(rs.events.length === 5, "fünf sichtbare Stationen", rs.events.length);
+ok(!rs.events.some((e) => /Versteckte/.test(e.title + e.company)), "Verstecktes bleibt draußen");
+
+const elbwerk = rs.events.find((e) => e.company === "Elbwerk GmbH");
+ok(!!elbwerk && elbwerk.start === "03/2022" && elbwerk.present === true,
+   "Zeitraum aus freiem Text: 'March 2022 - Present'", elbwerk && elbwerk.start + "/" + elbwerk.present);
+ok(!!elbwerk && elbwerk.list.length === 2, "Listenpunkte aus dem HTML", elbwerk && elbwerk.list.length);
+ok(!!elbwerk && elbwerk.description.length === 1, "Absatz bleibt Absatz");
+
+const uni = rs.events.find((e) => e.company === "Universität Leipzig");
+ok(!!uni && uni.title === "Master of Science, Informatik", "Abschluss und Fach", uni && uni.title);
+ok(!!uni && uni.list.includes("1,7"), "Note als Punkt");
+
+const roles = rs.events.map((e) => rs.sections.find((s) => s.id === e.sectionId).atsRole);
+ok(roles.filter((r) => r === "volunteer").length === 1, "Ehrenamt");
+ok(roles.filter((r) => r === "other").length === 1, "Auszeichnung als weitere Station");
+
+ok(rs.skills.items[0].name === "PostgreSQL" && rs.skills.items[0].rank === 5,
+   "Stufe 0–5 wird direkt übernommen", JSON.stringify(rs.skills.items[0]));
+ok(rs.skills.items.length === 4, "Schlagwörter kommen als eigene Kenntnisse mit", rs.skills.items.length);
+ok(rs.languages.items[1].percentage === 80, "Sprachstufe 4 von 5 wird zu 80 %", rs.languages.items[1].percentage);
+ok(rs.projects.items[0].url === "https://example.org/pgstatsd", "Projektadresse aus dem Objekt");
+ok(rs.footers.right.links.length === 3, "Webseite, eigenes Feld und Profil als Links",
+   rs.footers.right.links.map((l) => l.text).join("|"));
+ok(rs.photo.src.indexOf("data:image") === 0, "Bild übernommen");
+
 console.log("\n— Fließtext —");
 const txt = Imp.parseText(fs.readFileSync(fixture("lebenslauf.txt"), "utf8"), "lebenslauf.txt");
 const ts = Imp.apply(base(), txt, "replace");

@@ -1,0 +1,98 @@
+{
+  "picture": { "url": "data:image/png;base64,iVBORw0KGgo=", "hidden": false, "size": 120 },
+  "basics": {
+    "name": "Tomás Berger",
+    "headline": "Datenbankadministrator",
+    "email": "tomas.berger@example.org",
+    "phone": "+49 341 5566778",
+    "location": "Leipzig",
+    "website": { "url": "https://berger.example.org", "label": "berger.example.org" },
+    "customFields": [
+      { "icon": "github-logo", "text": "github.com/tberger", "link": "https://github.com/tberger" }
+    ]
+  },
+  "summary": {
+    "hidden": false,
+    "content": "<p><strong>Hält Datenbanken am Leben</strong>, auch nachts um drei.</p>"
+  },
+  "sections": {
+    "profiles": {
+      "items": [
+        { "hidden": false, "network": "LinkedIn", "username": "tberger", "url": { "href": "https://linkedin.com/in/tberger" } }
+      ]
+    },
+    "experience": {
+      "items": [
+        {
+          "hidden": false,
+          "company": "Elbwerk GmbH",
+          "position": "Senior Database Administrator",
+          "location": "Leipzig",
+          "period": "March 2022 - Present",
+          "description": "<p>Betrieb von 60 PostgreSQL-Instanzen.</p><ul><li>Umstellung auf Patroni</li><li>Rufbereitschaft aufgebaut</li></ul>"
+        },
+        {
+          "hidden": false,
+          "company": "Datenhof AG",
+          "position": "Datenbankentwickler",
+          "location": "Dresden",
+          "period": "08/2018 - 02/2022",
+          "description": "<p>Abfragen optimiert, bis es weh tat.</p>"
+        },
+        {
+          "hidden": true,
+          "company": "Versteckte Station",
+          "position": "Soll nicht importiert werden",
+          "period": "2010 - 2011"
+        }
+      ]
+    },
+    "education": {
+      "items": [
+        {
+          "hidden": false,
+          "school": "Universität Leipzig",
+          "degree": "Master of Science",
+          "area": "Informatik",
+          "grade": "1,7",
+          "location": "Leipzig",
+          "period": "2015 - 2018"
+        }
+      ]
+    },
+    "volunteer": {
+      "items": [
+        { "hidden": false, "organization": "Freifunk Leipzig", "period": "2019 - Present",
+          "description": "<p>Knoten aufgestellt und gepflegt.</p>" }
+      ]
+    },
+    "awards": {
+      "items": [
+        { "hidden": false, "title": "Bester Vortrag", "awarder": "PGConf", "date": "2023" }
+      ]
+    },
+    "skills": {
+      "items": [
+        { "hidden": false, "name": "PostgreSQL", "level": 5, "keywords": ["Replikation", "Tuning"] },
+        { "hidden": false, "name": "Ansible", "level": 3, "keywords": [] }
+      ]
+    },
+    "languages": {
+      "items": [
+        { "hidden": false, "language": "Deutsch", "fluency": "Muttersprache", "level": 5 },
+        { "hidden": false, "language": "Englisch", "fluency": "verhandlungssicher", "level": 4 }
+      ]
+    },
+    "interests": { "items": [ { "hidden": false, "name": "Kanu" } ] },
+    "projects": {
+      "items": [
+        { "hidden": false, "name": "pgstatsd", "period": "2021", "url": { "href": "https://example.org/pgstatsd" },
+          "description": "<p>Kleiner Sammler für Metriken.</p>" }
+      ]
+    },
+    "references": {
+      "items": [ { "hidden": false, "name": "Auf Anfrage", "position": "", "description": "" } ]
+    }
+  },
+  "metadata": { "template": "azurill", "page": { "format": "a4" } }
+}
