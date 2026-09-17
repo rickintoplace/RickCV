@@ -135,7 +135,11 @@
         emptyColor: "#d9d9d9",
         sidebarWidth: 35,
         titleSize: 32,
-        headlineSize: 16,
+        headlineSize: 16,      // Ueberschriften der Seitenspalte
+        mainHeadlineSize: 21,  // Ueberschriften im Hauptteil
+        titleGap: 5,           // Abstand unter den Ueberschriften des Hauptteils
+        //  "auto" laesst dem Theme die Entscheidung; alles andere ueberstimmt es.
+        profileAlign: "auto",
         iconSet: "lucide", // Vorgabe fuer neue Symbole
         //  Strichstaerke auf der Lucide-Skala (1 = fein, 3 = fett). Material
         //  Symbols wird ueber seine wght-Achse darauf abgebildet, damit beide

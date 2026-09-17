@@ -19,6 +19,7 @@
 }
 
 [data-template] {
+  --profile-align: left;
   --sidebar-color: transparent;
   --font-family: "Inter", "Source Sans 3", system-ui, sans-serif;
   line-height: 1.45;
@@ -47,7 +48,6 @@
 /*  Ohne Farbflaeche wirkt zentrierter Text in der Spalte wie ein
     Fremdkoerper: alles haengt an derselben Kante wie die Haarlinie.  */
 [data-column="sidebar"] .resume_info,
-[data-column="sidebar"] .profile-container,
 [data-column="sidebar"] .textblock {
   text-align: left;
 }

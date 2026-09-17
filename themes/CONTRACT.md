@@ -77,7 +77,10 @@ ein Theme kommt oft mit ein paar Zeilen davon aus.
 | `--accent-color` | Akzentfarbe |
 | `--font-color`, `--background-color` | Schrift und Papier |
 | `--sidebar-color`, `--sidebar-font-color`, `--sidebar-width` | die Seitenspalte |
-| `--font-family`, `--base-font-size`, `--title-size`, `--headline-size` | Typografie |
+| `--font-family`, `--base-font-size`, `--title-size` | Typografie |
+| `--headline-size`, `--headline-size-main` | Überschriften in Seitenspalte und Hauptteil |
+| `--title-gap` | Abstand unter einer Überschrift im Hauptteil |
+| `--profile-align` | Bündigkeit des Profiltexts; eine Wahl im Editor überstimmt sie |
 | `--left-margin`, `--right-margin`, `--bottom-margin`, `--header-height` | Ränder nach DIN 5008 |
 | `--icon-size`, `--icon-color`, `--icon-bg` | Symbole |
 

@@ -276,6 +276,12 @@
       body.appendChild(F.toggle("profile.show", t("showProfile")));
       body.appendChild(F.text("profile.title", t("headline")));
       body.appendChild(F.textarea("profile.text", t("text"), 5, t("profilePlaceholder")));
+      body.appendChild(F.select("style.profileAlign", t("profileAlign"), [
+        { value: "auto", label: t("profileAlignAuto") },
+        { value: "left", label: t("profileAlignLeft") },
+        { value: "center", label: t("profileAlignCenter") },
+        { value: "justify", label: t("profileAlignJustify") },
+      ]));
       addPageField(body, "profile");
     }
 
@@ -764,10 +770,13 @@
       body.appendChild(F.color("style.sidebarFontColor", t("sidebarFontColor")));
       body.appendChild(F.color("style.emptyColor", t("emptyDotColor")));
       body.appendChild(F.range("style.sidebarWidth", t("sidebarWidth"), 20, 50, 1, " %"));
+      body.appendChild(F.range("style.titleSize", t("nameSize"), 18, 48, 1, " px"));
       body.appendChild(F.row(
-        F.range("style.titleSize", t("nameSize"), 18, 48, 1, " px"),
-        F.range("style.headlineSize", t("headlineSizeLabel"), 11, 24, 1, " px")
+        F.range("style.headlineSize", t("headlineSideLabel"), 10, 26, 1, " px"),
+        F.range("style.mainHeadlineSize", t("headlineMainLabel"), 12, 34, 1, " px")
       ));
+      body.appendChild(F.range("style.titleGap", t("titleGapLabel"), 0, 20, 1, " px"));
+      body.appendChild(F.hint(t("titleGapHint")));
       body.appendChild(F.range("style.border", t("pageBorder"), 0, 15, 0.5, " mm"));
 
       body.appendChild(el("hr"));

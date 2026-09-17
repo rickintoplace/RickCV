@@ -14,6 +14,8 @@
 */
 
 [data-template] {
+  /*  Der Profiltext liest sich hier linksbündig besser als zentriert.  */
+  --profile-align: left;
   --font-family: "Source Sans 3", "Inter", system-ui, sans-serif;
   --sidebar-color: #f6f5f2;
   line-height: 1.4;

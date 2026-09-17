@@ -75,7 +75,10 @@
   --border: 0; /*Umrahmt die Seite mit einem Rand, z.b. "10px;" oder "0.2cm;" eintragen*/
   --img-border: 0; /*Default: 0; Setzt einen Rahmen um das Profilbild, wenn das hochgeladene Bild nicht größer ist als der Container*/
   --title-size: 32px; /*Schriftgröße für die Überschrift (deinen Namen)*/
-  --headline-size: 16px; /*Schriftgröße für andere Überschriften*/
+  --headline-size: 16px; /*Schriftgröße für die Überschriften der Seitenspalte*/
+  --headline-size-main: 21px; /*Schriftgröße für die Überschriften im Hauptteil*/
+  --title-gap: 5px; /*Abstand unter einer Überschrift im Hauptteil*/
+  --profile-align: center; /*Bündigkeit des Profiltexts; Themes dürfen das setzen*/
 
   --sidebar-width: 35%; /*Breite der Sidebar. Default sind 35%*/
 
@@ -582,8 +585,12 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   color: var(--sidebar-font-color);
 }
 
+/*  Die Bündigkeit des Profiltexts kommt aus einer Variablen: das Theme
+    setzt sie (eine schmale, zentrierte Spalte will etwas anderes als eine
+    breite, linksbündige), und wer im Editor etwas anderes waehlt,
+    ueberstimmt das Theme – dann steht der Wert am <body>. */
 .resume_info.profile-container {
-  text-align: center;
+  text-align: var(--profile-align, center);
 }
 
 /*  Der Abstand zwischen Symbol und Text gehoert an die Zeile, nicht an das
@@ -832,6 +839,13 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 .resume_wrapper .resume_right .resume_item .resume_title {
   color: var(--font-color);
   border-bottom: 2px solid var(--accent-color);
+
+  /*  Frueher stand hier nichts: die Ueberschrift war so gross, wie ein h2
+      eben ist, und der Abstand darunter war null – der Text klebte an der
+      Linie. Beides ist jetzt einstellbar, und ein Theme kann es wie
+      gehabt ueberschreiben. */
+  font-size: var(--headline-size-main);
+  margin-bottom: var(--title-gap);
 }
 
 .resume_wrapper .resume_right .resume_data {

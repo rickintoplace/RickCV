@@ -158,6 +158,9 @@
     set("--sidebar-width", style.sidebarWidth + "%");
     set("--title-size", style.titleSize + "px");
     set("--headline-size", style.headlineSize + "px");
+    set("--headline-size-main",
+      (style.mainHeadlineSize === undefined ? 21 : style.mainHeadlineSize) + "px");
+    set("--title-gap", (style.titleGap === undefined ? 5 : style.titleGap) + "px");
     set("--border", style.border + "mm");
     set("--left-margin", style.leftMargin + "cm");
     set("--right-margin", style.rightMargin + "cm");
@@ -191,6 +194,17 @@
     root.lang = data.locale || "de"; // landet als /Lang im PDF
 
     var body = doc.body;
+
+    //  Die Bündigkeit des Profiltexts ist die eine Einstellung, die ein Theme
+    //  sinnvoll selbst setzt – eine schmale Spalte liest sich zentriert, eine
+    //  breite nicht. Deshalb steht sie bei "auto" nirgends, und das Theme
+    //  entscheidet. Waehlt jemand etwas anderes, landet der Wert am <body>:
+    //  dort gewinnt er gegen die Regel des Themes, die genau dorthin zielt.
+    body.style.removeProperty("--profile-align");
+    if (style.profileAlign && style.profileAlign !== "auto") {
+      body.style.setProperty("--profile-align", style.profileAlign);
+    }
+
     //  Die Fassung des Vertrags, gegen den dieses Markup geschrieben ist.
     //  Ein Theme darf sich daran festhalten – und spaeter daran merken,
     //  dass es fuer eine aeltere Fassung gedacht war.

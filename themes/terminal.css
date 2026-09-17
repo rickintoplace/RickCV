@@ -12,6 +12,8 @@
 */
 
 [data-template] {
+  /*  Der Profiltext liest sich hier linksbündig besser als zentriert.  */
+  --profile-align: left;
   --accent-color: #1f7a4d;
   --sidebar-color: #10201a;
   --sidebar-font-color: #d8e6df;

@@ -53,7 +53,10 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
   drop in someone else's, or write your own **in the builder itself** — a workshop with the
   document next to it that updates as you type, and a download button at the end. No checkout,
   no build, no reload.
-- **Customizable styling:** colors, typeface, font size, sidebar width, headline sizes and DIN 5008 margins.
+- **Customizable styling:** colors, typeface, font size, sidebar width, DIN 5008 margins, and
+  type down to the detail: heading size for the sidebar and the main column separately, the
+  space below a heading, and whether the summary sits centred, left or justified (themes bring
+  their own answer, and yours overrules it).
 - **One page or many:** By default the resume is laid out onto as many sheets as it needs, the
   way the cover letter already was: what does not fit moves to a new sheet — whole blocks, never
   cut in half — and a sheet is only added when something actually has to move. What the preview

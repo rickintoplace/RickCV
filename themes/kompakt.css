@@ -15,6 +15,7 @@
 [data-template] {
   --base-font-size: 12.5px;
   --headline-size: 14px;
+  --headline-size-main: 18px;
   --title-size: 26px;
   --left-margin: 1.4cm;
   --right-margin: 1.2cm;
