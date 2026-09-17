@@ -504,6 +504,11 @@
     function buildProjects(body) {
       body.appendChild(F.toggle("projects.show", t("showSection")));
       body.appendChild(F.text("projects.title", t("headline")));
+      body.appendChild(F.select("settings.projectsColumn", t("projectsColumn"), [
+        { value: "sidebar", label: t("projectsColumnSidebar") },
+        { value: "main", label: t("projectsColumnMain") },
+      ]));
+      body.appendChild(F.hint(t("projectsColumnHint")));
       body.appendChild(F.listEditor({
         path: "projects.items",
         addLabel: t("addProject"),
@@ -696,6 +701,8 @@
         })));
       body.appendChild(F.range("style.baseFontSize", t("fontSize"), 11, 17, 0.5, " px"));
       body.appendChild(F.hint(t("fontSizeHint")));
+      body.appendChild(F.range("style.pageBottom", t("pageBottom"), 0, 2, 0.1, " cm"));
+      body.appendChild(F.hint(t("pageBottomHint")));
 
       // --- Symbolstil ---
       var iconBlock = el("details", "sub-block");
@@ -891,13 +898,19 @@
       body.appendChild(pageMode);
       body.appendChild(F.hint(t("pageModeHint")));
 
-      if (state.settings.pageMode === "two") {
+      //  Folgeblaetter gibt es in beiden mehrseitigen Betriebsarten.
+      if (state.settings.pageMode !== "single") {
         var page2 = el("details", "sub-block");
         page2.open = true;
         page2.appendChild(el("summary", null, t("page2Block")));
         var page2Body = el("div", "sub-block-body");
 
         page2Body.appendChild(F.hint(t("page2Hint")));
+        page2Body.appendChild(F.select("settings.page2.sidebar", t("page2Sidebar"), [
+          { value: "keep", label: t("page2SidebarKeep") },
+          { value: "none", label: t("page2SidebarNone") },
+        ]));
+        page2Body.appendChild(F.hint(t("page2SidebarHint")));
         page2Body.appendChild(F.toggle("settings.page2.repeatHeader", t("page2RepeatHeader")));
         page2Body.appendChild(F.toggle("settings.page2.repeatContact", t("page2RepeatContact")));
         page2Body.appendChild(F.toggle("settings.page2.repeatPhoto", t("page2RepeatPhoto")));

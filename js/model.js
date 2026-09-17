@@ -94,7 +94,18 @@
         //  an der Schnittkante sofort, wieviel zu streichen ist.
         pageMode: "flow",
 
+        //  Wie Folgeblaetter aussehen – gilt fuer "zwei Seiten" wie fuer
+        //  "automatisch mehrseitig".
+        //  Projekte stehen im Grundriss in der Seitenspalte. Wer sie als
+        //  Portfolio versteht, stellt sie in den Hauptteil – dort haben sie
+        //  die ganze Breite.
+        projectsColumn: "sidebar",
         page2: {
+          //  "keep" – Folgeblaetter haben dieselbe Seitenspalte
+          //  "none" – Folgeblaetter sind einspaltig, der Hauptteil nimmt
+          //           die ganze Breite (die Spaltenbloecke laufen dort
+          //           weiter, wo sonst der Hauptteil steht)
+          sidebar: "keep",
           repeatPhoto: false,
           repeatContact: true,
           repeatHeader: true,
@@ -140,6 +151,9 @@
         rightMargin: 2,
         bottomMargin: 2,
         headerHeight: 10,
+        //  Wieviel Luft unter dem letzten Block bleibt, in Zentimetern.
+        //  Weniger heisst: mehr passt auf ein Blatt.
+        pageBottom: 0.5,
       },
 
       photo: {

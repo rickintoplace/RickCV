@@ -182,6 +182,7 @@
       style.iconColor === "text" ? style.fontColor
       : style.iconColor === "custom" ? style.iconColorCustom
       : style.accentColor);
+    set("--page-bottom", (style.pageBottom === undefined ? 0.5 : style.pageBottom) + "cm");
     set("--icon-bg", style.iconBg === "none" ? "transparent" : style.iconBgColor);
     set("--icon-bg-radius", style.iconBg === "circle" ? "50%" : "0.28em");
     set("--icon-bg-pad", style.iconBg === "none" ? "0" : "0.3em");
@@ -401,6 +402,16 @@
     return '<div class="resume-page-number">' + esc(label) + "</div>";
   }
 
+  //  Derselbe Block, zwei moegliche Spalten: der Bauplan steht nur einmal.
+  //  Im Hauptteil traegt die Ueberschrift ein h2 wie die anderen Abschnitte
+  //  dort; in der Seitenspalte bleibt es ein div wie bei ihren Nachbarn.
+  function projectsBlock(data, inMain) {
+    var tag = inMain ? "h2" : "div";
+    return '<div class="resume_item resume_projects" data-block="projects">' +
+      "<" + tag + ' class="resume_title">' + esc(data.projects.title) + "</" + tag + ">" +
+      '<div class="resume_info projects_container">' + projectBlock(items(data.projects)) + "</div></div>";
+  }
+
   function buildSidebar(data, page, pages) {
     var blocks = "";
     var page2 = data.settings.page2;
@@ -435,10 +446,9 @@
         '<div class="interests_container">' + iconRows(items(data.interests)) + "</div>",
         "resume_interests", "interests");
     }
-    if (isOn(data.projects) && onPage(data.projects, page, pages)) {
-      blocks += '<div class="resume_item resume_projects" data-block="projects">' +
-        '<div class="resume_title">' + esc(data.projects.title) + "</div>" +
-        '<div class="resume_info projects_container">' + projectBlock(items(data.projects)) + "</div></div>";
+    if (data.settings.projectsColumn !== "main" &&
+        isOn(data.projects) && onPage(data.projects, page, pages)) {
+      blocks += projectsBlock(data, false);
     }
 
     var showPhoto = data.photo.show && data.photo.src &&
@@ -476,6 +486,11 @@
         '<h2 class="resume_title">' + Icons.html(section.icon) + esc(section.title) + "</h2>" +
         '<div class="timeline" data-timeline="' + esc(section.id) + '"></div></div>';
     });
+
+    if (data.settings.projectsColumn === "main" &&
+        isOn(data.projects) && onPage(data.projects, page, pages)) {
+      out += projectsBlock(data, true);
+    }
 
     if (isOn(data.skills) && onPage(data.skills, page, pages)) {
       out += '<div class="resume_item resmue_skills" data-block="skills">' +
@@ -1044,9 +1059,9 @@
     //  Die Fusszeilen gehoeren ans Ende des Dokuments. Sie umzuhaengen kann
     //  das letzte Blatt wieder zum Ueberlaufen bringen – also danach noch
     //  einmal von dort aus verteilen.
-    moveFooters(sheets);
+    moveFooters(data, sheets);
     spread(sheets.length - 1);
-    moveFooters(sheets);
+    moveFooters(data, sheets);
 
     finishSheets(doc, data, sheets);
     return sheets.length;
@@ -1061,9 +1076,9 @@
   }
 
   function targetColumn(sheet, key) {
-    return key === "main"
-      ? sheet.querySelector('[data-column="main"]')
-      : sheet.querySelector('[data-column="sidebar"] .resume_bottom');
+    if (key === "main") return sheet.querySelector('[data-column="main"]');
+    return sheet.querySelector('[data-column="sidebar"] .resume_bottom') ||
+      sheet.querySelector('[data-column="main"]');
   }
 
   //  Was am unteren Rand mitlaeuft und deshalb Platz braucht: die
@@ -1126,21 +1141,46 @@
     var sheet = like.cloneNode(false);
     sheet.removeAttribute("style");
 
-    var side = like.querySelector('[data-column="sidebar"]');
-    var newSide = side.cloneNode(false);
-
-    if (data.settings.page2.repeatPhoto) {
-      var photo = side.querySelector(".resume_image");
-      if (photo) newSide.appendChild(photo.cloneNode(true));
-    }
-
-    var bottom = side.querySelector(".resume_bottom");
-    newSide.appendChild(bottom ? bottom.cloneNode(false) : doc.createElement("div"));
-
+    var page2 = data.settings.page2 || {};
     var main = like.querySelector('[data-column="main"]');
     var newMain = main.cloneNode(false);
 
-    if (data.settings.page2.repeatHeader) {
+    //  Ohne Seitenspalte nimmt der Hauptteil das ganze Blatt. Die Bloecke
+    //  der Spalte laufen dann dort weiter – sie muessen ja irgendwo hin.
+    if (page2.sidebar === "none") {
+      sheet.setAttribute("data-sidebar", "none");
+      newMain.style.width = "100%";
+
+      //  Ohne Spalte hat der Kontaktblock keinen Platz mehr neben dem Text –
+      //  wer ihn wiederholt haben will, bekommt ihn hier im Hauptteil.
+      if (page2.repeatContact) {
+        var moved = like.querySelector('[data-block="contact"]');
+        if (moved) newMain.appendChild(moved.cloneNode(true));
+      }
+    } else {
+      var side = like.querySelector('[data-column="sidebar"]');
+      var newSide = side.cloneNode(false);
+
+      if (page2.repeatPhoto) {
+        var photo = side.querySelector(".resume_image");
+        if (photo) newSide.appendChild(photo.cloneNode(true));
+      }
+
+      var bottom = side.querySelector(".resume_bottom");
+      var newBottom = bottom ? bottom.cloneNode(false) : doc.createElement("div");
+
+      //  Die Kontaktangaben auf jedem Blatt: ein einzelnes Blatt soll auch
+      //  dann zuzuordnen sein, wenn es aus der Mappe faellt.
+      if (page2.repeatContact) {
+        var contact = like.querySelector('[data-block="contact"]');
+        if (contact) newBottom.appendChild(contact.cloneNode(true));
+      }
+
+      newSide.appendChild(newBottom);
+      sheet.appendChild(newSide);
+    }
+
+    if (page2.repeatHeader) {
       var namerole = main.querySelector('[data-block="namerole"]');
       if (namerole) {
         var copy = namerole.cloneNode(true);
@@ -1149,25 +1189,52 @@
       }
     }
 
-    sheet.appendChild(newSide);
     sheet.appendChild(newMain);
     return sheet;
   }
 
-  //  Fusszeilen gehoeren ans Ende des Dokuments, nicht auf jedes Blatt.
-  function moveFooters(sheets) {
-    if (sheets.length < 2) return;
-    var last = sheets[sheets.length - 1];
+  //  Auf welchem Blatt eine Fussleiste steht, sagt ihre Einstellung:
+  //  "last" (Vorgabe), "all", "1" oder "2". Bei einem Blatt ist die Frage
+  //  ohnehin beantwortet.
+  function footerTargets(setting, count) {
+    var where = String(setting || "last");
+    if (where === "all") {
+      var all = [];
+      for (var i = 0; i < count; i++) all.push(i);
+      return all;
+    }
+    if (where === "1") return [0];
+    if (where === "2") return count > 1 ? [1] : [count - 1];
+    return [count - 1];
+  }
 
-    sheets.forEach(function (sheet, index) {
-      if (index === sheets.length - 1) return;
+  function placeFooter(sheets, node, selector, setting, column) {
+    if (!node) return;
+    var targets = footerTargets(setting, sheets.length);
 
-      var mainBottom = sheet.querySelector(".resume-column-bottom");
-      if (mainBottom) last.querySelector('[data-column="main"]').appendChild(mainBottom);
-
-      var sideFooter = sheet.querySelector(".resume-link-footer-left");
-      if (sideFooter) last.querySelector('[data-column="sidebar"]').appendChild(sideFooter);
+    //  Was auf anderen Blaettern liegt, verschwindet – sonst haette man
+    //  nach einem Wechsel der Einstellung zwei davon.
+    sheets.forEach(function (sheet) {
+      var existing = sheet.querySelector(selector);
+      if (existing && existing !== node) existing.parentNode.removeChild(existing);
     });
+
+    targets.forEach(function (index, position) {
+      var host = sheets[index].querySelector(column) ||
+        sheets[index].querySelector('[data-column="main"]');
+      if (!host) return;
+      host.appendChild(position === 0 ? node : node.cloneNode(true));
+    });
+  }
+
+  function moveFooters(data, sheets) {
+    if (sheets.length < 2) return;
+
+    var footers = data.footers || {};
+    placeFooter(sheets, sheets[0].querySelector(".resume-column-bottom"),
+      ".resume-column-bottom", (footers.right || {}).page, '[data-column="main"]');
+    placeFooter(sheets, sheets[0].querySelector(".resume-link-footer-left"),
+      ".resume-link-footer-left", (footers.left || {}).page, '[data-column="sidebar"]');
   }
 
   //  Nacharbeit: Seitenzahlen auf jedes Blatt, leere Blaetter weg.
@@ -1186,7 +1253,7 @@
       sheets.splice(i, 1);
     }
 
-    moveFooters(sheets);
+    moveFooters(data, sheets);
 
     sheets.forEach(function (sheet, index) {
       sheet.setAttribute("data-page", String(index + 1));

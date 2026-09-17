@@ -46,9 +46,19 @@
   color: var(--sidebar-font-color);
 }
 
+/*  Der Grundstil flankiert die Überschriften der Seitenspalte mit zwei
+    Linien. Mit der Unterstreichung dieses Themes wären es drei – also
+    bleibt die durchgehende. */
 [data-column="sidebar"] .resume_title {
+  display: block;
+  white-space: normal;
   border-bottom: 1px solid color-mix(in oklab, var(--sidebar-font-color), transparent 70%);
   padding-bottom: 0.2em;
+}
+
+[data-column="sidebar"] .resume_title::before,
+[data-column="sidebar"] .resume_title::after {
+  display: none;
 }
 
 /*  Statt Zeitleiste mit Punkten: eine Randlinie, an der die Stationen

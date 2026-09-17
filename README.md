@@ -59,10 +59,15 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
   cut in half — and a sheet is only added when something actually has to move. What the preview
   shows is what the PDF has, sheet for sheet. Switch to *one page* to keep everything on a
   single sheet (the rest is then cut off, in the preview as in print), or to *two pages* to
-  place every block by hand.
+  place every block by hand. Under **Folgeseiten/Further sheets** you say what those sheets
+  look like: sidebar or full width, letterhead repeated or not, contact details on every
+  sheet, and which sheet a footer belongs on. How much room stays free below the last block
+  is a slider in **Design** — less of it is often the difference between one sheet and two.
   The cover letter needs no switch: it breaks onto further A4 sheets by itself once the text no longer fits,
   keeping your margins on every page and numbering them per DIN 5008 — and it says so when that happens,
   because one page is almost always the right answer.
+- **Projects where you want them:** as a column of small entries in the sidebar, or at full
+  width in the main column behind the career — one setting under *Projekte/Projects*.
 - **Bring your data in:** Drop a file anywhere on the page — a RickCV backup, a
   [JSON Resume](https://jsonresume.org/) `resume.json`, the ZIP from LinkedIn's *Get a copy
   of your data* (or its single CSV files), an old resume as PDF, or plain text pasted into
@@ -115,7 +120,8 @@ git clone https://github.com/rickintoplace/RickCV.git
    You can also upload a scan of your signature. Under **Folgeseiten** you decide what a
    second sheet looks like: letterhead on page one only (DIN 5008) or repeated, and how the
    page numbers are labelled.
-7. **Design** – layout, accent color, typeface, font size, icon set, sidebar width and margins.
+7. **Design** – accent color, typeface, font size, icon set, sidebar width, margins and the
+   room left at the foot of a sheet.
 8. **Maschinenlesbarkeit** – see and edit what applicant systems read. See the section below.
 9. **Optionen** – interface language, date format, chronological order and multi-page mode.
 
@@ -188,7 +194,7 @@ Chromium-based browser.
 
 ## Themes
 
-A theme is one CSS file. Seven ship with RickCV —
+A theme is one CSS file. Ten ship with RickCV —
 [see them with pictures](themes/README.md):
 
 | Theme | |
@@ -200,6 +206,9 @@ A theme is one CSS file. Seven ship with RickCV —
 | **Klassisch** / Classic | serifs, small caps and hairlines, stations as a list with hanging dates |
 | **Kompakt** / Compact | the date moves onto the title's line; a career that needs two sheets elsewhere fits on one |
 | **Terminal** | monospaced, square, dark sidebar, stations against a gutter rule |
+| **Right Rail** | the sidebar moves to the right and loses its fill; the career starts at the left edge |
+| **Margin Heads** | section headings sit in the margin beside their section, not above it |
+| **Banner** | a coloured band carries the name across the main column, skills sit in pills |
 
 The same mechanism takes any other file: drop a `.css` anywhere on the builder, or pick one in
 **Themes**.

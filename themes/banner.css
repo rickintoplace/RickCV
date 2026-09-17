@@ -1,0 +1,149 @@
+/* @rickcv-theme
+   name:     Banner
+   name-en:  Banner
+   author:   RickCV
+   licence:  CC0-1.0
+   contract: 1
+   about:    Ein farbiges Band trägt den Namen über die ganze Breite des
+             Hauptteils, Abschnitte tragen Versalien, Kenntnisse stehen als
+             Plaketten. Laut, aber geordnet – für Branchen, in denen ein
+             Lebenslauf auffallen darf.
+   about-en: A coloured band carries the name across the main column,
+             sections wear small capitals, skills sit in pills. Loud but
+             orderly – for fields where a résumé may stand out.
+*/
+
+[data-template] {
+  --font-family: "Inter", "Source Sans 3", system-ui, sans-serif;
+  line-height: 1.4;
+}
+
+/*  Der Hauptteil setzt seinen eigenen Innenabstand; das Band soll über die
+    ganze Spaltenbreite laufen, also wird der Abstand hier ausgeglichen.  */
+[data-block="namerole"] {
+  background: var(--accent-color);
+  color: var(--background-color);
+  margin: -20px -40px 1.2em;
+  padding: 1.1em 40px 1em;
+}
+
+[data-block="namerole"] h1,
+[data-block="namerole"] .role {
+  color: var(--background-color);
+}
+
+[data-block="namerole"] h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+[data-block="namerole"] .role {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.78em;
+  opacity: 0.9;
+}
+
+/*  Auf Folgeblättern wiederholt sich der Kopf kleiner – das Band soll
+    dort nicht die halbe Seite tragen.  */
+[data-block="namerole"].resume_namerole-repeat {
+  padding: 0.6em 40px 0.55em;
+}
+
+[data-column="main"] .resume_title {
+  font-size: 0.82em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+}
+
+[data-column="sidebar"] .resume_title {
+  display: block;
+  white-space: normal;
+  text-align: left;
+  font-size: 0.78em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+[data-column="sidebar"] .resume_title::before,
+[data-column="sidebar"] .resume_title::after {
+  display: none;
+}
+
+/*  Kenntnisse als Plaketten statt als Zeile mit Punkten.  */
+.skills-container {
+  gap: 0.4em 0.5em;
+}
+
+.skills-container .skills {
+  gap: 0.45em;
+  border: 1px solid color-mix(in oklab, var(--accent-color), transparent 65%);
+  border-radius: 999px;
+  padding: 0.12em 0.7em;
+  flex: 0 0 auto;
+}
+
+.skills-container .skill-description {
+  margin-left: 0;
+}
+
+/*  Werdegang flach, mit kräftiger Marke am Eintrag.  */
+/*  Flex bleibt: der Renderer dreht die Reihenfolge über
+    flex-direction: column-reverse, wenn "neueste zuerst" eingestellt ist.  */
+.timeline {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.timeline::before,
+.event::after,
+.event .dot,
+.line {
+  display: none;
+}
+
+.event {
+  width: 100%;
+  min-height: 0;
+  display: block;
+  margin: 0;
+  padding: 0.28em 0 0.32em;
+}
+
+.event .date {
+  position: static;
+  left: auto;
+  width: auto;
+  min-width: 0;
+  display: block;
+  float: right;
+  margin-left: 1em;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82em;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.event .content {
+  margin-left: 0;
+  left: 0;
+  padding: 0 0 0 0.8em;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/*  Der Streifen des Grundstils bleibt – hier bekommt er Abstand zum Text
+    und die Akzentfarbe.  */
+.event .content::before {
+  background: var(--accent-color);
+  width: 3px;
+  border-radius: 999px;
+}
+
+.content h3 {
+  font-size: 1em;
+  font-weight: 650;
+}

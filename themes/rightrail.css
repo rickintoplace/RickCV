@@ -1,0 +1,136 @@
+/* @rickcv-theme
+   name:     Rechte Spalte
+   name-en:  Right Rail
+   author:   RickCV
+   licence:  CC0-1.0
+   contract: 1
+   about:    Die Seitenspalte steht rechts, ohne Farbfläche, nur durch eine
+             Haarlinie abgesetzt. Der Werdegang beginnt dadurch am linken
+             Blattrand – dort, wo das Auge zu lesen anfängt.
+   about-en: The sidebar sits on the right, unfilled, set off by a hairline.
+             The career therefore starts at the left edge of the sheet –
+             where the eye starts reading.
+*/
+
+/*  Ein Blatt ist ein Flex-Kasten: Seitenspalte, dann Hauptteil. Umgedreht
+    steht die Spalte rechts – mehr braucht es dafür nicht.  */
+.resume_wrapper {
+  flex-direction: row-reverse;
+}
+
+[data-template] {
+  --sidebar-color: transparent;
+  --font-family: "Inter", "Source Sans 3", system-ui, sans-serif;
+  line-height: 1.45;
+}
+
+/*  Ohne Farbfläche braucht die Spalte eine Kante, sonst schwimmt sie.  */
+[data-column="sidebar"] {
+  border-left: 1px solid color-mix(in oklab, var(--font-color), transparent 85%);
+}
+
+[data-column="sidebar"] .resume_title {
+  display: block;
+  white-space: normal;
+  text-align: left;
+  font-size: 0.78em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+[data-column="sidebar"] .resume_title::before,
+[data-column="sidebar"] .resume_title::after {
+  display: none;
+}
+
+/*  Ohne Farbflaeche wirkt zentrierter Text in der Spalte wie ein
+    Fremdkoerper: alles haengt an derselben Kante wie die Haarlinie.  */
+[data-column="sidebar"] .resume_info,
+[data-column="sidebar"] .profile-container,
+[data-column="sidebar"] .textblock {
+  text-align: left;
+}
+
+[data-block="photo"] img {
+  border-radius: 0;
+}
+
+[data-block="namerole"] h1 {
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+[data-block="namerole"] .role {
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  opacity: 0.75;
+}
+
+[data-column="main"] .resume_title {
+  font-size: 0.85em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--accent-color);
+  padding-bottom: 0.25em;
+}
+
+/*  Werdegang als Liste mit hängendem Datum.  */
+/*  Flex bleibt: der Renderer dreht die Reihenfolge über
+    flex-direction: column-reverse, wenn "neueste zuerst" eingestellt ist.  */
+.timeline {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.timeline::before,
+.event::after,
+.event .dot,
+.line {
+  display: none;
+}
+
+.event {
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 6.2em 1fr;
+  gap: 0 1.2em;
+  margin: 0;
+  padding: 0.3em 0;
+}
+
+.event .date {
+  position: static;
+  left: auto;
+  width: auto;
+  min-width: 0;
+  display: block;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85em;
+  padding-top: 0.25em;
+  opacity: 0.7;
+}
+
+.event .content {
+  margin-left: 0;
+  left: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/*  Der farbige Streifen am Eintrag gehört zur Kästchen-Optik des
+    Grundstils und hätte in einer flachen Liste keinen Abstand zum Text.  */
+.event .content::before {
+  display: none;
+}
+
+.content h3 {
+  font-size: 1em;
+  font-weight: 640;
+}

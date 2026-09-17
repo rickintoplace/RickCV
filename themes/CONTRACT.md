@@ -62,6 +62,11 @@ eigene Name muss im Selektor nicht vorkommen.
 Jeder Block trägt zusätzlich `.resume_item`, jede Blocküberschrift
 `.resume_title`.
 
+Folgeblätter sehen genauso aus, tragen aber `data-page="2"`, `"3"` … Wer sie
+anders setzen will, hat daran einen Haken – und `[data-sidebar="none"]` am
+Blatt, wenn eingestellt ist, dass Folgeblätter einspaltig laufen. Eine
+wiederholte Kopfzeile trägt zusätzlich `.resume_namerole-repeat`.
+
 ## Variablen
 
 Sie stehen am Anfang von `styles.css` und sind die eigentliche Schnittstelle;

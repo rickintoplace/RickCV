@@ -1,0 +1,151 @@
+/* @rickcv-theme
+   name:     Randtitel
+   name-en:  Margin Heads
+   author:   RickCV
+   licence:  CC0-1.0
+   contract: 1
+   about:    Die Überschriften stehen im Rand neben ihrem Abschnitt statt
+             darüber. Das schafft eine ruhige Lesespalte und spart je
+             Abschnitt eine Zeile – nach dem Vorbild der Lebensläufe
+             amerikanischer Hochschulen.
+   about-en: Headings sit in the margin beside their section instead of
+             above it. That leaves one calm reading column and saves a line
+             per section – after the résumés of US universities.
+*/
+
+[data-template] {
+  --font-family: "Source Sans 3", "Inter", system-ui, sans-serif;
+  --sidebar-color: #f6f5f2;
+  line-height: 1.4;
+}
+
+/*  Kern des Themes: Titel links im Rand, Inhalt rechts daneben. Der Block
+    ist im Grundstil eine Säule – hier wird er zweispaltig.  */
+[data-column="main"] [data-block="section"],
+[data-column="main"] [data-block="skills"],
+[data-column="main"] [data-block="mobility"],
+[data-column="main"] [data-block="references"] {
+  display: grid;
+  grid-template-columns: 7.5em 1fr;
+  gap: 0 1.4em;
+  align-items: start;
+  padding: 0.5em 0;
+}
+
+[data-column="main"] .resume_title {
+  grid-column: 1;
+  margin: 0;
+  padding-top: 0.25em;
+  font-size: 0.78em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: right;
+  color: var(--accent-color);
+  border: 0;
+  /*  Das Symbol vor der Überschrift wirkt im schmalen Rand wie ein
+      Fleck – der Text trägt hier allein.  */
+  display: block;
+}
+
+[data-column="main"] .resume_title .material-symbols-outlined,
+[data-column="main"] .resume_title .rc-icon,
+[data-column="main"] .resume_title .material-icons {
+  display: none;
+}
+
+[data-column="main"] [data-block="section"] .timeline,
+[data-column="main"] .resume_info {
+  grid-column: 2;
+}
+
+[data-block="namerole"] {
+  border-bottom: 2px solid var(--accent-color);
+  padding-bottom: 0.4em;
+}
+
+[data-block="namerole"] h1 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+[data-block="namerole"] .role {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.78em;
+  opacity: 0.75;
+}
+
+/*  Flache Liste im Lesebereich: Datum über dem Titel, damit die schmale
+    Spalte nicht noch einmal geteilt werden muss.  */
+/*  Flex bleibt: der Renderer dreht die Reihenfolge über
+    flex-direction: column-reverse, wenn "neueste zuerst" eingestellt ist.  */
+.timeline {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.timeline::before,
+.event::after,
+.event .dot,
+.line {
+  display: none;
+}
+
+.event {
+  width: 100%;
+  min-height: 0;
+  display: block;
+  margin: 0;
+  padding: 0.25em 0 0.35em;
+}
+
+.event + .event {
+  border-top: 1px solid color-mix(in oklab, var(--font-color), transparent 90%);
+}
+
+.event .date {
+  position: static;
+  left: auto;
+  width: auto;
+  min-width: 0;
+  display: block;
+  float: right;
+  margin-left: 1em;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82em;
+  opacity: 0.65;
+}
+
+.event .content {
+  margin-left: 0;
+  left: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.event .content::before {
+  display: none;
+}
+
+.content h3 {
+  font-size: 1em;
+  font-weight: 640;
+}
+
+[data-column="sidebar"] .resume_title {
+  display: block;
+  white-space: normal;
+  text-align: left;
+  font-size: 0.78em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+}
+
+[data-column="sidebar"] .resume_title::before,
+[data-column="sidebar"] .resume_title::after {
+  display: none;
+}

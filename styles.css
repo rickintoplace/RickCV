@@ -83,6 +83,7 @@
   --left-margin: 2.5cm;
   --right-margin: 2cm;
   --bottom-margin: 2cm;
+  --page-bottom: 0.5cm; /* Luft unter dem letzten Block im Lebenslauf */
   --header-height: 10em; /* Höhe der Kopfzeile */
 }
 
@@ -334,10 +335,19 @@ a {
   font-size: 0.9em;
 }
 
-.content p, span {
-  /*margin: 5px 0 0;*/
-  font-size: 0.95em;
+/*  Hier stand ein Komma zuviel: ".content p, span" traf jedes <span> im
+    ganzen Dokument und faerbte es mit der Schriftfarbe des Hauptteils –
+    auch in der Seitenspalte. Themes mit dunkler Spalte hatten dadurch
+    dunkle Schrift auf dunklem Grund, etwa in den Projektbeschreibungen.
+    Die Groesse bleibt wie gehabt, die Farbe kommt jetzt von der Spalte. */
+.content p,
+.content span {
   color: var(--font-color);
+}
+
+.content p,
+span {
+  font-size: 0.95em;
 }
 
 .content .event-list ul {
@@ -446,6 +456,13 @@ body.pages-two .project {
   background: var(--sidebar-color);
   display: flex;
   flex-direction: column;
+
+  /*  Die Spalte gibt ihre Schriftfarbe an alles darin weiter. Frueher
+      setzten das nur einzelne Regeln (Ueberschriften, Sprachen, Fussleiste)
+      – ein Theme mit dunkler Seitenspalte hatte deshalb dunkle Schrift auf
+      dunklem Grund, sobald es an eine Stelle kam, die niemand bedacht
+      hatte: Projektbeschreibungen etwa. */
+  color: var(--sidebar-font-color);
 }
 
 .resume_wrapper .resume_left .resume_image {
@@ -501,7 +518,10 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   }
 }
 
-.resume_wrapper .resume_title {
+/*  Nur in der Seitenspalte: im Hauptteil gilt die Schriftfarbe des
+    Dokuments. Bei gleichen Farben faellt der Unterschied nicht auf, bei
+    einer dunklen Spalte sehr wohl. */
+.resume_wrapper .resume_left .resume_title {
   color: var(--sidebar-font-color);
   text-transform: uppercase;
   /* font-variant: small-caps; */
@@ -583,11 +603,15 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 }
 
 .resume_wrapper .resume_left .resume_bottom {
-  padding: 20px 30px;
+  padding: 20px 30px var(--page-bottom);
 }
 
+/*  Abstand zwischen zwei Bloecken. Frueher standen hier 20px: bei fuenf
+    Bloecken im Hauptteil sind das rund 100px – genug, um einen einzelnen
+    letzten Block auf ein zweites, sonst leeres Blatt zu schieben. Zwoelf
+    reichen, um die Bloecke zu trennen, und sparen das Blatt. */
 .resume_wrapper .resume_item {
-  padding: 20px 0;
+  padding: 12px 0;
 }
 
 .resume_left .resume_item {
@@ -740,6 +764,22 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   width: 80%;
 }
 
+/*  Im Hauptteil hat der Block die ganze Spaltenbreite. Das Bild darf dann
+    kleiner sein – es ist eine Marke, kein Motiv – und der Text nimmt den
+    Rest, statt auf 80% einer viel breiteren Spalte zu haengen. */
+[data-column="main"] .project-img-holder {
+  width: 3.2em;
+}
+
+[data-column="main"] .project-txt {
+  width: auto;
+  flex: 1;
+}
+
+[data-column="main"] .resume_info.project {
+  margin-bottom: 0.7em;
+}
+
 .project .project-title {
   font-variant: small-caps;
   /*font-size: 1.4em;*/
@@ -747,7 +787,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 
 .resume_wrapper .resume_right {
   width: 65%;
-  padding: 20px 40px;
+  padding: 20px 40px var(--page-bottom);
   color: var(--font-color);
   /*  Saeule statt Block, damit sich die Fusszeile mit margin-top:auto an den
       unteren Rand haengen kann. */
@@ -1129,7 +1169,7 @@ body.pages-fixed .resume_wrapper {
 
 .resume-link-footer-left {
   margin-top: auto;
-  padding: 1.2em 30px 20px;
+  padding: 1.2em 30px var(--page-bottom);
   color: var(--sidebar-font-color);
 }
 

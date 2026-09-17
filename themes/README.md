@@ -6,6 +6,14 @@ im Baukasten selbst: Themes → Werkstatt, tippen, zusehen, Datei herunterladen.
 
 Die Bilder hier erzeugt `python3 tools/make-theme-previews.py`.
 
+## Banner
+
+Ein farbiges Band trägt den Namen über die ganze Breite des Hauptteils, Abschnitte tragen Versalien, Kenntnisse stehen als Plaketten. Laut, aber geordnet – für Branchen, in denen ein Lebenslauf auffallen darf. about-en: A coloured band carries the name across the main column, sections wear small capitals, skills sit in pills. Loud but orderly – for fields where a résumé may stand out.
+
+![Banner](previews/banner.webp)
+
+`themes/banner.css`
+
 ## Clean
 
 Ruhige Grundform: Zeitleiste links am Rand, Datum rechts, kein Schnickschnack. Das Ausgangslayout von RickCV. about-en: A calm baseline: timeline along the edge, dates on the right, nothing else. RickCV's original layout.
@@ -53,6 +61,22 @@ Für lange Lebensläufe: das Datum steht in der Zeile des Titels statt daneben, 
 ![Kompakt](previews/kompakt.webp)
 
 `themes/kompakt.css`
+
+## Randtitel
+
+Die Überschriften stehen im Rand neben ihrem Abschnitt statt darüber. Das schafft eine ruhige Lesespalte und spart je Abschnitt eine Zeile – nach dem Vorbild der Lebensläufe amerikanischer Hochschulen. about-en: Headings sit in the margin beside their section instead of above it. That leaves one calm reading column and saves a line per section – after the résumés of US universities.
+
+![Randtitel](previews/marginheads.webp)
+
+`themes/marginheads.css`
+
+## Rechte Spalte
+
+Die Seitenspalte steht rechts, ohne Farbfläche, nur durch eine Haarlinie abgesetzt. Der Werdegang beginnt dadurch am linken Blattrand – dort, wo das Auge zu lesen anfängt. about-en: The sidebar sits on the right, unfilled, set off by a hairline. The career therefore starts at the left edge of the sheet – where the eye starts reading.
+
+![Rechte Spalte](previews/rightrail.webp)
+
+`themes/rightrail.css`
 
 ## Terminal
 

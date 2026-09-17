@@ -108,7 +108,10 @@ Field by field:
 | `settings.pageSize` | `"a4"` or `"letter"` — use `"letter"` for the US and Canada |
 | `settings.pageMode` | `"single"` (one sheet), `"flow"` (as many as the content needs), `"two"` (two sheets, each block assigned) |
 | `settings.showCoverLetter` | include the cover letter |
-| `theme.slug` | `clean`, `dynaline`, `icons`, `einspaltig`, `klassisch`, `kompakt`, `terminal` |
+| `settings.page2.sidebar` | `"keep"` (default) or `"none"` — whether sheets after the first keep the sidebar |
+| `settings.page2.repeatHeader` / `repeatContact` / `repeatPhoto` | what a follow-up sheet repeats |
+| `style.pageBottom` | centimetres of free space below the last block, `0.5` by default |
+| `theme.slug` | `clean`, `dynaline`, `icons`, `einspaltig`, `klassisch`, `kompakt`, `terminal`, `rightrail`, `marginheads`, `banner` |
 | `events[].sectionId` | `"experience"`, `"education"` or `"volunteer"` |
 | `events[].start` / `end` | `"MM/YYYY"` or `"YYYY"`; `present: true` means "to this day" |
 | `events[].dateMode` | `"auto"` (default), `"range"`, `"start"`, `"none"` — for entries without a period |
