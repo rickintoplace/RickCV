@@ -686,11 +686,10 @@
     /* -------------------------------------------------------------- Design */
 
     function buildDesign(body) {
-      body.appendChild(F.select("settings.template", t("layout"), [
-        { value: "clean", label: t("layoutClean") },
-        { value: "icons", label: t("layoutIcons") },
-        { value: "dynaline", label: t("layoutDynaline") },
-      ]));
+      //  Die Vorlagenauswahl stand frueher hier. Sie ist in den Abschnitt
+      //  "Themes" gewandert, wo sie hingehoert – mit Vorschau statt drei
+      //  Wörtern in einem Auswahlfeld.
+      body.appendChild(F.hint(t("designThemeHint")));
       body.appendChild(F.select("style.fontFamily", t("font"),
         global.RickCVRender.fonts.map(function (name) {
           return { value: name, label: name };
@@ -873,6 +872,14 @@
 
       //  Der Wechsel des Seitenmodus blendet in allen anderen Abschnitten die
       //  Seitenauswahl ein oder aus – deshalb wird der Editor neu aufgebaut.
+      //  Blattmass zuerst: davon haengt ab, wieviel ueberhaupt auf eine
+      //  Seite passt.
+      body.appendChild(F.select("settings.pageSize", t("pageSize"), [
+        { value: "a4", label: t("pageSizeA4") },
+        { value: "letter", label: t("pageSizeLetter") },
+      ]));
+      body.appendChild(F.hint(t("pageSizeHint")));
+
       var pageMode = F.select("settings.pageMode", t("pageMode"), [
         { value: "single", label: t("pageSingle") },
         { value: "two", label: t("pageTwo") },

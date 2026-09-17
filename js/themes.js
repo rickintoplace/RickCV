@@ -37,7 +37,7 @@
   //  Fortsetzungszeilen ohne "schluessel:" gehoeren zum vorigen Wert.
   function parseMeta(css) {
     var meta = {
-      name: "", author: "", licence: "", about: "", about_en: "",
+      name: "", name_en: "", author: "", licence: "", about: "", about_en: "",
       contract: 0, defaults: "",
     };
     var head = String(css).match(/\/\*[\s\S]*?@rickcv-theme([\s\S]*?)\*\//);
@@ -169,7 +169,7 @@
       var meta = parseMeta(bundle[slug]);
       return {
         slug: slug,
-        name: meta.name || slug,
+        name: (english && meta.name_en) || meta.name || slug,
         author: meta.author,
         licence: meta.licence,
         about: (english && meta.about_en) || meta.about,

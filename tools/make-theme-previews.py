@@ -66,7 +66,7 @@ def serve():
     return server
 
 
-def shrink(path, width=640):
+def shrink(path, target, width=640):
     """Verkleinert das Bild, wenn Pillow da ist.
 
     Ein Blatt in voller Breite kostet knapp 300 kB. In einer Galerie, die
@@ -77,6 +77,7 @@ def shrink(path, width=640):
     try:
         from PIL import Image
     except ImportError:
+        os.replace(path, target)
         return
 
     image = Image.open(path).convert("RGB")
@@ -84,9 +85,10 @@ def shrink(path, width=640):
         height = round(image.height * width / image.width)
         image = image.resize((width, height), Image.LANCZOS)
 
-    #  Ein Lebenslauf ist fast durchgehend flaechig: mit einer Palette
-    #  bleibt er scharf und braucht ein Drittel des Platzes.
-    image.convert("P", palette=Image.ADAPTIVE, colors=128).save(path, optimize=True)
+    #  WebP: schaerfer als ein JPEG derselben Groesse und ein Bruchteil des
+    #  PNGs. Eine Galerie, die mit jedem Beitrag waechst, bleibt so klein.
+    image.save(target, "WEBP", quality=88, method=6)
+    os.remove(path)
 
 
 def main():
@@ -105,20 +107,21 @@ def main():
         for slug in slugs:
             probe = os.path.join(ROOT, ".theme-preview.html")
             io.open(probe, "w", encoding="utf-8").write(PAGE % {"slug": slug, "locale": "de"})
-            target = os.path.join(SHOTS, slug + ".png")
+            shot = os.path.join(SHOTS, slug + ".png")
+            target = os.path.join(SHOTS, slug + ".webp")
 
             subprocess.run([
                 chrome, "--headless", "--disable-gpu", "--no-sandbox",
                 "--window-size=820,1160", "--virtual-time-budget=9000",
-                "--screenshot=" + target,
+                "--screenshot=" + shot,
                 "http://127.0.0.1:%d/.theme-preview.html" % PORT,
             ], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
             os.remove(probe)
 
-            if not os.path.exists(target):
+            if not os.path.exists(shot):
                 raise SystemExit("Vorschau fuer %s ist nicht entstanden." % slug)
 
-            shrink(target)
+            shrink(shot, target)
 
             css = io.open(os.path.join(THEMES, slug + ".css"), encoding="utf-8").read()
             name = (re.search(r"name:\s*(.+)", css) or [None, slug])[1].strip()
@@ -137,7 +140,7 @@ def main():
     for slug, name, about in rows:
         gallery += ["## %s" % name, "",
                     "%s" % (about or ""), "",
-                    "![%s](previews/%s.png)" % (name, slug), "",
+                    "![%s](previews/%s.webp)" % (name, slug), "",
                     "`themes/%s.css`" % slug, ""]
 
     io.open(os.path.join(THEMES, "README.md"), "w", encoding="utf-8").write("\n".join(gallery))

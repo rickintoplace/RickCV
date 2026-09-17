@@ -186,6 +186,7 @@
     set("--icon-bg-radius", style.iconBg === "circle" ? "50%" : "0.28em");
     set("--icon-bg-pad", style.iconBg === "none" ? "0" : "0.3em");
 
+    applyPageSize(doc, data);
     root.lang = data.locale || "de"; // landet als /Lang im PDF
 
     var body = doc.body;
@@ -666,7 +667,9 @@
    *  eigenen Raendern – genauso, wie es der Lebenslauf haelt.
    */
 
-  var LETTER_PAGE_HEIGHT = (29.7 / 2.54) * 96;   // A4-Hoehe in px bei 96 dpi
+  //  Hoehe des Blattes in px bei 96 dpi – haengt am gewaehlten Format und
+  //  wird vor jedem Umbruch neu gesetzt.
+  var LETTER_PAGE_HEIGHT = (29.7 / 2.54) * 96;
 
   //  Beim Teilen bleiben mindestens so viele Zeilen auf jeder Seite stehen.
   //  Eine einzelne Zeile am Seitenanfang oder -ende liest sich wie ein
@@ -974,6 +977,35 @@
     return name ? kind + " – " + name : kind;
   }
 
+  //  Zwei Blattmasse. Mehr braucht ein Lebenslauf nicht: A4 ueberall,
+  //  Letter in Nordamerika. Die Masse stehen als Variablen am <html> und
+  //  zusaetzlich in einer @page-Regel – die versteht keine Variablen,
+  //  entscheidet aber darueber, was der Druckdialog anbietet.
+  var PAGE_SIZES = {
+    a4: { width: "21cm", height: "29.7cm", css: "A4", heightPx: (29.7 / 2.54) * 96 },
+    letter: { width: "21.59cm", height: "27.94cm", css: "letter", heightPx: 11 * 96 },
+  };
+
+  function pageSize(data) {
+    return PAGE_SIZES[(data.settings && data.settings.pageSize) || "a4"] || PAGE_SIZES.a4;
+  }
+
+  function applyPageSize(doc, data) {
+    var size = pageSize(data);
+    var root = doc.documentElement;
+    root.style.setProperty("--page-width", size.width);
+    root.style.setProperty("--page-height", size.height);
+
+    var node = doc.getElementById("rickcv-page");
+    if (!node) {
+      node = doc.createElement("style");
+      node.id = "rickcv-page";
+      doc.head.appendChild(node);
+    }
+    var rule = "@page { size: " + size.css + "; margin: 0; }";
+    if (node.textContent !== rule) node.textContent = rule;
+  }
+
   //  Fassung des DOM-Vertrags. Sie steht am <body> und in themes/CONTRACT.md;
   //  wer sie erhoeht, hat Klassennamen oder Haken geaendert.
   var CONTRACT = 1;
@@ -1050,6 +1082,7 @@
 
     //  Sofort und nicht erst im naechsten Bild: wer gleich nach dem Zeichnen
     //  druckt oder die Seitenzahl liest, soll das fertige Dokument sehen.
+    LETTER_PAGE_HEIGHT = pageSize(data).heightPx;
     letterPages = paginateLetter(doc, data);
 
     var direction = data.settings.reverseTimeline ? "column-reverse" : "column";
@@ -1070,6 +1103,7 @@
 
   global.RickCVRender = {
     CONTRACT: CONTRACT,
+    pageHeightPx: function (data) { return pageSize(data).heightPx; },
     render: render,
     fonts: Object.keys(FONT_STACK),
     documentTitle: documentTitle,

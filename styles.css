@@ -24,6 +24,11 @@
 
 :root {
   /*Farben*/
+  /*  Blattmaß: A4 als Vorgabe, US Letter über die Einstellungen. Der
+      Renderer setzt beides am <html>, damit auch @page passt.  */
+  --page-width: 21cm;
+  --page-height: 29.7cm;
+
   --background-color: #fff; /*Im Idealfall Weiß. Ein angenehmeres Fast-Weiß ist möglich, aber im Bewerbungskontext vielleicht sehr gewagt. */
   --accent-color: #286f6f; /*Der Farbtupfer für das Thema. #357f2d oder #128c7f funktionieren ganz gut*/
   --font-color: #33333b; /*Die Schriftfarbe. Schwarz oder eine dunkle Farbe*/
@@ -385,8 +390,8 @@ a {
   margin: 60px auto 0 0;
   background: var(--background-color);
   padding: var(--border);
-  width: 21cm;
-  height: 29.7cm;
+  width: var(--page-width);
+  height: var(--page-height);
 }
 
 /*  Mehrere Blaetter stehen als Geschwister im Dokument. Ohne eigene
@@ -404,7 +409,7 @@ a {
     alle Seiten, weil sie mit dem Flex-Container mitwaechst. */
 body.pages-flow .resume_wrapper {
   height: auto;
-  min-height: 29.7cm;
+  min-height: var(--page-height);
 }
 
 /*  Zweite Seite: jedes Blatt ist genau ein A4-Bogen. min-height statt height,
@@ -412,7 +417,7 @@ body.pages-flow .resume_wrapper {
     zu werden – die Seitenzahl in der Vorschau zeigt dann drei statt zwei. */
 body.pages-two .resume_wrapper {
   height: auto;
-  min-height: 29.7cm;
+  min-height: var(--page-height);
 }
 
 /* Einzelne Eintraege sollen nie mitten durchgeschnitten werden. */
@@ -907,8 +912,8 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   margin: 60px auto;
   background: var(--background-color);
   padding: var(--border);
-  width: 21cm;
-  height: 29.7cm;
+  width: var(--page-width);
+  height: var(--page-height);
 }
 
 /*  Mehrere Blaetter des Anschreibens stehen als Geschwister nebeneinander –
@@ -1204,7 +1209,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   html,
   body {
     background: #fff;
-    width: 21cm;
+    width: var(--page-width);
   }
 
   .document {
@@ -1258,7 +1263,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 
 .ats-appendix_wrapper {
   width: 21cm;
-  min-height: 29.7cm;
+  min-height: var(--page-height);
   margin: 60px auto;
   padding: 2cm var(--right-margin) var(--bottom-margin) var(--left-margin);
   background: var(--background-color);

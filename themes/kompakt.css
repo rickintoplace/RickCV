@@ -1,12 +1,15 @@
 /* @rickcv-theme
    name:     Kompakt
+   name-en:  Compact
    author:   RickCV
    licence:  CC0-1.0
    contract: 1
-   about:    Enger gesetzt, damit ein langer Werdegang auf ein Blatt passt:
-             kleinere Schrift, weniger Luft, schmalere Ränder.
-   about-en: Set tighter so a long career fits on one sheet: smaller type,
-             less air, narrower margins.
+   about:    Für lange Lebensläufe: das Datum steht in der Zeile des Titels
+             statt daneben, Aufzählungen rücken enger, Ränder schrumpfen.
+             Damit passt ein Werdegang auf ein Blatt, der sonst zwei braucht.
+   about-en: For long careers: the date sits on the title's line instead of
+             beside it, bullets move closer, margins shrink. A career that
+             needs two sheets elsewhere fits on one.
 */
 
 [data-template] {
@@ -16,37 +19,82 @@
   --left-margin: 1.4cm;
   --right-margin: 1.2cm;
   --bottom-margin: 1.2cm;
-  line-height: 1.32;
-}
-
-.resume_item {
-  margin-bottom: 0.45em;
-}
-
-.event {
-  margin: 0.25em 0;
-  padding-top: 0.15em;
-  padding-bottom: 0.15em;
-}
-
-.event .event-content,
-.event .resume_subinfo {
   line-height: 1.3;
 }
 
-.resume_title {
-  margin-bottom: 0.25em;
+/*  Kein Platzhalter für eine Datumsspalte: das Datum wandert in die Zeile
+    des Titels. Das spart pro Station eine halbe Zeile Höhe – bei zwölf
+    Stationen ist das eine Seite.  */
+/*  Flex bleibt: der Renderer dreht die Reihenfolge über
+    flex-direction: column-reverse, wenn "neueste zuerst" eingestellt ist.
+    Mit display:block ginge diese Einstellung still verloren.  */
+.timeline {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
 }
 
-/*  Aufzählungen dürfen enger stehen als Fließtext.  */
+.timeline::before,
+.event::after,
+.event .dot,
+.line {
+  display: none;
+}
+
+.event {
+  width: 100%;
+  min-height: 0;
+  display: block;
+  margin: 0;
+  padding: 0.18em 0;
+}
+
+.event .date {
+  position: static;
+  width: auto;
+  left: auto;
+  float: right;
+  display: block;
+  margin-left: 1em;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in oklab, var(--font-color), transparent 30%);
+}
+
+/*  Anfang und Ende in einer Zeile: der Umbruch im Datum entfällt.  */
+.event .date br {
+  display: none;
+}
+
+.event .content {
+  margin-left: 0;
+  left: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.content h3 {
+  margin: 0;
+  display: inline;
+}
+
 .event ul {
-  margin: 0.1em 0 0;
+  margin: 0.05em 0 0;
 }
 
 .event li {
   margin: 0;
 }
 
+.resume_item {
+  margin-bottom: 0.4em;
+}
+
+.resume_title {
+  margin-bottom: 0.2em;
+}
+
 [data-column="sidebar"] .resume_item {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.45em;
 }

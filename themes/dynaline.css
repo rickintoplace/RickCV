@@ -71,3 +71,21 @@
     /* display: none; */
   }
 }
+
+/*  Etwas enger als früher: mit voller Beispielbestückung lief das Blatt
+    sonst um ein paar Zeilen über. Innerhalb von [data-template], sonst
+    gewinnt die Schachtelung weiter oben in dieser Datei.  */
+[data-template] {
+  .timeline-container {
+    padding-bottom: 0.2em !important;
+  }
+
+  .event {
+    margin: 5px 0;
+  }
+
+  .event .content {
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+}

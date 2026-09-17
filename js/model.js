@@ -75,6 +75,10 @@
 
       settings: {
         template: "clean",
+        //  "a4" (210 x 297 mm) oder "letter" (8,5 x 11 Zoll). Wer sich in
+        //  den USA bewirbt, druckt auf Letter – ein A4-PDF kommt dort auf
+        //  jedem Drucker skaliert oder beschnitten heraus.
+        pageSize: "a4",
         dateFormat: "short",
         reverseTimeline: true,
         noLine: false,

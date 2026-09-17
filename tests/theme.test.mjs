@@ -17,6 +17,7 @@ import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
 import { execFileSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -99,11 +100,34 @@ ok(Themes.hooks("de").length >= 4 && Themes.hooks("en").length >= 4, "Hakenliste
 
 console.log("\n— Der Vertrag am gerenderten Dokument —");
 
+//  Über file:// lädt Chromium die Webfonts nicht – Schriftdateien
+//  unterliegen dort der Ursprungsprüfung. Ohne die echten Schriften fällt
+//  der Satz anders aus und jede Höhenmessung wäre wertlos. Also ein Server,
+//  und zwar derselbe wie in tools/make-theme-previews.py: ein eigener in
+//  Node hing sich mit Chromiums virtueller Zeit auf, weil deren Uhr auf
+//  offene Verbindungen wartet.
+const PORT = 8762;
+
+function serve() {
+  return spawn("python3", ["-m", "http.server", String(PORT), "--bind", "127.0.0.1"], {
+    cwd: root, stdio: "ignore",
+  });
+}
+
+//  Den Browser im PATH suchen, ohne eine Shell zu bemühen: das spart eine
+//  Warnung und eine Angriffsfläche.
 function findChromium() {
-  for (const name of ["chromium", "chromium-browser", "google-chrome", "google-chrome-stable"]) {
-    try {
-      return execFileSync("command", ["-v", name], { shell: true, encoding: "utf8" }).trim();
-    } catch { /* nächster Versuch */ }
+  const names = ["chromium", "chromium-browser", "google-chrome", "google-chrome-stable"];
+  const dirs = (process.env.PATH || "").split(path.delimiter).filter(Boolean);
+
+  for (const dir of dirs) {
+    for (const name of names) {
+      const candidate = path.join(dir, name);
+      try {
+        fs.accessSync(candidate, fs.constants.X_OK);
+        return candidate;
+      } catch { /* nächster Kandidat */ }
+    }
   }
   return null;
 }
@@ -112,6 +136,9 @@ const browser = findChromium();
 if (!browser) {
   console.log("  übersprungen (kein Chromium gefunden)");
 } else {
+  const server = serve();
+  await new Promise((done) => setTimeout(done, 800));
+  const origin = `http://127.0.0.1:${PORT}`;
   const probe = path.join(root, ".theme-contract-probe.html");
   fs.writeFileSync(probe, `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
 <link rel="stylesheet" href="styles.css"></head><body><div class="document"></div>
@@ -130,12 +157,72 @@ if (!browser) {
   try {
     dom = execFileSync(browser, [
       "--headless", "--disable-gpu", "--no-sandbox", "--allow-file-access-from-files",
-      "--virtual-time-budget=8000", "--dump-dom", probe,
+      "--window-size=900,1300", "--virtual-time-budget=8000",
+      "--dump-dom", origin + "/.theme-contract-probe.html",
     ], { encoding: "utf8", timeout: 90000, stdio: ["ignore", "pipe", "ignore"] });
   } catch (error) {
     ok(false, "Dokument gerendert", error.message);
   } finally {
     fs.unlinkSync(probe);
+  }
+
+  //  Läuft ein Theme über den Blattrand? Das ist der Fehler, den man beim
+  //  Schreiben eines Themes am leichtesten übersieht und im PDF am
+  //  teuersten bezahlt. Gemessen wird am gerenderten Blatt.
+  function overflowOf(slug) {
+    const probe = path.join(root, ".theme-overflow-probe.html");
+    //  Mit den echten Schriften messen: mit einer Ersatzschrift fällt der
+    //  Satz anders aus, und die Zahl wäre wertlos.
+    fs.writeFileSync(probe, `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="styles.css"></head><body><div class="document"></div>
+<script src="js/i18n.js"></script><script src="js/icon-data.js"></script>
+<script src="js/icons.js"></script><script src="js/theme-data.js"></script>
+<script src="js/themes.js"></script><script src="js/model.js"></script>
+<script src="js/ats.js"></script><script src="js/render.js"></script>
+<script>
+  var data = RickCVModel.createExample("de");
+  data.settings.showCoverLetter = false;
+  data.theme = { slug: ${JSON.stringify(slug)}, name: "", css: "", source: "builtin" };
+  RickCVRender.render(document, data);
+  setTimeout(function () {
+    var worst = 0;
+    document.querySelectorAll(".resume_wrapper").forEach(function (sheet) {
+      worst = Math.max(worst, sheet.scrollHeight - sheet.clientHeight);
+    });
+    document.title = "overflow:" + Math.round(worst);
+  }, 600);
+</script></body></html>`);
+
+    try {
+      const out = execFileSync(browser, [
+        "--headless", "--disable-gpu", "--no-sandbox", "--allow-file-access-from-files",
+        "--window-size=900,1300", "--virtual-time-budget=9000",
+        "--dump-dom", origin + "/.theme-overflow-probe.html",
+      ], { encoding: "utf8", timeout: 90000, stdio: ["ignore", "pipe", "ignore"] });
+      const match = out.match(/<title>overflow:(-?\d+)<\/title>/);
+      return match ? Number(match[1]) : null;
+    } catch {
+      return null;
+    } finally {
+      fs.unlinkSync(probe);
+    }
+  }
+
+  console.log("\n— Kein Überlauf über den Blattrand —");
+  for (const name of files) {
+    const slug = name.replace(/\.css$/, "");
+    const over = overflowOf(slug);
+    //  Die Schwelle fängt Layoutfehler ab – eine Regel, die den Inhalt weit
+    //  über den Rand schiebt –, nicht die Frage, ob ein besonders volles
+    //  Beispiel auf ein Blatt passt. Der gemessene Wert steht immer dabei,
+    //  damit auch eine Verschlechterung unterhalb der Schwelle auffällt.
+    const limit = 180;
+    ok(over !== null && over <= limit, `${slug}: bleibt auf dem Blatt`,
+       over === null ? "nicht messbar" : over + " px über dem Rand");
+    if (over !== null && over > 0 && over <= limit) {
+      console.log(`       ${over} px über dem Rand – unter der Schwelle von ${limit}`);
+    }
   }
 
   if (dom) {
@@ -156,6 +243,8 @@ if (!browser) {
     ok(/@layer theme \{/.test(dom), "Theme liegt in der oberen Kaskadenebene");
     ok(dom.includes("Harald Töpfer"), "Beispieldaten sind im Dokument");
   }
+
+  server.kill();
 }
 
 console.log(fails ? `\n${fails} Fehler\n` : "\nalles grün\n");

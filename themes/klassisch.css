@@ -1,13 +1,16 @@
 /* @rickcv-theme
    name:     Klassisch
+   name-en:  Classic
    author:   RickCV
    licence:  CC0-1.0
    contract: 1
-   about:    Serifen, feine Linien, keine Flächen. Für Bewerbungen, bei
-             denen Zurückhaltung die Botschaft ist – Behörden, Kanzleien,
-             Banken.
-   about-en: Serifs, thin rules, no filled areas. For applications where
-             restraint is the message – public service, law, banking.
+   about:    Serifen, Kapitälchen, Haarlinien. Kein Punkt, kein Kasten,
+             keine Farbfläche – die Stationen stehen als Liste mit hängendem
+             Datum. Für Bewerbungen, bei denen Zurückhaltung die Botschaft
+             ist: Behörden, Kanzleien, Banken.
+   about-en: Serifs, small caps, hairlines. No dots, no boxes, no filled
+             areas – stations sit as a list with hanging dates. For
+             applications where restraint is the message.
 */
 
 [data-template] {
@@ -17,7 +20,6 @@
   font-family: var(--font-family);
 }
 
-/*  Überschriften: Kapitälchen statt Farbe.  */
 .resume_title {
   font-variant-caps: small-caps;
   letter-spacing: 0.06em;
@@ -36,30 +38,68 @@
   letter-spacing: 0.14em;
 }
 
-/*  Der Punkt auf der Zeitleiste wird ein feiner Ring – das Symbol darin
-    bleibt sichtbar und nimmt die Linienfarbe an.  */
-.event .dot {
-  background: var(--background-color) !important;
-  border: 1px solid var(--accent-color);
-  color: var(--accent-color);
-  transform: scale(0.85);
+/*  Werdegang als gesetzte Liste statt als Grafik.  */
+/*  Flex bleibt: der Renderer dreht die Reihenfolge über
+    flex-direction: column-reverse, wenn "neueste zuerst" eingestellt ist.
+    Mit display:block ginge diese Einstellung still verloren.  */
+.timeline {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
 }
 
-.event .dot svg {
-  stroke: var(--accent-color);
-  color: var(--accent-color);
-}
-
-.event .dot .material-symbols-outlined {
-  color: var(--accent-color);
+.timeline::before,
+.event::after,
+.event .dot,
+.line {
+  display: none;
 }
 
 .event {
-  border: 0;
-  box-shadow: none;
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 6em 1fr;
+  gap: 0 1.4em;
+  margin: 0;
+  padding: 0.28em 0 0.3em;
 }
 
-/*  Kenntnisse als Punkte wirken hier fremd – eine Linie genügt.  */
+.event + .event {
+  border-top: 1px solid color-mix(in oklab, var(--font-color), transparent 90%);
+}
+
+.event .date {
+  position: static;
+  width: auto;
+  left: auto;
+  display: block;
+  text-align: right;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.04em;
+  padding-top: 0.15em;
+}
+
+.event .content {
+  margin-left: 0;
+  left: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.content h3 {
+  font-size: 1em;
+  font-weight: 600;
+}
+
+/*  Punkte für Kenntnisse wirken in dieser Umgebung fremd.  */
 .rank-dots {
-  opacity: 0.55;
+  opacity: 0.5;
+}
+
+/*  Auch die Seitenspalte bleibt ruhig: Linien statt Flächen.  */
+[data-column="sidebar"] .resume_title {
+  border-bottom: 1px solid color-mix(in oklab, var(--font-color), transparent 70%);
 }

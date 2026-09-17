@@ -169,6 +169,43 @@ const merged = Imp.apply(Imp.apply(base(), txt, "replace"), jr, "merge");
 ok(merged.contact.name === "Max Mustermann", "vorhandener Name bleibt stehen");
 ok(merged.events.length === 3 + jr.summary.events, "Stationen wurden angehängt", merged.events.length);
 
+//  Die Anleitung für Sprachmodelle zeigt ein Beispieldokument. Wenn das
+//  nicht mehr stimmt, schickt jeder Agent kaputte Links – deshalb wird es
+//  hier aus AGENTS.md gelesen und wirklich importiert.
+console.log("\n— Das Beispiel aus AGENTS.md —");
+{
+  const doc = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
+  const block = (doc.match(/```json\n([\s\S]*?)```/) || [])[1];
+  ok(!!block, "AGENTS.md enthält ein JSON-Beispiel");
+
+  if (block) {
+    let parsed = null;
+    try { parsed = Imp.parseText(block, "link.json"); } catch (error) {
+      ok(false, "Beispiel ist importierbar", error.message);
+    }
+
+    if (parsed) {
+      const as = Imp.apply(base(), parsed, "replace");
+      ok(parsed.format === "rickcv", "wird als RickCV-Dokument erkannt", parsed.format);
+      ok(!!as.contact.name && !!as.contact.email, "Kontaktdaten kommen an");
+      ok(as.events.length >= 2, "Stationen kommen an", as.events.length);
+      ok(as.events.some((e) => e.present === true), "'bis heute' funktioniert wie beschrieben");
+      ok(as.skills.items.length >= 2, "Kenntnisse mit Stufe", as.skills.items.length);
+      ok(as.coverLetter.paragraphs.length >= 2, "Anschreiben kommt mit");
+      ok(as.settings.pageSize === "a4" || as.settings.pageSize === "letter",
+         "Blattformat ist gesetzt", as.settings.pageSize);
+      ok(!!as.theme.slug, "Theme ist benannt", as.theme.slug);
+
+      //  Genau der Weg, den die Anleitung beschreibt: base64url in den Link.
+      const token = Buffer.from(JSON.stringify(JSON.parse(block)), "utf8")
+        .toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      const back = Buffer.from(token.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+      ok(JSON.parse(back).contact.name === as.contact.name, "base64url hin und zurück");
+      ok(token.length < 8000, "Link bleibt handhabbar", token.length + " Zeichen");
+    }
+  }
+}
+
 console.log("\n— Was nicht gehen darf —");
 for (const [input, label] of [['{"foo":1}', "fremdes JSON"], ["", "leerer Text"], ["%%%", "Unsinn"]]) {
   let threw = false;

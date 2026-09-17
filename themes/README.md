@@ -10,7 +10,7 @@ Die Bilder hier erzeugt `python3 tools/make-theme-previews.py`.
 
 Ruhige Grundform: Zeitleiste links am Rand, Datum rechts, kein Schnickschnack. Das Ausgangslayout von RickCV. about-en: A calm baseline: timeline along the edge, dates on the right, nothing else. RickCV's original layout.
 
-![Clean](previews/clean.png)
+![Clean](previews/clean.webp)
 
 `themes/clean.css`
 
@@ -18,15 +18,15 @@ Ruhige Grundform: Zeitleiste links am Rand, Datum rechts, kein Schnickschnack. D
 
 Die Zeitleiste wird zur Achse: Stationen sitzen auf einer durchgehenden Linie, die Dauer bestimmt ihren Abstand. about-en: The timeline becomes the axis: stations sit on one continuous line, and how long they lasted sets their distance.
 
-![Dynaline](previews/dynaline.png)
+![Dynaline](previews/dynaline.webp)
 
 `themes/dynaline.css`
 
 ## Einspaltig
 
-Kopfblock mit Foto, Profil und Kontakt, darunter der Werdegang über die volle Breite. Eine Spalte liest sich für Mensch und Maschine in derselben Reihenfolge. about-en: A header block with photo, profile and contact, and the career below across the full width. One column reads the same way for a person and for a machine.
+Kopfblock mit Foto, Profil und Kontakt, darunter der Werdegang über die volle Breite – als schlichte Liste ohne Zeitleiste, Punkte und Kästen. Dieselbe Reihenfolge für Mensch und Maschine. Der Kopfblock trägt alle Blöcke der Seitenspalte – wer viele davon eingeschaltet hat, stellt auf mehrseitig um. about-en: A header block with photo, profile and contact, the career below across the full width – a plain list without timeline, dots or boxes. The same order for a person and for a machine. The header carries every sidebar block, so with many of them switched on, turn on multi-page.
 
-![Einspaltig](previews/einspaltig.png)
+![Einspaltig](previews/einspaltig.webp)
 
 `themes/einspaltig.css`
 
@@ -34,30 +34,30 @@ Kopfblock mit Foto, Profil und Kontakt, darunter der Werdegang über die volle B
 
 Symbole tragen das Layout: jede Station bekommt ihren Punkt, die Zeitleiste laeuft mittig. about-en: Symbols carry the layout: every station gets its dot, the timeline runs down the middle.
 
-![Icons](previews/icons.png)
+![Icons](previews/icons.webp)
 
 `themes/icons.css`
 
 ## Klassisch
 
-Serifen, feine Linien, keine Flächen. Für Bewerbungen, bei denen Zurückhaltung die Botschaft ist – Behörden, Kanzleien, Banken. about-en: Serifs, thin rules, no filled areas. For applications where restraint is the message – public service, law, banking.
+Serifen, Kapitälchen, Haarlinien. Kein Punkt, kein Kasten, keine Farbfläche – die Stationen stehen als Liste mit hängendem Datum. Für Bewerbungen, bei denen Zurückhaltung die Botschaft
 
-![Klassisch](previews/klassisch.png)
+![Klassisch](previews/klassisch.webp)
 
 `themes/klassisch.css`
 
 ## Kompakt
 
-Enger gesetzt, damit ein langer Werdegang auf ein Blatt passt: kleinere Schrift, weniger Luft, schmalere Ränder. about-en: Set tighter so a long career fits on one sheet: smaller type, less air, narrower margins.
+Für lange Lebensläufe: das Datum steht in der Zeile des Titels statt daneben, Aufzählungen rücken enger, Ränder schrumpfen. Damit passt ein Werdegang auf ein Blatt, der sonst zwei braucht. about-en: For long careers: the date sits on the title's line instead of beside it, bullets move closer, margins shrink. A career that needs two sheets elsewhere fits on one.
 
-![Kompakt](previews/kompakt.png)
+![Kompakt](previews/kompakt.webp)
 
 `themes/kompakt.css`
 
 ## Terminal
 
-Feste Schrittweite, kantige Kanten, grüner Akzent. Für Leute, die ihren Lebenslauf sowieso lieber in einem Editor hätten. about-en: Monospaced, square edges, a green accent. For people who would rather have written their resume in an editor anyway.
+Feste Schrittweite, kantige Kanten, dunkle Seitenspalte. Die Stationen stehen an einer Randlinie wie Code in einem Editor, mit einem Quadrat statt eines Punktes. about-en: Monospaced, square edges, a dark sidebar. Stations sit against a gutter rule like code in an editor, with a square instead of a dot.
 
-![Terminal](previews/terminal.png)
+![Terminal](previews/terminal.webp)
 
 `themes/terminal.css`

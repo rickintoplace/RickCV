@@ -320,7 +320,10 @@
     if (event.key === "Escape") hide();
   }
 
-  function show(config, file) {
+  //  file: eine Datei zum Einlesen. text: bereits vorhandener Inhalt –
+  //  so kommt ein Link mit Daten durch dieselbe Bestaetigung wie alles
+  //  andere, statt am Dialog vorbei ins Dokument zu schreiben.
+  function show(config, file, text) {
     options = config;
     mode = "replace";
     if (!overlay) build();
@@ -332,6 +335,7 @@
     lastFocus = document.activeElement;
 
     if (file) readFile(file);
+    else if (text) handle(function () { return Import.parseText(text, "link.json"); });
     else stepPick();
   }
 

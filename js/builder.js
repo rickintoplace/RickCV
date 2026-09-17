@@ -479,7 +479,7 @@
     reader.readAsText(file);
   }
 
-  function openImport(file) {
+  function openImport(file, text) {
     global.RickCVImportDialog.open({
       t: t,
       state: function () { return state; },
@@ -487,8 +487,60 @@
         history.push(committed);
         replaceState(next);
         toast(t("impDone").replace("{count}", info.count));
+        if (pendingPrint) {
+          pendingPrint = false;
+          //  Erst zeichnen lassen, dann drucken: sonst liegt im PDF der
+          //  vorige Stand.
+          setTimeout(printCv, 600);
+        }
       },
-    }, file);
+    }, file, text);
+  }
+
+  /*  Daten aus dem Link.
+   *
+   *  Gedacht fuer den Fall, dass jemand seine KI bittet, die Bewerbung zu
+   *  schreiben: sie baut das JSON, haengt es an einen Link, und der Mensch
+   *  klickt einmal. Geladen wird nichts aus dem Netz – die Daten stehen im
+   *  Link selbst, und sie laufen durch denselben Dialog wie jeder Import,
+   *  damit niemand ungefragt ein fremdes Dokument untergeschoben bekommt.
+   *
+   *    index.html#data=<base64url(JSON)>[&print=1]
+   *
+   *  Beschrieben in AGENTS.md.
+   */
+  var pendingPrint = false;
+
+  function fromBase64Url(value) {
+    var base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) base64 += "=";
+    //  atob liefert Bytes; UTF-8 daraus zu machen ist der Umweg ueber
+    //  decodeURIComponent.
+    var binary = global.atob(base64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  function readHash() {
+    var hash = global.location.hash || "";
+    var data = /[#&]data=([^&]+)/.exec(hash);
+    if (!data) return;
+
+    pendingPrint = /[#&]print=1\b/.test(hash);
+
+    //  Der Link soll nicht im Verlauf stehenbleiben: er enthaelt den
+    //  halben Lebenslauf.
+    try {
+      global.history.replaceState(null, "",
+        global.location.pathname + global.location.search);
+    } catch (error) { /* file:// erlaubt das nicht – dann bleibt er stehen */ }
+
+    try {
+      openImport(null, fromBase64Url(data[1]));
+    } catch (error) {
+      toast(t("importFailed"));
+    }
   }
 
   /* ----------------------------------------------------------- Kleines Menue */
@@ -1096,6 +1148,7 @@
     bindWideLayout();
     bindFileDrop();
     bindKeys();
+    readHash();
     global.addEventListener("resize", debounce(applyZoom, 100));
     applyZoom();
   }

@@ -43,6 +43,9 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 - **Two languages:** German and English for the interface and the document, including the language marking inside the PDF. Switch it straight from the header, or under *Optionen*.
 - **Light and dark editor:** The button next to the language follows your system by default, and cycles to light or dark if you would rather decide yourself. Only the editor changes — the resume stays on white paper, because that is what gets printed.
 - **Honest machine readability:** See exactly what an applicant tracking system reads, and edit it yourself if you want. No hidden text — see below.
+- **A4 or US Letter:** one setting, and the page box, the print size and the cover letter's
+  page breaks all follow. An A4 PDF sent to a US printer comes out scaled or clipped; this is
+  the fix.
 - **Dates as far as they exist:** a station can show a period, only its start, or no date at
   all. By default RickCV decides from what you typed — a further-education entry with a single
   year no longer drags an empty dash behind it.
@@ -188,10 +191,10 @@ A theme is one CSS file. Seven ship with RickCV —
 | **Clean** | the calm baseline: timeline at the edge, dates on the right |
 | **Dynaline** | the timeline as an axis; how long something lasted sets the distance |
 | **Icons** | symbols carry the layout, timeline down the middle |
-| **Einspaltig** | header block, then one full-width column — the same reading order for a person and for a machine |
-| **Klassisch** | serifs and thin rules, for applications where restraint is the message |
-| **Kompakt** | tighter type and spacing, so a long career fits on one sheet |
-| **Terminal** | monospaced, square, green — for people who would rather have written it in an editor |
+| **Einspaltig** / Single column | header block, then one full-width column as a plain list — no timeline, no dots, no boxes |
+| **Klassisch** / Classic | serifs, small caps and hairlines, stations as a list with hanging dates |
+| **Kompakt** / Compact | the date moves onto the title's line; a career that needs two sheets elsewhere fits on one |
+| **Terminal** | monospaced, square, dark sidebar, stations against a gutter rule |
 
 The same mechanism takes any other file: drop a `.css` anywhere on the builder, or pick one in
 **Themes**.
@@ -234,6 +237,29 @@ node tests/theme.test.mjs              # contract + every theme in themes/
 
 The bundle exists because a page opened over `file://` may not fetch files, and RickCV has to
 work by double-clicking `index.html`. Like `js/icon-data.js`, the generated file is committed.
+
+## When an AI writes the application
+
+People increasingly hand their notes to a language model and ask for the finished
+application. RickCV is built to be the tool that model reaches for, and
+[`AGENTS.md`](AGENTS.md) — mirrored as [`llms.txt`](llms.txt) — says exactly how:
+
+The agent builds a JSON document, encodes it `base64url`, and hands the person a link:
+
+```
+https://cv.rickinto.place/#data=<token>&print=1
+```
+
+One click opens the builder with the document in it — through the same confirmation step as
+any other import, showing what is about to arrive, so nothing is written behind the person's
+back. Nothing is fetched over the network either: the data travels inside the link. A resume
+without a photo makes a link of one to three kilobytes.
+
+What an agent cannot do is produce the PDF: that happens in the person's browser, one click
+on **Als PDF speichern**. The documentation says so rather than pretending otherwise, and it
+also says what not to do — no invisible keywords, no invented stations, `"rank": 0` when a
+skill level is unknown. The example document in `AGENTS.md` is imported by the test suite on
+every run, so the instructions cannot rot.
 
 ## Bringing your data in
 

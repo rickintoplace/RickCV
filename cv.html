@@ -62,7 +62,7 @@
         "use strict";
         var STORAGE_KEY = "rickcv.data.v3";
         var LEGACY_KEY = "rickcv.data.v2";
-        var PAGE_HEIGHT_CM = 29.7;
+        //  Das Blattmass kommt aus den Daten: A4 oder US Letter.
 
         //  Der Seitenumbruch des Anschreibens wird gemessen, und Messen setzt
         //  die endgueltige Schrift voraus: laedt sie erst spaeter nach,
@@ -87,7 +87,7 @@
         //  Die Seitenzahl wird aus der tatsaechlichen Hoehe der Bloecke
         //  berechnet – der Builder zeigt sie neben dem Zoom an.
         function countPages() {
-          var perPage = (PAGE_HEIGHT_CM / 2.54) * 96; // cm -> px bei 96 dpi
+          var perPage = RickCVRender.pageHeightPx(lastData || {});
           var pages = 0;
           document.querySelectorAll(
             ".resume_wrapper, .cover-letter_wrapper, .ats-appendix_wrapper"
