@@ -72,7 +72,7 @@
   width: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: 5.2em 0.9em 1fr;
+  grid-template-columns: max-content 0.9em 1fr;
   align-items: start;
   gap: 0 0.7em;
   margin: 0;
@@ -81,7 +81,8 @@
 
 .event .date {
   position: static;
-  width: auto;
+  width: max-content;
+  min-width: 0;
   left: auto;
   display: block;
   text-align: right;
@@ -119,4 +120,11 @@
 
 .event .date {
   color: color-mix(in oklab, var(--font-color), transparent 30%);
+}
+
+/*  Der Grundstil setzt links am Eintrag einen farbigen Streifen
+    (.content::before) – er gehört zur Kästchen-Optik und hat in einer
+    flachen Liste nichts verloren: ohne Innenabstand klebt er am Text.  */
+.event .content::before {
+  display: none;
 }

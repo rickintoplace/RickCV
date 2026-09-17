@@ -85,10 +85,14 @@
         alignText: "left",
         showCoverLetter: true,
 
-        //  "single" – ein festes Blatt (Vorgabe)
-        //  "two"    – zweites Blatt, jeder Block wird einer Seite zugeordnet
-        //  "flow"   – laengerer Inhalt laeuft von selbst weiter
-        pageMode: "single",
+        //  "flow"   – laengerer Inhalt bekommt weitere Boegen (Vorgabe)
+        //  "single" – ein festes Blatt, alles darueber wird abgeschnitten
+        //  "two"    – zwei Blaetter, jeder Block wird einem zugeordnet
+        //
+        //  Vorgabe ist "flow": ein abgeschnittener Lebenslauf ist der
+        //  schlimmere Fehler von beiden, und wer auf ein Blatt will, sieht
+        //  an der Schnittkante sofort, wieviel zu streichen ist.
+        pageMode: "flow",
 
         page2: {
           repeatPhoto: false,

@@ -410,6 +410,31 @@ a {
 body.pages-flow .resume_wrapper {
   height: auto;
   min-height: var(--page-height);
+  position: relative;
+}
+
+/*  Die Schnittkanten sichtbar machen: In "automatisch mehrseitig" rastet die
+    Blatthoehe auf ganze Boegen (render.js), und diese Linien zeigen, wo der
+    Drucker trennt. Im Druck selbst haben sie nichts verloren. */
+body.pages-flow .resume_wrapper[data-sheets]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--page-height) - 1px),
+    color-mix(in oklab, var(--font-color), transparent 55%) calc(var(--page-height) - 1px),
+    color-mix(in oklab, var(--font-color), transparent 55%) var(--page-height)
+  );
+}
+
+@media print {
+  body.pages-flow .resume_wrapper[data-sheets]::after {
+    display: none;
+  }
 }
 
 /*  Zweite Seite: jedes Blatt ist genau ein A4-Bogen. min-height statt height,

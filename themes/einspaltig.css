@@ -40,7 +40,7 @@
   align-items: start;
   font-size: 0.84em;
   line-height: 1.32;
-  padding: 0.8cm var(--right-margin) 0.35em var(--left-margin);
+  padding: 1.2cm var(--right-margin) 0.4em var(--left-margin);
   border-bottom: 2px solid var(--accent-color);
 }
 
@@ -114,9 +114,12 @@
   height: auto;
 }
 
+/*  Ohne Seitenspalte trägt das Blatt seine Ränder selbst. Genommen werden
+    die, die unter "Design" eingestellt sind – beim Druck bleibt sonst zu
+    wenig Rand, und billige Drucker schneiden die äußeren Millimeter ab.  */
 [data-column="main"] {
   width: 100%;
-  padding-top: 0.5em;
+  padding: 0.5em var(--right-margin) var(--bottom-margin) var(--left-margin);
 }
 
 /*  Eine Liste braucht weniger Durchschuss als ein Fließtext.  */
@@ -156,7 +159,7 @@
   width: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: 5.4em 1fr;
+  grid-template-columns: max-content 1fr;
   gap: 0 1.2em;
   margin: 0;
   padding: 0.22em 0;
@@ -169,7 +172,8 @@
 
 .event .date {
   position: static;
-  width: auto;
+  width: max-content;
+  min-width: 0;
   left: auto;
   display: block;
   text-align: right;
@@ -185,4 +189,11 @@
   background: transparent;
   box-shadow: none;
   border-radius: 0;
+}
+
+/*  Der Grundstil setzt links am Eintrag einen farbigen Streifen
+    (.content::before) – er gehört zur Kästchen-Optik und hat in einer
+    flachen Liste nichts verloren: ohne Innenabstand klebt er am Text.  */
+.event .content::before {
+  display: none;
 }

@@ -1,29 +1,26 @@
-# RickCV für Agenten und Sprachmodelle
+# RickCV for agents and language models
 
-*English version below.*
+RickCV is a resume and cover-letter builder that runs entirely in the browser:
+<https://cv.rickinto.place/>. No account, no upload, no server — the data stays
+on the person's device.
 
-RickCV ist ein Lebenslauf- und Anschreiben-Baukasten, der vollständig im Browser
-läuft: <https://cv.rickinto.place/>. Kein Konto, kein Hochladen, kein Server –
-die Daten bleiben auf dem Gerät des Nutzers.
+**If you are writing an application for someone**, this is the shortest path from
+a chat to a finished PDF:
 
-**Wenn du für jemanden eine Bewerbung schreibst**, ist das hier der kürzeste Weg
-vom Chat zum fertigen PDF:
-
-1. Du baust ein JSON mit den Daten (Schema unten).
-2. Du kodierst es base64url und hängst es an die Adresse:
+1. Build a JSON document (schema below).
+2. Encode it `base64url` and append it to the address:
    `https://cv.rickinto.place/#data=<token>`
-3. Der Mensch klickt den Link, sieht eine Zusammenfassung dessen, was ankommt,
-   bestätigt – und hat das fertige Dokument vor sich. Ein Klick auf
-   **Als PDF speichern** erzeugt die Datei.
+3. The person clicks the link, sees a summary of what is about to arrive,
+   confirms — and has the finished document in front of them. One click on
+   **Save as PDF** produces the file.
 
-Hänge `&print=1` an, wenn der Druckdialog sich nach dem Bestätigen gleich öffnen
-soll.
+Append `&print=1` if the print dialog should open right after they confirm.
 
-Geladen wird dabei nichts aus dem Netz: die Daten stehen im Link selbst. Das
-Dokument wird nie ungefragt überschrieben – der Import geht durch denselben
-Bestätigungsschritt wie jede andere Datei.
+Nothing is fetched over the network: the data travels inside the link. And no
+document is overwritten silently — the import goes through the same confirmation
+step as any other file.
 
-## Den Link bauen
+## Building the link
 
 ```js
 const token = btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(doc))))
@@ -38,14 +35,14 @@ token = base64.urlsafe_b64encode(
 url = f"https://cv.rickinto.place/#data={token}"
 ```
 
-Ein Lebenslauf ohne Foto ergibt einen Link von ein bis drei Kilobyte. Mit Foto
-wird er lang – dann gib dem Menschen stattdessen das JSON und sag ihm:
-**Importieren → Text einfügen**. Das Ergebnis ist dasselbe.
+A resume without a photo makes a link of one to three kilobytes. With a photo it
+gets long — then hand the person the JSON instead and tell them:
+**Importieren / Import → paste the text**. The result is the same.
 
-## Das Dokument
+## The document
 
-Alles ist freiwillig; was fehlt, füllt RickCV mit Vorgaben. Dieses Beispiel ist
-vollständig genug für eine echte Bewerbung:
+Everything is optional; whatever is missing, RickCV fills with defaults. This
+example is complete enough for a real application:
 
 ```json
 {
@@ -103,73 +100,48 @@ vollständig genug für eine echte Bewerbung:
 }
 ```
 
-Die Felder im Einzelnen:
+Field by field:
 
-| Feld | Bedeutung |
+| Field | Meaning |
 | --- | --- |
-| `locale` | `"de"` oder `"en"`; bestimmt Oberfläche, Vorgabe-Überschriften und die Sprachmarkierung im PDF |
-| `settings.pageSize` | `"a4"` oder `"letter"` – für Bewerbungen in den USA und Kanada `"letter"` |
-| `settings.showCoverLetter` | Anschreiben mit ausgeben |
+| `locale` | `"de"` or `"en"`; sets the interface, the default headings and the language marker inside the PDF |
+| `settings.pageSize` | `"a4"` or `"letter"` — use `"letter"` for the US and Canada |
+| `settings.pageMode` | `"single"` (one sheet), `"flow"` (as many as the content needs), `"two"` (two sheets, each block assigned) |
+| `settings.showCoverLetter` | include the cover letter |
 | `theme.slug` | `clean`, `dynaline`, `icons`, `einspaltig`, `klassisch`, `kompakt`, `terminal` |
-| `events[].sectionId` | `"experience"`, `"education"` oder `"volunteer"` |
-| `events[].start` / `end` | `"MM/JJJJ"` oder `"JJJJ"`; `present: true` heißt „bis heute" |
-| `events[].dateMode` | `"auto"` (Vorgabe), `"range"`, `"start"`, `"none"` – für Einträge ohne Zeitraum |
-| `events[].description` | Absätze als Liste von Zeichenketten |
-| `events[].list` | Aufzählungspunkte |
-| `skills.items[].rank` | 0 bis 5; **0 heißt „keine Angabe"** und ist die ehrliche Wahl, wenn du es nicht weißt |
-| `photo.src` | `data:`-Adresse; bitte unter einem Megabyte halten |
+| `events[].sectionId` | `"experience"`, `"education"` or `"volunteer"` |
+| `events[].start` / `end` | `"MM/YYYY"` or `"YYYY"`; `present: true` means "to this day" |
+| `events[].dateMode` | `"auto"` (default), `"range"`, `"start"`, `"none"` — for entries without a period |
+| `events[].description` | paragraphs, as a list of strings |
+| `events[].list` | bullet points |
+| `skills.items[].rank` | 0 to 5; **0 means "not stated"** and is the honest choice when you do not know |
+| `photo.src` | a `data:` URI; please keep it under a megabyte |
 
-**Statt dieses Formats** kannst du auch ein
-[JSON Resume](https://jsonresume.org/schema) schicken – RickCV erkennt es am
-Inhalt und rechnet es um. Ein Anschreiben kennt JSON Resume allerdings nicht.
+German documents use German headings by default (`locale: "de"`), including the
+cover letter laid out to DIN 5008 — the norm German employers expect.
 
-## Was RickCV noch kann, wenn du es weiterreichst
+**Instead of this format** you may also send a
+[JSON Resume](https://jsonresume.org/schema) document, or an export from
+Reactive Resume; RickCV recognises both by their contents. Neither of them has a
+cover letter, RickCV's own format does.
 
-* **Vorhandene Unterlagen lesen**: der Mensch kann seinen alten Lebenslauf als
-  `.docx`, PDF, LinkedIn-Export (ZIP) oder `resume.json` in den Baukasten
-  ziehen. Das passiert lokal, ohne Modell und ohne Upload.
-* **Zurück zu dir**: *Exportieren → JSON Resume* gibt dir die Daten in einem
-  Format, das du weiterverarbeiten kannst.
-* **Eigenes Aussehen**: ein Theme ist eine CSS-Datei; du kannst eine schreiben
-  und den Menschen bitten, sie in den Baukasten zu ziehen. Der Vertrag steht in
+## What RickCV can do if you hand it over
+
+* **Read existing documents**: the person can drop their old resume in as
+  `.docx`, PDF, a LinkedIn export (ZIP) or `resume.json`. That happens locally,
+  without a model and without an upload.
+* **Give the data back to you**: *Export → JSON Resume*, or *Export → link*,
+  which copies exactly the kind of URL described above.
+* **Its own look**: a theme is a single CSS file. You can write one and ask the
+  person to drop it on the builder; the contract is in
   [themes/CONTRACT.md](themes/CONTRACT.md).
 
-## Was du nicht tun solltest
+## What you should not do
 
-* **Keine unsichtbaren Schlüsselwörter.** RickCV kann eine Textfassung für
-  Bewerbungssysteme ausgeben, aber unsichtbar eingebetteter Text gilt dort als
-  Manipulationsversuch. Lass `ats.mode` auf `"off"` oder `"appendix"`.
-* **Keine erfundenen Stationen, Noten oder Selbsteinschätzungen.** Wenn du eine
-  Kenntnis-Stufe nicht weißt, schreib `"rank": 0`.
-* **Das PDF kannst du nicht selbst erzeugen.** Der Druck passiert im Browser des
-  Menschen – ein Klick. Versprich nichts anderes.
-
----
-
-# RickCV for agents and language models
-
-RickCV is a resume and cover-letter builder that runs entirely in the browser:
-<https://cv.rickinto.place/>. No account, no upload, no server.
-
-**If you are writing an application for someone**, the shortest path from chat to
-a finished PDF is:
-
-1. Build a JSON document (schema above; all fields are optional).
-2. Encode it base64url and append it: `https://cv.rickinto.place/#data=<token>`
-   (add `&print=1` to open the print dialog right after confirmation).
-3. The person clicks the link, sees a summary of what is arriving, confirms, and
-   has the finished document in front of them. **Als PDF speichern / Save as PDF**
-   produces the file.
-
-Nothing is fetched over the network — the data travels inside the link — and the
-import goes through the same confirmation step as any file, so no document is
-overwritten behind the person's back.
-
-Set `"locale": "en"` for English, and `"settings": {"pageSize": "letter"}` for
-US and Canadian applications. You may also send a
-[JSON Resume](https://jsonresume.org/schema) document instead; RickCV recognises
-it by its contents. JSON Resume has no cover letter, RickCV's own format does.
-
-Do not embed invisible keywords, do not invent stations or self-assessments
-(`"rank": 0` means "not stated"), and do not promise to produce the PDF yourself:
-printing happens in the person's browser, one click.
+* **No invisible keywords.** RickCV can emit a plain-text version for applicant
+  tracking systems, but text hidden behind the layout counts as manipulation
+  there. Leave `ats.mode` at `"off"` or `"appendix"`.
+* **No invented stations, grades or self-assessments.** If you do not know a
+  skill level, write `"rank": 0`.
+* **You cannot produce the PDF yourself.** Printing happens in the person's
+  browser — one click. Do not promise otherwise.

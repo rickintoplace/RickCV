@@ -98,3 +98,10 @@
 [data-column="sidebar"] .resume_item {
   margin-bottom: 0.45em;
 }
+
+/*  Der Grundstil setzt links am Eintrag einen farbigen Streifen
+    (.content::before) – er gehört zur Kästchen-Optik und hat in einer
+    flachen Liste nichts verloren: ohne Innenabstand klebt er am Text.  */
+.event .content::before {
+  display: none;
+}

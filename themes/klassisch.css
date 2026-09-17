@@ -59,7 +59,7 @@
   width: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: 6em 1fr;
+  grid-template-columns: max-content 1fr;
   gap: 0 1.4em;
   margin: 0;
   padding: 0.28em 0 0.3em;
@@ -71,7 +71,8 @@
 
 .event .date {
   position: static;
-  width: auto;
+  width: max-content;
+  min-width: 0;
   left: auto;
   display: block;
   text-align: right;
@@ -99,7 +100,24 @@
   opacity: 0.5;
 }
 
-/*  Auch die Seitenspalte bleibt ruhig: Linien statt Flächen.  */
+/*  Die Überschriften der Seitenspalte tragen im Grundstil zwei flankierende
+    Linien. Zusammen mit der Unterstreichung dieses Themes wären es drei –
+    also bleibt eine: die durchgehende darunter.  */
 [data-column="sidebar"] .resume_title {
+  display: block;
+  white-space: normal;
+  text-align: center;
   border-bottom: 1px solid color-mix(in oklab, var(--font-color), transparent 70%);
+}
+
+[data-column="sidebar"] .resume_title::before,
+[data-column="sidebar"] .resume_title::after {
+  display: none;
+}
+
+/*  Der Grundstil setzt links am Eintrag einen farbigen Streifen
+    (.content::before) – er gehört zur Kästchen-Optik und hat in einer
+    flachen Liste nichts verloren: ohne Innenabstand klebt er am Text.  */
+.event .content::before {
+  display: none;
 }

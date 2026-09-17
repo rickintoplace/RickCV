@@ -479,6 +479,73 @@
     reader.readAsText(file);
   }
 
+  /*  Dasselbe Dokument als Adresse: alles, was im Baukasten steht, steckt
+   *  dann im Link. Praktisch, um an einem anderen Rechner weiterzumachen
+   *  oder jemandem den Stand zu schicken – und es ist derselbe Weg, den
+   *  auch ein Sprachmodell nimmt (siehe AGENTS.md).
+   */
+  function toBase64Url(text) {
+    var bytes = new TextEncoder().encode(text);
+    var binary = "";
+    for (var i = 0; i < bytes.length; i += 8192) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+    }
+    return global.btoa(binary)
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  function documentLink() {
+    var base = global.location.origin && global.location.origin !== "null"
+      ? global.location.origin + global.location.pathname
+      : global.location.href.split("#")[0];
+    return base + "#data=" + toBase64Url(JSON.stringify(state));
+  }
+
+  //  Die Zwischenablage gibt es nur im sicheren Kontext; per Doppelklick
+  //  geoeffnet (file://) muss der alte Weg herhalten.
+  function copyText(text, done) {
+    if (global.navigator.clipboard && global.navigator.clipboard.writeText) {
+      global.navigator.clipboard.writeText(text).then(function () { done(true); },
+        function () { done(fallbackCopy(text)); });
+      return;
+    }
+    done(fallbackCopy(text));
+  }
+
+  function fallbackCopy(text) {
+    var area = el("textarea");
+    area.value = text;
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    var worked = false;
+    try { worked = document.execCommand("copy"); } catch (error) { worked = false; }
+    document.body.removeChild(area);
+    return worked;
+  }
+
+  function copyLink() {
+    var link = documentLink();
+    //  Mit Bild wird die Adresse sehr lang. Browser tragen das, Chatfenster
+    //  und Mailprogramme nicht immer – dann ist das JSON der bessere Weg.
+    if (link.length > 60000) {
+      toast(t("expLinkTooLong"));
+      return;
+    }
+    copyText(link, function (worked) {
+      toast(worked
+        ? t("expLinkCopied").replace("{kb}", Math.round(link.length / 1024))
+        : t("expCopyFailed"));
+    });
+  }
+
+  function copyJson() {
+    copyText(JSON.stringify(state, null, 2), function (worked) {
+      toast(worked ? t("expJsonCopied") : t("expCopyFailed"));
+    });
+  }
+
   function openImport(file, text) {
     global.RickCVImportDialog.open({
       t: t,
@@ -763,6 +830,8 @@
       popupMenu(event.currentTarget, [
         { label: t("expRickcv"), hint: t("expRickcvHint"), action: exportJson },
         { label: t("expJsonResume"), hint: t("expJsonResumeHint"), action: exportJsonResume },
+        { label: t("expLink"), hint: t("expLinkHint"), action: copyLink },
+        { label: t("expCopyJson"), hint: t("expCopyJsonHint"), action: copyJson },
       ]);
     });
     document.getElementById("btn-import").addEventListener("click", function () {

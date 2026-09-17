@@ -1006,6 +1006,34 @@
     if (node.textContent !== rule) node.textContent = rule;
   }
 
+  /*  "Automatisch mehrseitig": das Blatt waechst mit dem Inhalt, und der
+   *  Drucker schneidet es in A4-Boegen. In der Vorschau sah das aus wie ein
+   *  einziges, endlos langes Blatt – man konnte nicht erkennen, wo der
+   *  Schnitt faellt.
+   *
+   *  Deshalb wird die Hoehe auf ein ganzes Vielfaches der Blatthoehe
+   *  aufgerundet und die Schnittkante angezeigt. Das entspricht genau dem,
+   *  was beim Druck passiert: die Bloecke tragen break-inside: avoid und
+   *  rutschen von selbst auf das naechste Blatt.
+   */
+  function snapFlowHeight(doc, data) {
+    var wrapper = doc.querySelector(".resume_wrapper");
+    if (!wrapper) return;
+
+    if ((data.settings.pageMode || "single") !== "flow") {
+      wrapper.style.removeProperty("height");
+      wrapper.removeAttribute("data-sheets");
+      return;
+    }
+
+    var page = pageSize(data).heightPx;
+    //  Erst die eigene Hoehe freigeben, sonst misst man den vorigen Stand.
+    wrapper.style.removeProperty("height");
+    var sheets = Math.max(1, Math.ceil((wrapper.scrollHeight - 2) / page));
+    wrapper.style.height = (sheets * page) + "px";
+    wrapper.setAttribute("data-sheets", String(sheets));
+  }
+
   //  Fassung des DOM-Vertrags. Sie steht am <body> und in themes/CONTRACT.md;
   //  wer sie erhoeht, hat Klassennamen oder Haken geaendert.
   var CONTRACT = 1;
@@ -1091,6 +1119,8 @@
       if (timeline) timeline.style.flexDirection = direction;
       fillTimeline(doc, grouped[section.id] || [], timeline, data);
     });
+
+    snapFlowHeight(doc, data);
 
     (doc.defaultView || global).requestAnimationFrame(function () {
       (data.sections || []).forEach(function (section) {

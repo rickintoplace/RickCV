@@ -16,9 +16,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
-import { execFileSync } from "node:child_process";
-import { spawn } from "node:child_process";
+import { execFile, execFileSync, spawn } from "node:child_process";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+
+//  Asynchron aufrufen, wo der Server nebenher antworten muss.
+const run = promisify(execFile);
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, "..");
@@ -166,10 +169,11 @@ if (!browser) {
     fs.unlinkSync(probe);
   }
 
-  //  Läuft ein Theme über den Blattrand? Das ist der Fehler, den man beim
-  //  Schreiben eines Themes am leichtesten übersieht und im PDF am
-  //  teuersten bezahlt. Gemessen wird am gerenderten Blatt.
-  function overflowOf(slug) {
+  //  Wieviel Papier braucht ein Theme für dasselbe Beispiel? Seit
+  //  "automatisch mehrseitig" die Vorgabe ist, wird nichts abgeschnitten –
+  //  die ehrliche Frage ist deshalb nicht "läuft es über", sondern
+  //  "wieviele Bögen". Ein Theme mit einem Layoutfehler braucht sofort vier.
+  async function sheetsFor(slug) {
     const probe = path.join(root, ".theme-overflow-probe.html");
     //  Mit den echten Schriften messen: mit einer Ersatzschrift fällt der
     //  Satz anders aus, und die Zahl wäre wertlos.
@@ -183,24 +187,22 @@ if (!browser) {
 <script>
   var data = RickCVModel.createExample("de");
   data.settings.showCoverLetter = false;
+  data.settings.pageMode = "flow";
   data.theme = { slug: ${JSON.stringify(slug)}, name: "", css: "", source: "builtin" };
   RickCVRender.render(document, data);
   setTimeout(function () {
-    var worst = 0;
-    document.querySelectorAll(".resume_wrapper").forEach(function (sheet) {
-      worst = Math.max(worst, sheet.scrollHeight - sheet.clientHeight);
-    });
-    document.title = "overflow:" + Math.round(worst);
+    var sheet = document.querySelector(".resume_wrapper");
+    document.title = "sheets:" + (sheet.getAttribute("data-sheets") || "0");
   }, 600);
 </script></body></html>`);
 
     try {
-      const out = execFileSync(browser, [
-        "--headless", "--disable-gpu", "--no-sandbox", "--allow-file-access-from-files",
+      const { stdout } = await run(browser, [
+        "--headless", "--disable-gpu", "--no-sandbox",
         "--window-size=900,1300", "--virtual-time-budget=9000",
         "--dump-dom", origin + "/.theme-overflow-probe.html",
-      ], { encoding: "utf8", timeout: 90000, stdio: ["ignore", "pipe", "ignore"] });
-      const match = out.match(/<title>overflow:(-?\d+)<\/title>/);
+      ], { encoding: "utf8", timeout: 90000, maxBuffer: 32 * 1024 * 1024 });
+      const match = stdout.match(/<title>sheets:(\d+)<\/title>/);
       return match ? Number(match[1]) : null;
     } catch {
       return null;
@@ -209,20 +211,15 @@ if (!browser) {
     }
   }
 
-  console.log("\n— Kein Überlauf über den Blattrand —");
+  console.log("\n— Papierbedarf für das Beispiel —");
   for (const name of files) {
     const slug = name.replace(/\.css$/, "");
-    const over = overflowOf(slug);
-    //  Die Schwelle fängt Layoutfehler ab – eine Regel, die den Inhalt weit
-    //  über den Rand schiebt –, nicht die Frage, ob ein besonders volles
-    //  Beispiel auf ein Blatt passt. Der gemessene Wert steht immer dabei,
-    //  damit auch eine Verschlechterung unterhalb der Schwelle auffällt.
-    const limit = 180;
-    ok(over !== null && over <= limit, `${slug}: bleibt auf dem Blatt`,
-       over === null ? "nicht messbar" : over + " px über dem Rand");
-    if (over !== null && over > 0 && over <= limit) {
-      console.log(`       ${over} px über dem Rand – unter der Schwelle von ${limit}`);
-    }
+    const sheets = await sheetsFor(slug);
+    //  Zwei Bögen sind für das reichlich gefüllte Beispiel in Ordnung; drei
+    //  wären ein Hinweis auf verschwendeten Platz oder einen Layoutfehler.
+    ok(sheets !== null && sheets <= 2, `${slug}: höchstens zwei Bögen`,
+       sheets === null ? "nicht messbar" : sheets + " Bögen");
+    if (sheets !== null) console.log(`       ${slug}: ${sheets}`);
   }
 
   if (dom) {

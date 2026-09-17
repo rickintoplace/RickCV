@@ -54,7 +54,10 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
   document next to it that updates as you type, and a download button at the end. No checkout,
   no build, no reload.
 - **Customizable styling:** colors, typeface, font size, sidebar width, headline sizes and DIN 5008 margins.
-- **One page or many:** The resume stops after one page by default; switch on multi-page mode for longer careers.
+- **One page or many:** By default the resume gets further sheets as it grows, and a thin line
+  in the preview shows where the paper ends — printing moves a block that would cross it onto
+  the next sheet as a whole. Switch to *one page* to keep it on a single sheet, or to *two
+  pages* to place every block by hand.
   The cover letter needs no switch: it breaks onto further A4 sheets by itself once the text no longer fits,
   keeping your margins on every page and numbering them per DIN 5008 — and it says so when that happens,
   because one page is almost always the right answer.
@@ -349,11 +352,15 @@ in by hand instead of hunting for what went missing.
 
 ### Going the other way
 
-*Exportieren* offers the same two doors: the complete RickCV backup, and `resume.json` in
+*Exportieren* offers four doors. Two of them produce a file: the complete RickCV backup, and `resume.json` in
 the JSON Resume format, which other resume tools, themes and CLI renderers can read. Your
 career data is yours to take elsewhere. The two differ on purpose: the backup holds
 everything, the `resume.json` holds what the document actually shows — a section switched
 off is not part of your resume.
+
+The other two copy to the clipboard: **the whole document as a link** (the same
+`#data=` address an agent would build, so you can carry on at another machine or send someone
+your state), and **the raw JSON**, for when a link would be unwieldy — a photo makes it long.
 
 None of this involves a server. Files are read in the browser, including the PDF: pdf.js
 lives in `vendor/` and is loaded from your own copy of the site.
