@@ -133,6 +133,10 @@
         sidebarColor: "#d3e2e2",
         sidebarFontColor: "#33333b",
         emptyColor: "#d9d9d9",
+        //  Welche Farben jemand im Editor selbst gewaehlt hat. Nur die
+        //  stehen spaeter am <body> und gewinnen damit gegen die Palette
+        //  eines Themes; die uebrigen bleiben dem Theme ueberlassen.
+        ownColors: {},
         sidebarWidth: 35,
         titleSize: 32,
         headlineSize: 16,      // Ueberschriften der Seitenspalte

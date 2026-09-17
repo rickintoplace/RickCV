@@ -190,6 +190,12 @@ if (!browser) {
   data.settings.pageMode = "flow";
   data.theme = { slug: ${JSON.stringify(slug)}, name: "", css: "", source: "builtin" };
   RickCVRender.render(document, data);
+  //  Noch einmal zeichnen, sobald die Schriften da sind – genau wie cv.html
+  //  es tut. Ohne das misst der Test einen Satz in der Ersatzschrift: die
+  //  Seitenaufteilung faellt dann anders aus als im echten Dokument.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { RickCVRender.render(document, data); });
+  }
   setTimeout(function () {
     var sheets = document.querySelectorAll(".resume_wrapper");
     var over = 0;

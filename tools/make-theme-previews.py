@@ -40,6 +40,11 @@ PAGE = """<!DOCTYPE html><html lang="%(locale)s"><head><meta charset="utf-8">
   data.languages.show = true;
   data.theme = { slug: "%(slug)s", name: "", css: "", source: "builtin" };
   RickCVRender.render(document, data);
+  //  Ein zweites Mal, sobald die Schriften geladen sind – sonst zeigt das
+  //  Vorschaubild einen Satz in der Ersatzschrift.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { RickCVRender.render(document, data); });
+  }
 </script></body></html>
 """
 

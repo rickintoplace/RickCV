@@ -769,6 +769,32 @@
       ));
       body.appendChild(F.color("style.sidebarFontColor", t("sidebarFontColor")));
       body.appendChild(F.color("style.emptyColor", t("emptyDotColor")));
+
+      //  Sobald jemand eine Farbe angefasst hat, gewinnt sie gegen die Palette
+      //  des Themes. Der Hinweis darauf und der Weg zurueck stehen schon im
+      //  Formular und werden nur eingeblendet – die Felder neu aufzubauen,
+      //  waehrend jemand im Farbwaehler zieht, wuerde ihm den Waehler unter
+      //  der Hand austauschen.
+      var ownBlock = el("div");
+      ownBlock.appendChild(F.hint(t("ownColorsHint")));
+      var backRow = el("div", "add-row");
+      var back = el("button", "btn btn-small", t("ownColorsReset"));
+      back.type = "button";
+      back.addEventListener("click", function () {
+        state.style.ownColors = {};
+        ownBlock.hidden = true;
+        context.onChange();
+      });
+      backRow.appendChild(back);
+      ownBlock.appendChild(backRow);
+      ownBlock.hidden = !Object.keys(state.style.ownColors || {}).length;
+      body.appendChild(ownBlock);
+
+      var reveal = function () {
+        if (Object.keys(state.style.ownColors || {}).length) ownBlock.hidden = false;
+      };
+      body.addEventListener("input", reveal);
+      body.addEventListener("change", reveal);
       body.appendChild(F.range("style.sidebarWidth", t("sidebarWidth"), 20, 50, 1, " %"));
       body.appendChild(F.range("style.titleSize", t("nameSize"), 18, 48, 1, " px"));
       body.appendChild(F.row(

@@ -31,10 +31,10 @@
 }
 
 [data-column="sidebar"] .resume_title {
+  --headline-scale-side: 0.68;
   display: block;
   white-space: normal;
   text-align: left;
-  font-size: 0.78em;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   opacity: 0.7;
@@ -69,7 +69,9 @@
 }
 
 [data-column="main"] .resume_title {
-  font-size: 0.85em;
+  /*  Groesse als Faktor statt fester Wert: so bleibt der Regler im Editor
+      wirksam und das Symbol vor der Ueberschrift passt zur Zeile.  */
+  --headline-scale-main: 0.57;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   border-bottom: 1px solid var(--accent-color);
@@ -96,7 +98,7 @@
   width: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: 6.2em 1fr;
+  grid-template-columns: var(--date-column) 1fr;
   gap: 0 1.2em;
   margin: 0;
   padding: 0.3em 0;

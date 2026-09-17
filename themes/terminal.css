@@ -84,7 +84,7 @@
   width: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: max-content 0.9em 1fr;
+  grid-template-columns: var(--date-column) 0.9em 1fr;
   align-items: start;
   gap: 0 0.7em;
   margin: 0;
@@ -93,7 +93,7 @@
 
 .event .date {
   position: static;
-  width: max-content;
+  width: auto;
   min-width: 0;
   left: auto;
   display: block;

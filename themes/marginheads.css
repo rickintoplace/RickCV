@@ -35,10 +35,12 @@
 }
 
 [data-column="main"] .resume_title {
+  /*  Groesse als Faktor statt fester Wert: so bleibt der Regler im Editor
+      wirksam und das Symbol vor der Ueberschrift passt zur Zeile.  */
+  --headline-scale-main: 0.52;
   grid-column: 1;
   margin: 0;
   padding-top: 0.25em;
-  font-size: 0.78em;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-align: right;
@@ -138,10 +140,10 @@
 }
 
 [data-column="sidebar"] .resume_title {
+  --headline-scale-side: 0.68;
   display: block;
   white-space: normal;
   text-align: left;
-  font-size: 0.78em;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent-color);

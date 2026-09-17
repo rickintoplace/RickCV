@@ -32,7 +32,25 @@
     }, state);
   }
 
+  //  Ein Theme bringt oft eine eigene Palette mit (Terminal etwa eine dunkle
+  //  Seitenspalte). Damit die Farbwahl im Editor trotzdem etwas bewirkt,
+  //  merken wir uns, welche Farbe jemand tatsaechlich angefasst hat – der
+  //  Renderer setzt genau diese am <body>, wo sie gegen das Theme gewinnt.
+  var OWN_COLOR = {
+    "style.accentColor": "accent",
+    "style.fontColor": "font",
+    "style.backgroundColor": "background",
+    "style.sidebarColor": "sidebar",
+    "style.sidebarMode": "sidebar",
+    "style.sidebarFontColor": "sidebarFont",
+    "style.emptyColor": "empty",
+  };
+
   function set(path, value) {
+    if (OWN_COLOR[path] && state && state.style) {
+      if (!state.style.ownColors) state.style.ownColors = {};
+      state.style.ownColors[OWN_COLOR[path]] = true;
+    }
     var keys = path.split(".");
     var last = keys.pop();
     var target = keys.reduce(function (current, key) {

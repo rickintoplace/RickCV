@@ -216,6 +216,10 @@ A theme is one CSS file. Ten ship with RickCV —
 The same mechanism takes any other file: drop a `.css` anywhere on the builder, or pick one in
 **Themes**.
 
+A theme may bring its own palette, and most do. The colours you change in **Design** still win:
+a colour you touch is written onto the document itself and overrules the theme, while everything
+you leave alone stays the theme's business. One button hands the whole palette back.
+
 ### Writing one without cloning anything
 
 Open the builder, go to **Themes → Werkstatt/Workshop**, and start from the current theme or

@@ -87,6 +87,10 @@
   --right-margin: 2cm;
   --bottom-margin: 2cm;
   --page-bottom: 0.5cm; /* Luft unter dem letzten Block im Lebenslauf */
+  /*  Breite der Datumsspalte in flachen Zeitleisten. Der Renderer misst das
+      breiteste Datum im Dokument und traegt hier einen festen Wert ein –
+      sonst rueckte eine Station mit "heute" gegenüber ihren Nachbarn ein. */
+  --date-column: max-content;
   --header-height: 10em; /* Höhe der Kopfzeile */
 }
 
@@ -529,7 +533,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   text-transform: uppercase;
   /* font-variant: small-caps; */
   font-weight: 700;
-  font-size: var(--headline-size);
+  font-size: var(--title-font);
   /* font-size: 1.4em; */
   margin-bottom: 10px;
   letter-spacing: 2px;
@@ -545,16 +549,31 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
     festgelegt ist. Beide Saetze teilen sich denselben Kasten; die
     Material-Glyphe wird darin nur etwas groesser gesetzt, weil sie
     Innenabstand mitbringt. */
+/*  Eine Ueberschrift kennt ihre eigene Groesse als --title-font: in der
+    Seitenspalte die eine Einstellung, im Hauptteil die andere. Frueher
+    stand hier nur --headline-size – daran hing auch das Symbol vor den
+    Ueberschriften des Hauptteils, und der Regler fuer die Seitenspalte
+    veraenderte dort die Symbolgroesse.
+
+    Ein Theme, das seine Ueberschriften kleiner oder groesser setzen will,
+    nimmt dafuer --headline-scale-… statt einer festen Schriftgroesse: dann
+    bleibt der Regler im Editor wirksam und das Symbol passt weiter zur
+    Zeile. */
 .resume_title {
   position: relative;
-  --title-icon: calc(var(--headline-size) * 1.25 * var(--icon-scale));
+  --title-font: calc(var(--headline-size) * var(--headline-scale-side, 1));
+  --title-icon: calc(var(--title-font) * 1.25 * var(--icon-scale));
+}
+
+.resume_wrapper .resume_right .resume_title {
+  --title-font: calc(var(--headline-size-main) * var(--headline-scale-main, 1));
 }
 
 .resume_title .material-symbols-outlined,
 .resume_title .rc-icon,
 .resume_title .material-icons {
   position: absolute;
-  left: calc(-1 * (var(--title-icon) + var(--headline-size) * 0.3));
+  left: calc(-1 * (var(--title-icon) + var(--title-font) * 0.3));
   top: 50%;
   transform: translateY(-50%);
   width: var(--title-icon);
@@ -577,7 +596,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 .resume_wrapper .resume_left .resume_title .material-icons {
   position: static;
   transform: none;
-  margin: 0 calc(var(--headline-size) * 0.3) 0 0;
+  margin: 0 calc(var(--title-font) * 0.3) 0 0;
   vertical-align: -0.18em;
 }
 
@@ -844,7 +863,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
       eben ist, und der Abstand darunter war null – der Text klebte an der
       Linie. Beides ist jetzt einstellbar, und ein Theme kann es wie
       gehabt ueberschreiben. */
-  font-size: var(--headline-size-main);
+  font-size: var(--title-font);
   margin-bottom: var(--title-gap);
 }
 

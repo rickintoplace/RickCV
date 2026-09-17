@@ -195,6 +195,25 @@
 
     var body = doc.body;
 
+    //  Selbst gewaehlte Farben stehen am <body> und gewinnen damit gegen die
+    //  Palette des Themes, die genau dorthin zielt. Alles, was im Editor
+    //  unberuehrt geblieben ist, bleibt am :root – dort darf das Theme es
+    //  ueberschreiben. Ohne diese Trennung waere entweder die Farbwahl
+    //  wirkungslos oder jedes Theme farblos.
+    var own = style.ownColors || {};
+    [["accent", "--accent-color", style.accentColor],
+     ["font", "--font-color", style.fontColor],
+     ["background", "--background-color", style.backgroundColor],
+     ["sidebar", "--sidebar-color", sidebarColor(style)],
+     ["sidebarFont", "--sidebar-font-color",
+      style.sidebarMode === "dark" ? (style.sidebarFontColor || "#f5f5f5")
+                                   : (style.sidebarFontColor || style.fontColor)],
+     ["empty", "--color-empty", style.emptyColor],
+    ].forEach(function (entry) {
+      if (own[entry[0]]) body.style.setProperty(entry[1], entry[2]);
+      else body.style.removeProperty(entry[1]);
+    });
+
     //  Die Bündigkeit des Profiltexts ist die eine Einstellung, die ein Theme
     //  sinnvoll selbst setzt – eine schmale Spalte liest sich zentriert, eine
     //  breite nicht. Deshalb steht sie bei "auto" nirgends, und das Theme
@@ -1339,6 +1358,31 @@
   //  Wieviele Blaetter der Lebenslauf zuletzt gebraucht hat.
   var resumeSheets = 1;
 
+  //  Alle Stationen einer Zeitleiste sollen ihr Datum in derselben Breite
+  //  tragen. Themes mit stehendem Datum geben jeder Station ein eigenes
+  //  Raster – "05/23 – heute" ist dort breiter als "09/15 – 07/21", und der
+  //  Eintrag daneben ruecke ein. Gemessen statt geraten, weil die Laenge an
+  //  der Sprache, am Datumsformat und an der Schrift haengt.
+  function sizeDateColumn(doc) {
+    var root = doc.documentElement;
+    var dates = doc.querySelectorAll("#CV .event .date");
+    if (!dates.length) {
+      root.style.removeProperty("--date-column");
+      return;
+    }
+
+    //  Erst freigeben, sonst misst man die zuletzt gesetzte Breite nach.
+    root.style.setProperty("--date-column", "max-content");
+
+    var widest = 0;
+    Array.prototype.forEach.call(dates, function (node) {
+      var width = node.getBoundingClientRect().width;
+      if (width > widest) widest = width;
+    });
+
+    root.style.setProperty("--date-column", Math.ceil(widest) + "px");
+  }
+
   function render(doc, data) {
     var grouped = groupEvents(data);
     applyStyle(doc, data);
@@ -1381,6 +1425,7 @@
       fillTimeline(doc, grouped[section.id] || [], timeline, data);
     });
 
+    sizeDateColumn(doc);
     resumeSheets = paginateResume(doc, data);
 
     (doc.defaultView || global).requestAnimationFrame(function () {

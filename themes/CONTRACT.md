@@ -79,10 +79,24 @@ ein Theme kommt oft mit ein paar Zeilen davon aus.
 | `--sidebar-color`, `--sidebar-font-color`, `--sidebar-width` | die Seitenspalte |
 | `--font-family`, `--base-font-size`, `--title-size` | Typografie |
 | `--headline-size`, `--headline-size-main` | Überschriften in Seitenspalte und Hauptteil |
+| `--headline-scale-side`, `--headline-scale-main` | Faktor darauf; so setzt ein Theme kleinere Überschriften, ohne den Regler im Editor auszuhebeln |
+| `--date-column` | Breite der Datumsspalte, vom Renderer auf das breiteste Datum im Dokument gemessen |
 | `--title-gap` | Abstand unter einer Überschrift im Hauptteil |
 | `--profile-align` | Bündigkeit des Profiltexts; eine Wahl im Editor überstimmt sie |
 | `--left-margin`, `--right-margin`, `--bottom-margin`, `--header-height` | Ränder nach DIN 5008 |
 | `--icon-size`, `--icon-color`, `--icon-bg` | Symbole |
+
+## Farben
+
+Ein Theme darf eine eigene Palette mitbringen (`--accent-color`,
+`--sidebar-color`, …). Sobald jemand im Editor eine Farbe *anfasst*, steht sie
+am `<body>` und gewinnt gegen das Theme; alles Unberührte bleibt dem Theme
+überlassen. Ein Theme braucht dafür nichts zu tun – aber es sollte damit
+rechnen, dass eine seiner Farben ersetzt sein kann, und Kontraste nicht über
+zwei Farben legen, die es beide selbst setzt.
+
+Dasselbe gilt für `--profile-align`: die Einstellung im Editor steht auf
+„vom Theme bestimmt", bis jemand etwas anderes wählt.
 
 ## Was ein Theme nicht darf
 
