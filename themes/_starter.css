@@ -1,0 +1,57 @@
+/* @rickcv-theme
+   name:     Mein Theme
+   author:   dein Name
+   licence:  CC0-1.0
+   contract: 1
+   about:    Ein Satz, der sagt, wie das Theme aussieht. Er steht später in
+             der Auswahl im Baukasten.
+*/
+
+/*  Kopiervorlage für ein eigenes Theme.
+ *
+ *  Du brauchst dieses Projekt nicht auf deinem Rechner: öffne
+ *  https://cv.rickinto.place/, geh auf "Themes" → "Werkstatt" und schreib
+ *  dort los. Jede Zeile wirkt sofort im Dokument daneben, und am Ende lädst
+ *  du genau diese Datei herunter.
+ *
+ *  Drei Dinge, die gut zu wissen sind:
+ *
+ *    1. Themes liegen in der Kaskadenebene "theme" und gewinnen damit gegen
+ *       jede Regel der Grundstile. Du musst deren Selektoren nicht nachbauen
+ *       und brauchst kein !important.
+ *
+ *    2. Die Haken stehen in themes/CONTRACT.md – und in der Werkstatt als
+ *       anklickbare Liste.
+ *
+ *    3. Bilder und Schriften müssen als data:-Adresse in der Datei liegen.
+ *       Entfernte Adressen werden beim Laden entfernt, damit ein Theme nicht
+ *       verrät, wann jemand an seinem Lebenslauf sitzt.
+ */
+
+[data-template] {
+  /*  Farben, Schrift und Maße kommen aus Variablen. Wer sie hier setzt,
+      ändert das ganze Dokument auf einmal.  */
+  --accent-color: #2f5d8a;
+  --sidebar-width: 34%;
+}
+
+/*  Name und Rolle  */
+[data-block="namerole"] h1 {
+  letter-spacing: -0.02em;
+}
+
+/*  Überschriften der Seitenspalte  */
+[data-column="sidebar"] .resume_title {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/*  Eine einzelne Station  */
+.event {
+  /* padding-left: 0.4cm; */
+}
+
+/*  Nur Stationen ohne Datum – etwa Weiterbildungen ohne Zeitraum  */
+[data-date-mode="none"] .date {
+  display: none;
+}

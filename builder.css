@@ -1870,3 +1870,112 @@ body.legal-body {
   color: var(--ui-text);
   tab-size: 8;
 }
+
+/* ------------------------------------------------------------- Themes */
+
+/*  Die Werkstatt: links tippen, rechts sehen. Deshalb bleibt sie schmal
+    und der Editor bekommt die Höhe, nicht die Breite. */
+
+.theme-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  background: var(--ui-panel-2);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-card:hover,
+.theme-card:focus-visible {
+  border-color: var(--ui-accent);
+}
+
+.theme-card.active {
+  border-color: var(--ui-accent);
+  background: var(--ui-accent-soft);
+}
+
+.theme-card small {
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.theme-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-danger-ghost {
+  color: var(--ui-danger);
+}
+
+/*  Kein Zeilenumbruch: CSS liest sich in Zeilen, und ein umgebrochener
+    Selektor sieht aus wie zwei. */
+textarea.theme-editor {
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  white-space: pre;
+  overflow-x: auto;
+  tab-size: 2;
+}
+
+.theme-hook-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui-muted);
+  margin-top: 10px;
+}
+
+.theme-hooks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+/*  Ein Haken ist ein Knopf, der Text einsetzt – er sieht deshalb aus wie
+    Code, nicht wie eine Schaltfläche. */
+.theme-hook {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  background: var(--ui-panel);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-hook:hover,
+.theme-hook:focus-visible {
+  border-color: var(--ui-accent);
+  background: var(--ui-accent-soft);
+}
+
+.theme-hook code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  color: var(--ui-accent);
+}
+
+.theme-hook small {
+  font-size: 11px;
+  color: var(--ui-muted);
+}

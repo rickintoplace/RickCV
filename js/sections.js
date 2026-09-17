@@ -15,6 +15,7 @@
     var state = context.state;
     var t = context.t;
     var refreshSection = context.refreshSection;
+    var onChange = context.onChange;
     var el = F.el;
 
     /* ------------------------------------------------------- Hilfsbausteine */
@@ -902,6 +903,198 @@
       }
     }
 
+    /* ---------------------------------------------------------------- Themes */
+
+    //  Ein Theme ist eine CSS-Datei. Damit das nicht nur fuer Leute gilt,
+    //  die das Projekt auskennen: die Werkstatt schreibt dieselbe Datei im
+    //  Baukasten, mit der Vorschau daneben. Wer sie fertig hat, laedt sie
+    //  herunter – und genau die Datei ist der Beitrag.
+    function buildTheme(body) {
+      var Themes = global.RickCVThemes;
+      if (!Themes) return;
+
+      var locale = state.locale || "de";
+      var theme = state.theme || (state.theme = { slug: "clean", name: "", css: "", source: "" });
+
+      body.appendChild(F.hint(t("themeHint")));
+
+      /* -- Mitgelieferte ------------------------------------------------- */
+
+      var gallery = el("div", "theme-gallery");
+      Themes.builtin(locale).forEach(function (entry) {
+        var card = el("button", "theme-card");
+        card.type = "button";
+        if (!theme.css && theme.slug === entry.slug) card.classList.add("active");
+        card.appendChild(el("strong", null, entry.name));
+        if (entry.about) card.appendChild(el("small", null, entry.about));
+        card.addEventListener("click", function () {
+          state.theme = { slug: entry.slug, name: entry.name, css: "", source: "builtin" };
+          //  Die Vorlage steckte frueher in den Einstellungen; der Wert
+          //  bleibt gepflegt, damit aeltere Staende weiter passen.
+          state.settings.template = entry.slug;
+          onChange(true);
+          refreshSection("theme");
+        });
+        gallery.appendChild(card);
+      });
+      body.appendChild(gallery);
+
+      /* -- Werkstatt ----------------------------------------------------- */
+
+      var workshop = el("details", "sub-block");
+      workshop.open = !!theme.css;
+      workshop.appendChild(el("summary", null, t("themeWorkshop")));
+      var shop = el("div", "sub-block-body");
+      workshop.appendChild(shop);
+      body.appendChild(workshop);
+
+      shop.appendChild(F.hint(t("themeWorkshopHint")));
+
+      var actions = el("div", "theme-actions");
+
+      function useCss(css, name, note) {
+        state.theme = { slug: "", name: name || t("themeMine"), css: css, source: "workshop" };
+        state.settings.template = "custom";
+        onChange(true);
+        refreshSection("theme");
+        if (note) global.RickCVToast(note);
+      }
+
+      var base = Themes.builtin(locale).filter(function (entry) {
+        return entry.slug === theme.slug;
+      })[0];
+
+      if (!theme.css) {
+        var fork = el("button", "btn", t("themeFrom").replace("{name}", (base && base.name) || "Clean"));
+        fork.type = "button";
+        fork.addEventListener("click", function () {
+          useCss(Themes.source((base && base.slug) || "clean"), (base ? base.name + " ✳" : t("themeMine")));
+        });
+        actions.appendChild(fork);
+
+        var fresh = el("button", "btn", t("themeStarter"));
+        fresh.type = "button";
+        fresh.addEventListener("click", function () { useCss(Themes.starter(locale)); });
+        actions.appendChild(fresh);
+      }
+
+      var loadBtn = el("button", "btn", t("themeLoad"));
+      loadBtn.type = "button";
+      var file = el("input");
+      file.type = "file";
+      file.accept = ".css,text/css";
+      file.hidden = true;
+      file.addEventListener("change", function () {
+        if (!file.files[0]) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+          var read = Themes.read(String(reader.result), file.files[0].name.replace(/\.css$/i, ""));
+          useCss(String(reader.result), read.name, t("themeLoaded"));
+        };
+        reader.readAsText(file.files[0]);
+        file.value = "";
+      });
+      loadBtn.addEventListener("click", function () { file.click(); });
+      actions.appendChild(loadBtn);
+      actions.appendChild(file);
+
+      if (theme.css) {
+        var save = el("button", "btn", t("themeSave"));
+        save.type = "button";
+        save.addEventListener("click", function () {
+          var name = (theme.name || "theme").toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "theme";
+          var blob = new Blob([theme.css], { type: "text/css" });
+          var url = URL.createObjectURL(blob);
+          var link = el("a");
+          link.href = url;
+          link.download = name + ".css";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        });
+        actions.appendChild(save);
+
+        var drop = el("button", "btn btn-danger-ghost", t("themeDiscard"));
+        drop.type = "button";
+        drop.addEventListener("click", function () {
+          state.theme = { slug: "clean", name: "", css: "", source: "builtin" };
+          state.settings.template = "clean";
+          onChange(true);
+          refreshSection("theme");
+        });
+        actions.appendChild(drop);
+      }
+
+      shop.appendChild(actions);
+
+      if (!theme.css) return;
+
+      /* -- Der Editor ---------------------------------------------------- */
+
+      shop.appendChild(F.text("theme.name", t("themeName")));
+
+      var editor = F.textarea("theme.css", t("themeCss"), 16);
+      var area = editor.querySelector("textarea");
+      area.className = "theme-editor";
+      area.spellcheck = false;
+      area.wrap = "off";
+      shop.appendChild(editor);
+
+      //  Was die Pruefung entfernt hat, steht direkt darunter – sonst
+      //  sucht man den Fehler in der eigenen Regel.
+      var checked = Themes.read(theme.css, theme.name);
+      var NOTES = {
+        imports: "themeNoteImports", remote: "themeNoteRemote",
+        ats: "themeNoteAts", truncated: "themeNoteTruncated", contract: "themeNoteContract",
+      };
+      checked.notes.forEach(function (key) {
+        if (NOTES[key]) shop.appendChild(F.note(t(NOTES[key])));
+      });
+
+      /* -- Haken zum Einsetzen ------------------------------------------- */
+
+      function insert(text) {
+        var start = area.selectionStart;
+        var value = area.value;
+        area.value = value.slice(0, start) + text + value.slice(area.selectionEnd);
+        area.selectionStart = area.selectionEnd = start + text.length;
+        area.focus();
+        //  Denselben Weg nehmen wie beim Tippen: Zustand, Vorschau, Verlauf.
+        area.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+
+      var reference = el("details", "sub-block");
+      reference.appendChild(el("summary", null, t("themeHooks")));
+      var refBody = el("div", "sub-block-body");
+      refBody.appendChild(F.hint(t("themeHooksHint")));
+
+      Themes.hooks(locale).forEach(function (group) {
+        refBody.appendChild(el("div", "theme-hook-title", group.title));
+        var list = el("div", "theme-hooks");
+        group.items.forEach(function (item) {
+          var chip = el("button", "theme-hook");
+          chip.type = "button";
+          chip.title = item.about;
+          chip.appendChild(el("code", null, item.sel));
+          chip.appendChild(el("small", null, item.about));
+          chip.addEventListener("click", function () {
+            insert(item.sel.indexOf("--") === 0
+              ? "  " + item.sel + ": ;\n"
+              : "\n" + item.sel + " {\n  \n}\n");
+          });
+          list.appendChild(chip);
+        });
+        refBody.appendChild(list);
+      });
+
+      reference.appendChild(refBody);
+      shop.appendChild(reference);
+
+      shop.appendChild(F.hint(t("themeShareHint")));
+    }
+
     /* ------------------------------------------------------------- Register */
 
     return [
@@ -927,6 +1120,7 @@
         } },
       { id: "letter", title: t("secLetter"), build: buildLetter },
       { id: "design", title: t("secDesign"), build: buildDesign },
+      { id: "theme", title: t("secTheme"), build: buildTheme },
       { id: "ats", title: t("secAts"), build: buildAts },
       { id: "options", title: t("secOptions"), build: buildOptions },
     ];

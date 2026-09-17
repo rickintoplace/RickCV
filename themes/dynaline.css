@@ -1,0 +1,73 @@
+/* @rickcv-theme
+   name:     Dynaline
+   author:   RickCV
+   licence:  CC0-1.0
+   contract: 1
+   about:    Die Zeitleiste wird zur Achse: Stationen sitzen auf einer
+             durchgehenden Linie, die Dauer bestimmt ihren Abstand.
+   about-en: The timeline becomes the axis: stations sit on one continuous
+             line, and how long they lasted sets their distance.
+*/
+
+[data-template] {
+
+  .timeline {
+    left: -0.6cm;
+  }
+
+  .date {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    text-align: right;
+    /* text-align-last: justify; */
+    left: -2.5cm;
+  }
+
+  .event {
+    position: relative;
+    margin: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    width: max-content;
+}
+
+  .dot {
+    border-radius: 5px;
+  }
+  .event .content {
+    margin-left: 40px;
+    padding: 4px 10px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    left: -2em;
+    /* left: calc(var(--offset) / 1 - 30px); */
+    z-index: 1;
+    width: 9.2cm;
+}
+  .event .content h3 {
+    font-size: inherit;
+    margin: 0;
+}
+
+    .event-company, .event-place {
+    color: #5a5a5a;
+    }
+
+  .content::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 2px;
+    height: 1em;
+    
+    background: var(--color);
+    border-radius: 10px;
+    z-index: 0;
+    /* display: none; */
+  }
+}

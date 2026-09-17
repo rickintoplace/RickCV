@@ -173,6 +173,12 @@
       //  eine im Hauptbereich.
       footers: { left: emptyFooter(), right: emptyFooter() },
 
+      //  Das Aussehen als Datei. Ein mitgeliefertes Theme steht nur als
+      //  Name da – dann wirken spaetere Verbesserungen auch auf alte
+      //  Dokumente. Ein eigenes reist als CSS im Dokument mit, damit ein
+      //  Export vollstaendig ist und cv.html ohne Baukasten gleich aussieht.
+      theme: { slug: "clean", name: "", css: "", source: "" },
+
       ats: {
         //  "off"      – nichts einbetten (Vorgabe)
         //  "appendix" – gut lesbare Zusatzseite in Textform
@@ -316,17 +322,11 @@
     },
   };
 
-  //  Das englische Beispiel ist keine Uebersetzung des deutschen, sondern
-  //  ein eigener Unsinn im selben Ton: wer den Baukasten auf Englisch
-  //  oeffnet, soll etwas vorfinden, das in seiner Sprache komisch ist und
-  //  nicht nach Uebersetzung klingt.
   var EXAMPLE_EN = {
     profileText:
-      "Retired champion of competitive interpretive dance, now devoted to punching " +
-      "tickets with feeling. Knows every level crossing between here and the coast, " +
-      "and the name of the cat at each one.",
+      "The conqueror of the Dark Lord of Eurythmy (he whose name must not be danced) aims to enchant passengers with his charm.",
     contact: {
-      name: "Ada Wheelwright",
+      name: "Harold Poppins",
       role: "Train Conductor",
       address: "12 Sidings Lane",
       city: "Lower Piddling, LP3 4RW",
@@ -335,13 +335,13 @@
     },
     interests: [
       { name: "Trains", icon: icon("lucide", "train-front") },
-      { name: "The number 9", icon: icon("lucide", "dices") },
-      { name: "Saying yes to wine", icon: icon("lucide", "wine") },
-      { name: "Card tricks", icon: icon("lucide", "wand-sparkles") },
+      { name: "Dices", icon: icon("lucide", "dices") },
+      { name: "Rosé all day", icon: icon("lucide", "wine") },
+      { name: "Magic tricks", icon: icon("lucide", "wand-sparkles") },
     ],
     skills: [
       { name: "Model railways", rank: 5 },
-      { name: "Interlocking bricks", rank: 4 },
+      { name: "Construction toys", rank: 4 },
       { name: "MS Paint", rank: 4 },
       { name: "The internet", rank: 3.5 },
     ],
@@ -393,7 +393,7 @@
         sectionId: "experience" },
       { title: "Rainforest project", start: "09/2021", end: "05/2023",
         icon: icon("lucide", "sprout"), color: "var(--accent-color-shade1)", company: "A large brewery",
-        place: "Burton upon Trent", description: ["Helping preserve rainforest, allegedly"],
+        place: "Burton upon Trent", description: ["Helping preserve rainforest"],
         sectionId: "volunteer", hoffset: 20 },
       { title: "Social security", start: "05/2023", end: "01/2025", present: true,
         icon: icon("lucide", "wine"), color: "var(--accent-color-shade3)",
@@ -587,6 +587,15 @@
       }
       delete oldSettings.multiPage;
       data.version = 4;
+    }
+
+    //  v4 -> Themes: die Vorlage war eine Einstellung, jetzt ist sie ein
+    //  Theme. Der alte Wert wird zu dessen Namen.
+    if (!data.theme || (!data.theme.slug && !data.theme.css)) {
+      data.theme = {
+        slug: (data.settings && data.settings.template) || "clean",
+        name: "", css: "", source: "",
+      };
     }
 
     //  Kurzzeitig gab es fuer das Anschreiben einen eigenen Seitenmodus. Es

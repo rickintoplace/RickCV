@@ -458,6 +458,27 @@
     toast(t("exported"));
   }
 
+  //  Ein Theme per Datei: hereingezogen, gepruefte Fassung uebernommen,
+  //  Hinweise gemeldet. Die Werkstatt im Abschnitt "Themes" macht dasselbe
+  //  mit dem Dateiwaehler.
+  function loadTheme(file) {
+    var Themes = global.RickCVThemes;
+    if (!Themes) return;
+
+    var reader = new FileReader();
+    reader.onerror = function () { toast(t("importFailed")); };
+    reader.onload = function () {
+      var css = String(reader.result);
+      var read = Themes.read(css, file.name.replace(/\.css$/i, ""));
+      history.push(committed);
+      state.theme = { slug: "", name: read.name, css: css, source: "file" };
+      state.settings.template = "custom";
+      replaceState(state);
+      toast(t("themeLoaded"));
+    };
+    reader.readAsText(file);
+  }
+
   function openImport(file) {
     global.RickCVImportDialog.open({
       t: t,
@@ -538,7 +559,11 @@
       var tag = (event.target.tagName || "").toLowerCase();
       if (tag === "input" || tag === "textarea") return;
       event.preventDefault();
-      openImport(event.dataTransfer.files[0]);
+
+      var file = event.dataTransfer.files[0];
+      //  Eine CSS-Datei ist kein Lebenslauf, sondern sein Aussehen.
+      if (/\.css$/i.test(file.name) || file.type === "text/css") loadTheme(file);
+      else openImport(file);
     });
   }
 

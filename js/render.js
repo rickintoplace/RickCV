@@ -189,6 +189,13 @@
     root.lang = data.locale || "de"; // landet als /Lang im PDF
 
     var body = doc.body;
+    //  Die Fassung des Vertrags, gegen den dieses Markup geschrieben ist.
+    //  Ein Theme darf sich daran festhalten – und spaeter daran merken,
+    //  dass es fuer eine aeltere Fassung gedacht war.
+    body.setAttribute("data-contract", String(CONTRACT));
+    body.setAttribute("data-template", themeSlug(data));
+    body.setAttribute("data-icon-set", (data.style && data.style.iconSet) || "lucide");
+    applyTheme(doc, data);
     body.className = body.className.split(/\s+/).filter(function (name) {
       return name && !/^(template-|photo-|pages-)/.test(name);
     }).join(" ");
@@ -250,8 +257,9 @@
     }).join("");
   }
 
-  function sidebarItem(title, body, extraClass) {
-    return '<div class="resume_item ' + (extraClass || "") + '">' +
+  function sidebarItem(title, body, extraClass, block) {
+    return '<div class="resume_item ' + (extraClass || "") + '"' +
+      (block ? ' data-block="' + block + '"' : "") + ">" +
       '<div class="resume_title">' + esc(title) + "</div>" +
       '<div class="resume_info">' + body + "</div></div>";
   }
@@ -397,7 +405,7 @@
     var page2 = data.settings.page2;
 
     if (data.profile.show && data.profile.text && onPage(data.profile, page, pages)) {
-      blocks += '<div class="resume_item resume_profile">' +
+      blocks += '<div class="resume_item resume_profile" data-block="profile">' +
         '<div class="resume_title">' + esc(data.profile.title) + "</div>" +
         '<div class="resume_info profile-container">' + nl2br(data.profile.text) + "</div></div>";
     }
@@ -405,29 +413,29 @@
     //  Der Kontaktblock gehoert immer auf die erste Seite; auf der zweiten ist
     //  er eine Wiederholung, damit das Blatt fuer sich zuordenbar bleibt.
     if (page === 1 || page2.repeatContact) {
-      blocks += '<div class="resume_item resume_contact">' +
+      blocks += '<div class="resume_item resume_contact" data-block="contact">' +
         '<div class="resume_title">' + esc(data.contactTitle) + "</div>" +
         '<div class="resume_info"><div class="contact_container">' +
         contactBlock(data.contact) + "</div></div></div>";
     }
 
     if (isOn(data.languages) && onPage(data.languages, page, pages)) {
-      blocks += '<div class="resume_item resume_language">' +
+      blocks += '<div class="resume_item resume_language" data-block="languages">' +
         '<div class="resume_title">' + esc(data.languages.title) + "</div>" +
         '<div class="language_container">' + languageBlock(items(data.languages)) + "</div></div>";
     }
     if (isOn(data.mobilitySB) && onPage(data.mobilitySB, page, pages)) {
       blocks += sidebarItem(data.mobilitySB.title,
         '<div class="mobilitySB_container">' + iconRows(items(data.mobilitySB)) + "</div>",
-        "resume_mobilitySB");
+        "resume_mobilitySB", "mobilitySB");
     }
     if (isOn(data.interests) && onPage(data.interests, page, pages)) {
       blocks += sidebarItem(data.interests.title,
         '<div class="interests_container">' + iconRows(items(data.interests)) + "</div>",
-        "resume_interests");
+        "resume_interests", "interests");
     }
     if (isOn(data.projects) && onPage(data.projects, page, pages)) {
-      blocks += '<div class="resume_item resume_projects">' +
+      blocks += '<div class="resume_item resume_projects" data-block="projects">' +
         '<div class="resume_title">' + esc(data.projects.title) + "</div>" +
         '<div class="resume_info projects_container">' + projectBlock(items(data.projects)) + "</div></div>";
     }
@@ -435,11 +443,11 @@
     var showPhoto = data.photo.show && data.photo.src &&
       (page === 1 || page2.repeatPhoto);
     var photo = showPhoto
-      ? '<div class="resume_image profile-image-container"><img src="' + safeUrl(data.photo.src) +
+      ? '<div class="resume_image profile-image-container" data-block="photo"><img src="' + safeUrl(data.photo.src) +
         '" alt="' + esc(I18n.t("doc", "photoAlt", data.locale)) + '"></div>'
       : "";
 
-    return '<div class="resume_left">' + photo +
+    return '<div class="resume_left" data-column="sidebar">' + photo +
       '<div class="resume_bottom">' + blocks + "</div>" +
       footerBlock(data.footers.left, "resume-link-footer-left", page, pages) + "</div>";
   }
@@ -452,7 +460,7 @@
     //  damit sie den Blick nicht ein zweites Mal einfaengt.
     if (page === 1 || page2.repeatHeader) {
       out += '<div class="resume_item resume_namerole' +
-        (page > 1 ? " resume_namerole-repeat" : "") + '">' +
+        (page > 1 ? " resume_namerole-repeat" : "") + '" data-block="namerole">' +
         '<h1 class="name">' + esc(data.contact.name) + "</h1>" +
         '<div class="role">' + esc(data.contact.role) + "</div></div>";
     }
@@ -461,25 +469,27 @@
       if (section.show === false) return;
       if (!onPage(section, page, pages)) return;
       if (!grouped[section.id] || !grouped[section.id].length) return;
-      out += '<div class="resume_item timeline-container" data-section-id="' + esc(section.id) + '">' +
+      out += '<div class="resume_item timeline-container" data-block="section"' +
+        ' data-section-id="' + esc(section.id) + '"' +
+        ' data-role="' + esc(section.atsRole || "experience") + '">' +
         '<h2 class="resume_title">' + Icons.html(section.icon) + esc(section.title) + "</h2>" +
         '<div class="timeline" data-timeline="' + esc(section.id) + '"></div></div>';
     });
 
     if (isOn(data.skills) && onPage(data.skills, page, pages)) {
-      out += '<div class="resume_item resmue_skills">' +
+      out += '<div class="resume_item resmue_skills" data-block="skills">' +
         '<h2 class="resume_title">' + Icons.html(data.skills.icon) + esc(data.skills.title) + "</h2>" +
         '<div class="resume_info skills-container">' + skillBlock(items(data.skills)) + "</div></div>";
     }
     if (isOn(data.mobility) && onPage(data.mobility, page, pages)) {
-      out += '<div class="resume_item resmue_mobility">' +
+      out += '<div class="resume_item resmue_mobility" data-block="mobility">' +
         '<h2 class="resume_title">' + Icons.html(data.mobility.icon) + esc(data.mobility.title) + "</h2>" +
         '<div class="resume_info mobility-container">' +
         items(data.mobility).map(function (item) { return esc(item.name); }).join("<br>") +
         "</div></div>";
     }
     if (isOn(data.references) && onPage(data.references, page, pages)) {
-      out += '<div class="resume_item resume_references">' +
+      out += '<div class="resume_item resume_references" data-block="references">' +
         '<h2 class="resume_title">' + Icons.html(data.references.icon) + esc(data.references.title) + "</h2>" +
         '<div class="resume_info references-container">' +
         items(data.references).map(function (reference) {
@@ -497,7 +507,7 @@
     var bottom = footerBlock(data.footers.right, "resume-link-footer-right", page, pages) +
       pageNumber(data, page, pages);
 
-    return '<div class="resume_right">' + out +
+    return '<div class="resume_right" data-column="main">' + out +
       (bottom ? '<div class="resume-column-bottom">' + bottom + "</div>" : "") +
       "</div>";
   }
@@ -535,6 +545,7 @@
     events.forEach(function (event) {
       var node = doc.createElement("div");
       node.className = "event";
+      node.setAttribute("data-date-mode", dateMode(event));
 
       var date = doc.createElement("div");
       date.className = "date";
@@ -963,6 +974,46 @@
     return name ? kind + " – " + name : kind;
   }
 
+  //  Fassung des DOM-Vertrags. Sie steht am <body> und in themes/CONTRACT.md;
+  //  wer sie erhoeht, hat Klassennamen oder Haken geaendert.
+  var CONTRACT = 1;
+
+  //  Ein Theme ist nichts als CSS, das hinter dem Stylesheet des Dokuments
+  //  liegt. Es reist im Dokument mit, deshalb wirkt es auch dann, wenn
+  //  cv.html direkt geoeffnet wird – ohne Baukasten drumherum.
+  //  Mitgeliefert oder eigen? Beides traegt denselben Namen am <body>,
+  //  damit ein Theme sich darauf beziehen kann – noetig ist es nicht.
+  function themeSlug(data) {
+    var theme = data.theme || {};
+    if (theme.slug) return theme.slug;
+    return theme.css ? "custom" : (data.settings.template || "clean");
+  }
+
+  function applyTheme(doc, data) {
+    var theme = data.theme || {};
+    var css = global.RickCVThemes
+      ? global.RickCVThemes.resolve(theme)
+      : (typeof theme.css === "string" ? theme.css : "");
+    var node = doc.getElementById("rickcv-theme");
+
+    if (!css) {
+      if (node) node.parentNode.removeChild(node);
+      doc.body.removeAttribute("data-theme-name");
+      return;
+    }
+
+    if (!node) {
+      node = doc.createElement("style");
+      node.id = "rickcv-theme";
+      doc.head.appendChild(node);
+    }
+    //  In der oberen Ebene: damit gewinnt jede Theme-Regel gegen die
+    //  Grundstile, ohne dass sie deren Selektoren nachbauen muss.
+    var layered = "@layer theme {\n" + css + "\n}";
+    if (node.textContent !== layered) node.textContent = layered;
+    doc.body.setAttribute("data-theme-name", theme.name || "eigenes");
+  }
+
   //  Wieviele Blaetter das Anschreiben zuletzt gebraucht hat. Der Baukasten
   //  warnt damit, sobald es mehr als eines ist.
   var letterPages = 0;
@@ -1018,6 +1069,7 @@
   }
 
   global.RickCVRender = {
+    CONTRACT: CONTRACT,
     render: render,
     fonts: Object.keys(FONT_STACK),
     documentTitle: documentTitle,
