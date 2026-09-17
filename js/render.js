@@ -1006,32 +1006,209 @@
     if (node.textContent !== rule) node.textContent = rule;
   }
 
-  /*  "Automatisch mehrseitig": das Blatt waechst mit dem Inhalt, und der
-   *  Drucker schneidet es in A4-Boegen. In der Vorschau sah das aus wie ein
-   *  einziges, endlos langes Blatt – man konnte nicht erkennen, wo der
-   *  Schnitt faellt.
+  /*  Echte Blaetter statt eines wachsenden Bogens.
    *
-   *  Deshalb wird die Hoehe auf ein ganzes Vielfaches der Blatthoehe
-   *  aufgerundet und die Schnittkante angezeigt. Das entspricht genau dem,
-   *  was beim Druck passiert: die Bloecke tragen break-inside: avoid und
-   *  rutschen von selbst auf das naechste Blatt.
+   *  Gezeichnet wird zuerst ein Blatt mit allem darauf. Dann wird gemessen:
+   *  was unter die Blattkante geraet, zieht mitsamt allem Folgenden auf ein
+   *  neues Blatt um – Spalte fuer Spalte, Block fuer Block. Ein Block wird
+   *  dabei nie zerschnitten: eine Station, ein Kenntnisblock, ein Absatz
+   *  gehoeren zusammen.
+   *
+   *  Ein neues Blatt entsteht nur, wenn wirklich etwas umziehen muss, und
+   *  der erste Block eines Blattes bleibt immer stehen – sonst entstuende
+   *  ein leeres Blatt davor.
    */
-  function snapFlowHeight(doc, data) {
-    var wrapper = doc.querySelector(".resume_wrapper");
-    if (!wrapper) return;
+  function paginateResume(doc, data) {
+    var host = doc.querySelector("#CV");
+    if (!host) return 1;
 
-    if ((data.settings.pageMode || "single") !== "flow") {
-      wrapper.style.removeProperty("height");
-      wrapper.removeAttribute("data-sheets");
-      return;
+    var sheets = Array.prototype.slice.call(host.querySelectorAll(".resume_wrapper"));
+    if (!sheets.length) return 1;
+    if ((data.settings.pageMode || "flow") !== "flow") return sheets.length;
+
+    var view = doc.defaultView || global;
+    var height = pageSize(data).heightPx;
+    var guard = 0;
+
+    function spread(from) {
+      for (var index = from; index < sheets.length && guard++ < 16; index++) {
+        var extra = moveOverflow(doc, data, sheets[index], view, height);
+        if (!extra) continue;
+        host.insertBefore(extra, sheets[index].nextSibling);
+        sheets.splice(index + 1, 0, extra);
+      }
     }
 
-    var page = pageSize(data).heightPx;
-    //  Erst die eigene Hoehe freigeben, sonst misst man den vorigen Stand.
-    wrapper.style.removeProperty("height");
-    var sheets = Math.max(1, Math.ceil((wrapper.scrollHeight - 2) / page));
-    wrapper.style.height = (sheets * page) + "px";
-    wrapper.setAttribute("data-sheets", String(sheets));
+    spread(0);
+
+    //  Die Fusszeilen gehoeren ans Ende des Dokuments. Sie umzuhaengen kann
+    //  das letzte Blatt wieder zum Ueberlaufen bringen – also danach noch
+    //  einmal von dort aus verteilen.
+    moveFooters(sheets);
+    spread(sheets.length - 1);
+    moveFooters(sheets);
+
+    finishSheets(doc, data, sheets);
+    return sheets.length;
+  }
+
+  //  Die beiden Spalten eines Blattes, jede mit ihrem eigenen Fluss.
+  function columnsOf(sheet) {
+    return [
+      { key: "main", node: sheet.querySelector('[data-column="main"]') },
+      { key: "side", node: sheet.querySelector('[data-column="sidebar"] .resume_bottom') },
+    ].filter(function (part) { return part.node; });
+  }
+
+  function targetColumn(sheet, key) {
+    return key === "main"
+      ? sheet.querySelector('[data-column="main"]')
+      : sheet.querySelector('[data-column="sidebar"] .resume_bottom');
+  }
+
+  //  Was am unteren Rand mitlaeuft und deshalb Platz braucht: die
+  //  Linkleisten und die Seitenzahl. Sie stehen ausserhalb des Flusses,
+  //  wuerden aber vom Inhalt hinausgedrueckt – sichtbar als Fussleiste, die
+  //  unter der Blattkante klebt.
+  function reservedHeight(sheet, key) {
+    var node = key === "main"
+      ? sheet.querySelector(".resume-column-bottom")
+      : sheet.querySelector(".resume-link-footer-left");
+    if (!node) return 0;
+    var rect = node.getBoundingClientRect();
+    return rect.height ? rect.height + 8 : 0;
+  }
+
+  function moveOverflow(doc, data, sheet, view, height) {
+    var top = sheet.getBoundingClientRect().top;
+    var next = null;
+
+    columnsOf(sheet).forEach(function (part) {
+      var style = view.getComputedStyle(part.node);
+      //  Der untere Rand der Spalte bleibt frei: dort endet das Papier,
+      //  nicht erst an der Blattkante.
+      var limit = top + height - (parseFloat(style.paddingBottom) || 0) -
+        reservedHeight(sheet, part.key);
+
+      var blocks = Array.prototype.filter.call(part.node.children, function (node) {
+        return !node.classList.contains("resume-column-bottom");
+      });
+      if (!blocks.length) return;
+
+      //  Erst alles messen, dann verschieben: jeder Umzug verschiebt die
+      //  Nachbarn.
+      var bottoms = blocks.map(function (node) {
+        return node.getBoundingClientRect().bottom;
+      });
+
+      var cut = -1;
+      for (var i = 0; i < blocks.length; i++) {
+        if (bottoms[i] > limit + 1) { cut = i; break; }
+      }
+      if (cut === -1) return;
+      //  Ein Block, der fuer sich schon zu hoch ist, bleibt auf diesem Blatt
+      //  und laeuft ueber – ein leeres Blatt davor waere schlimmer.
+      if (cut === 0) cut = 1;
+      if (cut >= blocks.length) return;
+
+      next = next || newSheet(doc, data, sheet);
+      var target = targetColumn(next, part.key);
+      for (var j = cut; j < blocks.length; j++) target.appendChild(blocks[j]);
+    });
+
+    return next;
+  }
+
+  //  Ein leeres Blatt nach dem Vorbild des ersten: gleiche Spalten, gleiche
+  //  Klassen. Foto und Kopfzeile erscheinen nur wieder, wenn es so
+  //  eingestellt ist – sonst faengt das Folgeblatt direkt mit dem Inhalt an.
+  function newSheet(doc, data, like) {
+    var sheet = like.cloneNode(false);
+    sheet.removeAttribute("style");
+
+    var side = like.querySelector('[data-column="sidebar"]');
+    var newSide = side.cloneNode(false);
+
+    if (data.settings.page2.repeatPhoto) {
+      var photo = side.querySelector(".resume_image");
+      if (photo) newSide.appendChild(photo.cloneNode(true));
+    }
+
+    var bottom = side.querySelector(".resume_bottom");
+    newSide.appendChild(bottom ? bottom.cloneNode(false) : doc.createElement("div"));
+
+    var main = like.querySelector('[data-column="main"]');
+    var newMain = main.cloneNode(false);
+
+    if (data.settings.page2.repeatHeader) {
+      var namerole = main.querySelector('[data-block="namerole"]');
+      if (namerole) {
+        var copy = namerole.cloneNode(true);
+        copy.classList.add("resume_namerole-repeat");
+        newMain.appendChild(copy);
+      }
+    }
+
+    sheet.appendChild(newSide);
+    sheet.appendChild(newMain);
+    return sheet;
+  }
+
+  //  Fusszeilen gehoeren ans Ende des Dokuments, nicht auf jedes Blatt.
+  function moveFooters(sheets) {
+    if (sheets.length < 2) return;
+    var last = sheets[sheets.length - 1];
+
+    sheets.forEach(function (sheet, index) {
+      if (index === sheets.length - 1) return;
+
+      var mainBottom = sheet.querySelector(".resume-column-bottom");
+      if (mainBottom) last.querySelector('[data-column="main"]').appendChild(mainBottom);
+
+      var sideFooter = sheet.querySelector(".resume-link-footer-left");
+      if (sideFooter) last.querySelector('[data-column="sidebar"]').appendChild(sideFooter);
+    });
+  }
+
+  //  Nacharbeit: Seitenzahlen auf jedes Blatt, leere Blaetter weg.
+  function finishSheets(doc, data, sheets) {
+    var host = sheets[0].parentNode;
+
+    //  Ein Blatt, auf dem nichts gelandet ist, wird wieder entfernt.
+    for (var i = sheets.length - 1; i > 0; i--) {
+      var empty = columnsOf(sheets[i]).every(function (part) {
+        return !Array.prototype.some.call(part.node.children, function (node) {
+          return !node.classList.contains("resume-column-bottom");
+        });
+      });
+      if (!empty) continue;
+      host.removeChild(sheets[i]);
+      sheets.splice(i, 1);
+    }
+
+    moveFooters(sheets);
+
+    sheets.forEach(function (sheet, index) {
+      sheet.setAttribute("data-page", String(index + 1));
+
+      var existing = sheet.querySelector(".resume-page-number");
+      if (existing) existing.parentNode.removeChild(existing);
+      if (sheets.length < 2 || !data.settings.page2.pageNumbers) return;
+
+      var main = sheet.querySelector('[data-column="main"]');
+      var box = main.querySelector(".resume-column-bottom");
+      if (!box) {
+        box = doc.createElement("div");
+        box.className = "resume-column-bottom";
+        main.appendChild(box);
+      }
+
+      var number = doc.createElement("div");
+      number.className = "resume-page-number";
+      number.textContent = I18n.t("doc", "pageOf", data.locale)
+        .replace("{page}", index + 1).replace("{pages}", sheets.length);
+      box.appendChild(number);
+    });
   }
 
   //  Fassung des DOM-Vertrags. Sie steht am <body> und in themes/CONTRACT.md;
@@ -1078,6 +1255,9 @@
   //  warnt damit, sobald es mehr als eines ist.
   var letterPages = 0;
 
+  //  Wieviele Blaetter der Lebenslauf zuletzt gebraucht hat.
+  var resumeSheets = 1;
+
   function render(doc, data) {
     var grouped = groupEvents(data);
     applyStyle(doc, data);
@@ -1120,7 +1300,7 @@
       fillTimeline(doc, grouped[section.id] || [], timeline, data);
     });
 
-    snapFlowHeight(doc, data);
+    resumeSheets = paginateResume(doc, data);
 
     (doc.defaultView || global).requestAnimationFrame(function () {
       (data.sections || []).forEach(function (section) {
@@ -1134,6 +1314,7 @@
   global.RickCVRender = {
     CONTRACT: CONTRACT,
     pageHeightPx: function (data) { return pageSize(data).heightPx; },
+    resumeSheets: function () { return resumeSheets; },
     render: render,
     fonts: Object.keys(FONT_STACK),
     documentTitle: documentTitle,

@@ -157,6 +157,34 @@
           });
         }
 
+        /*  Allein geoeffnet – ohne Baukasten drumherum – passt sich das
+         *  Blatt der Fensterbreite an, indem es verkleinert wird. Es wird
+         *  nicht umgebaut: sonst saehe man etwas anderes als im PDF, und
+         *  die Seitenaufteilung faende andere Umbrueche als der Drucker.
+         */
+        function fitToWindow() {
+          if (window.parent !== window) return; // im Vorschaurahmen skaliert der Baukasten
+          var sheet = document.querySelector(".resume_wrapper, .cover-letter_wrapper");
+          if (!sheet) return;
+
+          var width = sheet.getBoundingClientRect().width / (currentScale || 1);
+          var room = document.documentElement.clientWidth - 16;
+          currentScale = Math.min(1, room / width);
+
+          var host = document.querySelector(".document");
+          host.style.transformOrigin = "top center";
+          host.style.transform = currentScale < 1 ? "scale(" + currentScale + ")" : "";
+          //  Der verkleinerte Inhalt beansprucht sonst weiter die volle
+          //  Hoehe und haengt unten ins Leere.
+          host.style.height = currentScale < 1
+            ? host.scrollHeight * currentScale + "px" : "";
+        }
+
+        var currentScale = 1;
+        window.addEventListener("resize", fitToWindow);
+        window.addEventListener("load", fitToWindow);
+        setTimeout(fitToWindow, 0);
+
         parent.postMessage({ type: "rickcv:ready" }, "*");
       })();
     </script>

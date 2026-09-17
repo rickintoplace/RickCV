@@ -392,6 +392,13 @@ a {
   padding: var(--border);
   width: var(--page-width);
   height: var(--page-height);
+
+  /*  Ein Blatt ist ein Blatt und schrumpft nicht. Als Flex-Element wuerde es
+      sich sonst an ein schmales Vorschaufenster anpassen – der Text liefe
+      anders um, die Seitenaufteilung faende andere Umbrueche als der Druck,
+      und die Vorschau zeigte etwas anderes als das PDF. */
+  flex: 0 0 auto;
+  min-width: var(--page-width);
 }
 
 /*  Mehrere Blaetter stehen als Geschwister im Dokument. Ohne eigene
@@ -407,34 +414,12 @@ a {
 /*  Mehrseitiger Lebenslauf: die Seite darf wachsen, der Inhalt laeuft im
     Druck auf weitere Blaetter. Die Sidebar traegt ihren Hintergrund ueber
     alle Seiten, weil sie mit dem Flex-Container mitwaechst. */
+/*  Auch im Fluss-Modus ist ein Blatt ein Blatt: die Aufteilung macht
+    render.js, indem es Bloecke auf weitere Boegen umzieht. Frueher wuchs
+    hier stattdessen das eine Blatt – in der Vorschau sah das aus wie eine
+    endlose Bahn, und wo der Drucker schneidet, war nicht zu erkennen. */
 body.pages-flow .resume_wrapper {
-  height: auto;
-  min-height: var(--page-height);
-  position: relative;
-}
-
-/*  Die Schnittkanten sichtbar machen: In "automatisch mehrseitig" rastet die
-    Blatthoehe auf ganze Boegen (render.js), und diese Linien zeigen, wo der
-    Drucker trennt. Im Druck selbst haben sie nichts verloren. */
-body.pages-flow .resume_wrapper[data-sheets]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 5;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent calc(var(--page-height) - 1px),
-    color-mix(in oklab, var(--font-color), transparent 55%) calc(var(--page-height) - 1px),
-    color-mix(in oklab, var(--font-color), transparent 55%) var(--page-height)
-  );
-}
-
-@media print {
-  body.pages-flow .resume_wrapper[data-sheets]::after {
-    display: none;
-  }
+  height: var(--page-height);
 }
 
 /*  Zweite Seite: jedes Blatt ist genau ein A4-Bogen. min-height statt height,
@@ -1107,51 +1092,26 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 }
 
 
-/*Media Queries*/
-
-@media screen and (max-width: 800px) {
-  .resume_wrapper .resume_right .resume_namerole {
-    display: none;
-  }
-  .resume_wrapper .resume_left .resume_namerole {
-    display: block;
-  }
-  .resume_wrapper {
-    width: 95%;
-    margin: 10px auto;
-    flex-direction: column;
-  }
-  .resume_wrapper .resume_left,
-  .resume_wrapper .resume_right {
-    width: 100%;
-  }
+/*  "Eine Seite" heisst eine Seite: was nicht passt, wird abgeschnitten –
+    sichtbar in der Vorschau und genauso im Druck. Ohne das Beschneiden
+    malte der Browser den Ueberhang auf eine zweite Seite, und aus dem
+    Einseiter wurde beim Drucken doch ein Zweiseiter. */
+body.pages-fixed .resume_wrapper {
+  overflow: hidden;
 }
 
-@media screen and (max-width: 424px) {
-  .resume_wrapper .resume_right {
-    padding: 20px 30px;
-  }
-  .resume_wrapper .resume_right .resume_data {
-    flex-direction: column;
-  }
-  .resume_wrapper .resume_right .resume_data .year {
-    padding: 0;
-    margin-bottom: 5px;
-    width: 100%;
-    color: var(--accent-color);
-  }
-  .resume_wrapper .resume_right .resume_data .year:before,
-  .resume_wrapper .resume_right .resume_data .year:after {
-    display: none;
-  }
-  .resume_wrapper .resume_right .resume_data .content {
-    width: 100%;
-    padding: 0;
-  }
-  .resume_wrapper .resume_right .resmue_skills .skills .int_icon {
-    font-size: 24px;
-  }
-}
+/*  Kein Umbau fuer schmale Fenster.
+    ---------------------------------------------------------------------
+    Frueher stapelten sich hier unter 800 px die Spalten uebereinander.
+    Das war gedacht fuer den Fall, dass jemand cv.html direkt auf dem
+    Telefon oeffnet – es hatte aber eine unangenehme Folge: der Satz fiel
+    dann anders aus als im Druck. Die Seitenaufteilung misst am Bildschirm,
+    und sie faende auf einem schmalen Fenster andere Umbrueche als der
+    Drucker. Die Vorschau zeigte etwas anderes als das PDF.
+
+    Ein Lebenslauf ist ein Blatt Papier. Statt ihn umzubauen, wird er
+    verkleinert: der Baukasten skaliert die Vorschau, und cv.html tut es
+    allein geoeffnet selbst.                                              */
 
 /*  Link-Fusszeilen
     ---------------------------------------------------------------------
@@ -1243,21 +1203,31 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
     display: block;
   }
 
+  /*  Kein erzwungener Umbruch hinter jedem Blatt: jedes Blatt ist genau
+      eine Seite hoch und darf nicht brechen (Regel darunter) – damit
+      landet das naechste ohnehin auf der naechsten Seite. Der erzwungene
+      Umbruch hinterliess dagegen am Ende eine leere Seite. */
   .resume_wrapper,
   .cover-letter_wrapper {
     margin: 0 !important;
     box-shadow: none !important;
-    break-after: page;
-    page-break-after: always;
   }
 
-  /*  Ein Blatt am Stueck halten ergibt nur beim festen Einseiter Sinn. Bei
-      "zwei Seiten" und "mehrseitig" darf der Ueberhang weiterlaufen – sonst
-      schiebt der Browser das ganze Blatt auf die naechste Seite und
-      hinterlaesst eine leere. */
-  body.pages-fixed .resume_wrapper {
+  /*  Jedes Blatt ist genau eine Seite – der Umbruch ist beim Zeichnen
+      gefallen (paginateResume), der Browser soll ihn nicht noch einmal
+      raten. Frueher war das nur beim festen Einseiter so; seit auch
+      "mehrseitig" echte Blaetter bekommt, gilt es ueberall. Ohne die Regel
+      genuegt ein halbes Pixel Rundungsunterschied zwischen 29,7 cm und der
+      Druckseite, und hinter jedem Blatt steht eine leere Seite. */
+  .resume_wrapper {
     break-inside: avoid;
     page-break-inside: avoid;
+    /*  Ein Haar kuerzer als die Druckseite: 29,7 cm sind bei 96 dpi
+        1122,52 px, und schon ein halbes Pixel Rundung schiebt sonst jedes
+        Folgeblatt eine Seite weiter. Das !important muss sein: die Regel
+        fuer den Bildschirm (body.pages-flow .resume_wrapper) ist
+        spezifischer und wuerde sonst auch im Druck gewinnen. */
+    height: calc(var(--page-height) - 1px) !important;
   }
 
   /*  Jedes Blatt des Anschreibens ist genau eine Seite – der Umbruch ist

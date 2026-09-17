@@ -932,8 +932,22 @@
         var card = el("button", "theme-card");
         card.type = "button";
         if (!theme.css && theme.slug === entry.slug) card.classList.add("active");
+
+        //  Ein Bild sagt hier mehr als der beste Satz. Die Beschreibung
+        //  bleibt trotzdem im Dokument stehen – für Vorlesesoftware, für
+        //  die Suche und für den Fall, dass das Bild fehlt.
+        var shot = el("img", "theme-shot");
+        shot.src = "themes/previews/" + entry.slug + ".webp";
+        shot.alt = entry.name + (entry.about ? " – " + entry.about : "");
+        shot.loading = "lazy";
+        shot.addEventListener("error", function () { shot.hidden = true; });
+        card.appendChild(shot);
+
         card.appendChild(el("strong", null, entry.name));
-        if (entry.about) card.appendChild(el("small", null, entry.about));
+        if (entry.about) {
+          card.title = entry.about;
+          card.appendChild(el("small", "visually-hidden", entry.about));
+        }
         card.addEventListener("click", function () {
           state.theme = { slug: entry.slug, name: entry.name, css: "", source: "builtin" };
           //  Die Vorlage steckte frueher in den Einstellungen; der Wert

@@ -191,9 +191,16 @@ if (!browser) {
   data.theme = { slug: ${JSON.stringify(slug)}, name: "", css: "", source: "builtin" };
   RickCVRender.render(document, data);
   setTimeout(function () {
-    var sheet = document.querySelector(".resume_wrapper");
-    document.title = "sheets:" + (sheet.getAttribute("data-sheets") || "0");
-  }, 600);
+    var sheets = document.querySelectorAll(".resume_wrapper");
+    var over = 0;
+    sheets.forEach(function (sheet) {
+      var edge = sheet.getBoundingClientRect().bottom;
+      sheet.querySelectorAll("*").forEach(function (node) {
+        over = Math.max(over, node.getBoundingClientRect().bottom - edge);
+      });
+    });
+    document.title = "sheets:" + sheets.length + ":" + Math.round(over);
+  }, 700);
 </script></body></html>`);
 
     try {
@@ -202,8 +209,8 @@ if (!browser) {
         "--window-size=900,1300", "--virtual-time-budget=9000",
         "--dump-dom", origin + "/.theme-overflow-probe.html",
       ], { encoding: "utf8", timeout: 90000, maxBuffer: 32 * 1024 * 1024 });
-      const match = stdout.match(/<title>sheets:(\d+)<\/title>/);
-      return match ? Number(match[1]) : null;
+      const match = stdout.match(/<title>sheets:(\d+):(-?\d+)<\/title>/);
+      return match ? { sheets: Number(match[1]), over: Number(match[2]) } : null;
     } catch {
       return null;
     } finally {
@@ -214,12 +221,20 @@ if (!browser) {
   console.log("\n— Papierbedarf für das Beispiel —");
   for (const name of files) {
     const slug = name.replace(/\.css$/, "");
-    const sheets = await sheetsFor(slug);
+    const measured = await sheetsFor(slug);
     //  Zwei Bögen sind für das reichlich gefüllte Beispiel in Ordnung; drei
     //  wären ein Hinweis auf verschwendeten Platz oder einen Layoutfehler.
-    ok(sheets !== null && sheets <= 2, `${slug}: höchstens zwei Bögen`,
-       sheets === null ? "nicht messbar" : sheets + " Bögen");
-    if (sheets !== null) console.log(`       ${slug}: ${sheets}`);
+    ok(measured !== null && measured.sheets >= 1 && measured.sheets <= 2,
+       `${slug}: höchstens zwei Bögen`,
+       measured === null ? "nicht messbar" : measured.sheets + " Bögen");
+    //  Und nichts darf über die Blattkante hinausragen: die Seitenaufteilung
+    //  soll umziehen, nicht abschneiden. Ein paar Punkte gehen auf das Konto
+    //  von Schatten und Rundung.
+    ok(measured !== null && measured.over <= 4, `${slug}: nichts steht über`,
+       measured === null ? "nicht messbar" : measured.over + " px über der Kante");
+    if (measured !== null) {
+      console.log(`       ${slug}: ${measured.sheets} Bogen/Bögen, ${measured.over} px Überstand`);
+    }
   }
 
   if (dom) {

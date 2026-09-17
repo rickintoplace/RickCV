@@ -54,10 +54,12 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
   document next to it that updates as you type, and a download button at the end. No checkout,
   no build, no reload.
 - **Customizable styling:** colors, typeface, font size, sidebar width, headline sizes and DIN 5008 margins.
-- **One page or many:** By default the resume gets further sheets as it grows, and a thin line
-  in the preview shows where the paper ends — printing moves a block that would cross it onto
-  the next sheet as a whole. Switch to *one page* to keep it on a single sheet, or to *two
-  pages* to place every block by hand.
+- **One page or many:** By default the resume is laid out onto as many sheets as it needs, the
+  way the cover letter already was: what does not fit moves to a new sheet — whole blocks, never
+  cut in half — and a sheet is only added when something actually has to move. What the preview
+  shows is what the PDF has, sheet for sheet. Switch to *one page* to keep everything on a
+  single sheet (the rest is then cut off, in the preview as in print), or to *two pages* to
+  place every block by hand.
   The cover letter needs no switch: it breaks onto further A4 sheets by itself once the text no longer fits,
   keeping your margins on every page and numbering them per DIN 5008 — and it says so when that happens,
   because one page is almost always the right answer.
