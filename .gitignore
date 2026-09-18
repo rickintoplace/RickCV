@@ -1,2 +1,8 @@
-#  Zwischenstände der Aufnahme (tools/record-demo.mjs --keep)
-.demo-*/
+.theme-contract-probe.html
+.theme-overflow-probe.html
+.theme-preview.html
+.*-probe.html
+
+.DS_Store
+Thumbs.db
+*~

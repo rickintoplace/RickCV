@@ -268,9 +268,6 @@ reads is not a question of looks. The builder says when it removed something.
 ```bash
 python3 tools/build-themes.py          # themes/*.css → js/theme-data.js
 python3 tools/make-theme-previews.py   # gallery images for themes/README.md
-python3 tools/make-demo-cv.py          # tests/fixtures/demo-cv.pdf from examples/demo-assets/
-node tools/record-demo.mjs             # examples/demo.gif, by driving the real app
-node tools/make-screenshots.mjs        # examples/*.webp
 node tests/theme.test.mjs              # contract + every theme in themes/
 ```
 
@@ -445,10 +442,6 @@ Copy `index.html`, `cv.html`, `builder.css`, `builder.js`, `render.js`, `default
 | `themes/` | One CSS file per theme, plus `CONTRACT.md` and `_starter.css` |
 | `vendor/pdfjs/` | Mozilla's pdf.js (Apache-2.0), only fetched when a PDF is imported |
 | `tools/gen-icons.py` | Regenerates `js/icon-data.js` from lucide-static |
-| `tools/make-demo-cv.py` | Builds `tests/fixtures/demo-cv.pdf`, the foreign resume used in the demo |
-| `tools/record-demo.mjs` | Records the demo at the top of this file, by driving the real app |
-| `tools/make-screenshots.mjs` | The screenshots above, same way |
-| `tools/cdp.mjs` | The headless browser both of those talk to |
 
 Every file is a plain script which is what lets you
 open `index.html` by double-clicking it.

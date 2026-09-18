@@ -495,7 +495,7 @@ if (!fs.existsSync(pdfLib)) {
     ok(false, "PDF mit Bildern gelesen", error.message);
   }
 
-  //  Die Datei aus der Vorfuehrung (tools/record-demo.mjs): ein fremder
+  //  Die Datei aus der Vorfuehrung im README: ein fremder
   //  Lebenslauf in der Form, die am haeufigsten vorkommt – Seitenspalte mit
   //  Kenntnissen in zwei Spalten, Titel und Zeitraum nebeneinander, fett
   //  gesetzte Projektnamen. Was das GIF im README zeigt, steht hier als
