@@ -23,6 +23,14 @@
     translate = fn;
   }
 
+  //  Die Kataloge fuehren Gruppen und Hinweise auf Deutsch – sie sind Daten,
+  //  keine Oberflaeche. Uebersetzt wird deshalb hier beim Anzeigen, und wo
+  //  keine Uebersetzung steht, bleibt der Eintrag stehen, wie er ist.
+  function say(key, fallback) {
+    var text = translate(key);
+    return text && text !== key ? text : fallback;
+  }
+
   function el(tag, className, text) {
     var node = document.createElement(tag);
     if (className) node.className = className;
@@ -53,10 +61,11 @@
     setTabs = el("div", "picker-sets");
     Object.keys(Icons.sets).forEach(function (id) {
       var set = Icons.sets[id];
-      var tab = el("button", "picker-set", set.label);
+      var tab = el("button", "picker-set",
+        say("set" + id.charAt(0).toUpperCase() + id.slice(1), set.label));
       tab.type = "button";
       tab.dataset.set = id;
-      tab.title = set.note;
+      tab.title = say("setNote" + id.charAt(0).toUpperCase() + id.slice(1), set.note);
       tab.addEventListener("click", function () {
         activeSet = id;
         paintTabs();
@@ -91,7 +100,9 @@
       tab.classList.toggle("is-active", active);
       tab.setAttribute("aria-pressed", String(active));
     });
-    document.getElementById("picker-note").textContent = Icons.sets[activeSet].note;
+    document.getElementById("picker-note").textContent =
+      say("setNote" + activeSet.charAt(0).toUpperCase() + activeSet.slice(1),
+          Icons.sets[activeSet].note);
   }
 
   function paintGrid() {
@@ -107,7 +118,7 @@
     results.forEach(function (result) {
       if (result.group !== lastGroup) {
         lastGroup = result.group;
-        grid.appendChild(el("div", "picker-group", result.group));
+        grid.appendChild(el("div", "picker-group", say("grp" + result.group, result.group)));
       }
 
       var button = el("button", "picker-item");

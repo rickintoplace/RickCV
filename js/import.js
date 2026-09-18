@@ -1033,6 +1033,14 @@
   //  Spaltensprung als Tabulator hinterlassen – daran laesst sich beides
   //  trennen. Eine Beschriftung ist kurz, traegt keine Ziffern und endet
   //  hoechstens auf einen Doppelpunkt.
+  //  Traegt die Zeile einen Zeitraum, ein Anfangs- oder ein Enddatum?
+  function carriesDate(text) {
+    var line = clean(text);
+    if (!line) return false;
+    return RANGE.test(line) || SINGLE.test(line) || LEADING.test(line) ||
+      !!trailingDate(line);
+  }
+
   function labelSplit(text) {
     var parts = String(text).split("\t");
     if (parts.length < 2) return null;
@@ -1178,6 +1186,7 @@
       .map(function (row) {
         return {
           text: clean(row.text), size: row.size || 0, spaced: !!row.spaced,
+          bold: !!row.bold,
           x: row.x || 0, y: row.y || 0, page: row.page || 1,
         };
       })
@@ -1263,15 +1272,17 @@
         profile.profileText = clean(profile.profileText + " " + joined.replace(/\n/g, " "))
           .replace(/\s+/g, " ").trim();
       } else if (current === "skills") {
-        listItems(joined).forEach(function (name) { profile.skills.push({ name: name, rank: 0 }); });
+        skillEntries(buffer).forEach(function (entry) { profile.skills.push(entry); });
       } else if (current === "interests") {
         listItems(joined).forEach(function (name) { profile.interests.push({ name: name }); });
       } else if (current === "mobility") {
         listItems(joined).forEach(function (name) { profile.mobility.push({ name: name }); });
       } else if (current === "languages") {
         //  "Deutsch" / "(Muttersprache)" untereinander ist ein Umbruch,
-        //  keine zweite Sprache.
-        var glued = joined.replace(/\n\s*\(/g, " (");
+        //  keine zweite Sprache. Und "Deutsch<TAB>Muttersprache" ist eine
+        //  Sprache mit Stufe, keine zwei Sprachen: zweispaltige Listen sind
+        //  in Lebenslaeufen die Regel, nicht die Ausnahme.
+        var glued = pairColumns(joined).replace(/\n\s*\(/g, " (");
         languageEntries(glued).forEach(function (entry) {
           profile.languages.push(entry);
         });
@@ -1383,7 +1394,10 @@
         return;
       }
 
-      if (current) buffer.push({ text: line, size: row.size, y: row.y, page: row.page });
+      if (current) {
+        buffer.push({ text: line, size: row.size, bold: row.bold,
+                      y: row.y, page: row.page });
+      }
     }
 
     var page = null;
@@ -1420,6 +1434,14 @@
       var label = labelSplit(line);
       if (label) {
         var labelRole = headingOf(label.label);
+
+        //  "Software Developer<TAB>03/2016 – 07/2018" ist eine Station,
+        //  keine Ueberschrift – auch wenn "Software" als Ueberschrift fuer
+        //  Kenntnisse durchgeht. Eine Ueberschrift traegt kein Datum neben
+        //  sich; frueher riss so ein Stationstitel den Abschnitt auf, und
+        //  der Rest des Werdegangs landete unter Kenntnissen.
+        if (labelRole && carriesDate(label.value)) labelRole = null;
+
         if (labelRole) {
           closeEvent(); flushBuffer();
           sawHeading = true;
@@ -1532,6 +1554,10 @@
       if (/https?:\/\//.test(value)) return true;
       if (/^[\w.-]+\.(de|com|org|net|io|dev|eu|ch|at)$/i.test(value)) return true;
       if (bodySize && row.size > bodySize * 1.1) return true;
+      //  Viele Vorlagen setzen den Projektnamen nicht groesser, sondern
+      //  fett. Ohne das wird aus drei Projekten eines mit einer sehr
+      //  langen Beschreibung.
+      if (row.bold && value.length < 60) return true;
       return value.length < 40 && value === value.toUpperCase() && /[A-ZÄÖÜ]/.test(value);
     }
 
@@ -1767,6 +1793,68 @@
 
   //  Nebeneinander gesetzte Eintraege (Kenntnisse stehen gern in zwei
   //  Spalten) trennt der Tabulator, den die PDF-Ebene gesetzt hat.
+  //  Punkte, Sterne, Balken: die Selbsteinschaetzung steht in Lebenslaeufen
+  //  als Zeichenkette neben der Kenntnis. Gefuellt und leer sind
+  //  unterschiedliche Zeichen – daraus laesst sich die Stufe zaehlen,
+  //  statt sie auf null zu lassen.
+  var FULL_MARK = /[●◆■★▰▮⬤•]/g;
+  var EMPTY_MARK = /[○◇□☆▱▯◯]/g;
+
+  function rankFromMarks(text) {
+    var value = String(text || "");
+    var full = (value.match(FULL_MARK) || []).length;
+    var empty = (value.match(EMPTY_MARK) || []).length;
+    if (!full && !empty) return 0;
+    //  Nur Marken und Leerraum duerfen dastehen, sonst ist es Text.
+    if (clean(value.replace(FULL_MARK, "").replace(EMPTY_MARK, ""))) return 0;
+    var total = full + empty;
+    if (!total) return 0;
+    return Math.max(1, Math.min(5, Math.round(full / total * 5)));
+  }
+
+  //  Zweispaltige Listen: "Go<TAB>●●●●○". Der Tabulator trennt Name und
+  //  Wert – ohne ihn zu beachten, wird aus einer Kenntnis mit Stufe ein
+  //  Paar aus zwei Kenntnissen.
+  function skillEntries(rows) {
+    var out = [];
+
+    rows.forEach(function (row) {
+      var line = clean(row.text);
+      if (!line) return;
+
+      var parts = line.split("\t").map(clean).filter(Boolean);
+      if (parts.length === 2) {
+        var rank = rankFromMarks(parts[1]);
+        if (rank) { out.push({ name: parts[0], rank: rank }); return; }
+        //  Zwei Eintraege nebeneinander ("Modelleisenbahn  Klemmbausteine")
+        //  bleiben zwei Eintraege.
+      }
+
+      listItems(line).forEach(function (name) {
+        var rank = rankFromMarks(name);
+        if (rank) {
+          //  Die Marken hingen an der Kenntnis davor.
+          if (out.length) out[out.length - 1].rank = rank;
+          return;
+        }
+        out.push({ name: name, rank: 0 });
+      });
+    });
+
+    return out;
+  }
+
+  //  "Deutsch<TAB>Muttersprache" zu "Deutsch (Muttersprache)": danach sieht
+  //  es aus wie die Schreibweise, die languageEntries ohnehin versteht.
+  function pairColumns(text) {
+    return String(text).split("\n").map(function (line) {
+      var parts = clean(line).split("\t").map(clean).filter(Boolean);
+      if (parts.length !== 2) return line;
+      if (parts[0].length > 30 || parts[1].length > 30) return line;
+      return parts[0] + " (" + parts[1] + ")";
+    }).join("\n");
+  }
+
   function listItems(text) {
     return String(text).split(/\n|\t|[;,•·]|\s{3,}|\s\|\s/)
       .map(function (entry) { return clean(entry).replace(/^[-–—•*·]\s*/, ""); })
@@ -1998,6 +2086,10 @@
     base.settings = copy(state.settings);
     base.photo = copy(state.photo);
     base.contactTitle = state.contactTitle;
+    //  Das Theme gehoert zum Aussehen, nicht zum Inhalt. Der Dialog sagt
+    //  zu "Ersetzen": Gestaltung, Vorlage und Sprache bleiben – ohne diese
+    //  Zeile sprang das Dokument beim Import zurueck auf Clean.
+    if (state.theme) base.theme = copy(state.theme);
 
     ["skills", "languages", "interests", "projects", "references",
      "mobility", "mobilitySB"].forEach(function (key) {

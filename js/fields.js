@@ -213,6 +213,17 @@
     "#7a3f8a", "#a8432f", "#b3792b", "#4a4a52", "#1f2933",
   ];
 
+  //  Alle anderen Farbfelder mit demselben Pfad auf den neuen Wert bringen.
+  function syncColor(path, value, source) {
+    var fields = document.querySelectorAll('.field[data-path="' + path + '"]');
+    Array.prototype.forEach.call(fields, function (field) {
+      if (field === source) return;
+      Array.prototype.forEach.call(field.querySelectorAll("input"), function (input) {
+        input.value = value;
+      });
+    });
+  }
+
   function color(path, label, withSwatches) {
     var field = el("div", "field");
     if (label) field.appendChild(el("label", null, label));
@@ -227,9 +238,17 @@
     var current = get(path) || "#000000";
     picker.value = current;
     hex.value = current;
+    //  Dieselbe Farbe kann an zwei Stellen im Formular stehen (die
+    //  Akzentfarbe etwa unter Design und unter Themes). Der Pfad am Feld
+    //  laesst die eine Stelle die andere nachziehen, ohne dass ein
+    //  Abschnitt neu gebaut werden muss.
+    field.dataset.path = path;
+    picker.dataset.path = path;
+    hex.dataset.path = path;
 
     function apply(value) {
       set(path, value);
+      syncColor(path, value, field);
       changed();
     }
     picker.addEventListener("input", function () {

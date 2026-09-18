@@ -284,6 +284,10 @@
       if (node) node.textContent = t(texts[id]);
     });
 
+    //  Auch der Reiter im Browser: er stand fest auf Deutsch, waehrend
+    //  daneben die englische Oberflaeche lief.
+    document.title = "RickCV – " + t("tagline");
+
     //  Die Auswahl in der Kopfzeile und die im Abschnitt "Optionen" zeigen
     //  denselben Wert – egal, ueber welche der beiden umgestellt wurde.
     var langSwitch = document.getElementById("lang-switch");

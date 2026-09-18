@@ -164,10 +164,24 @@
       });
 
       var cleaned = unspace(text.replace(/[ ]+/g, " ").trim());
-      var first = parts.filter(function (item) { return !item.ghost; })[0] || parts[0];
+      var real = parts.filter(function (item) { return !item.ghost; });
+      var first = real[0] || parts[0];
+
+      //  Fett ist die Zeile, wenn der groessere Teil ihrer Zeichen fett
+      //  gesetzt ist – ein fett gesetztes Wort mitten im Satz macht noch
+      //  keine Ueberschrift.
+      var heavy = 0;
+      var total = 0;
+      real.forEach(function (item) {
+        var length = (item.str || "").length;
+        total += length;
+        if (item.bold) heavy += length;
+      });
+
       return {
         text: cleaned.text,
         spaced: cleaned.spaced,
+        bold: total > 0 && heavy / total > 0.6,
         size: size,
         x: first.x,
         y: row.y,
@@ -403,6 +417,28 @@
   //  Schnipsel weg, nicht nur einzelne Zeichen.
   var ICON_FONT = /material.?(symbols|icons)|font.?awesome|icomoon|glyphicons|feather|lucide|ionicons|octicons|typicons|entypo/i;
 
+  //  Ein fetter Schnitt steht im Namen der eingebetteten Schrift. Das ist
+  //  die einzige Stelle, an der ein PDF "wichtig" sagt – Ueberschriften,
+  //  Stationstitel und Projektnamen haengen daran.
+  var BOLD_FONT = /bold|black|heavy|semibold|demibold|ultra/i;
+
+  function boldFontMap(page, items) {
+    var map = {};
+    items.forEach(function (item) {
+      var name = item.fontName;
+      if (!name || map[name] !== undefined) return;
+      var label = "";
+      try {
+        var font = page.commonObjs.get(name);
+        label = (font && (font.name || font.loadedName)) || "";
+      } catch (error) {
+        label = "";
+      }
+      map[name] = BOLD_FONT.test(label) || BOLD_FONT.test(name);
+    });
+    return map;
+  }
+
   function iconFontMap(page, items) {
     var map = {};
     items.forEach(function (item) {
@@ -429,6 +465,7 @@
       //  wird noch gebraucht. Ohne sie klafft dort eine Luecke, und aus
       //  "Tierpflege" wuerde "Tierp ege" statt "Tierpege".
       var icons = iconFontMap(page, content.items);
+      var bold = boldFontMap(page, content.items);
       var cleaned = stripSymbols(content.items).map(function (item) {
         if (!icons[item.fontName]) return item;
         return Object.assign({}, item, { str: "", ghost: true });
@@ -444,6 +481,7 @@
           w: item.width || 0,
           h: Math.abs(item.transform[3]) || item.height || 10,
           ghost: !!item.ghost,
+          bold: !!bold[item.fontName],
         };
       });
 

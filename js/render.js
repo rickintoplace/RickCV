@@ -232,9 +232,11 @@
     body.setAttribute("data-icon-set", (data.style && data.style.iconSet) || "lucide");
     applyTheme(doc, data);
     body.className = body.className.split(/\s+/).filter(function (name) {
+      //  "template-…" steht mit in der Liste, damit alte Klassen von einer
+      //  frueheren Fassung verschwinden; gesetzt wird sie nicht mehr. Welches
+      //  Theme laeuft, sagt data-template.
       return name && !/^(template-|photo-|pages-)/.test(name);
     }).join(" ");
-    body.classList.add("template-" + (data.settings.template || "clean"));
     body.classList.add("photo-" + (photo.shape || "band"));
     var mode = data.settings.pageMode || "single";
     body.classList.add(

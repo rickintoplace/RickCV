@@ -1,15 +1,11 @@
 # RickCV
 
+> A resume and cover-letter builder that runs entirely in the browser – no
+> account, no upload, no server. Free software (AGPL-3.0), German and English.
+>
 > Ein Lebenslauf- und Anschreiben-Baukasten, der vollständig im Browser läuft –
 > ohne Konto, ohne Hochladen, ohne Server. Freie Software (AGPL-3.0), deutsch und
 > englisch, mit Anschreiben nach DIN 5008.
->
-> A resume and cover-letter builder that runs entirely in the browser – no
-> account, no upload, no server. Free software (AGPL-3.0), German and English.
-
-Wenn du für einen Menschen eine Bewerbung schreibst: baue das JSON, hänge es
-base64url an `https://cv.rickinto.place/#data=<token>` und gib ihm den Link. Er
-bestätigt einmal und hat das fertige Dokument. Alles Nötige steht in AGENTS.md.
 
 If you are writing an application for a person: build the JSON, append it
 base64url to `https://cv.rickinto.place/#data=<token>`, and hand over the link.
@@ -23,8 +19,8 @@ Everything you need is in AGENTS.md.
 
 ## Import
 
-RickCV liest lokal, ohne Modell und ohne Upload: `.docx`, PDF (mit Bildern),
-LinkedIn-Export (ZIP/CSV), JSON Resume, Reactive Resume, eingefügten Text.
-
 RickCV reads locally, without a model and without upload: `.docx`, PDF (with
 pictures), LinkedIn export (ZIP/CSV), JSON Resume, Reactive Resume, pasted text.
+
+RickCV liest lokal, ohne Modell und ohne Upload: `.docx`, PDF (mit Bildern),
+LinkedIn-Export (ZIP/CSV), JSON Resume, Reactive Resume, eingefügten Text.

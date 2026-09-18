@@ -757,12 +757,26 @@
 
       body.appendChild(el("hr"));
       body.appendChild(F.color("style.accentColor", t("accentColor"), true));
-      body.appendChild(F.select("style.sidebarMode", t("sidebar"), [
+      var sidebarMode = F.select("style.sidebarMode", t("sidebar"), [
         { value: "light", label: t("sidebarLight") },
         { value: "dark", label: t("sidebarDark") },
         { value: "custom", label: t("sidebarCustom") },
-      ]));
-      body.appendChild(F.color("style.sidebarColor", t("sidebarColor")));
+      ]);
+      body.appendChild(sidebarMode);
+
+      //  Die eigene Farbe zaehlt nur in der Betriebsart "eigene Farbe" – in
+      //  "hell" und "dunkel" mischt der Renderer sie aus der Akzentfarbe.
+      //  Wer hier am Farbfeld dreht, meint aber genau diese Farbe, und sah
+      //  bisher nichts passieren. Also stellt die Wahl die Betriebsart um.
+      var sidebarColor = F.color("style.sidebarColor", t("sidebarColor"));
+      sidebarColor.addEventListener("input", function () {
+        if (state.style.sidebarMode === "custom") return;
+        state.style.sidebarMode = "custom";
+        var select = sidebarMode.querySelector("select");
+        if (select) select.value = "custom";
+        context.onChange();
+      });
+      body.appendChild(sidebarColor);
       body.appendChild(F.row(
         F.color("style.fontColor", t("fontColor")),
         F.color("style.backgroundColor", t("pageBackground"))
@@ -1007,6 +1021,13 @@
         gallery.appendChild(card);
       });
       body.appendChild(gallery);
+
+      //  Wer sich durch die Galerie klickt, will als Naechstes die Farbe
+      //  aendern. Bisher hiess das: Abschnitt wechseln und wieder zurueck.
+      //  Dasselbe Feld steht deshalb auch hier – beide halten sich synchron,
+      //  weil das Farbfeld seinen Pfad kennt.
+      body.appendChild(F.color("style.accentColor", t("accentColor"), true));
+      body.appendChild(F.hint(t("themeColorHint")));
 
       /* -- Werkstatt ----------------------------------------------------- */
 

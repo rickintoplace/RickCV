@@ -9,28 +9,42 @@
 
 Build your CV and Cover Letter here: https://cv.rickinto.place/
 
+![Pick a theme, change the colour, drop an old resume in](examples/demo.gif)
+
+*Pick a theme, change the colour, drop an old resume onto the page. Everything happens in the
+browser.*
+
+*About that last step: the import reads what is actually inside the file, without a language
+model. A PDF that was generated from text comes across nearly complete, with pictures where
+they belong; a scan, a heavily graphic template or an unusual layout gives you a rough draft
+instead. RickCV shows what it read before it changes anything, and says when the result is
+only a draft. See [what a PDF gives away](#what-a-pdf-gives-away).*
+
 Welcome to **RickCV** – a browser-based builder for professional resumes and cover letters. Fill in a form, watch the document update live, and save it as a PDF. No sign-up, no server, no build step: it is plain HTML, CSS and JavaScript, and everything you type stays on your own device.
 
 It also includes features to optimize your resume for Applicant Tracking Systems (ATS), making it easy to tailor your content for both human and machine readers.
 
 ## The builder
 
-![RickCV builder](https://github.com/rickintoplace/RickCV/blob/main/examples/builder.png?raw=true)
+![RickCV builder](examples/builder.webp)
 
 Edit on the left, watch the document on the right.
 
-![Icon picker](https://github.com/rickintoplace/RickCV/blob/main/examples/icon-picker.png?raw=true)
+![Icon picker](examples/icon-picker.webp)
 
 Around 150 embedded icons, searchable in German and English.
 
 ## Preview
 
 <p align="center">
-<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/preview1.png?raw=true" width="48%">
-<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/preview2.png?raw=true" width="48%">
+<img src="themes/previews/clean.webp" width="32%">
+<img src="themes/previews/banner.webp" width="32%">
+<img src="themes/previews/terminal.webp" width="32%">
 </p>
 
-Two A4 pages are generated and saved as a PDF file that can be read by both people and machines.
+The document is laid out onto as many A4 or US Letter sheets as it needs and saved as a PDF
+that both people and machines can read. Every theme in the gallery is one CSS file – see
+[all ten with pictures](themes/README.md).
 
 ## Features
 
@@ -40,7 +54,7 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 - **Your own categories:** *Education*, *Experience* and *Volunteering* are only the defaults. Rename them, reorder them, add your own — each one keeps a separate machine-readable meaning so applicant systems still file it correctly.
 - **Icon picker:** ~150 embedded [Lucide](https://lucide.dev) icons plus Google Material Symbols, searchable in German and English. One stroke-weight slider drives both sets — Material Symbols is matched through its variable font axis so the two never look mismatched — plus size, color and an optional background shape.
 - **Address as a map link:** Optionally the address in the sidebar links to OpenStreetMap — clickable in the PDF, unchanged on paper.
-- **Two languages:** German and English for the interface and the document, including the language marking inside the PDF. Switch it straight from the header, or under *Optionen*.
+- **Two languages:** German and English for the interface and the document, including the language marking inside the PDF. Switch it straight from the header, or under *Options*.
 - **Light and dark editor:** The button next to the language follows your system by default, and cycles to light or dark if you would rather decide yourself. Only the editor changes — the resume stays on white paper, because that is what gets printed.
 - **Honest machine readability:** See exactly what an applicant tracking system reads, and edit it yourself if you want. No hidden text — see below.
 - **A4 or US Letter:** one setting, and the page box, the print size and the cover letter's
@@ -49,7 +63,7 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 - **Dates as far as they exist:** a station can show a period, only its start, or no date at
   all. By default RickCV decides from what you typed — a further-education entry with a single
   year no longer drags an empty dash behind it.
-- **Themes are files:** every layout is a single CSS file. Three come with RickCV; you can
+- **Themes are files:** every layout is a single CSS file. Ten come with RickCV; you can
   drop in someone else's, or write your own **in the builder itself** — a workshop with the
   document next to it that updates as you type, and a download button at the end. No checkout,
   no build, no reload.
@@ -62,7 +76,7 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
   cut in half — and a sheet is only added when something actually has to move. What the preview
   shows is what the PDF has, sheet for sheet. Switch to *one page* to keep everything on a
   single sheet (the rest is then cut off, in the preview as in print), or to *two pages* to
-  place every block by hand. Under **Folgeseiten/Further sheets** you say what those sheets
+  place every block by hand. Under **Second page** you say what those sheets
   look like: sidebar or full width, letterhead repeated or not, contact details on every
   sheet, and which sheet a footer belongs on. How much room stays free below the last block
   is a slider in **Design** — less of it is often the difference between one sheet and two.
@@ -70,7 +84,7 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
   keeping your margins on every page and numbering them per DIN 5008 — and it says so when that happens,
   because one page is almost always the right answer.
 - **Projects where you want them:** as a column of small entries in the sidebar, or at full
-  width in the main column behind the career — one setting under *Projekte/Projects*.
+  width in the main column behind the career — one setting under *Projects*.
 - **Bring your data in:** Drop a file anywhere on the page — a RickCV backup, a
   [JSON Resume](https://jsonresume.org/) `resume.json`, the ZIP from LinkedIn's *Get a copy
   of your data* (or its single CSV files), an old resume as PDF, or plain text pasted into
@@ -79,20 +93,19 @@ Two A4 pages are generated and saved as a PDF file that can be read by both peop
 - **Export to PDF:** Crisp A4 pages, straight from the browser's print dialog.
 - **Your data stays yours:** Everything is stored in your browser only. Export it as a RickCV backup (everything, including styling and photo) or as `resume.json` in the open JSON Resume format that other tools can read.
 
-### Dynamically change the color
-![color changes](https://github.com/rickintoplace/RickCV/blob/main/examples/dynamic%20accent%20color.png?raw=true)
+### Icons, sections, timeline and chronology are yours
 
-### Customize icons, sections, timeline and chronology
 <p align="center">
-<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/example%20dynaline.png?raw=true" width="48%">
-<img src="https://github.com/rickintoplace/RickCV/blob/main/examples/example%20%20icons.png?raw=true" width="48%">
+<img src="themes/previews/dynaline.webp" width="32%">
+<img src="themes/previews/icons.webp" width="32%">
+<img src="themes/previews/marginheads.webp" width="32%">
 </p>
 
 ## How to Use
 
 ### Option A – use the hosted version
 
-Open the site, fill in the form, click **Als PDF speichern**. That is the whole workflow.
+Open the site, fill in the form, click **Save as PDF**. That is the whole workflow.
 
 ### Option B – run it on your own machine
 
@@ -108,29 +121,29 @@ git clone https://github.com/rickintoplace/RickCV.git
 
 ### Building your document
 
-1. **Person & Kontakt** – your name, role and contact details.
-2. **Profilbild** – drop in a photo. Drag inside the small preview to move the crop, use the
+1. **Person & contact** – your name, role and contact details.
+2. **Photo** – drop in a photo. Drag inside the small preview to move the crop, use the
    scroll wheel or the *Zoom* slider to scale it, and choose a shape.
-3. **Werdegang** – add your stations. Each one belongs to a category, which decides the
-   block it appears in. Under *Kategorien verwalten* you can rename the three defaults,
-   reorder them or add your own — a category called "Meine Reise" still exports as
+3. **Career** – add your stations. Each one belongs to a category, which decides the
+   block it appears in. Under *Manage categories* you can rename the three defaults,
+   reorder them or add your own — a category called "My journey" still exports as
    professional experience, because its meaning is set separately. Use the ↑ ↓ buttons to
    reorder, ⧉ to duplicate and ✕ to delete.
-4. **Kenntnisse, Sprachen, Interessen, Projekte, Mobilität** – optional sections. Each has a
+4. **Skills, Languages, Interests, Projects, Mobility** – optional sections. Each has a
    switch to hide it completely.
-5. **Referenzen** – off by default; switch it on if you want them on the page.
-6. **Anschreiben** – recipient, subject, salutation and as many paragraphs as you need.
-   You can also upload a scan of your signature. Under **Folgeseiten** you decide what a
+5. **References** – off by default; switch it on if you want them on the page.
+6. **Cover letter** – recipient, subject, salutation and as many paragraphs as you need.
+   You can also upload a scan of your signature. Under **Second page** you decide what a
    second sheet looks like: letterhead on page one only (DIN 5008) or repeated, and how the
    page numbers are labelled.
 7. **Design** – accent color, typeface, font size, icon set, sidebar width, margins and the
    room left at the foot of a sheet.
-8. **Maschinenlesbarkeit** – see and edit what applicant systems read. See the section below.
-9. **Optionen** – interface language, date format, chronological order and multi-page mode.
+8. **Machine readability** – see and edit what applicant systems read. See the section below.
+9. **Options** – interface language, date format, chronological order and multi-page mode.
 
 ### Saving as PDF
 
-Click **Als PDF speichern**. In the browser's print dialog choose:
+Click **Save as PDF**. In the browser's print dialog choose:
 
 | Setting | Value |
 | --- | --- |
@@ -139,7 +152,8 @@ Click **Als PDF speichern**. In the browser's print dialog choose:
 | Margins | None |
 | Background graphics | Enabled |
 
-Chrome gives the best results, since the layout is tuned for it.
+Chromium-based browsers give the most predictable result, since the layout is tuned for them.
+Firefox now produces a usable PDF as well, with every piece of text still text.
 
 ### Keeping and moving your data
 
@@ -190,14 +204,15 @@ Screening](https://arxiv.org/abs/2605.28999) ·
 
 ## A note on browsers
 
-Editing works in any modern browser. **The PDF export is tuned for Chrome** —
-other browsers handle margins, page breaks and background colors differently.
-RickCV shows a reminder in the preview bar when you are not using a
-Chromium-based browser.
+Editing works in any modern browser, and so does the PDF export. The layout is tuned for
+Chromium, which handles margins, page breaks and background colors most predictably. The
+preview bar says so when you are somewhere else. Firefox produces a usable PDF too, and every
+piece of text in it is still text. That is manages through static font weights instead of a
+variable font, which Firefox's PDF engine used to synthesise into bold.
 
 ## Themes
 
-A theme is one CSS file. Ten ship with RickCV —
+A theme is one CSS file. Ten come with RickCV —
 [see them with pictures](themes/README.md):
 
 | Theme | |
@@ -205,9 +220,9 @@ A theme is one CSS file. Ten ship with RickCV —
 | **Clean** | the calm baseline: timeline at the edge, dates on the right |
 | **Dynaline** | the timeline as an axis; how long something lasted sets the distance |
 | **Icons** | symbols carry the layout, timeline down the middle |
-| **Einspaltig** / Single column | header block, then one full-width column as a plain list — no timeline, no dots, no boxes |
-| **Klassisch** / Classic | serifs, small caps and hairlines, stations as a list with hanging dates |
-| **Kompakt** / Compact | the date moves onto the title's line; a career that needs two sheets elsewhere fits on one |
+| **Single column** | header block, then one full-width column as a plain list — no timeline, no dots, no boxes |
+| **Classic** | serifs, small caps and hairlines, stations as a list with hanging dates |
+| **Compact** | the date moves onto the title's line; a career that needs two sheets elsewhere fits on one |
 | **Terminal** | monospaced, square, dark sidebar, stations against a gutter rule |
 | **Right Rail** | the sidebar moves to the right and loses its fill; the career starts at the left edge |
 | **Margin Heads** | section headings sit in the margin beside their section, not above it |
@@ -222,7 +237,7 @@ you leave alone stays the theme's business. One button hands the whole palette b
 
 ### Writing one without cloning anything
 
-Open the builder, go to **Themes → Werkstatt/Workshop**, and start from the current theme or
+Open the builder, go to **Themes → Workshop**, and start from the current theme or
 an empty skeleton. What you type lands in the document on the right immediately; a list of
 every hook and variable sits below the editor and drops selectors in at the cursor. When it
 looks right, **Save as .css**, and that file *is* the theme. Contributing it means putting it
@@ -253,6 +268,9 @@ reads is not a question of looks. The builder says when it removed something.
 ```bash
 python3 tools/build-themes.py          # themes/*.css → js/theme-data.js
 python3 tools/make-theme-previews.py   # gallery images for themes/README.md
+python3 tools/make-demo-cv.py          # tests/fixtures/demo-cv.pdf from examples/demo-assets/
+node tools/record-demo.mjs             # examples/demo.gif, by driving the real app
+node tools/make-screenshots.mjs        # examples/*.webp
 node tests/theme.test.mjs              # contract + every theme in themes/
 ```
 
@@ -271,21 +289,21 @@ The agent builds a JSON document, encodes it `base64url`, and hands the person a
 https://cv.rickinto.place/#data=<token>&print=1
 ```
 
-One click opens the builder with the document in it — through the same confirmation step as
+One click opens the builder with the document in it, through the same confirmation step as
 any other import, showing what is about to arrive, so nothing is written behind the person's
 back. Nothing is fetched over the network either: the data travels inside the link. A resume
 without a photo makes a link of one to three kilobytes.
 
 What an agent cannot do is produce the PDF: that happens in the person's browser, one click
-on **Als PDF speichern**. The documentation says so rather than pretending otherwise, and it
-also says what not to do — no invisible keywords, no invented stations, `"rank": 0` when a
+on **Save as PDF**. The documentation says so rather than pretending otherwise, and it
+also says what not to do: no invisible keywords, no invented stations, `"rank": 0` when a
 skill level is unknown. The example document in `AGENTS.md` is imported by the test suite on
 every run, so the instructions cannot rot.
 
 ## Bringing your data in
 
-Nobody types their career twice. The **Importieren** button — or dropping a file anywhere on
-the page — opens one dialog that takes whatever you have:
+The **Import** button (or dropping a file anywhere on
+the page) opens one dialog that takes whatever you have:
 
 | What you have | What to do |
 | --- | --- |
@@ -370,7 +388,7 @@ in by hand instead of hunting for what went missing.
 
 ### Going the other way
 
-*Exportieren* offers four doors. Two of them produce a file: the complete RickCV backup, and `resume.json` in
+*Export* offers four doors. Two of them produce a file: the complete RickCV backup, and `resume.json` in
 the JSON Resume format, which other resume tools, themes and CLI renderers can read. Your
 career data is yours to take elsewhere. The two differ on purpose: the backup holds
 everything, the `resume.json` holds what the document actually shows — a section switched
@@ -419,7 +437,7 @@ Copy `index.html`, `cv.html`, `builder.css`, `builder.js`, `render.js`, `default
 | `js/sections.js` | What each editor section contains |
 | `js/builder.js` | Wiring: state, history, saving, preview, printing |
 | `js/import.js` | Reading and writing other formats: JSON Resume, LinkedIn, CSV, text |
-| `js/import-dialog.js` | The dialog behind *Importieren* |
+| `js/import-dialog.js` | The dialog behind *Import* |
 | `js/pdf-import.js` | Text and picture extraction from PDFs, loads `vendor/pdfjs` on demand |
 | `js/docx-import.js` | Reads Word documents: ZIP, XML, tables, pictures |
 | `js/themes.js` | Themes: header, safety checks, hook catalogue |
@@ -427,6 +445,10 @@ Copy `index.html`, `cv.html`, `builder.css`, `builder.js`, `render.js`, `default
 | `themes/` | One CSS file per theme, plus `CONTRACT.md` and `_starter.css` |
 | `vendor/pdfjs/` | Mozilla's pdf.js (Apache-2.0), only fetched when a PDF is imported |
 | `tools/gen-icons.py` | Regenerates `js/icon-data.js` from lucide-static |
+| `tools/make-demo-cv.py` | Builds `tests/fixtures/demo-cv.pdf`, the foreign resume used in the demo |
+| `tools/record-demo.mjs` | Records the demo at the top of this file, by driving the real app |
+| `tools/make-screenshots.mjs` | The screenshots above, same way |
+| `tools/cdp.mjs` | The headless browser both of those talk to |
 
 Every file is a plain script which is what lets you
 open `index.html` by double-clicking it.

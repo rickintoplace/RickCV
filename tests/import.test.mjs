@@ -494,6 +494,46 @@ if (!fs.existsSync(pdfLib)) {
   } catch (error) {
     ok(false, "PDF mit Bildern gelesen", error.message);
   }
+
+  //  Die Datei aus der Vorfuehrung (tools/record-demo.mjs): ein fremder
+  //  Lebenslauf in der Form, die am haeufigsten vorkommt – Seitenspalte mit
+  //  Kenntnissen in zwei Spalten, Titel und Zeitraum nebeneinander, fett
+  //  gesetzte Projektnamen. Was das GIF im README zeigt, steht hier als
+  //  Zusicherung.
+  console.log("\n— PDF: die Datei aus der Vorführung —");
+  try {
+    const { state: ds, parsed } = await readPdf("demo-cv.pdf");
+    ok(ds.contact.name === "Nora Feldkamp", "Name", ds.contact.name);
+    ok(ds.events.length === 6, "alle sechs Stationen", ds.events.length);
+    ok(ds.events.some((e) => e.title === "Software Developer"),
+       "ein Stationstitel, der wie eine Überschrift klingt, bleibt eine Station",
+       ds.events.map((e) => e.title).join(" | "));
+    ok(ds.skills.items.length === 6, "sechs Kenntnisse statt Name und Punkte getrennt",
+       ds.skills.items.length);
+    ok(ds.skills.items[0].name === "Go" && ds.skills.items[0].rank === 5,
+       "die Punkte werden zur Stufe",
+       ds.skills.items.map((s) => s.name + ":" + s.rank).join(" "));
+    ok(ds.languages.items.length === 3, "drei Sprachen mit Stufe", ds.languages.items.length);
+    ok(ds.languages.items[0].level === "native", "Stufe neben der Sprache",
+       ds.languages.items[0].level);
+    ok(ds.projects.items.length === 3, "drei Projekte", ds.projects.items.length);
+    ok(ds.projects.items.every((p) => /^data:image/.test(p.img)),
+       "jedes Projekt mit seiner Marke");
+    ok(!parsed.warnings.includes("skillRanks"),
+       "keine Warnung über fehlende Stufen, weil sie gelesen wurden");
+
+    //  "Ersetzen" verspricht im Dialog, dass Gestaltung und Vorlage bleiben.
+    const styled = pbox.RickCVModel.createBase("de");
+    styled.theme = { slug: "rightrail", name: "Right Rail", css: "", source: "builtin" };
+    styled.style.accentColor = "#a8432f";
+    const after = pbox.RickCVImport.apply(styled, parsed, "replace");
+    ok(after.theme.slug === "rightrail", "das gewählte Theme übersteht den Import",
+       after.theme.slug);
+    ok(after.style.accentColor === "#a8432f", "die gewählte Farbe auch",
+       after.style.accentColor);
+  } catch (error) {
+    ok(false, "Vorführ-PDF gelesen", error.message);
+  }
 }
 
 console.log(fails ? `\n${fails} Fehler\n` : "\nalles grün\n");
