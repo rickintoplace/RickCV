@@ -295,7 +295,7 @@ textarea {
 }
 
 .section > summary::before {
-  content: "▸";
+  content: "●";
   color: var(--ui-muted);
   font-size: 11px;
   transition: transform 0.15s;
