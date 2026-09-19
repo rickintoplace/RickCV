@@ -133,8 +133,10 @@ here, and checks each theme in `themes/` for its header, its contract version an
 the sanitising. Rename a class and you get a red test — instead of a theme author
 whose file quietly stopped working.
 
-The second prints the example in your theme and reads the PDF back in, field by
-field. A layout can be perfectly readable for a person and still hide its
-structure from a parser — a date column too close to the text, a heading in the
-margin, a sidebar with a narrow gutter. If your theme comes back incomplete,
-that is worth knowing before someone applies with it.
+The second is not a rule your theme has to satisfy. It prints the example in
+every theme and reads the PDFs back in, field by field — the themes are the test
+corpus, and what is under test is the import. A red line means the import cannot
+yet cope with that layout: a date column close to the text, a heading in the
+margin, a narrow sidebar gutter. That is a bug in `js/import.js`, not in your
+CSS. Design your theme the way you want it to look; if it finds a hole in the
+import, all the better.

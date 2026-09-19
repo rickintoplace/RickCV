@@ -422,6 +422,84 @@ if (!fs.existsSync(pdfLib)) {
     ok(false, "PDF mit Symbolschrift gelesen", error.message);
   }
 
+  //  Fremde Vorlagen. Die drei Dateien sind nach dem Vorbild verbreiteter
+  //  Muster gesetzt – amerikanische Schule, LaTeX-Vorlage, deutscher
+  //  tabellarischer Lebenslauf – und decken je eine Eigenheit ab, an der
+  //  der Import einmal gescheitert ist.
+  console.log("\n— PDF: fremde Vorlagen —");
+  try {
+    const { state: us } = await readPdf("us-spalten.pdf");
+    ok(us.contact.name === "MARA LINDQVIST", "Name ohne die zweite Spalte", us.contact.name);
+    ok(us.events.length === 4, "zwei Stellen und zwei Abschlüsse", us.events.length);
+
+    const analyst = us.events.find((e) => /Operations/.test(e.title));
+    ok(!!analyst && analyst.title === "Operations Analyst",
+       "der Titel bleibt ganz, obwohl ein Wort davor wie ein Monat aussieht",
+       analyst && analyst.title);
+    ok(!!analyst && analyst.start === "2021" && analyst.end === "2024",
+       "Zeitraum aus der rechten Spalte", analyst && analyst.start + "–" + analyst.end);
+    ok(!!analyst && analyst.company === "HARBORLINE FREIGHT" && analyst.place === "Seattle, WA",
+       "Arbeitgeber steht eine Zeile höher", analyst && analyst.company + " / " + analyst.place);
+
+    const msc = us.events.find((e) => /Master of Science/.test(e.title));
+    ok(!!msc && msc.title === "Master of Science (MSc), Logistics",
+       "Studienfach bleibt am Abschluss", msc && msc.title);
+    ok(!us.events.some((e) => /555|3\.70/.test(e.title + e.start + e.end)),
+       "Telefonnummer und Note werden kein Datum");
+    ok(us.skills.items.length === 4, "Kenntnisse in einer Zeile", us.skills.items.length);
+  } catch (error) {
+    ok(false, "amerikanische Vorlage gelesen", error.message);
+  }
+
+  try {
+    const { state: st } = await readPdf("strichlos.pdf");
+    ok(st.events.length === 3, "drei Stationen", st.events.length);
+    ok(st.events[0].start === "03/2022" && st.events[0].end === "09/2025",
+       "Zeitraum ohne Gedankenstrich dazwischen",
+       st.events[0].start + "–" + st.events[0].end);
+    ok(st.events[0].company === "Nordwind Systems GmbH" && st.events[0].place === "Hamburg",
+       "Kopfzeile aus Arbeitgeber und Ort", st.events[0].company);
+    ok(st.events[0].title === "Site Reliability Engineer", "Tätigkeit darunter", st.events[0].title);
+  } catch (error) {
+    ok(false, "LaTeX-Vorlage gelesen", error.message);
+  }
+
+  try {
+    const { state: tb } = await readPdf("tabelle.pdf");
+    ok(tb.contact.name === "Annika Rosenberg", "Name", tb.contact.name);
+    ok(tb.contact.email === "annika.rosenberg@example.de" &&
+       tb.contact.address === "Lindenstraße 14" && tb.contact.city === "50667 Köln",
+       "Kontakt aus der Beschriftungstabelle",
+       tb.contact.email + " / " + tb.contact.address + " / " + tb.contact.city);
+    ok(tb.events.length === 5, "drei Stellen und zwei Abschlüsse", tb.events.length);
+
+    const leitung = tb.events.find((e) => /Teamleiterin/.test(e.title));
+    ok(!!leitung && leitung.start === "04/2021" && leitung.present === true,
+       "'seit 04/2021' ist ein offener Anfang",
+       leitung && leitung.start + "/" + leitung.present);
+    ok(!!leitung && leitung.company === "Rheinpharm GmbH" && leitung.place === "Köln",
+       "Arbeitgeber und Ort unter der Tätigkeit", leitung && leitung.company);
+    //  Chromium setzt die Punkte einer Liste ohne Marke in die Textebene:
+    //  ohne Zeichen davor ist das ein Absatz, und mehr ist daraus nicht zu
+    //  holen. Hauptsache, der Text geht nicht verloren.
+    ok(!!leitung && /Prüflabors/.test(leitung.description.concat(leitung.list).join(" ")) &&
+       /Chargenfreigabe/.test(leitung.description.concat(leitung.list).join(" ")),
+       "beide Zeilen unter der Station bleiben erhalten",
+       leitung && JSON.stringify(leitung.description.concat(leitung.list)));
+
+    const werk = tb.events.find((e) => /Werkstudentin/.test(e.title));
+    ok(!!werk && werk.start === "08/2016" && werk.end === "07/2017",
+       "ausgeschriebene Monatsnamen", werk && werk.start + "–" + werk.end);
+
+    ok(tb.languages.items.length === 3, "drei Sprachen", tb.languages.items.length);
+    ok(tb.skills.items.length === 4, "Kenntnisse hinter der Beschriftung", tb.skills.items.length);
+    ok(tb.interests.items.length === 3,
+       "die Aufzählung hinter 'Ehrenamt' bleibt eine Liste",
+       tb.interests.items.map((i) => i.name).join("|"));
+  } catch (error) {
+    ok(false, "tabellarischen Lebenslauf gelesen", error.message);
+  }
+
   //  Firefox zeichnet fett Gesetztes über cairo als Vektorkontur. Dann
   //  fehlen Überschriften, Name und Titel vollständig – übrig bleiben
   //  Zeiträume, Arbeitgeber und Beschreibungen. Hier als Zeilen gestellt,

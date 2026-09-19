@@ -5,11 +5,14 @@
  *  Kontakt, jede Station mit Zeitraum, Arbeitgeber und Ort, dazu Kenntnisse,
  *  Sprachen, Interessen, Projekte und der Profiltext.
  *
- *  Wozu: Die Themes setzen dasselbe Dokument sehr verschieden – Datum links,
- *  Datum rechts, Überschriften im Rand, dunkle Seitenspalte. Der Import liest
- *  nur Zeichen auf Papier, und jedes dieser Layouts kann ihn aus dem Tritt
- *  bringen. Wer ein Theme ändert oder ein neues beiträgt, soll es hier merken
- *  und nicht in der Bewerbung von jemandem.
+ *  Geprüft wird der Import, nicht das Theme. Die Themes setzen dasselbe
+ *  Dokument sehr verschieden – Datum links, Datum rechts, Überschriften im
+ *  Rand, dunkle Seitenspalte –, und genau deshalb sind sie ein brauchbares
+ *  Übungsfeld: jedes Layout ist ein Fall, den der Import beherrschen muss.
+ *  Bleibt eine Zeile aus, gehört die Arbeit in js/import.js. Ein Theme ist
+ *  nicht dafür da, leicht lesbar zu sein; der Import ist dafür da, mit dem
+ *  zurechtzukommen, was auf dem Papier steht – hier wie bei fremden Vorlagen
+ *  (tests/fixtures/).
  *
  *  Aufruf aus dem Projektverzeichnis:   node tests/roundtrip.test.mjs
  *  Gebraucht werden Node, ein Chromium und vendor/pdfjs.

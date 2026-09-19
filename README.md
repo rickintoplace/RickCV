@@ -362,14 +362,19 @@ node tests/theme.test.mjs       # plus a headless Chromium for the DOM contract
 node tests/roundtrip.test.mjs   # prints every theme and reads the PDF back in
 ```
 
-The third one is the strictest: it prints the example document in each theme,
-runs the resulting PDF through the import, and compares the result field by
-field — name, role, contact, every station with its period, employer and place,
-skills, languages, interests, projects, summary. A theme that a person can read
-but RickCV cannot read back is a broken theme.
+The third one tests the import, not the themes: it prints the example document
+in each theme, runs the resulting PDF through the import and compares the result
+field by field — name, role, contact, every station with its period, employer and
+place, skills, languages, interests, projects, summary. Every theme is a
+different layout, which makes the gallery a free test corpus: a date column on
+the left, headings in the margin, a sidebar with a narrow gutter. When one of
+them comes back incomplete, the work belongs in `js/import.js`.
 
 Fixtures live in `tests/fixtures/`: a JSON Resume, a plain-text resume, a LinkedIn ZIP, a
-Word file and several PDFs. If you add a format or touch the heuristics, add a fixture.
+Word file and several PDFs — among them layouts set the way widespread templates set them
+(American school, LaTeX, German tabular CV). Import heuristics are only as good as the
+documents they have seen, so if you meet a resume RickCV reads badly, a fixture is the most
+useful thing you can contribute.
 
 ## License
 

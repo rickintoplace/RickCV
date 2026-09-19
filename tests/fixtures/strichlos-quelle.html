@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><style>
+@page { size: A4; margin: 16mm 18mm }
+body { margin:0; font-family:"DejaVu Sans",sans-serif; font-size:10pt; color:#1a1a1a }
+h1 { font-size:18pt; margin:0 0 1mm } .tag { color:#555; margin-bottom:5mm }
+.section { font-weight:700; border-bottom:1px solid #999; margin:6mm 0 2mm; padding-bottom:1mm }
+.row { display:flex; justify-content:space-between; align-items:baseline }
+.org { font-weight:700 } .when { color:#444 }
+ul { margin:0 0 2mm 5mm; padding:0 }
+</style></head><body>
+<!--  Der LaTeX-Grundriss, wie ihn verbreitete Vorlagen setzen: ueber jeder
+      Station eine Kopfzeile aus Arbeitgeber und Ort, darunter Taetigkeit und
+      Zeitraum. Der Gedankenstrich zwischen den beiden Daten fehlt hier mit
+      Absicht: manche Vorlagen zeichnen ihn mit einer Schrift ohne
+      Zeichenzuordnung, im Text steht dann nichts zwischen ihnen.  -->
+<h1>Jonas Weber</h1>
+<div class="tag">Site Reliability Engineer</div>
+<p>jonas.weber@example.net &middot; +49 40 5550199 &middot; Hamburg</p>
+
+<div class="section">Work Experience</div>
+<div class="row"><span class="org">Nordwind Systems GmbH</span><span>Hamburg</span></div>
+<div class="row"><span>Site Reliability Engineer</span><span class="when">Mar. 2022 Sep. 2025</span></div>
+<ul><li>Ran the on-call rotation for 40 services</li>
+<li>Moved the metrics stack to a single time series database</li></ul>
+<div class="row"><span class="org">Elbfracht Digital</span><span>Bremen</span></div>
+<div class="row"><span>Backend Engineer</span><span class="when">Jan. 2019 Feb. 2022</span></div>
+<ul><li>Built the tracking API used by 300 forwarding agents</li></ul>
+
+<div class="section">Education</div>
+<div class="row"><span class="org">Technische Universität Hamburg</span><span>Hamburg</span></div>
+<div class="row"><span>M.Sc. Computer Science</span><span class="when">Oct. 2016 Dec. 2018</span></div>
+</body></html>

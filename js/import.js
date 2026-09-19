@@ -982,7 +982,28 @@
   //  Ein Zeitraum in einer Zeile: "09/2015 – 07/2021", "2015 - heute",
   //  "Jan 2015 – Dez 2018". Zweistellige Jahre sind erlaubt, die kommen aus
   //  gestalteten Lebenslaeufen ("11/13").
-  var DATE = "(?:\\d{1,2}[./])?\\d{2,4}|[A-Za-zÄÖÜäöü]{3,9}\\.?\\s+\\d{2,4}";
+  //  Was als Datum gilt: Monat und Jahr ("07/21", "7.2021"), ein volles
+  //  Jahr ("2021") oder ein Monatsname mit Jahr ("Jan 2015", "Summer 2016"
+  //  faellt weg, das ist keine Jahreszahl mit Monat).
+  //
+  //  Was ausdruecklich nicht zaehlt: eine nackte zwei- oder dreistellige
+  //  Zahl. Sonst wird aus "Tel. (203) 555-5555" ein Zeitraum von 555 bis
+  //  5555, aus "Taught 75 students" eine Station von 1975, und aus einer
+  //  Notenangabe "3.70/4.00" der April des Jahres 2000. Genau das ist in
+  //  echten Lebenslaeufen passiert.
+  var YEAR = "(?:19|20)\\d{2}";
+
+  //  Monatsnamen kommen aus derselben Liste, mit der sie spaeter gelesen
+  //  werden. Frueher stand hier "irgendein Wort aus 3 bis 9 Buchstaben vor
+  //  einer Jahreszahl" – damit wurde aus "Operations Analyst 2021 – 2024"
+  //  ein Zeitraum von "Analyst 2021" bis 2024, und der Titel hiess
+  //  anschliessend nur noch "Operations".
+  var MONTH_WORDS = Object.keys(MONTHS)
+    .sort(function (a, b) { return b.length - a.length; })
+    .join("|");
+
+  var DATE = "(?:\\d{1,2}[./](?:\\d{2}|\\d{4}))|" + YEAR +
+    "|(?:" + MONTH_WORDS + ")\\.?\\s+" + YEAR;
   var OPEN = "heute|present|current|aktuell|now|jetzt|dato|today|ongoing|bis heute";
 
   var RANGE = new RegExp(
@@ -990,15 +1011,27 @@
 
   //  Eine Zeile, die nur ein Datum traegt – auch zweistellig ("11/13"),
   //  wie es gestaltete Lebenslaeufe setzen.
-  var SINGLE = new RegExp("^\\s*((?:\\d{1,2}[./])?\\d{4}|\\d{1,2}[./]\\d{2})\\s*$");
+  var SINGLE = new RegExp("^\\s*(" + DATE + ")\\s*$");
 
   //  "2020   Schweissen unter Wasser" – Datum links, Inhalt rechts. So setzen
   //  es Weiterbildungslisten, und so setzen es die Themes von RickCV selbst
   //  ("11/13   Angefangene Ausbildung"). Ein nacktes zweistelliges Jahr ohne
   //  Monat bleibt draussen, sonst wuerde aus "10 Jahre Erfahrung" eine
   //  Station von 2010.
-  var LEAD_DATE = "\\d{1,2}[./]\\d{2,4}|\\d{4}|[A-Za-zÄÖÜäöü]{3,9}\\.?\\s+\\d{2,4}";
-  var LEADING = new RegExp("^(" + LEAD_DATE + ")[\\t ]+(\\S.*)$");
+  var LEADING = new RegExp("^(" + DATE + ")[\\t ]+(\\S.*)$");
+
+  //  Zwei Daten hintereinander ohne Trennzeichen: "Sep. 2023 Mar. 2024".
+  //  Manche Vorlagen zeichnen den Gedankenstrich als Grafik oder mit einer
+  //  Schrift ohne Zeichenzuordnung – im Text steht dann nichts zwischen den
+  //  beiden Daten, obwohl ein Zeitraum gemeint ist.
+  var LOOSE_RANGE = new RegExp(
+    "^(.*?)[\\t ]+(" + DATE + ")[\\t ]+(" + DATE + "|" + OPEN + ")$", "i");
+
+  //  "seit 04/2021", "since 2019", "ab 08/2020" – der offene Anfang, wie ihn
+  //  deutsche Lebenslaeufe schreiben, statt einen Zeitraum bis "heute" zu
+  //  setzen. Das Wort faellt weg, der Rest der Zeile wird gelesen wie jede
+  //  andere Station, und das Ende bleibt offen.
+  var SINCE = new RegExp("^(?:seit|since|ab|from)[\\t ]+(?=" + DATE + ")", "i");
 
   //  Die Fortsetzungszeile derselben Station: "– 09/15" allein oder mit dem
   //  Arbeitgeber dahinter. In Layouts mit stehendem Datum steht der Zeitraum
@@ -1012,12 +1045,29 @@
   var TRAILING = new RegExp(
     "^(.*?)[\\t ]*(?:(–|—|-|bis|to)[\\t ]*)?(" + DATE + "|" + OPEN + ")[.,;]?$", "i");
 
+  //  Steht die gefundene Zahl fuer sich, oder ist sie ein Stueck aus einer
+  //  laengeren? "GPA: 3.70/4.00" enthaelt "4.00", und das sieht aus wie
+  //  April 2000 – ist aber die zweite Haelfte einer Note. Entschieden wird
+  //  am Zeichen davor und dahinter, nicht mit einem Rueckblick im Muster:
+  //  Lookbehind kennen aeltere Browser nicht, und eine Datei, die sie nicht
+  //  einmal lesen koennen, ist schlimmer als ein falsches Datum.
+  function standaloneAt(line, start, length) {
+    var before = start > 0 ? line.charAt(start - 1) : "";
+    var after = start + length < line.length ? line.charAt(start + length) : "";
+    return !/[\d.,/]/.test(before) && !/[\d./]/.test(after);
+  }
+
   function trailingDate(text) {
-    var match = String(text).match(TRAILING);
+    var line = String(text);
+    var match = line.match(TRAILING);
     if (!match) return null;
 
     var rest = clean(match[1]).replace(/[\t]/g, " ").replace(/[,;–—-]\s*$/, "").trim();
     var value = clean(match[3]);
+
+    //  Das Datum steht am Ende – wo es anfaengt, sagt die Laenge des Restes.
+    var at = line.lastIndexOf(match[3]);
+    if (at >= 0 && !standaloneAt(line, at, match[3].length)) return null;
 
     //  Eine blosse Hausnummer oder Postleitzahl ist kein Datum.
     if (!/[./]/.test(value) && !/^(19|20)\d{2}$/.test(value) &&
@@ -1084,6 +1134,19 @@
     }
 
     return null;
+  }
+
+  //  Eine Aufzaehlung oder eine Station? "Chorleitung, Volleyball, Imkerei"
+  //  sind drei Eintraege einer Liste, "Jugendtrainerin im Turnverein" ist
+  //  eine einzelne Angabe. Drei kurze Glieder ohne Datum sind das eine, alles
+  //  darunter das andere.
+  function enumeration(value) {
+    var parts = String(value).split(/[,;•·]/).map(clean).filter(Boolean);
+    if (parts.length < 3) return false;
+
+    return parts.every(function (part) {
+      return part.length <= 30 && !carriesDate(part);
+    });
   }
 
   function labelSplit(text) {
@@ -1303,12 +1366,36 @@
 
     var current = null;      // laufender Abschnitt
     var event = null;        // laufende Station
+    var pending = null;      // Zeile ohne Datum, die auf ihre Station wartet
     var buffer = [];         // Zeilen des Abschnitts ausserhalb einer Station
     var stopped = false;
     var stopIndex = rows.length;
     var sawHeading = false;  // wurde ueberhaupt eine Ueberschrift gefunden?
 
+    //  Eine neue Station beginnt: was zurueckgestellt wurde, gehoert zu ihr.
+    //  Erst uebernehmen, dann die vorige schliessen – closeEvent macht aus
+    //  einer liegengebliebenen Zeile sonst eine eigene Station.
+    function startEvent() {
+      var carried = pending;
+      pending = null;
+
+      closeEvent();
+      event = newEvent(current);
+
+      if (carried) assignStationLine(event, carried);
+      return event;
+    }
+
     function closeEvent() {
+      //  Blieb eine zurueckgestellte Zeile ohne Station, ist sie selbst eine:
+      //  "Engagement im Sportverein" unter "Ehrenamt" hat kein Datum und
+      //  bleibt trotzdem ein Eintrag.
+      if (pending && !event) {
+        event = newEvent(current || "experience");
+        assignStationLine(event, pending);
+      }
+      pending = null;
+
       //  Stand am Ende nur die Einrichtung da ("Engagement im Sportverein"),
       //  ist sie der Eintrag – eine Station ohne Titel zeigt nichts an.
       if (event && !clean(event.title) && clean(event.company)) {
@@ -1388,6 +1475,20 @@
                       current === "volunteer" || current === "other";
 
       if (isStation) {
+        //  "seit 04/2021 Teamleiterin" – das Wort davor sagt nur, dass die
+        //  Station noch laeuft. Ohne diese Regel faellt die Zeile durch alle
+        //  Muster, und ihr Inhalt haengt sich an die Station darunter.
+        var since = line.match(SINCE);
+        if (since) {
+          var before = event;
+          content(row, line.slice(since[0].length));
+
+          //  Offen ist nur die Station, die diese Zeile eroeffnet hat. Haengt
+          //  der Rest an der Station darueber, bleibt deren Ende stehen.
+          if (event && event !== before && !event.end) event.present = true;
+          return;
+        }
+
         //  Erst die Fortsetzung: "– 09/15 ZOOLINO, Bad Wimpeln" schliesst die
         //  Station darueber ab. Ohne diese Regel faengt hier eine neue an –
         //  mit einem Gedankenstrich als Titel.
@@ -1402,8 +1503,7 @@
         var range = line.match(RANGE);
         if (range) {
           //  Ein vollstaendiger Zeitraum beginnt immer eine neue Station.
-          closeEvent();
-          event = newEvent(current);
+          startEvent();
           event.start = normDate(range[1]);
           event.present = isPresent(range[2]);
           event.end = event.present ? "" : normDate(range[2]);
@@ -1412,10 +1512,35 @@
           return;
         }
 
+        //  "Danggeun Pay Inc.        Seoul, S.Korea" – eine Kopfzeile ohne
+        //  Datum, wie englische Vorlagen sie ueber jede Station setzen. Sie
+        //  beendet die vorige Station und wartet auf die naechste, statt als
+        //  Beschreibung an der falschen zu haengen.
+        if (line.indexOf("\t") !== -1 && !carriesDate(line)) {
+          var head = line.split("\t").map(clean).filter(Boolean);
+          if (head.length === 2 && head[1].length <= 30 && !/\d/.test(head[1]) &&
+              head[0].length > 2) {
+            closeEvent();
+            pending = line;
+            return;
+          }
+        }
+
+        //  "DevOps Engineer   Sep. 2023 Mar. 2024" – zwei Daten am Zeilenende,
+        //  dazwischen fehlt nur der Strich.
+        var loose = line.match(LOOSE_RANGE);
+        if (loose && !isPresent(loose[2])) {
+          startEvent();
+          event.start = normDate(loose[2]);
+          event.present = isPresent(loose[3]);
+          event.end = event.present ? "" : normDate(loose[3]);
+          if (clean(loose[1])) assignStationLine(event, loose[1]);
+          return;
+        }
+
         var leading = line.match(LEADING);
         if (leading) {
-          closeEvent();
-          event = newEvent(current);
+          startEvent();
           event.start = normDate(leading[1]);
           assignStationLine(event, leading[2]);
           return;
@@ -1423,8 +1548,7 @@
 
         var single = line.match(SINGLE);
         if (single) {
-          closeEvent();
-          event = newEvent(current);
+          startEvent();
           event.start = normDate(single[1]);
           return;
         }
@@ -1438,8 +1562,7 @@
             event.present = trailing.present;
             if (trailing.rest) assignStationLine(event, trailing.rest);
           } else {
-            closeEvent();
-            event = newEvent(current);
+            startEvent();
             if (trailing.present) event.present = true;
             else event.start = trailing.date;
             if (trailing.rest) assignStationLine(event, trailing.rest);
@@ -1447,11 +1570,14 @@
           return;
         }
 
-        //  Eine Station ohne jedes Datum ist trotzdem eine: "Engagement im
-        //  Sportverein" unter "Ehrenamt".
+        //  Eine Zeile ohne Datum, waehrend keine Station offen ist: In
+        //  englischen Lebenslaeufen steht dort der Arbeitgeber, und die
+        //  Taetigkeit mit dem Zeitraum kommt erst darunter
+        //  ("UBS INVESTMENT BANK, New York" / "Summer Associate  2016").
+        //  Sie wird deshalb zurueckgestellt und der naechsten Station
+        //  vorangestellt – kommt keine, wird sie selbst zur Station.
         if (!event) {
-          event = newEvent(current);
-          assignStationLine(event, line);
+          pending = line;
           return;
         }
       }
@@ -1517,6 +1643,19 @@
         //  sich; frueher riss so ein Stationstitel den Abschnitt auf, und
         //  der Rest des Werdegangs landete unter Kenntnissen.
         if (labelRole && carriesDate(label.value)) labelRole = null;
+
+        //  "Ehrenamt<TAB>Chorleitung, Volleyball, Imkerei" mitten in einer
+        //  Liste ist eine Zeile dieser Liste und keine neue Station: eine
+        //  Aufzaehlung hat keinen Zeitraum und keinen Arbeitgeber. Steht dort
+        //  dagegen eine einzelne Angabe ("Ehrenamt<TAB>Jugendtrainerin im
+        //  Turnverein"), bleibt es dabei, dass die Beschriftung den Abschnitt
+        //  aufmacht.
+        if (labelRole && LIST_SECTIONS.indexOf(current) !== -1 &&
+            LIST_SECTIONS.indexOf(labelRole) === -1 && enumeration(label.value)) {
+          labelRole = null;
+          content(row, label.value);
+          return;
+        }
 
         if (labelRole) {
           closeEvent(); flushBuffer();
@@ -1696,9 +1835,9 @@
       });
 
       if (best >= 0) {
-        //  In einer schmalen Spalte bricht auch der Name um. Die
-        //  Folgezeile im selben Schriftgrad gehoert dann noch dazu.
-        var name = rows[best].text;
+        //  Steht rechts daneben noch etwas ("DAN BULLDOG   Finance"), gehoert
+        //  nur die erste Spalte zum Namen.
+        var name = rows[best].text.split("\t")[0].trim();
         var after = best + 1;
         if (rows[after] && usable(rows[after]) &&
             Math.abs(rows[after].size - rows[best].size) <= rows[best].size * 0.05 &&
@@ -1823,8 +1962,22 @@
   }
 
   function assignStationLine(event, line) {
+    var raw = String(line);
     var value = clean(line).replace(/\t+/g, " ");
     if (!value) return;
+
+    //  "UBS INVESTMENT BANK        New York, NY" – englische Lebenslaeufe
+    //  setzen den Ort an den rechten Rand. Der Spaltensprung ist als
+    //  Tabulator erhalten; was rechts steht, ist kurz und traegt kein Datum.
+    if (!event.title && !event.company && raw.indexOf("\t") !== -1) {
+      var columns = raw.split("\t").map(clean).filter(Boolean);
+      if (columns.length === 2 && columns[1].length <= 30 &&
+          !/\d/.test(columns[1]) && columns[0].length > 2) {
+        event.company = columns[0];
+        event.place = columns[1];
+        return;
+      }
+    }
 
     if (!event.title) {
       //  "Mechaniker GmbH, Standort" ist der Arbeitgeber, nicht der Titel –
