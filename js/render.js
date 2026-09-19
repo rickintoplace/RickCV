@@ -69,6 +69,40 @@
     return parts[0] + "/" + parts[1];
   }
 
+  //  Monatsnamen ausgeschrieben – fuer das Datum ueber einem Anschreiben und
+  //  unter dem Lebenslauf. Eigene Listen statt toLocaleDateString: die
+  //  Ausgabe haengt sonst an der Spracheinstellung des Rechners, nicht an
+  //  der des Dokuments.
+  var MONTH_NAMES = {
+    de: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August",
+         "September", "Oktober", "November", "Dezember"],
+    en: ["January", "February", "March", "April", "May", "June", "July", "August",
+         "September", "October", "November", "December"],
+  };
+
+  //  Das Datum von heute. Leer gelassen heisst "immer aktuell": ein Dokument,
+  //  das man in vier Wochen wieder oeffnet, traegt dann nicht mehr das Datum
+  //  von damals.
+  function today(locale) {
+    var now = new Date();
+    var names = MONTH_NAMES[locale === "en" ? "en" : "de"];
+    var day = now.getDate();
+    var month = names[now.getMonth()];
+    var year = now.getFullYear();
+    if (locale === "en") return day + " " + month + " " + year;
+    return (day < 10 ? "0" + day : day) + ". " + month + " " + year;
+  }
+
+  //  "12345 Musterstadt" ist eine Anschrift, "Musterstadt" ein Ort. Die
+  //  Postleitzahl steht je nach Land davor oder dahinter; was Ziffern
+  //  enthaelt, ist keine Ortsangabe.
+  function placeOf(data) {
+    var city = String((data.contact && data.contact.city) || "").trim();
+    city = city.replace(/^\d{4,5}\s+/, "");
+    city = city.replace(/,\s*[^,]*\d[^,]*$/, "");
+    return city.trim();
+  }
+
   function monthsBetween(start, end) {
     var a = String(start || "").split("/").map(Number);
     var b = String(end || "").split("/").map(Number);
@@ -305,21 +339,26 @@
   //  "C1", nicht aber fuer "verhandlungssicher": laengerer Text wird dort
   //  beschnitten und steht auf halber Fuellung ohne Kontrast. Ab einer
   //  Handvoll Zeichen wandert er deshalb unter den Balken.
-  var LEVEL_INSIDE = 5;
 
-  function languageBlock(list) {
+  //  Wo die Stufe steht, gilt fuer alle Sprachen gleich: im Balken (kurz),
+  //  darunter (beliebig lang) oder gar nicht. Frueher entschied die Laenge
+  //  des Wortes darueber, und dann stand "B2" im Balken und
+  //  "Muttersprache" darunter – in derselben Liste.
+  function languageBlock(list, mode) {
+    var where = mode === "below" || mode === "none" ? mode : "inside";
+
     return list.map(function (language) {
       var width = Math.max(0, Math.min(100, Number(language.percentage) || 0));
       var level = String(language.level || "");
-      var inside = level.length <= LEVEL_INSIDE;
+      var inside = where === "inside" ? esc(level) : "";
+      var below = where === "below" && level
+        ? '<div class="language_note">' + esc(level) + "</div>" : "";
 
       return '<div class="language_entry">' +
         '<div class="language_list">' +
         '<div class="language_left">' + esc(language.name) + "</div>" +
         '<div class="language_bar"><p><span style="width:' + width + '%">' +
-        (inside ? esc(level) : "") + "</span></p></div></div>" +
-        (inside || !level ? "" : '<div class="language_note">' + esc(level) + "</div>") +
-        "</div>";
+        inside + "</span></p></div></div>" + below + "</div>";
     }).join("");
   }
 
@@ -387,7 +426,7 @@
   //  Seite ist das die einzige, bei zweien die hintere.
   function footerOnPage(footer, page, pages) {
     if (!footer || !footer.show) return false;
-    if (!(footer.links || []).length) return false;
+    if (!(footer.links || []).length && !footer.dateLine) return false;
     var where = footer.page || "last";
     if (where === "all") return true;
     if (where === "last") return page === pages;
@@ -418,16 +457,24 @@
     }).join("");
   }
 
-  function footerBlock(footer, sideClass, page, pages) {
+  function footerBlock(footer, sideClass, page, pages, data) {
     if (!footerOnPage(footer, page, pages)) return "";
     var links = footerLinks(footer);
-    if (!links) return "";
+    //  "Ort, Datum" unter dem Lebenslauf ist in deutschen Bewerbungen
+    //  ueblich – und steht dort, wo sonst die Links stehen.
+    var dated = footer.dateLine
+      ? [footer.place || placeOf(data),
+         footer.date || today(data.locale)].filter(Boolean).join(", ")
+      : "";
+    if (!links && !dated) return "";
     var intro = String(footer.intro || "").trim();
 
     return '<footer class="resume-link-footer ' + sideClass +
       " resume-footer-mode-" + esc(footer.mode || "iconText") + '">' +
       (intro ? '<div class="resume-footer-intro">' + nl2br(intro) + "</div>" : "") +
-      '<div class="resume-footer-links">' + links + "</div></footer>";
+      (links ? '<div class="resume-footer-links">' + links + "</div>" : "") +
+      (dated ? '<div class="resume-footer-date">' + esc(dated) + "</div>" : "") +
+      "</footer>";
   }
 
   function pageNumber(data, page, pages) {
@@ -469,7 +516,8 @@
     if (isOn(data.languages) && onPage(data.languages, page, pages)) {
       blocks += '<div class="resume_item resume_language" data-block="languages">' +
         '<div class="resume_title">' + esc(data.languages.title) + "</div>" +
-        '<div class="language_container">' + languageBlock(items(data.languages)) + "</div></div>";
+        '<div class="language_container">' +
+        languageBlock(items(data.languages), data.languages.levelMode) + "</div></div>";
     }
     if (isOn(data.mobilitySB) && onPage(data.mobilitySB, page, pages)) {
       blocks += sidebarItem(data.mobilitySB.title,
@@ -495,7 +543,7 @@
 
     return '<div class="resume_left" data-column="sidebar">' + photo +
       '<div class="resume_bottom">' + blocks + "</div>" +
-      footerBlock(data.footers.left, "resume-link-footer-left", page, pages) + "</div>";
+      footerBlock(data.footers.left, "resume-link-footer-left", page, pages, data) + "</div>";
   }
 
   function buildMain(data, grouped, page, pages) {
@@ -555,7 +603,7 @@
 
     //  Fusszeile und Seitenzahl haengen am unteren Rand der Spalte – der
     //  Container schiebt sich per margin-top:auto nach unten.
-    var bottom = footerBlock(data.footers.right, "resume-link-footer-right", page, pages) +
+    var bottom = footerBlock(data.footers.right, "resume-link-footer-right", page, pages, data) +
       pageNumber(data, page, pages);
 
     return '<div class="resume_right" data-column="main">' + out +
@@ -679,7 +727,8 @@
           nl2br(text) + "</p></div>";
       }).join("");
 
-    var dateLine = [letter.place, letter.date].filter(Boolean).join(", ");
+    var dateLine = [letter.place || placeOf(data),
+                    letter.date || today(data.locale)].filter(Boolean).join(", ");
 
     return '<div class="cover-letter"><div class="cover-letter_wrapper">' +
       '<div class="cover-letter-header"><div class="cover-letter-sender">' +
@@ -1097,8 +1146,17 @@
     moveFooters(data, sheets);
     spread(sheets.length - 1);
     moveFooters(data, sheets);
-
+    pullBack(doc, data, sheets, view, height);
     finishSheets(doc, data, sheets);
+
+    //  Beim Aufraeumen kann ein leeres Blatt wegfallen – dann zieht die
+    //  Fussleiste auf ein volleres Blatt zurueck und braucht dort Platz, den
+    //  vorher die Rechnung fuer das andere Blatt hatte. Also noch einmal
+    //  hinsehen und notfalls das letzte Stueck weiterschieben.
+    var again = sheets.length;
+    spread(sheets.length - 1);
+    if (sheets.length !== again) finishSheets(doc, data, sheets);
+
     return sheets.length;
   }
 
@@ -1169,6 +1227,13 @@
     return next;
   }
 
+  //  Eine Wiederholung gehoert zu ihrem Blatt (Kopfzeile, Kontakt, Foto) und
+  //  darf beim Zurueckholen nicht als Inhalt gelten.
+  function repeat(node) {
+    node.setAttribute("data-repeat", "1");
+    return node;
+  }
+
   //  Ein leeres Blatt nach dem Vorbild des ersten: gleiche Spalten, gleiche
   //  Klassen. Foto und Kopfzeile erscheinen nur wieder, wenn es so
   //  eingestellt ist – sonst faengt das Folgeblatt direkt mit dem Inhalt an.
@@ -1190,7 +1255,7 @@
       //  wer ihn wiederholt haben will, bekommt ihn hier im Hauptteil.
       if (page2.repeatContact) {
         var moved = like.querySelector('[data-block="contact"]');
-        if (moved) newMain.appendChild(moved.cloneNode(true));
+        if (moved) newMain.appendChild(repeat(moved.cloneNode(true)));
       }
     } else {
       var side = like.querySelector('[data-column="sidebar"]');
@@ -1198,7 +1263,7 @@
 
       if (page2.repeatPhoto) {
         var photo = side.querySelector(".resume_image");
-        if (photo) newSide.appendChild(photo.cloneNode(true));
+        if (photo) newSide.appendChild(repeat(photo.cloneNode(true)));
       }
 
       var bottom = side.querySelector(".resume_bottom");
@@ -1208,7 +1273,7 @@
       //  dann zuzuordnen sein, wenn es aus der Mappe faellt.
       if (page2.repeatContact) {
         var contact = like.querySelector('[data-block="contact"]');
-        if (contact) newBottom.appendChild(contact.cloneNode(true));
+        if (contact) newBottom.appendChild(repeat(contact.cloneNode(true)));
       }
 
       newSide.appendChild(newBottom);
@@ -1218,7 +1283,7 @@
     if (page2.repeatHeader) {
       var namerole = main.querySelector('[data-block="namerole"]');
       if (namerole) {
-        var copy = namerole.cloneNode(true);
+        var copy = repeat(namerole.cloneNode(true));
         copy.classList.add("resume_namerole-repeat");
         newMain.appendChild(copy);
       }
@@ -1270,6 +1335,64 @@
       ".resume-column-bottom", (footers.right || {}).page, '[data-column="main"]');
     placeFooter(sheets, sheets[0].querySelector(".resume-link-footer-left"),
       ".resume-link-footer-left", (footers.left || {}).page, '[data-column="sidebar"]');
+  }
+
+  //  Die Gegenrichtung zu moveOverflow: was auf dem naechsten Blatt steht und
+  //  hier noch Platz haette, kommt zurueck. Gebraucht wird das, weil beim
+  //  ersten Durchgang noch die Fussleiste auf Blatt eins liegt und Platz
+  //  beansprucht – zieht sie danach ans Ende, bleibt eine Luecke, und ein
+  //  Block, der nur um zwanzig Punkte nicht passte, haette ein fast leeres
+  //  zweites Blatt fuer sich.
+  function pullBack(doc, data, sheets, view, height) {
+    for (var index = 0; index < sheets.length - 1; index++) {
+      var sheet = sheets[index];
+      var next = sheets[index + 1];
+      var top = sheet.getBoundingClientRect().top;
+
+      columnsOf(sheet).forEach(function (part) {
+        var source = targetColumn(next, part.key);
+        if (!source || source === part.node) return;
+
+        var style = view.getComputedStyle(part.node);
+        var room = top + height - (parseFloat(style.paddingBottom) || 0);
+        var limit = room - reservedHeight(sheet, part.key);
+
+        //  Holt man das letzte Stueck vom naechsten Blatt, faellt jenes weg –
+        //  und die Fussleiste kommt hierher zurueck. Dann muss ihr Platz
+        //  schon vorher frei bleiben, sonst steht sie nachher unter der Kante.
+        var lastLimit = room - Math.max(reservedHeight(sheet, part.key),
+                                        reservedHeight(next, part.key));
+
+        for (var guard = 0; guard < 24; guard++) {
+          var movable = Array.prototype.filter.call(source.children, function (node) {
+            return !node.classList.contains("resume-column-bottom") &&
+                   node.getAttribute("data-repeat") !== "1";
+          });
+          var block = movable[0];
+          if (!block) return;
+
+          part.node.appendChild(block);
+          //  Zwei Bedingungen: der Block bleibt ueber der Grenze, und die
+          //  Spalte selbst waechst nicht ueber die Blattkante hinaus – bei
+          //  einspaltigen Themes stehen Kopfblock und Hauptteil untereinander,
+          //  da traegt die Spalte ihren eigenen Rand mit.
+          var edge = sheet.getBoundingClientRect().bottom;
+          var fits = block.getBoundingClientRect().bottom <=
+            (movable.length === 1 ? lastLimit : limit) + 1 &&
+            part.node.getBoundingClientRect().bottom <= edge + 1;
+          if (!fits) {
+            //  Zurueck an seinen Platz: vor alles, was dort schon steht,
+            //  aber hinter die Wiederholungen des Blattes.
+            var after = Array.prototype.filter.call(source.children, function (node) {
+              return node.getAttribute("data-repeat") === "1";
+            }).pop();
+            if (after) source.insertBefore(block, after.nextSibling);
+            else source.insertBefore(block, source.firstChild);
+            return;
+          }
+        }
+      });
+    }
   }
 
   //  Nacharbeit: Seitenzahlen auf jedes Blatt, leere Blaetter weg.

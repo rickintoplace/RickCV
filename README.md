@@ -37,12 +37,12 @@ Around 150 embedded icons, searchable in German and English.
 <p align="center">
 <img src="themes/previews/clean.webp" width="32%">
 <img src="themes/previews/banner.webp" width="32%">
-<img src="themes/previews/terminal.webp" width="32%">
+<img src="themes/previews/rightrail.webp" width="32%">
 </p>
 
 The document is laid out onto as many A4 or US Letter sheets as it needs and saved as a PDF
 that both people and machines can read. Every theme in the gallery is one CSS file – see
-[all ten with pictures](themes/README.md).
+[all nine with pictures](themes/README.md).
 
 ## Features
 
@@ -51,12 +51,13 @@ that both people and machines can read. Every theme in the gallery is one CSS fi
 - **Your own categories:** *Education*, *Experience* and *Volunteering* are only the defaults.
   Rename, reorder, add — each keeps a separate machine-readable meaning, so applicant systems
   still file it correctly.
-- **Themes are files:** every layout is a single CSS file. Ten come with RickCV; drop in
+- **Themes are files:** every layout is a single CSS file. Nine come with RickCV; drop in
   someone else's, or write your own **in the builder** — a workshop with the document next to
   it and a download button at the end. No checkout, no build, no reload.
 - **Styling down to the detail:** colours, typeface, font size, sidebar width, DIN 5008
   margins, heading sizes for sidebar and main column separately, the space below a heading,
-  the alignment of the summary. A theme brings its own answers; yours overrule them.
+  the alignment of the summary, where a language level sits (in the bar, under it, or not at
+  all). A theme brings its own answers; yours overrule them.
 - **Real sheets:** the resume is laid out onto as many sheets as it needs. What does not fit
   moves to the next one — whole blocks, never cut in half — and a sheet is added only when
   something has to move. The preview shows what the PDF has, sheet for sheet. Under **Second
@@ -68,6 +69,9 @@ that both people and machines can read. Every theme in the gallery is one CSS fi
   [JSON Resume](https://jsonresume.org/) `resume.json`, the ZIP from LinkedIn's *Get a copy of
   your data*, an old resume as PDF or `.docx`, or pasted text. RickCV shows what it found
   before anything changes. Reading happens in your browser; no upload.
+- **Place and date:** the line German applications carry under the resume, optional and off by
+  default. Left empty it fills itself — your city, today's date — so a document opened again
+  weeks later never shows a stale date. The cover letter's date works the same way.
 - **Honest machine readability:** see exactly what an applicant tracking system reads, and
   edit it yourself. No hidden text — see below.
 - **Icon picker:** ~150 embedded [Lucide](https://lucide.dev) icons plus Google Material
@@ -171,7 +175,7 @@ variable font, which Firefox's PDF engine used to synthesise into bold.
 
 ## Themes
 
-A theme is one CSS file. Ten come with RickCV —
+A theme is one CSS file. Nine come with RickCV —
 [see them with pictures](themes/README.md):
 
 | Theme | |
@@ -179,7 +183,6 @@ A theme is one CSS file. Ten come with RickCV —
 | **Clean** | the calm baseline: timeline at the edge, dates on the right |
 | **Dynaline** | the timeline as an axis; how long something lasted sets the distance |
 | **Icons** | symbols carry the layout, timeline down the middle |
-| **Single column** | header block, then one full-width column as a plain list — no timeline, no dots, no boxes |
 | **Classic** | serifs, small caps and hairlines, stations as a list with hanging dates |
 | **Compact** | the date moves onto the title's line; a career that needs two sheets elsewhere fits on one |
 | **Terminal** | monospaced, square, dark sidebar, stations against a gutter rule |

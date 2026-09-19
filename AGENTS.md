@@ -111,7 +111,7 @@ Field by field:
 | `settings.page2.sidebar` | `"keep"` (default) or `"none"` — whether sheets after the first keep the sidebar |
 | `settings.page2.repeatHeader` / `repeatContact` / `repeatPhoto` | what a follow-up sheet repeats |
 | `style.pageBottom` | centimetres of free space below the last block, `0.5` by default |
-| `theme.slug` | `clean`, `dynaline`, `icons`, `einspaltig`, `klassisch`, `kompakt`, `terminal`, `rightrail`, `marginheads`, `banner` |
+| `theme.slug` | `clean`, `dynaline`, `icons`, `klassisch`, `kompakt`, `terminal`, `rightrail`, `marginheads`, `banner` |
 | `theme.css` | a complete CSS theme of your own; `theme.slug` then stays empty |
 | `events[].sectionId` | `"experience"`, `"education"` or `"volunteer"` |
 | `events[].start` / `end` | `"MM/YYYY"` or `"YYYY"`; `present: true` means "to this day" |

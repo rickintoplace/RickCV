@@ -192,9 +192,11 @@
 
   function resolve(theme) {
     if (!theme) return "";
-    var raw = theme.slug && data()[theme.slug]
-      ? data()[theme.slug]
-      : (typeof theme.css === "string" ? theme.css : "");
+    //  Ein Name, den es nicht mehr gibt – ein zurueckgezogenes Theme etwa –
+    //  soll kein nacktes Dokument ergeben, sondern die Grundform.
+    var known = theme.slug && data()[theme.slug];
+    if (!known && theme.slug && !theme.css) known = data().clean;
+    var raw = known || (typeof theme.css === "string" ? theme.css : "");
     if (!raw) return "";
     if (raw === lastSource) return lastResult;
 

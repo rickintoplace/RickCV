@@ -30,14 +30,6 @@ The timeline becomes the axis: stations sit on one continuous line, and how long
 
 `themes/dynaline.css`
 
-## Single column
-
-A header block with photo, profile and contact, the career below across the full width – a plain list without timeline, dots or boxes. The same order for a person and for a machine. The header carries every sidebar block, so with many of them switched on, turn on multi-page.
-
-![Single column](previews/einspaltig.webp)
-
-`themes/einspaltig.css`
-
 ## Icons
 
 Symbols carry the layout: every station gets its dot, the timeline runs down the middle.

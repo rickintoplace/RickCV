@@ -693,7 +693,6 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 
 .resume_wrapper .resume_left .resume_language .language_list {
   display: flex;
-  justify-content: space-between;
   margin-bottom: 5px;
   align-items: center;
   justify-content: flex-end;
@@ -705,6 +704,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   height: inherit;
   /*background: var(--background-color);*/
 }
+
 
 .language_left {
   color: var(--sidebar-font-color);
@@ -730,11 +730,14 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   flex-direction: row-reverse;
   justify-content: flex-end;
   text-indent: 0.2em;
+  /*  Was nicht in die Fuellung passt, wird abgeschnitten statt farblos
+      daneben zu liegen – wer lange Stufen schreibt, stellt "neben dem
+      Balken" ein. */
+  overflow: hidden;
 }
 
-/*  Lange Stufenangaben stehen unter dem Balken statt darin: "B2" passt
-    hinein, "verhandlungssicher" nicht – dort wurde es beschnitten und lag
-    ohne Kontrast auf halber Fuellung. */
+/*  Die Stufe unter dem Balken – die Einstellung "darunter". Dort ist Platz
+    fuer "verhandlungssicher"; im Balken hat nur Kurzes Platz. */
 .language_note {
   color: var(--sidebar-font-color);
   text-align: right;
@@ -836,6 +839,15 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 
 .resume_wrapper .resume_right .resume_item.resume_namerole-repeat .role {
   font-size: 0.8em;
+}
+
+/*  "Musterstadt, 19. September 2026" unter dem Lebenslauf – in deutschen
+    Bewerbungen die Zeile ueber der Unterschrift. Sie steht etwas ruhiger als
+    die Links daneben. */
+.resume-footer-date {
+  font-size: 0.85em;
+  opacity: 0.8;
+  margin-top: 0.35em;
 }
 
 .resume-page-number {

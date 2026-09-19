@@ -40,7 +40,15 @@
   //  page: auf welchem Blatt der Footer erscheint.
   //  "last" – letzte Seite (Vorgabe), "all" – auf jeder, "1"/"2" – genau dort.
   function emptyFooter() {
-    return { show: false, mode: "iconText", intro: "", page: "last", links: [] };
+    return {
+      show: false, mode: "iconText", intro: "", page: "last", links: [],
+      //  "Ort, Datum" unter dem Lebenslauf – in deutschen Bewerbungen
+      //  ueblich, anderswo unbekannt, deshalb ausgeschaltet. Bleiben Ort und
+      //  Datum leer, nimmt der Renderer den Wohnort und den heutigen Tag:
+      //  ein Dokument, das in vier Wochen wieder geoeffnet wird, traegt dann
+      //  nicht mehr das Datum von damals.
+      dateLine: false, place: "", date: "",
+    };
   }
 
   function emptyEvent(sectionId) {
@@ -188,7 +196,12 @@
       events: [],
 
       skills: { show: true, title: d("skills"), icon: icon("lucide", "star"), items: [], page: 1 },
-      languages: { show: false, title: d("languages"), items: [], page: 1 },
+      //  Wo die Stufe steht: "inside" im Balken (Vorgabe, kurze Angaben wie
+      //  "B2"), "below" darunter (auch "verhandlungssicher"), "none" gar
+      //  nicht. Frueher entschied das die Laenge des Wortes – dann stand in
+      //  derselben Liste eines drin und eines darunter.
+      languages: { show: false, title: d("languages"), levelMode: "inside",
+                   items: [], page: 1 },
       interests: { show: true, title: d("interests"), items: [], page: 1 },
       projects: { show: true, title: d("projects"), items: [], page: 1 },
       //  Leer und ausgeschaltet. Frueher stand hier ein Fuehrerschein als
@@ -340,7 +353,7 @@
     coverLetter: {
       recipient: "Firma Beispiel GmbH\nAnsprechpartner Beate Beispiel\nBeispielstraße 2\n54321 Beispielstadt",
       place: "Musterstadt",
-      date: "01. Januar 2025",
+      date: "",
       subject: "Bewerbung als Zugbegleiter",
       salutation: "Sehr geehrte Damen und Herren,",
       paragraphs: [
@@ -457,7 +470,7 @@
     coverLetter: {
       recipient: "Northern Rail Ltd\nAttn. Ms Beatrice Sample\n2 Station Approach\nManchester M1 2AB",
       place: "Lower Piddling",
-      date: "1 January 2025",
+      date: "",
       subject: "Application for the position of train conductor",
       salutation: "Dear Sir or Madam,",
       paragraphs: [

@@ -123,7 +123,11 @@ def main():
 
             subprocess.run([
                 chrome, "--headless", "--disable-gpu", "--no-sandbox",
-                "--window-size=820,1160", "--virtual-time-budget=9000",
+                #  Ohne --hide-scrollbars stand auf jedem Vorschaubild rechts
+                #  ein Rollbalken: das Blatt ist mit seinem Aussenabstand
+                #  hoeher als das Fenster.
+                "--hide-scrollbars", "--window-size=820,1280",
+                "--virtual-time-budget=9000",
                 "--screenshot=" + shot,
                 "http://127.0.0.1:%d/.theme-preview.html" % PORT,
             ], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)

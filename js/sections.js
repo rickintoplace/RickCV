@@ -459,6 +459,12 @@
     function buildLanguages(body) {
       body.appendChild(F.toggle("languages.show", t("showSection")));
       body.appendChild(F.text("languages.title", t("headline")));
+      body.appendChild(F.select("languages.levelMode", t("langLevel"), [
+        { value: "inside", label: t("langLevelInside") },
+        { value: "below", label: t("langLevelBelow") },
+        { value: "none", label: t("langLevelNone") },
+      ]));
+      body.appendChild(F.hint(t("langLevelHint")));
       body.appendChild(F.listEditor({
         path: "languages.items",
         addLabel: t("addLanguage"),
@@ -584,6 +590,23 @@
         ]));
       }
 
+      //  "Ort, Datum" statt oder neben den Links – die Zeile, die unter einem
+      //  deutschen Lebenslauf steht. Ort und Datum bleiben am besten leer:
+      //  dann nimmt das Dokument den Wohnort und den heutigen Tag.
+      var dated = F.toggle(path + ".dateLine", t("footerDateLine"));
+      inner.appendChild(dated);
+      dated.addEventListener("change", function () {
+        setTimeout(function () { refreshSection("footer"); }, 0);
+      });
+
+      if (F.get(path + ".dateLine")) {
+        inner.appendChild(F.row(
+          F.text(path + ".place", t("footerDatePlace"), t("footerDatePlaceholder")),
+          F.text(path + ".date", t("footerDateDate"), t("footerDateToday"))
+        ));
+        inner.appendChild(F.hint(t("footerDateHint")));
+      }
+
       inner.appendChild(F.listEditor({
         path: path + ".links",
         addLabel: t("footerAddLink"),
@@ -625,9 +648,10 @@
       body.appendChild(F.toggle("settings.showCoverLetter", t("createLetter")));
       body.appendChild(F.textarea("coverLetter.recipient", t("recipient"), 4, t("recipientPlaceholder")));
       body.appendChild(F.row(
-        F.text("coverLetter.place", t("place")),
-        F.text("coverLetter.date", t("date"))
+        F.text("coverLetter.place", t("place"), t("footerDatePlaceholder")),
+        F.text("coverLetter.date", t("date"), t("footerDateToday"))
       ));
+      body.appendChild(F.hint(t("footerDateHint")));
       body.appendChild(F.text("coverLetter.subject", t("subject")));
       body.appendChild(F.text("coverLetter.salutation", t("salutation")));
       body.appendChild(F.listEditor({
