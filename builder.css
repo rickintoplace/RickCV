@@ -1065,13 +1065,13 @@ textarea {
 }
 
 .sub-block > summary::before {
-  content: "▸ ";
+  content: "● ";
   color: var(--ui-muted);
   font-size: 10px;
 }
 
 .sub-block[open] > summary::before {
-  content: "▾ ";
+  content: "● ";
 }
 
 .sub-block-body {
