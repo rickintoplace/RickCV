@@ -492,6 +492,9 @@
     data.interests.items = JSON.parse(JSON.stringify(ex.interests));
     data.skills.items = JSON.parse(JSON.stringify(ex.skills));
     data.languages.items = JSON.parse(JSON.stringify(ex.languages));
+    //  Drei Sprachen im Beispiel, die niemand sieht: der Block stand auf
+    //  "aus", waehrend die Eintraege darunter lagen.
+    data.languages.show = true;
     data.mobility.items = JSON.parse(JSON.stringify(ex.mobility));
     data.mobility.show = true;
     data.projects.items = JSON.parse(JSON.stringify(ex.projects));

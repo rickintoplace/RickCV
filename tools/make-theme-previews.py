@@ -28,7 +28,17 @@ SHOTS = os.path.join(THEMES, "previews")
 PORT = 8749
 
 PAGE = """<!DOCTYPE html><html lang="%(locale)s"><head><meta charset="utf-8">
-<link rel="stylesheet" href="fonts/fonts.css"><link rel="stylesheet" href="styles.css"></head>
+<link rel="stylesheet" href="fonts/fonts.css"><link rel="stylesheet" href="styles.css">
+<style>
+  /*  Das Bild soll das Blatt sein und sonst nichts: kein Rahmen ringsum,
+      kein Schatten, und vom zweiten Bogen keine Kante am unteren Rand. */
+  html, body { margin: 0; padding: 0; background: #fff; overflow: hidden }
+  .document { margin: 0 }
+  #CV { gap: 0 }
+  #CV > .resume_wrapper { margin: 0 !important; box-shadow: none !important }
+  #CV > .resume_wrapper ~ .resume_wrapper { display: none }
+  .cover-letter_wrapper, .ats-page, .resume-page-number { display: none }
+</style></head>
 <body><div class="document"></div>
 <script src="js/i18n.js"></script><script src="js/icon-data.js"></script>
 <script src="js/icons.js"></script><script src="js/theme-data.js"></script>
@@ -123,11 +133,9 @@ def main():
 
             subprocess.run([
                 chrome, "--headless", "--disable-gpu", "--no-sandbox",
-                #  Ohne --hide-scrollbars stand auf jedem Vorschaubild rechts
-                #  ein Rollbalken: das Blatt ist mit seinem Aussenabstand
-                #  hoeher als das Fenster.
-                "--hide-scrollbars", "--window-size=820,1280",
-                "--virtual-time-budget=9000",
+                #  Genau ein A4-Blatt bei 96 dpi – das Bild ist das Blatt.
+                "--hide-scrollbars", "--force-device-scale-factor=1",
+                "--window-size=794,1123", "--virtual-time-budget=9000",
                 "--screenshot=" + shot,
                 "http://127.0.0.1:%d/.theme-preview.html" % PORT,
             ], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)

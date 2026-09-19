@@ -464,7 +464,6 @@
         { value: "below", label: t("langLevelBelow") },
         { value: "none", label: t("langLevelNone") },
       ]));
-      body.appendChild(F.hint(t("langLevelHint")));
       body.appendChild(F.listEditor({
         path: "languages.items",
         addLabel: t("addLanguage"),
