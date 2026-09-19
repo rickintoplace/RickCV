@@ -707,8 +707,7 @@
 
       var line = doc.createElement("div");
       line.className = "line";
-      line.style.height =
-        event.hideline || data.settings.noLine ? "0" : Math.max(0, end - start) + "px";
+      line.style.height = event.hideline ? "0" : Math.max(0, end - start) + "px";
       node.appendChild(line);
     });
   }

@@ -161,8 +161,14 @@
         stage.classList.toggle("is-circle", photo.shape === "circle");
         stage.style.borderRadius = photo.shape === "rounded" ? photo.radius + "px" : "";
         if (image) {
+          //  Dieselbe Rechnung wie im Dokument (styles.css): erst der
+          //  Ausschnitt aus dem Seitenverhaeltnis, dann die Verschiebung
+          //  innerhalb der Vergroesserung.
+          var slack = photo.scale - 1;
           image.style.objectPosition = photo.posX + "% " + photo.posY + "%";
-          image.style.transform = "scale(" + photo.scale + ")";
+          image.style.transform =
+            "translate(" + ((50 - photo.posX) * slack) + "%, " +
+            ((50 - photo.posY) * slack) + "%) scale(" + photo.scale + ")";
         }
         if (posX) posX.value = photo.posX;
         if (posY) posY.value = photo.posY;
@@ -945,7 +951,6 @@
         { value: "full", label: t("dateFull") },
       ]));
       body.appendChild(F.toggle("settings.reverseTimeline", t("newestFirst")));
-      body.appendChild(F.toggle("settings.noLine", t("hideAllLines")));
 
       body.appendChild(el("hr"));
 

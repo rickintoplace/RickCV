@@ -487,10 +487,22 @@ body.pages-two .project {
   display: block;
   padding: var(--img-border);
   object-fit: cover;
-  object-position: var(--img-position-x) var(--img-position-y);
+  object-position: var(--img-position-x, 50%) var(--img-position-y, 50%);
   position: relative;
   margin: auto;
-  transform: scale(var(--img-scale));
+
+  /*  Der Ausschnitt hat zwei Schichten. object-position verschiebt, was das
+      Seitenverhaeltnis ueberstehen laesst – bei einem hochkant Bild in einem
+      breiten Rahmen also nur senkrecht, bei einem querformatigen nur
+      waagerecht. Was die Vergroesserung ueberstehen laesst, kommt hier dazu:
+      sie wirkt in beide Richtungen, und damit laesst sich auch ein
+      querformatiges Bild in einem hohen Rahmen senkrecht einstellen, sobald
+      jemand hineinzoomt. Verschoben wird hoechstens um die Haelfte dessen,
+      was uebersteht – darueber hinaus kaeme der Rand des Bildes ins Bild.  */
+  transform:
+    translate(calc((50% - var(--img-position-x, 50%)) * (var(--img-scale, 1) - 1)),
+              calc((50% - var(--img-position-y, 50%)) * (var(--img-scale, 1) - 1)))
+    scale(var(--img-scale, 1));
 }
 
 /*Bildform: Band ueber die volle Sidebarbreite (Standard), abgerundet oder Kreis*/

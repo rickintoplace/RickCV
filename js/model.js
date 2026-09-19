@@ -89,7 +89,6 @@
         pageSize: "a4",
         dateFormat: "short",
         reverseTimeline: true,
-        noLine: false,
         alignText: "left",
         showCoverLetter: true,
 
