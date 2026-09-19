@@ -125,9 +125,16 @@ python3 tools/build-themes.py
 
 ```bash
 node tests/theme.test.mjs
+node tests/roundtrip.test.mjs
 ```
 
-The test renders the example document, holds on to every hook documented here,
-and checks each theme in `themes/` for its header, its contract version and the
-sanitising. Rename a class and you get a red test — instead of a theme author
+The first test renders the example document, holds on to every hook documented
+here, and checks each theme in `themes/` for its header, its contract version and
+the sanitising. Rename a class and you get a red test — instead of a theme author
 whose file quietly stopped working.
+
+The second prints the example in your theme and reads the PDF back in, field by
+field. A layout can be perfectly readable for a person and still hide its
+structure from a parser — a date column too close to the text, a heading in the
+margin, a sidebar with a narrow gutter. If your theme comes back incomplete,
+that is worth knowing before someone applies with it.

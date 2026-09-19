@@ -992,9 +992,19 @@
   //  wie es gestaltete Lebenslaeufe setzen.
   var SINGLE = new RegExp("^\\s*((?:\\d{1,2}[./])?\\d{4}|\\d{1,2}[./]\\d{2})\\s*$");
 
-  //  "2020   Schweissen unter Wasser" – Jahr links, Inhalt rechts. Das ist
-  //  die uebliche Form von Weiterbildungslisten.
-  var LEADING = new RegExp("^((?:\\d{1,2}[./])?\\d{4})[\\t ]+(\\S.*)$");
+  //  "2020   Schweissen unter Wasser" – Datum links, Inhalt rechts. So setzen
+  //  es Weiterbildungslisten, und so setzen es die Themes von RickCV selbst
+  //  ("11/13   Angefangene Ausbildung"). Ein nacktes zweistelliges Jahr ohne
+  //  Monat bleibt draussen, sonst wuerde aus "10 Jahre Erfahrung" eine
+  //  Station von 2010.
+  var LEAD_DATE = "\\d{1,2}[./]\\d{2,4}|\\d{4}|[A-Za-zÄÖÜäöü]{3,9}\\.?\\s+\\d{2,4}";
+  var LEADING = new RegExp("^(" + LEAD_DATE + ")[\\t ]+(\\S.*)$");
+
+  //  Die Fortsetzungszeile derselben Station: "– 09/15" allein oder mit dem
+  //  Arbeitgeber dahinter. In Layouts mit stehendem Datum steht der Zeitraum
+  //  ueber zwei Zeilen, und die zweite gehoert zur ersten.
+  var CONTINUES = new RegExp(
+    "^[–—-][\\t ]*(" + DATE + "|" + OPEN + ")(?:[\\t ]+(\\S.*))?$", "i");
 
   //  Ein Datum am Zeilenende – die haeufigste Form in gestalteten
   //  Lebenslaeufen. Steht ein Gedankenstrich davor, ist es das Ende eines
@@ -1041,6 +1051,41 @@
       !!trailingDate(line);
   }
 
+  //  "AUSBILDUNG Angefangene Ausbildung zum Tierpfleger   11/13" – Themes mit
+  //  Ueberschriften im Rand setzen beides auf dieselbe Zeile. Getrennt wird
+  //  nur, wenn hinter der Ueberschrift ein Datum steht: sonst zerschnitte die
+  //  Regel auch "Ausbildung zum Berufstaucher".
+  function splitLeadingHeading(text) {
+    var line = clean(text);
+    if (!line) return null;
+
+    var words = line.split(/[\t ]+/);
+    if (words.length < 3) return null;
+
+    for (var take = 1; take <= 3 && take < words.length; take++) {
+      var prefix = words.slice(0, take).join(" ");
+      var rest = clean(words.slice(take).join(" "));
+      if (!rest) continue;
+
+      var role = headingOf(prefix);
+      if (!role || role === "ignore") continue;
+
+      //  Getrennt wird nur, wenn die Ueberschrift auch wie eine gesetzt ist:
+      //  Versalien vorn, gemischter Satz dahinter. Das unterscheidet
+      //  "MOBILITÄT Führerschein Klasse B" von "Software Developer 03/2016",
+      //  wo "Software" zufaellig ein Ueberschriftenwort ist – und genau daran
+      //  ist diese Regel beim ersten Versuch gescheitert.
+      var shouts = prefix.length >= 4 && prefix === prefix.toUpperCase() &&
+        /[A-ZÄÖÜ]/.test(prefix) && rest !== rest.toUpperCase();
+
+      if (!shouts) continue;
+
+      return { role: role, rest: rest };
+    }
+
+    return null;
+  }
+
   function labelSplit(text) {
     var parts = String(text).split("\t");
     if (parts.length < 2) return null;
@@ -1053,9 +1098,21 @@
   function headingOf(line) {
     var value = normalizeHeading(line);
     if (!value || value.length > 40) return null;
+
     for (var i = 0; i < HEADINGS.length; i++) {
       if (HEADINGS[i].pattern.test(value)) return HEADINGS[i].role;
     }
+
+    //  Gesperrt gesetzte Ueberschriften kommen aus dem PDF in Stuecken
+    //  ("BERUFSER FA HRUNG"), die sich nicht mehr zu einzelnen Buchstaben
+    //  zusammenfassen lassen. Ohne Leerzeichen passt das Wort wieder.
+    var tight = value.replace(/\s+/g, "");
+    if (tight !== value && tight.length > 3) {
+      for (var j = 0; j < HEADINGS.length; j++) {
+        if (HEADINGS[j].pattern.test(tight)) return HEADINGS[j].role;
+      }
+    }
+
     return null;
   }
 
@@ -1331,6 +1388,17 @@
                       current === "volunteer" || current === "other";
 
       if (isStation) {
+        //  Erst die Fortsetzung: "– 09/15 ZOOLINO, Bad Wimpeln" schliesst die
+        //  Station darueber ab. Ohne diese Regel faengt hier eine neue an –
+        //  mit einem Gedankenstrich als Titel.
+        var continues = event && line.match(CONTINUES);
+        if (continues) {
+          if (isPresent(continues[1])) event.present = true;
+          else event.end = normDate(continues[1]);
+          if (continues[2]) assignStationLine(event, continues[2]);
+          return;
+        }
+
         var range = line.match(RANGE);
         if (range) {
           //  Ein vollstaendiger Zeitraum beginnt immer eine neue Station.
@@ -1423,6 +1491,14 @@
         closeEvent(); flushBuffer(); stopped = true; stopIndex = index; return;
       }
 
+      //  Mit dem Namen faengt der Hauptteil an. Was davor lief – in
+      //  zweispaltigen Vorlagen die Seitenspalte – ist damit zu Ende; sonst
+      //  landet die Rolle darunter ("ZUGBEGLEITER") als dritter Eintrag in
+      //  der Projektliste.
+      if (named.nameIndex >= 0 && index === named.nameIndex) {
+        closeEvent(); flushBuffer(); current = null;
+      }
+
       if (index === named.roleIndex) return;
       if (named.nameIndex >= 0 && index >= named.nameIndex &&
           index <= (named.nameEnd === undefined ? named.nameIndex : named.nameEnd)) return;
@@ -1462,6 +1538,17 @@
       //  "Ausbildung" ist eine Ueberschrift, "Ausbildung zum Berufstaucher"
       //  ist eine Station. Liegen Schriftgrade vor, entscheidet das Layout;
       //  sonst die Kuerze der Zeile.
+      //  Ueberschrift und erster Eintrag in derselben Zeile: erst die
+      //  Ueberschrift setzen, dann den Rest als Inhalt behandeln.
+      var glued = splitLeadingHeading(line);
+      if (glued) {
+        closeEvent(); flushBuffer();
+        sawHeading = true;
+        current = glued.role;
+        content(row, glued.rest);
+        return;
+      }
+
       var keyword = headingOf(line);
       var heading = null;
       if (keyword && (styled || headingShape(line) || !bodySize)) heading = keyword;
@@ -1590,13 +1677,15 @@
   //  zweispaltigen Lebenslaeufen kommt zuerst die Seitenspalte. Fehlen die
   //  Schriftgrade, bleibt es bei der Suche von oben.
   function findName(rows, bodySize) {
-    function usable(row, maxWords) {
+    function usable(row, maxWords, allowSpaced) {
       var value = clean(row.text);
       if (!value || /[@|]/.test(value) || /\d/.test(value)) return false;
       //  Ein Aufzaehlungspunkt ist nie ein Name.
       if (/^[-–—•*·]/.test(value)) return false;
       if (value.split(/\s+/).length > (maxWords || 5) || value.length > 48) return false;
-      return !headingOf(value) && !row.spaced;
+      //  Gesperrter Satz spricht gegen einen Namen – bei der Rolle darunter
+      //  ist er dagegen die Regel ("Z U G B E G L E I T E R").
+      return !headingOf(value) && (allowSpaced || !row.spaced);
     }
 
     if (bodySize) {
@@ -1621,7 +1710,10 @@
         //  Die Rolle steht direkt darunter: kurz, keine Ueberschrift.
         var roleIndex = -1;
         for (var i = after; i < Math.min(rows.length, after + 2); i++) {
-          if (usable(rows[i]) && rows[i].size < rows[best].size) { roleIndex = i; break; }
+          if (usable(rows[i], 5, true) && rows[i].size < rows[best].size) {
+            roleIndex = i;
+            break;
+          }
         }
 
         return {

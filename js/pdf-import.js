@@ -69,13 +69,27 @@
         if (item.x + item.w <= edge) left++;
         else { right++; gap = Math.min(gap, item.x - edge); }
       }
-      if (left < items.length * 0.15 || right < items.length * 0.15) return;
+      //  Beide Seiten muessen genug Text tragen, sonst ist es keine Spalte,
+      //  sondern ein verirrtes Stueck. Frueher standen hier 15 Prozent je
+      //  Seite – eine schmale Seitenspalte mit wenigen, langen Textstuecken
+      //  (Terminal: 23 von 217) fiel damit durch, und ihr Inhalt landete
+      //  zeilenweise im Werdegang.
+      if (left < 6 || right < 6) return;
+      if (left < items.length * 0.05 || right < items.length * 0.05) return;
       if (!best || gap > best.gap) best = { edge: edge, gap: gap };
     });
 
-    //  Unter einer halben Zeilenhoehe Abstand ist es kein Spaltenrand,
-    //  sondern Zufall.
-    if (!best || best.gap < width * 0.02) return [items];
+    //  Wie breit muss die Gasse sein, um als Spaltenrand zu gelten? Ein
+    //  fester Anteil der Seitenbreite war zu grob: ein Theme mit schmalem
+    //  Steg (Terminal: knapp vier Millimeter) fiel durch, und seine
+    //  Seitenspalte landete Zeile fuer Zeile im Werdegang. Gemessen wird
+    //  deshalb in Zeilenhoehen, mit einem Boden fuer sehr grosse Schriften.
+    var heights = items.map(function (item) { return item.h; })
+      .sort(function (a, b) { return a - b; });
+    var middle = heights[Math.floor(heights.length / 2)] || 10;
+    var minGap = Math.max(middle * 0.8, width * 0.012);
+
+    if (!best || best.gap < minGap) return [items];
 
     var leftItems = [], rightItems = [];
     items.forEach(function (item) {
@@ -144,10 +158,18 @@
       var previous = null;
       var size = 0;
 
+      var pendingSpace = false;
+
       parts.forEach(function (item) {
         //  Ein Platzhalter traegt nur noch seine Breite bei: kein Text,
         //  kein Leerzeichen, aber die Geometrie laeuft weiter.
         if (item.ghost) { previous = item; return; }
+
+        //  Ein Stueck, das nur ein Leerzeichen ist, wird gemerkt, aber nicht
+        //  gemessen: sein Text gehoert in die Zeile, seine Breite gehoert zur
+        //  Luecke. Sonst zerfaellt eine Spaltenluecke in zwei kleine
+        //  Abstaende, und aus zwei Kenntnissen nebeneinander wird eine.
+        if (!item.str.trim()) { pendingSpace = true; return; }
 
         size = Math.max(size, item.h);
         if (previous) {
@@ -157,8 +179,9 @@
           //  Doppelten der Zeilenhoehe ist es keine Luecke mehr, sondern
           //  eine eigene Spalte.
           if (gap > item.h * 2) text += "\t";
-          else if (gap > item.h * 0.25) text += " ";
+          else if (gap > item.h * 0.25 || pendingSpace) text += " ";
         }
+        pendingSpace = false;
         text += item.str;
         previous = item;
       });
@@ -471,8 +494,13 @@
         return Object.assign({}, item, { str: "", ghost: true });
       });
 
+      //  Ein Stueck, das nur ein Leerzeichen traegt, bleibt drin. Kapitaelchen
+      //  setzt Chrome Buchstabe fuer Buchstabe, und das Leerzeichen zwischen
+      //  zwei Woertern ist dann ein eigenes Stueck: wer es wegwirft, bekommt
+      //  "ZOOLINO,Bad Wimpeln" – der Abstand allein ist zu klein, um daraus
+      //  wieder ein Leerzeichen zu schliessen.
       var items = cleaned.filter(function (item) {
-        return (item.str && item.str.trim()) || item.ghost;
+        return (item.str && item.str.length) || item.ghost;
       }).map(function (item) {
         return {
           str: item.str,

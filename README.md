@@ -357,9 +357,16 @@ the **workshop** inside the builder writes it for you.
 Two test suites, because parsing other people's files is where silent breakage lives:
 
 ```bash
-node tests/import.test.mjs   # Node only; the browser code runs in a vm sandbox
-node tests/theme.test.mjs    # plus a headless Chromium for the DOM contract
+node tests/import.test.mjs      # Node only; the browser code runs in a vm sandbox
+node tests/theme.test.mjs       # plus a headless Chromium for the DOM contract
+node tests/roundtrip.test.mjs   # prints every theme and reads the PDF back in
 ```
+
+The third one is the strictest: it prints the example document in each theme,
+runs the resulting PDF through the import, and compares the result field by
+field — name, role, contact, every station with its period, employer and place,
+skills, languages, interests, projects, summary. A theme that a person can read
+but RickCV cannot read back is a broken theme.
 
 Fixtures live in `tests/fixtures/`: a JSON Resume, a plain-text resume, a LinkedIn ZIP, a
 Word file and several PDFs. If you add a format or touch the heuristics, add a fixture.
