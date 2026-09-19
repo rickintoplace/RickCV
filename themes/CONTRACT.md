@@ -1,56 +1,58 @@
-# Der Theme-Vertrag, Fassung 1
+# The theme contract, version 1
 
-Ein Theme für RickCV ist **eine CSS-Datei**. Sie wird in der Kaskadenebene
-`theme` angewendet und gewinnt damit gegen jede Regel der Grundstile – ohne
-`!important`, ohne dass du deren Selektoren nachbauen musst.
+A theme for RickCV is **one CSS file**. It is applied in the `theme` cascade
+layer, which means it wins against every rule of the base styles — without
+`!important` and without rebuilding their selectors.
 
-Dieses Dokument beschreibt, woran du dich festhalten kannst. Was hier steht,
-ändert sich nicht ohne Erhöhung der Vertragsfassung; alles andere im Markup
-darfst du als zufällig betrachten.
+This document describes what you can rely on. Nothing here changes without
+raising the contract version; everything else in the markup you should treat as
+accidental.
 
-> Du brauchst das Projekt nicht auf deinem Rechner. Öffne
-> <https://cv.rickinto.place/>, geh auf **Themes → Werkstatt** und schreib dort
-> los: jede Zeile wirkt sofort im Dokument daneben, am Ende lädst du die Datei
-> herunter. Wer sie beitragen will, legt sie als `themes/<name>.css` in einen
-> Pull Request.
+> You do not need the project on your machine. Open
+> <https://cv.rickinto.place/>, go to **Themes → Workshop** and start writing:
+> every line takes effect in the document next to it, and at the end you
+> download the file. To contribute it, put it in a pull request as
+> `themes/<name>.css`.
 
-## Der Kopf
+## The header
 
 ```css
 /* @rickcv-theme
    name:     Nordlicht
-   author:   jemand
+   author:   somebody
    licence:  CC0-1.0
    contract: 1
-   about:    Ein Satz über das Aussehen.
+   about:    One sentence about how it looks.
 */
 ```
 
-`name` und `contract` sind Pflicht. `licence` sollte CC0 oder MIT sein – der
-Kern von RickCV steht unter der AGPL, das Aussehen soll niemand mitschleppen
-müssen.
+`name` and `contract` are required. `licence` should be CC0 or MIT — the core of
+RickCV is under the AGPL, but nobody should have to carry that along for a
+look. Add `name-en:` and `about-en:` if you want an English name and
+description next to a German one; the gallery shows whichever fits the
+interface language.
 
-## Am `<body>`
+## On the `<body>`
 
-| Haken | Bedeutung |
+| Hook | Meaning |
 | --- | --- |
-| `data-contract="1"` | Fassung dieses Vertrags |
-| `data-template="<name>"` | Name des aktiven Themes, `custom` bei einem eigenen |
-| `data-icon-set="lucide\|material"` | welcher Symbolsatz gesetzt ist |
-| `data-theme-name="…"` | Anzeigename des Themes, falls gesetzt |
+| `data-contract="1"` | version of this contract |
+| `data-template="<name>"` | the active theme, `custom` for your own |
+| `data-icon-set="lucide\|material"` | which icon set is in use |
+| `data-theme-name="…"` | display name of the theme, if set |
 
-Als Wurzel genügt `[data-template]` – es ist immer nur ein Theme aktiv, der
-eigene Name muss im Selektor nicht vorkommen.
+`[data-template]` is enough as a root — only one theme is ever active, so your
+own name does not need to appear in the selector.
 
-## Aufbau eines Blattes
+## How a sheet is built
 
 ```
-[data-page="1"]                 ein Blatt (.resume_wrapper)
-  [data-column="sidebar"]       die Seitenspalte (.resume_left)
+[data-page="1"]                 one sheet (.resume_wrapper)
+  [data-column="sidebar"]       the sidebar (.resume_left)
     [data-block="photo"]
     [data-block="profile"] [data-block="contact"] [data-block="languages"]
     [data-block="interests"] [data-block="projects"] [data-block="mobilitySB"]
-  [data-column="main"]          der Hauptteil (.resume_right)
+  [data-column="main"]          the main column (.resume_right)
     [data-block="namerole"]
     [data-block="section"] [data-role="experience|education|volunteer|other"]
       .timeline
@@ -59,74 +61,73 @@ eigene Name muss im Selektor nicht vorkommen.
     [data-block="skills"] [data-block="mobility"] [data-block="references"]
 ```
 
-Jeder Block trägt zusätzlich `.resume_item`, jede Blocküberschrift
-`.resume_title`.
+Every block also carries `.resume_item`, every block heading `.resume_title`.
 
-Folgeblätter sehen genauso aus, tragen aber `data-page="2"`, `"3"` … Wer sie
-anders setzen will, hat daran einen Haken – und `[data-sidebar="none"]` am
-Blatt, wenn eingestellt ist, dass Folgeblätter einspaltig laufen. Eine
-wiederholte Kopfzeile trägt zusätzlich `.resume_namerole-repeat`.
+Further sheets look the same but carry `data-page="2"`, `"3"` … — a hook if you
+want to set them differently — plus `[data-sidebar="none"]` on the sheet when
+follow-up sheets are set to run full width. A repeated letterhead also carries
+`.resume_namerole-repeat`.
 
-## Variablen
+## Variables
 
-Sie stehen am Anfang von `styles.css` und sind die eigentliche Schnittstelle;
-ein Theme kommt oft mit ein paar Zeilen davon aus.
+They sit at the top of `styles.css` and are the actual interface; a theme often
+gets by with a handful of them.
 
-| Variable | Bedeutung |
+| Variable | Meaning |
 | --- | --- |
-| `--accent-color` | Akzentfarbe |
-| `--font-color`, `--background-color` | Schrift und Papier |
-| `--sidebar-color`, `--sidebar-font-color`, `--sidebar-width` | die Seitenspalte |
-| `--font-family`, `--base-font-size`, `--title-size` | Typografie |
-| `--headline-size`, `--headline-size-main` | Überschriften in Seitenspalte und Hauptteil |
-| `--headline-scale-side`, `--headline-scale-main` | Faktor darauf; so setzt ein Theme kleinere Überschriften, ohne den Regler im Editor auszuhebeln |
-| `--date-column` | Breite der Datumsspalte, vom Renderer auf das breiteste Datum im Dokument gemessen |
-| `--title-gap` | Abstand unter einer Überschrift im Hauptteil |
-| `--profile-align` | Bündigkeit des Profiltexts; eine Wahl im Editor überstimmt sie |
-| `--left-margin`, `--right-margin`, `--bottom-margin`, `--header-height` | Ränder nach DIN 5008 |
-| `--icon-size`, `--icon-color`, `--icon-bg` | Symbole |
+| `--accent-color` | accent colour |
+| `--font-color`, `--background-color` | text and paper |
+| `--sidebar-color`, `--sidebar-font-color`, `--sidebar-width` | the sidebar |
+| `--font-family`, `--base-font-size`, `--title-size` | typography |
+| `--headline-size`, `--headline-size-main` | headings in the sidebar and in the main column |
+| `--headline-scale-side`, `--headline-scale-main` | a factor on those; this is how a theme sets smaller headings without disabling the slider in the editor |
+| `--date-column` | width of the date column, measured by the renderer from the widest date in the document |
+| `--title-gap` | space below a heading in the main column |
+| `--profile-align` | alignment of the summary; a choice in the editor overrules it |
+| `--left-margin`, `--right-margin`, `--bottom-margin`, `--header-height` | margins per DIN 5008 |
+| `--icon-size`, `--icon-color`, `--icon-bg` | icons |
 
-## Farben
+## Colours
 
-Ein Theme darf eine eigene Palette mitbringen (`--accent-color`,
-`--sidebar-color`, …). Sobald jemand im Editor eine Farbe *anfasst*, steht sie
-am `<body>` und gewinnt gegen das Theme; alles Unberührte bleibt dem Theme
-überlassen. Ein Theme braucht dafür nichts zu tun – aber es sollte damit
-rechnen, dass eine seiner Farben ersetzt sein kann, und Kontraste nicht über
-zwei Farben legen, die es beide selbst setzt.
+A theme may bring its own palette (`--accent-color`, `--sidebar-color`, …). The
+moment someone *touches* a colour in the editor, that colour is written onto the
+`<body>` and wins against the theme; everything left alone stays the theme's
+business. A theme needs to do nothing for this — but it should expect one of its
+colours to be replaced, and not build a contrast out of two colours it sets
+itself.
 
-Dasselbe gilt für `--profile-align`: die Einstellung im Editor steht auf
-„vom Theme bestimmt", bis jemand etwas anderes wählt.
+The same goes for `--profile-align`: the setting in the editor says "left to the
+theme" until someone picks something else.
 
-## Was ein Theme nicht darf
+## What a theme may not do
 
-Beim Laden werden entfernt:
+Two things are stripped when a theme is loaded:
 
-* `@import` und `url()` auf entfernte Adressen. Ein Lebenslauf soll nicht
-  verraten, wann und wo jemand an ihm sitzt. Bilder und Schriften gehören als
-  `data:`-Adresse in die Datei.
-* Regeln, die auf `.ats-…` zielen. Was ein Bewerbungssystem aus dem Dokument
-  liest, ist keine Frage des Aussehens.
+* `@import` and `url()` pointing at remote addresses. A resume should not report
+  when and where someone is working on it. Images and fonts belong in the file
+  as `data:` URIs.
+* Rules aimed at `.ats-…`. What an applicant tracking system reads out of the
+  document is not a question of looks.
 
-Dazu eine Obergrenze von 64 kB je Theme.
+Plus a ceiling of 64 kB per theme.
 
-## Mitgelieferte Themes
+## The themes that ship with RickCV
 
-`themes/*.css` werden von `tools/build-themes.py` zu `js/theme-data.js`
-gebündelt – nötig, weil eine Seite über `file://` keine Dateien nachladen darf,
-RickCV aber per Doppelklick laufen soll. Die erzeugte Datei ist eingecheckt:
+`themes/*.css` are bundled into `js/theme-data.js` by `tools/build-themes.py` —
+necessary because a page opened over `file://` may not fetch files, while RickCV
+has to run from a double-click. The generated file is committed:
 
 ```bash
 python3 tools/build-themes.py
 ```
 
-## Prüfen
+## Checking
 
 ```bash
 node tests/theme.test.mjs
 ```
 
-Der Test rendert das Beispieldokument, hält jeden hier dokumentierten Haken
-fest und prüft jedes Theme in `themes/` auf Kopf, Vertragsfassung und
-Entschärfung. Wer einen Klassennamen ändert, bekommt einen roten Test – nicht
-einen Themenautor, dessen Datei still nicht mehr greift.
+The test renders the example document, holds on to every hook documented here,
+and checks each theme in `themes/` for its header, its contract version and the
+sanitising. Rename a class and you get a red test — instead of a theme author
+whose file quietly stopped working.

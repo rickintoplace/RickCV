@@ -112,6 +112,7 @@ Field by field:
 | `settings.page2.repeatHeader` / `repeatContact` / `repeatPhoto` | what a follow-up sheet repeats |
 | `style.pageBottom` | centimetres of free space below the last block, `0.5` by default |
 | `theme.slug` | `clean`, `dynaline`, `icons`, `einspaltig`, `klassisch`, `kompakt`, `terminal`, `rightrail`, `marginheads`, `banner` |
+| `theme.css` | a complete CSS theme of your own; `theme.slug` then stays empty |
 | `events[].sectionId` | `"experience"`, `"education"` or `"volunteer"` |
 | `events[].start` / `end` | `"MM/YYYY"` or `"YYYY"`; `present: true` means "to this day" |
 | `events[].dateMode` | `"auto"` (default), `"range"`, `"start"`, `"none"` — for entries without a period |
@@ -138,6 +139,21 @@ cover letter, RickCV's own format does.
 * **Its own look**: a theme is a single CSS file. You can write one and ask the
   person to drop it on the builder; the contract is in
   [themes/CONTRACT.md](themes/CONTRACT.md).
+
+
+## Writing a theme for your person
+
+The look of the document is one CSS file. If you design one, put it in `theme.css` of the
+JSON (leave `theme.slug` empty) and it travels inside the link like everything else. The
+contract — the hooks you may rely on, the variables, what gets stripped on load — is in
+[`themes/CONTRACT.md`](themes/CONTRACT.md). Two rules matter: no `@import` and no remote
+`url()` (a resume should not report home; embed images as `data:` URIs), and nothing aimed at
+`.ats-…`. Both are removed when the theme is loaded, so a theme that breaks them silently
+loses those rules.
+
+If the theme is good enough for other people, tell your person about the **Contribute** button
+in Themes → Workshop: one click opens a pull request against `themes/` with the file in it.
+Do not send it anywhere else.
 
 ## What you should not do
 

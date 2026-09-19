@@ -894,34 +894,43 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   content: ",\00a0";
 }
 
-.skills {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  align-content: center;
-  align-items: center;
-  min-width: max-content;
-}
-
+/*  Ein Raster statt einer umbrechenden Zeile. Frueher war jede Kenntnis ein
+    Flex-Element mit `flex: 1` – jede Zeile teilte ihre Breite unter ihren
+    eigenen Eintraegen auf, und weil die letzte Zeile weniger Eintraege hat,
+    standen deren Punkte woanders als die darueber. Das sah aus wie ein
+    Setzfehler. Im Raster liegen alle Spalten uebereinander, egal wieviele
+    Eintraege in der Zeile stehen. */
 .skills-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.5em; /* Abstand zwischen den Einträgen */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11em, 1fr));
+  gap: 0.35em 1.4em;
+  align-items: start;
 }
 
+/*  Innerhalb eines Eintrags dasselbe noch einmal: die Punkte in einer
+    Spalte fester Breite, der Name daneben. Sonst faengt jeder Name an einer
+    anderen Stelle an. */
 .skills {
-  display: flex;
-  flex-direction: row-reverse;
-  flex-wrap: nowrap;
-  flex: 1;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
   align-items: center;
+  gap: 0 0.5em;
+  min-width: 0;
+}
+
+/*  Die Punkte stehen im Markup hinter dem Namen – im Raster werden beide
+    ausdruecklich gesetzt, sonst landet der Name in einer eigenen Zeile. */
+.skills .rank {
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .skill-description {
-  flex: 1;
+  grid-column: 2;
+  grid-row: 1;
   text-align: left;
-  margin-left: 0.5em;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /*  Die fuenf Punkte kommen als SVG aus render.js. Frueher standen hier
@@ -979,12 +988,6 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 
 .resume_wrapper .resume_right .resume_data:last-child .year:after {
   display: none;
-}
-
-.resume_wrapper .resume_right .resmue_skills .resume_info {
-  display: flex;
-  justify-content: space-between;
-  text-align: center;
 }
 
 /*Cover letter*/

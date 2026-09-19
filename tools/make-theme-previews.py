@@ -4,8 +4,8 @@
 Aufruf:
     python3 tools/make-theme-previews.py
 
-Legt themes/previews/<name>.png an und schreibt themes/README.md mit der
-Galerie. Gebraucht wird ein Chromium und ein kurzlebiger lokaler Server –
+Legt themes/previews/<name>.webp an und schreibt themes/README.md mit der
+Galerie (englisch, wie das README daneben). Gebraucht wird ein Chromium und ein kurzlebiger lokaler Server –
 ueber file:// laedt die Seite ihre Schriften nicht.
 
 Wozu: ein Theme-Beitrag laesst sich damit ansehen statt lesen. Wer einen
@@ -96,6 +96,12 @@ def shrink(path, target, width=640):
     os.remove(path)
 
 
+def field(css, key):
+    """Ein Feld aus dem Theme-Kopf, zusammengefasst auf eine Zeile."""
+    match = re.search(r"\b%s:\s*([\s\S]*?)\n\s*(?:[a-z-]+:|\*/)" % re.escape(key), css)
+    return " ".join(match.group(1).split()) if match else ""
+
+
 def main():
     chrome = browser()
     if not os.path.isdir(SHOTS):
@@ -111,7 +117,7 @@ def main():
     try:
         for slug in slugs:
             probe = os.path.join(ROOT, ".theme-preview.html")
-            io.open(probe, "w", encoding="utf-8").write(PAGE % {"slug": slug, "locale": "de"})
+            io.open(probe, "w", encoding="utf-8").write(PAGE % {"slug": slug, "locale": "en"})
             shot = os.path.join(SHOTS, slug + ".png")
             target = os.path.join(SHOTS, slug + ".webp")
 
@@ -129,19 +135,21 @@ def main():
             shrink(shot, target)
 
             css = io.open(os.path.join(THEMES, slug + ".css"), encoding="utf-8").read()
-            name = (re.search(r"name:\s*(.+)", css) or [None, slug])[1].strip()
-            about = (re.search(r"about:\s*([\s\S]*?)\n\s*(?:[a-z]+:|\*/)", css) or [None, ""])[1]
-            about = " ".join(about.split())
+            #  Englisch zuerst: die Galerie steht im README neben dem
+            #  englischen Text. Das Bindestrich-Feld muss mit in die
+            #  Abbruchbedingung, sonst klebt "about-en:" an "about:".
+            name = field(css, "name-en") or field(css, "name") or slug
+            about = field(css, "about-en") or field(css, "about")
             rows.append((slug, name, about))
             print("  %-12s %6.1f kB" % (slug, os.path.getsize(target) / 1024.0))
     finally:
         server.shutdown()
 
     gallery = ["# Themes", "",
-               "Jedes Theme ist eine einzelne CSS-Datei. Wie man eine schreibt, steht in",
-               "[CONTRACT.md](CONTRACT.md) – und am bequemsten geht es in der **Werkstatt**",
-               "im Baukasten selbst: Themes → Werkstatt, tippen, zusehen, Datei herunterladen.",
-               "", "Die Bilder hier erzeugt `python3 tools/make-theme-previews.py`.", ""]
+               "Every theme is a single CSS file. How to write one is in",
+               "[CONTRACT.md](CONTRACT.md) — and the easiest way is the **workshop**",
+               "inside the builder itself: Themes → Workshop, type, watch, download the file.",
+               "", "These pictures are made by `python3 tools/make-theme-previews.py`.", ""]
     for slug, name, about in rows:
         gallery += ["## %s" % name, "",
                     "%s" % (about or ""), "",

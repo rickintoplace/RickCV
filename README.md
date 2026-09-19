@@ -11,18 +11,16 @@ Build your CV and Cover Letter here: https://cv.rickinto.place/
 
 ![Pick a theme, change the colour, drop an old resume in](examples/demo.gif)
 
-*Pick a theme, change the colour, drop an old resume onto the page. Everything happens in the
-browser.*
+**RickCV** is a browser-based builder for resumes and cover letters. Fill in a form, watch the
+document update live, save it as a PDF. No sign-up, no server, no build step: plain HTML, CSS
+and JavaScript, and everything you type stays on your own device — including what you show an
+applicant tracking system, which you can read and edit here rather than guess at.
 
-*About that last step: the import reads what is actually inside the file, without a language
-model. A PDF that was generated from text comes across nearly complete, with pictures where
-they belong; a scan, a heavily graphic template or an unusual layout gives you a rough draft
-instead. RickCV shows what it read before it changes anything, and says when the result is
-only a draft. See [what a PDF gives away](#what-a-pdf-gives-away).*
-
-Welcome to **RickCV** – a browser-based builder for professional resumes and cover letters. Fill in a form, watch the document update live, and save it as a PDF. No sign-up, no server, no build step: it is plain HTML, CSS and JavaScript, and everything you type stays on your own device.
-
-It also includes features to optimize your resume for Applicant Tracking Systems (ATS), making it easy to tailor your content for both human and machine readers.
+*About the last step in the picture: the import reads what is actually inside the file,
+without a language model. A PDF generated from text comes across nearly complete, pictures
+included; a scan or a heavily graphic template gives you a rough draft instead. RickCV shows
+what it read before it changes anything, and says when the result is only a draft — see
+[what a PDF gives away](#what-a-pdf-gives-away).*
 
 ## The builder
 
@@ -48,50 +46,37 @@ that both people and machines can read. Every theme in the gallery is one CSS fi
 
 ## Features
 
-- **Visual editor:** Every part of the document is a form field. No code, no JSON, no prior knowledge required.
-- **Live preview:** The page next to the editor re-renders as you type, and shows the page count.
-- **Photo placement:** Drag the picture to move the crop, scroll to zoom, and pick a shape (full-width band, rounded square, or circle).
-- **Your own categories:** *Education*, *Experience* and *Volunteering* are only the defaults. Rename them, reorder them, add your own — each one keeps a separate machine-readable meaning so applicant systems still file it correctly.
-- **Icon picker:** ~150 embedded [Lucide](https://lucide.dev) icons plus Google Material Symbols, searchable in German and English. One stroke-weight slider drives both sets — Material Symbols is matched through its variable font axis so the two never look mismatched — plus size, color and an optional background shape.
-- **Address as a map link:** Optionally the address in the sidebar links to OpenStreetMap — clickable in the PDF, unchanged on paper.
-- **Two languages:** German and English for the interface and the document, including the language marking inside the PDF. Switch it straight from the header, or under *Options*.
-- **Light and dark editor:** The button next to the language follows your system by default, and cycles to light or dark if you would rather decide yourself. Only the editor changes — the resume stays on white paper, because that is what gets printed.
-- **Honest machine readability:** See exactly what an applicant tracking system reads, and edit it yourself if you want. No hidden text — see below.
+- **Visual editor with live preview:** every part of the document is a form field; the page
+  next to it re-renders as you type and shows the page count.
+- **Your own categories:** *Education*, *Experience* and *Volunteering* are only the defaults.
+  Rename, reorder, add — each keeps a separate machine-readable meaning, so applicant systems
+  still file it correctly.
+- **Themes are files:** every layout is a single CSS file. Ten come with RickCV; drop in
+  someone else's, or write your own **in the builder** — a workshop with the document next to
+  it and a download button at the end. No checkout, no build, no reload.
+- **Styling down to the detail:** colours, typeface, font size, sidebar width, DIN 5008
+  margins, heading sizes for sidebar and main column separately, the space below a heading,
+  the alignment of the summary. A theme brings its own answers; yours overrule them.
+- **Real sheets:** the resume is laid out onto as many sheets as it needs. What does not fit
+  moves to the next one — whole blocks, never cut in half — and a sheet is added only when
+  something has to move. The preview shows what the PDF has, sheet for sheet. Under **Second
+  page** you decide what those sheets look like: sidebar or full width, letterhead repeated,
+  contact details on every sheet, where the footer belongs.
 - **A4 or US Letter:** one setting, and the page box, the print size and the cover letter's
-  page breaks all follow. An A4 PDF sent to a US printer comes out scaled or clipped; this is
-  the fix.
-- **Dates as far as they exist:** a station can show a period, only its start, or no date at
-  all. By default RickCV decides from what you typed — a further-education entry with a single
-  year no longer drags an empty dash behind it.
-- **Themes are files:** every layout is a single CSS file. Ten come with RickCV; you can
-  drop in someone else's, or write your own **in the builder itself** — a workshop with the
-  document next to it that updates as you type, and a download button at the end. No checkout,
-  no build, no reload.
-- **Customizable styling:** colors, typeface, font size, sidebar width, DIN 5008 margins, and
-  type down to the detail: heading size for the sidebar and the main column separately, the
-  space below a heading, and whether the summary sits centred, left or justified (themes bring
-  their own answer, and yours overrules it).
-- **One page or many:** By default the resume is laid out onto as many sheets as it needs, the
-  way the cover letter already was: what does not fit moves to a new sheet — whole blocks, never
-  cut in half — and a sheet is only added when something actually has to move. What the preview
-  shows is what the PDF has, sheet for sheet. Switch to *one page* to keep everything on a
-  single sheet (the rest is then cut off, in the preview as in print), or to *two pages* to
-  place every block by hand. Under **Second page** you say what those sheets
-  look like: sidebar or full width, letterhead repeated or not, contact details on every
-  sheet, and which sheet a footer belongs on. How much room stays free below the last block
-  is a slider in **Design** — less of it is often the difference between one sheet and two.
-  The cover letter needs no switch: it breaks onto further A4 sheets by itself once the text no longer fits,
-  keeping your margins on every page and numbering them per DIN 5008 — and it says so when that happens,
-  because one page is almost always the right answer.
-- **Projects where you want them:** as a column of small entries in the sidebar, or at full
-  width in the main column behind the career — one setting under *Projects*.
-- **Bring your data in:** Drop a file anywhere on the page — a RickCV backup, a
-  [JSON Resume](https://jsonresume.org/) `resume.json`, the ZIP from LinkedIn's *Get a copy
-  of your data* (or its single CSV files), an old resume as PDF, or plain text pasted into
-  the dialog. RickCV shows what it found before anything is changed, and you choose whether
-  it replaces the document or is added to it. Reading happens in your browser; no upload.
-- **Export to PDF:** Crisp A4 pages, straight from the browser's print dialog.
-- **Your data stays yours:** Everything is stored in your browser only. Export it as a RickCV backup (everything, including styling and photo) or as `resume.json` in the open JSON Resume format that other tools can read.
+  page breaks all follow.
+- **Bring your data in:** drop a file anywhere on the page — a RickCV backup, a
+  [JSON Resume](https://jsonresume.org/) `resume.json`, the ZIP from LinkedIn's *Get a copy of
+  your data*, an old resume as PDF or `.docx`, or pasted text. RickCV shows what it found
+  before anything changes. Reading happens in your browser; no upload.
+- **Honest machine readability:** see exactly what an applicant tracking system reads, and
+  edit it yourself. No hidden text — see below.
+- **Icon picker:** ~150 embedded [Lucide](https://lucide.dev) icons plus Google Material
+  Symbols, searchable in German and English, with one stroke-weight slider driving both sets.
+- **Two languages, two editor themes:** German and English for interface and document,
+  including the language marking inside the PDF. The editor follows your system's light or
+  dark setting; the document stays on white paper, because that is what gets printed.
+- **Your data stays yours:** everything lives in your browser. Export it as a RickCV backup,
+  as `resume.json`, as a link, or as JSON on the clipboard.
 
 ### Icons, sections, timeline and chronology are yours
 
@@ -101,45 +86,25 @@ that both people and machines can read. Every theme in the gallery is one CSS fi
 <img src="themes/previews/marginheads.webp" width="32%">
 </p>
 
-## How to Use
+## How to use it
 
-### Option A – use the hosted version
+Open <https://cv.rickinto.place/>, fill in the form, click **Save as PDF**. That is the whole
+workflow.
 
-Open the site, fill in the form, click **Save as PDF**. That is the whole workflow.
-
-### Option B – run it on your own machine
-
-Download the repository and double-click `index.html`. It opens in your browser and works
-straight away – no web server, no installation, no dependencies.
+Or run it yourself: download the repository and double-click `index.html`. No web server, no
+installation, no dependencies, and nothing is fetched at runtime — the typefaces and icons
+ship with the project.
 
 ```bash
 git clone https://github.com/rickintoplace/RickCV.git
 ```
 
-> Only an internet connection is needed the first time, so the browser can fetch the Google
-> fonts and icons.
-
-### Building your document
-
-1. **Person & contact** – your name, role and contact details.
-2. **Photo** – drop in a photo. Drag inside the small preview to move the crop, use the
-   scroll wheel or the *Zoom* slider to scale it, and choose a shape.
-3. **Career** – add your stations. Each one belongs to a category, which decides the
-   block it appears in. Under *Manage categories* you can rename the three defaults,
-   reorder them or add your own — a category called "My journey" still exports as
-   professional experience, because its meaning is set separately. Use the ↑ ↓ buttons to
-   reorder, ⧉ to duplicate and ✕ to delete.
-4. **Skills, Languages, Interests, Projects, Mobility** – optional sections. Each has a
-   switch to hide it completely.
-5. **References** – off by default; switch it on if you want them on the page.
-6. **Cover letter** – recipient, subject, salutation and as many paragraphs as you need.
-   You can also upload a scan of your signature. Under **Second page** you decide what a
-   second sheet looks like: letterhead on page one only (DIN 5008) or repeated, and how the
-   page numbers are labelled.
-7. **Design** – accent color, typeface, font size, icon set, sidebar width, margins and the
-   room left at the foot of a sheet.
-8. **Machine readability** – see and edit what applicant systems read. See the section below.
-9. **Options** – interface language, date format, chronological order and multi-page mode.
+The editor is a list of sections, in the order they appear on the page: person, photo,
+summary, career, the optional blocks (skills, languages, interests, projects, mobility,
+references), cover letter, design, themes, machine readability, options. Each block has a
+switch to hide it; entries move with ↑ ↓, duplicate with ⧉ and go with ✕. Under *Manage
+categories* you rename or add career categories — a category called "My journey" still
+exports as professional experience, because its machine-readable meaning is set separately.
 
 ### Saving as PDF
 
@@ -162,38 +127,32 @@ later. Because the browser storage is tied to one browser on one device, use **E
 download a `.json` backup and **Import** to load it again on another computer, in another
 browser, or to keep several versions of your CV side by side.
 
-## About ATS, hidden text, and GEO
+## About ATS and hidden text
 
-RickCV used to embed a copy of your data behind the layout, so that
-applicant tracking systems would pick it up. **That is no longer the default.**
+RickCV used to embed a copy of your data behind the layout, so that applicant tracking systems
+would pick it up. **That is no longer the default.** Detectors now treat invisible content as
+a manipulation attempt: text below 4 pt, text in the background colour, any mismatch between
+*what a human sees* and *what a machine extracts*. In a measurement study of 196,682 real
+resumes, roughly 1 % carried hidden injected content — over 90 % of it plain hidden skill and
+experience lists.
 
-Research on applicant systems now treats invisible content as a manipulation
-attempt. Detectors flag text below 4 pt, text in the background color, and 
-any mismatch between *what a human sees* and *what a machine extracts*.
-In a measurement study of 196,682 real resumes, roughly 1 % contained
-hidden injected content, and **over 90 % of those were plain "data injection":
-hidden skill and experience lists**.
+What actually helps is duller:
 
-What actually helps is duller and more reliable:
-
-- **Chrome already exports a tagged PDF.** The file carries a structure tree and
-  a language marking, so the reading order follows the DOM. RickCV puts your
-  name and contact details before the career blocks for that reason.
-- **The icon set matters more than you would think.** Material Symbols is a
-  font, so the icon name ends up glued to your heading in the extracted text
-  (`schoolEDUCATION`). The Lucide icons are SVG and leave nothing behind.
-  Lucide is the default.
+- **Chromium exports a tagged PDF.** The file carries a structure tree and a language marking,
+  so the reading order follows the DOM. RickCV puts your name and contact details before the
+  career blocks for that reason.
+- **The icon set matters.** Material Symbols is a font, so the icon name ends up glued to your
+  heading in the extracted text (`schoolEDUCATION`). Lucide icons are SVG and leave nothing
+  behind — which is why they are the default.
 - **The document title becomes the PDF title** and the suggested filename.
 
-If your layout is unusually graphic and you still want a safety net, the
-**machine readability** section offers a *visible* extra page in plain text. You
-can read exactly what it says, copy it, or write it yourself. The invisible mode
-is still available, clearly marked, for people who want it anyway.
+If your layout is unusually graphic and you still want a safety net, **Machine readability**
+offers a *visible* extra page in plain text: read it, copy it, or write it yourself. The
+invisible mode is still there, clearly marked, for people who want it anyway.
 
-On **GEO (Generative Engine Optimization)**: a 2026 survey of 45 studies
-concludes that no reviewed technique shows a stable, cross-platform causal
-effect. There is nothing here worth building into a resume, so RickCV does not
-pretend otherwise.
+On **GEO (Generative Engine Optimization)**: a 2026 survey of 45 studies finds no reviewed
+technique with a stable, cross-platform causal effect. Nothing worth building into a resume,
+so RickCV does not pretend otherwise.
 
 Sources: [Measuring Real-World Prompt Injection Attacks in LLM-based Resume
 Screening](https://arxiv.org/abs/2605.28999) ·
@@ -237,11 +196,16 @@ you leave alone stays the theme's business. One button hands the whole palette b
 
 ### Writing one without cloning anything
 
-Open the builder, go to **Themes → Workshop**, and start from the current theme or
-an empty skeleton. What you type lands in the document on the right immediately; a list of
-every hook and variable sits below the editor and drops selectors in at the cursor. When it
-looks right, **Save as .css**, and that file *is* the theme. Contributing it means putting it
-in `themes/` in a pull request.
+Open the builder, go to **Themes → Workshop**, and start from the current theme or an empty
+skeleton. What you type lands in the document on the right immediately; a list of every hook
+and variable sits below the editor and drops selectors in at the cursor. **Save as .css**, and
+that file *is* the theme — drop it back onto the builder any time, on any machine, to use it.
+Nothing else is needed: no clone, no Python, no build.
+
+To put it in the gallery, press **Contribute**. That opens GitHub's new-file form with your
+CSS already in it, so a contribution is one click and a pull request. The maintainer runs
+`build-themes.py` and `make-theme-previews.py` once; the preview image is rendered from the
+example document, never from anyone's data.
 
 That path exists on purpose: a theme system that starts with "clone the repository, run a
 server, edit a file, reload" has no contributors.
@@ -338,50 +302,38 @@ and the XML is read in the browser.
 A PDF holds no sections, no headings and no dates — only characters at coordinates. RickCV
 puts the document back together from what *is* there:
 
-- **Columns** are found by looking for the widest vertical lane no line of text crosses, so a
-  sidebar is read as a sidebar and not woven into the main column.
-- **Headings** are recognised by their keywords, and letter-spaced titles (`B E R U F S -
-  E R F A H R U N G`) are closed up first. Unknown headings are measured against the ones
-  that were recognised — same size, same spacing — so a section ends where it really ends.
-- **The name** is the largest type on the sheet, not the first line. In a two-column layout
-  the first line is usually the sidebar; and where a narrow column breaks the name across two
-  lines, the two are put back together.
+- **Columns** are found by the widest vertical lane no line of text crosses, so a sidebar is
+  read as a sidebar and not woven into the main column.
+- **Headings** are recognised by keyword, with letter-spaced titles (`B E R U F S -
+  E R F A H R U N G`) closed up first. Unknown headings are measured against the recognised
+  ones — same size, same spacing — so a section ends where it really ends.
+- **The name** is the largest type on the sheet, not the first line; where a narrow column
+  breaks it across two lines, the two are put back together.
 - **Dates** are read wherever they sit: in front of the entry, at the end of the line, split
-  over two lines (`Ausbildung 11/13` / `ZOOLINO, Bad Wimpeln – 09/15`), with two-digit years,
-  German or English month names, and an open end (`heute`, `present`).
-- **Pictures** are placed by where they sit on the page: the large upright one at the top
-  becomes the photo, a flat wide one on a letter page becomes the signature, and a small
-  image beside a project becomes that project's picture. What cannot be placed is left out
-  rather than dropped somewhere random.
-- **Label columns** — the shape most German templates use — are understood: a line like
-  `Sprachkenntnisse   Deutsch, Muttersprache` puts its content where the label says, a date in
-  the left column starts the entry, and `Führerschein   Klasse B` lands in the mobility
-  section. Where a label carries no meaning, it is kept, because the same gap can equally
+  over two lines, with two-digit years, German or English month names, and an open end
+  (`heute`, `present`).
+- **Two-column lists** are understood, the shape most German templates use:
+  `Sprachkenntnisse   Deutsch, Muttersprache` puts its content where the label says, `Go
+  ●●●●○` becomes a skill with four dots out of five, and `Führerschein   Klasse B` lands in
+  mobility. Where a label carries no meaning it is kept, because the same gap can equally
   separate two skills set side by side.
 - **Employer before role** is handled: `Nordwind Energie GmbH, Kassel` followed by
-  `Projektleiterin Netzausbau` is read as company, place and title — not as a title and a
-  company.
-- **Icon fonts** put their glyphs in Unicode's private use area, where they stick to the
-  headings they decorate and quietly break them. Those characters are removed — unless most of
-  the page is private-use, which means the PDF maps its whole text that way and removing
-  anything would leave an empty page.
-- **The cover letter** stops the reading: from the salutation on, nothing else is treated as
-  part of the resume. So does the closing line of a German resume (`Beispielstadt, 16.09.2026`),
-  which is followed only by a signature. A page break ends list sections too, so a letterhead on
-  sheet two does not end up among your skills.
-- **Icon fonts** contribute no text. They are recognised by the name of the embedded font, which
-  is more reliable than looking at the characters: depending on the file, an icon arrives as a
-  private-use character, as an empty piece, or as its spelled-out name (`school`).
+  `Projektleiterin Netzausbau` is read as company, place and title — not the other way round.
+- **Pictures** are placed by where they sit: the large upright one at the top becomes the
+  photo, a flat wide one on a letter page the signature, a small one beside a project that
+  project's picture. What cannot be placed is left out rather than dropped somewhere random.
+- **Icon fonts** contribute no text. They are recognised by the name of the embedded font,
+  which is more reliable than looking at the characters — depending on the file an icon
+  arrives as a private-use character, an empty piece, or its spelled-out name (`school`).
+- **The cover letter** stops the reading: from the salutation on, nothing is treated as part
+  of the resume. So does the closing line of a German resume (`Beispielstadt, 16.09.2026`).
 - **When a PDF has no text for its headings** — bold type drawn as graphics, which is what
-  Firefox does with variable fonts — RickCV says so and still salvages what is left: dates,
-  employers, places and descriptions become stations under one category. It does not invent a
-  name in that case, because the name was in the missing layer too.
+  Firefox does with variable fonts — RickCV says so and still salvages dates, employers,
+  places and descriptions as stations under one category.
 
-Unreadable characters are dropped rather than passed through: a placeholder in the middle of a
-word is worse than a gap, and the import tells you it happened.
-
-Where little is recognised, RickCV says so and shows you the text it read, so you can sort it
-in by hand instead of hunting for what went missing.
+Unreadable characters are dropped rather than passed through, and the import says so. Where
+little is recognised, it shows you the text it read, so you can sort it in by hand instead of
+hunting for what went missing.
 
 ### Going the other way
 
@@ -402,20 +354,9 @@ lives in `vendor/` and is loaded from your own copy of the site.
 
 RickCV is a static site. Upload the files and you are done.
 
-### GitHub Pages
-
-The repository ships with a workflow at `.github/workflows/pages.yml`. Enable it once:
-
-1. Push the repository to GitHub.
-2. Go to **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**.
-
-Every push to `main` then publishes the site to
-`https://<username>.github.io/<repository>/`.
-
-### Any web space
-
-Copy `index.html`, `cv.html`, `builder.css`, `builder.js`, `render.js`, `defaults.js` and
-`styles.css` into a directory on your web space. That is all it takes.
+Copy the folder onto any static host — there is nothing to build and nothing to configure.
+The public instance at <https://cv.rickinto.place/> runs on Vercel; GitHub Pages, a shared web
+space or a directory served by nginx work exactly the same.
 
 ## Project structure
 
@@ -446,77 +387,41 @@ Copy `index.html`, `cv.html`, `builder.css`, `builder.js`, `render.js`, `default
 Every file is a plain script which is what lets you
 open `index.html` by double-clicking it.
 
-## Advanced customization
+## Fonts, icons, and why they are files
 
-Everything in the **Design** section writes to CSS variables defined at the top of
-`styles.css`. If you want to go further than the editor allows, that is the place to look.
-`--accent-color`, `--font-color`, `--sidebar-width`, `--img-height` and friends are all
-documented there.
+Everything in **Design** writes to CSS variables at the top of `styles.css`; if you want to go
+further than the editor allows, that is the place to look.
 
-Icons come from two sets. [Lucide](https://lucide.dev) icons are embedded in
-`js/icon-data.js` (ISC licence, see `licenses/`); run `tools/gen-icons.py` to
-change the selection. [Google Material
-Symbols](https://fonts.google.com/icons) ship as a font in `fonts/`, cut down
-to exactly the symbols the builder offers — 53 kB instead of the full 2.3 MB.
+Nothing is fetched at runtime. All nine document typefaces live in `fonts/`, as does a
+Material Symbols icon font cut down to the symbols the builder actually offers (53 kB instead
+of 2.3 MB); [Lucide](https://lucide.dev) icons are embedded in `js/icon-data.js`. So the
+builder works offline and no visitor's IP address reaches a third party. `tools/fetch-fonts.py`
+refreshes the files and pulls in the licence texts, `tools/gen-icons.py` the icon selection.
 
-Nothing is fetched from Google at runtime. All nine document typefaces live in
-`fonts/` as well, so the builder works offline and no visitor IP address is
-handed to a third party. Run `python3 tools/fetch-fonts.py` to refresh the
-files after changing the font list or the icon selection; it also pulls in the
-licence texts.
-
-Each typeface ships as **two static files, 400 and 700** — not as one variable
-font covering both. That is deliberate, and it is about machine readability
-rather than looks: with a variable font the browser derives the bold weight
-itself, and some print paths cannot express that in a PDF. Firefox (through
-cairo) draws such text as vector outlines — the page looks right, but the bold
-parts are no longer text. In a resume that is the name, every section heading
-and every job title: an applicant tracking system reads a document without them.
-With real static faces every browser embeds a proper font, and the text stays
-text.
-
-For the same reason the document switches **ligatures off**
-(`font-variant-ligatures: none` in `styles.css`). A single glyph for "fl" saves
-nothing and costs a word: printed through cairo it arrives without a mapping, so
-`Tierpflege` reaches the reader as `Tierp?ege`. The icon font is exempt — it
+Each typeface ships as **two static files, 400 and 700**, not as one variable font. That is
+about machine readability: with a variable font the browser derives the bold weight itself,
+and some print paths cannot express that in a PDF. Firefox, through cairo, draws such text as
+vector outlines — the page looks right, but the bold parts are no longer text. In a resume
+that is the name, every section heading and every job title. For the same reason the document
+switches **ligatures off**: printed through cairo, a single "fl" glyph arrives without a
+mapping and `Tierpflege` reaches the reader as `Tierp?ege`. The icon font is exempt — it
 builds its symbols out of ligatures.
-
-The two sets measure weight differently: Lucide in stroke pixels on a 24-unit
-grid, Material Symbols on a variable font axis. Their defaults (`stroke 2`
-and `wght 400`) look nothing alike side by side: Material comes out roughly twice
-as heavy. RickCV maps them onto one slider, calibrated by comparing them
-directly: `stroke 1.75` matches `wght 200`. Material glyphs also carry padding
-inside their box and render about 8 % smaller at the same size, which the
-stylesheet compensates for.
-
-## Technologies Used
-
-- **HTML5** - For structuring the resume and cover letter content.
-- **CSS3** - For styling the layout, including responsive design and custom themes.
-- **JavaScript** - For the editor, the live preview and the document rendering. No frameworks, no build step, no dependencies.
-- **Self-hosted webfonts** - Nine document typefaces and a trimmed Material Symbols icon font in `fonts/`, generated by `tools/fetch-fonts.py`. No runtime call to Google.
 
 ## Contributing
 
-If you’d like to contribute to the development of RickCV, feel free to fork the repository, make your changes, and create a pull request. I welcome any improvements or new features that could enhance this template.
+Fork it, change it, open a pull request. There is no build step and nothing to install: open
+`index.html` and you are developing. The easiest contribution is a theme — one CSS file, and
+the **workshop** inside the builder writes it for you.
 
-There is no build step and there are no dependencies to install: open `index.html` and you
-are developing. The import path has a test suite, because parsing other people's file
-formats is where silent breakage lives:
-
-```bash
-node tests/import.test.mjs
-```
+Two test suites, because parsing other people's files is where silent breakage lives:
 
 ```bash
-node tests/theme.test.mjs
+node tests/import.test.mjs   # Node only; the browser code runs in a vm sandbox
+node tests/theme.test.mjs    # plus a headless Chromium for the DOM contract
 ```
 
-The first needs nothing but Node (20 or newer) — the browser code runs in a small sandbox that
-pretends to be a `window`. The second adds a headless Chromium where one is installed, to check
-the DOM contract on a really rendered document; without a browser it skips that part. Fixtures live in `tests/fixtures/`: a JSON Resume, a plain-text
-resume, a LinkedIn export ZIP and a two-column PDF (its source HTML sits next to it). If you
-add a format or touch the heuristics, add a fixture.
+Fixtures live in `tests/fixtures/`: a JSON Resume, a plain-text resume, a LinkedIn ZIP, a
+Word file and several PDFs. If you add a format or touch the heuristics, add a fixture.
 
 ## License
 

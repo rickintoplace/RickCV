@@ -1106,6 +1106,27 @@
         });
         actions.appendChild(save);
 
+        //  Beitragen ohne Klonen: GitHub kann eine neue Datei mit vorbelegtem
+        //  Inhalt anlegen. Ein Klick, ein Pull Request – der Weg ueber
+        //  "Repo holen, Ordner finden, Datei anlegen" hat keine Beitraeger.
+        var share = el("button", "btn", t("themeShare"));
+        share.type = "button";
+        share.addEventListener("click", function () {
+          var name = (theme.name || "theme").toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "theme";
+          var target = "https://github.com/rickintoplace/RickCV/new/main" +
+            "?filename=themes/" + encodeURIComponent(name + ".css") +
+            "&value=" + encodeURIComponent(theme.css);
+          //  Sehr lange Themes passen nicht in eine Adresse; dann bleibt der
+          //  gewoehnliche Weg mit der heruntergeladenen Datei.
+          if (target.length > 7000) {
+            global.RickCVToast(t("themeShareLong"));
+            return;
+          }
+          global.open(target, "_blank", "noopener");
+        });
+        actions.appendChild(share);
+
         var drop = el("button", "btn btn-danger-ghost", t("themeDiscard"));
         drop.type = "button";
         drop.addEventListener("click", function () {

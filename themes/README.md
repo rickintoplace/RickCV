@@ -1,14 +1,14 @@
 # Themes
 
-Jedes Theme ist eine einzelne CSS-Datei. Wie man eine schreibt, steht in
-[CONTRACT.md](CONTRACT.md) – und am bequemsten geht es in der **Werkstatt**
-im Baukasten selbst: Themes → Werkstatt, tippen, zusehen, Datei herunterladen.
+Every theme is a single CSS file. How to write one is in
+[CONTRACT.md](CONTRACT.md) — and the easiest way is the **workshop**
+inside the builder itself: Themes → Workshop, type, watch, download the file.
 
-Die Bilder hier erzeugt `python3 tools/make-theme-previews.py`.
+These pictures are made by `python3 tools/make-theme-previews.py`.
 
 ## Banner
 
-Ein farbiges Band trägt den Namen über die ganze Breite des Hauptteils, Abschnitte tragen Versalien, Kenntnisse stehen als Plaketten. Laut, aber geordnet – für Branchen, in denen ein Lebenslauf auffallen darf. about-en: A coloured band carries the name across the main column, sections wear small capitals, skills sit in pills. Loud but orderly – for fields where a résumé may stand out.
+A coloured band carries the name across the main column, sections wear small capitals, skills sit in pills. Loud but orderly – for fields where a résumé may stand out.
 
 ![Banner](previews/banner.webp)
 
@@ -16,7 +16,7 @@ Ein farbiges Band trägt den Namen über die ganze Breite des Hauptteils, Abschn
 
 ## Clean
 
-Ruhige Grundform: Zeitleiste links am Rand, Datum rechts, kein Schnickschnack. Das Ausgangslayout von RickCV. about-en: A calm baseline: timeline along the edge, dates on the right, nothing else. RickCV's original layout.
+A calm baseline: timeline along the edge, dates on the right, nothing else. RickCV's original layout.
 
 ![Clean](previews/clean.webp)
 
@@ -24,63 +24,63 @@ Ruhige Grundform: Zeitleiste links am Rand, Datum rechts, kein Schnickschnack. D
 
 ## Dynaline
 
-Die Zeitleiste wird zur Achse: Stationen sitzen auf einer durchgehenden Linie, die Dauer bestimmt ihren Abstand. about-en: The timeline becomes the axis: stations sit on one continuous line, and how long they lasted sets their distance.
+The timeline becomes the axis: stations sit on one continuous line, and how long they lasted sets their distance.
 
 ![Dynaline](previews/dynaline.webp)
 
 `themes/dynaline.css`
 
-## Einspaltig
+## Single column
 
-Kopfblock mit Foto, Profil und Kontakt, darunter der Werdegang über die volle Breite – als schlichte Liste ohne Zeitleiste, Punkte und Kästen. Dieselbe Reihenfolge für Mensch und Maschine. Der Kopfblock trägt alle Blöcke der Seitenspalte – wer viele davon eingeschaltet hat, stellt auf mehrseitig um. about-en: A header block with photo, profile and contact, the career below across the full width – a plain list without timeline, dots or boxes. The same order for a person and for a machine. The header carries every sidebar block, so with many of them switched on, turn on multi-page.
+A header block with photo, profile and contact, the career below across the full width – a plain list without timeline, dots or boxes. The same order for a person and for a machine. The header carries every sidebar block, so with many of them switched on, turn on multi-page.
 
-![Einspaltig](previews/einspaltig.webp)
+![Single column](previews/einspaltig.webp)
 
 `themes/einspaltig.css`
 
 ## Icons
 
-Symbole tragen das Layout: jede Station bekommt ihren Punkt, die Zeitleiste laeuft mittig. about-en: Symbols carry the layout: every station gets its dot, the timeline runs down the middle.
+Symbols carry the layout: every station gets its dot, the timeline runs down the middle.
 
 ![Icons](previews/icons.webp)
 
 `themes/icons.css`
 
-## Klassisch
+## Classic
 
-Serifen, Kapitälchen, Haarlinien. Kein Punkt, kein Kasten, keine Farbfläche – die Stationen stehen als Liste mit hängendem Datum. Für Bewerbungen, bei denen Zurückhaltung die Botschaft
+Serifs, small caps, hairlines. No dots, no boxes, no filled areas – stations sit as a list with hanging dates. For applications where restraint is the message.
 
-![Klassisch](previews/klassisch.webp)
+![Classic](previews/klassisch.webp)
 
 `themes/klassisch.css`
 
-## Kompakt
+## Compact
 
-Für lange Lebensläufe: das Datum steht in der Zeile des Titels statt daneben, Aufzählungen rücken enger, Ränder schrumpfen. Damit passt ein Werdegang auf ein Blatt, der sonst zwei braucht. about-en: For long careers: the date sits on the title's line instead of beside it, bullets move closer, margins shrink. A career that needs two sheets elsewhere fits on one.
+For long careers: the date sits on the title's line instead of beside it, bullets move closer, margins shrink. A career that needs two sheets elsewhere fits on one.
 
-![Kompakt](previews/kompakt.webp)
+![Compact](previews/kompakt.webp)
 
 `themes/kompakt.css`
 
-## Randtitel
+## Margin Heads
 
-Die Überschriften stehen im Rand neben ihrem Abschnitt statt darüber. Das schafft eine ruhige Lesespalte und spart je Abschnitt eine Zeile – nach dem Vorbild der Lebensläufe amerikanischer Hochschulen. about-en: Headings sit in the margin beside their section instead of above it. That leaves one calm reading column and saves a line per section – after the résumés of US universities.
+Headings sit in the margin beside their section instead of above it. That leaves one calm reading column and saves a line per section – after the résumés of US universities.
 
-![Randtitel](previews/marginheads.webp)
+![Margin Heads](previews/marginheads.webp)
 
 `themes/marginheads.css`
 
-## Rechte Spalte
+## Right Rail
 
-Die Seitenspalte steht rechts, ohne Farbfläche, nur durch eine Haarlinie abgesetzt. Der Werdegang beginnt dadurch am linken Blattrand – dort, wo das Auge zu lesen anfängt. about-en: The sidebar sits on the right, unfilled, set off by a hairline. The career therefore starts at the left edge of the sheet – where the eye starts reading.
+The sidebar sits on the right, unfilled, set off by a hairline. The career therefore starts at the left edge of the sheet – where the eye starts reading.
 
-![Rechte Spalte](previews/rightrail.webp)
+![Right Rail](previews/rightrail.webp)
 
 `themes/rightrail.css`
 
 ## Terminal
 
-Feste Schrittweite, kantige Kanten, dunkle Seitenspalte. Die Stationen stehen an einer Randlinie wie Code in einem Editor, mit einem Quadrat statt eines Punktes. about-en: Monospaced, square edges, a dark sidebar. Stations sit against a gutter rule like code in an editor, with a square instead of a dot.
+Monospaced, square edges, a dark sidebar. Stations sit against a gutter rule like code in an editor, with a square instead of a dot.
 
 ![Terminal](previews/terminal.webp)
 
