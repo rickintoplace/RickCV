@@ -665,29 +665,80 @@
     menu.querySelector(".menu-item").focus();
   }
 
-  /*  Eine Datei irgendwo ins Fenster ziehen heisst: uebernimm das. Der
-   *  Dialog kuemmert sich um den Rest, Eingabefelder behalten ihr eigenes
-   *  Verhalten.
+  /*  Eine Datei irgendwo ins Fenster ziehen heisst: uebernimm das. Wer
+   *  einen Lebenslauf auf RickCV zieht, hat sich schon entschieden – der
+   *  Umweg ueber "Importieren" ist dann nur eine Huerde. Es gilt ueberall:
+   *  ueber dem Editor, ueber der Vorschau (die in einem eigenen Rahmen
+   *  liegt und deshalb nachfragt), und auch ueber einem Eingabefeld – eine
+   *  Datei ist dort ohnehin kein Text zum Einfuegen.
+   *
+   *  Zwei Stellen behalten ihr eigenes Verhalten, weil dort etwas anderes
+   *  gemeint ist: das Feld fuer das Foto und der Dialog selbst.
    */
   function bindFileDrop() {
     ["dragenter", "dragover"].forEach(function (name) {
       document.addEventListener(name, function (event) {
         if (!hasFiles(event)) return;
         event.preventDefault();
+        showDropHint();
       });
     });
 
     document.addEventListener("drop", function (event) {
       if (!hasFiles(event)) return;
-      var tag = (event.target.tagName || "").toLowerCase();
-      if (tag === "input" || tag === "textarea") return;
       event.preventDefault();
-
-      var file = event.dataTransfer.files[0];
-      //  Eine CSS-Datei ist kein Lebenslauf, sondern sein Aussehen.
-      if (/\.css$/i.test(file.name) || file.type === "text/css") loadTheme(file);
-      else openImport(file);
+      hideDropHint();
+      takeFile(event.dataTransfer.files[0]);
     });
+
+    //  Verlaesst die Datei das Fenster wieder, verschwindet auch das
+    //  Zeichen. Ohne das bliebe es stehen, bis jemand irgendwo loslaesst.
+    ["dragleave", "dragend"].forEach(function (name) {
+      document.addEventListener(name, function (event) {
+        if (event.relatedTarget) return;
+        hideDropHint();
+      });
+    });
+  }
+
+  function takeFile(file) {
+    if (!file) return;
+    //  Eine CSS-Datei ist kein Lebenslauf, sondern sein Aussehen.
+    if (/\.css$/i.test(file.name) || file.type === "text/css") loadTheme(file);
+    else openImport(file);
+  }
+
+  /*  Das Zeichen beim Ziehen: die ganze Flaeche sagt, dass sie die Datei
+   *  nimmt. Es steht ueber allem und faengt nichts ab – losgelassen wird
+   *  auf dem, was darunter liegt.
+   *
+   *  Ein- und ausgeblendet wird ueber eine Zeitschaltung statt ueber
+   *  gezaehlte dragenter und dragleave: beim Ueberfahren von Feldern,
+   *  Schaltflaechen und dem Vorschaurahmen kommen die paarweise durcheinander,
+   *  ein ausbleibendes dragover dagegen heisst zuverlaessig "weg".
+   */
+  var dragHint = null;
+  var dragTimer = null;
+
+  function showDropHint() {
+    if (!dragHint) {
+      dragHint = el("div", "drop-hint");
+      dragHint.appendChild(el("div", "drop-hint-label", t("dropAnywhere")));
+      document.body.appendChild(dragHint);
+    }
+    dragHint.firstChild.textContent = t("dropAnywhere");
+    document.body.classList.add("dragging-file");
+
+    //  Grosszuegig bemessen: steht der Zeiger still, meldet der Browser
+    //  das Ziehen nur noch alle paar hundert Millisekunden.
+    if (dragTimer) global.clearTimeout(dragTimer);
+    dragTimer = global.setTimeout(hideDropHint, 700);
+  }
+
+  function hideDropHint() {
+    if (dragTimer) global.clearTimeout(dragTimer);
+    dragTimer = null;
+    document.body.classList.remove("dragging-file");
   }
 
   function hasFiles(event) {
@@ -1208,6 +1259,15 @@
         status(t("saved"));
       } else if (message.type === "rickcv:error") {
         status("Fehler: " + message.message);
+      } else if (message.type === "rickcv:dragging") {
+        //  Die Vorschau liegt in einem eigenen Rahmen; was dort gezogen
+        //  wird, sieht dieses Fenster nicht von selbst.
+        showDropHint();
+      } else if (message.type === "rickcv:dragend") {
+        hideDropHint();
+      } else if (message.type === "rickcv:file") {
+        hideDropHint();
+        takeFile(message.file);
       }
     });
 

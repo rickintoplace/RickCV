@@ -642,6 +642,37 @@ textarea {
   color: var(--ui-text);
 }
 
+/*  Das Zeichen beim Ziehen einer Datei: es liegt ueber allem, faengt aber
+    nichts ab – losgelassen wird auf dem, was darunter liegt.  */
+.drop-hint {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--ui-accent) 12%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
+}
+
+body.dragging-file .drop-hint {
+  opacity: 1;
+}
+
+.drop-hint-label {
+  border: 2px dashed var(--ui-accent);
+  border-radius: var(--ui-radius);
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  padding: 18px 26px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
 /* ------------------------------------------------------------------ Vorschau */
 
 .preview {

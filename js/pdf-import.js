@@ -14,6 +14,8 @@
 (function (global) {
   "use strict";
 
+  var Layout = global.RickCVLayout;
+
   var SCRIPT = "vendor/pdfjs/pdf.min.js";
   var WORKER = "vendor/pdfjs/pdf.worker.min.js";
   var loading = null;
@@ -44,173 +46,6 @@
       document.head.appendChild(script);
     });
     return loading;
-  }
-
-  /* ------------------------------------------------------------- Spalten */
-
-  //  Eine senkrechte Bahn, durch die keine Zeile laeuft, trennt zwei
-  //  Spalten. Gesucht wird die breiteste solche Bahn, die beide Seiten
-  //  nennenswert fuellt – sonst waere jeder Einzug schon eine Spalte.
-  function splitColumns(items, width) {
-    if (items.length < 20) return [items];
-
-    var edges = [];
-    items.forEach(function (item) { edges.push(item.x + item.w); });
-    edges.sort(function (a, b) { return a - b; });
-
-    var best = null;
-    edges.forEach(function (edge) {
-      if (edge < width * 0.2 || edge > width * 0.8) return;
-
-      var left = 0, right = 0, gap = width;
-      for (var i = 0; i < items.length; i++) {
-        var item = items[i];
-        if (item.x < edge && item.x + item.w > edge + 1) return; // laeuft hindurch
-        if (item.x + item.w <= edge) left++;
-        else { right++; gap = Math.min(gap, item.x - edge); }
-      }
-      //  Beide Seiten muessen genug Text tragen, sonst ist es keine Spalte,
-      //  sondern ein verirrtes Stueck. Frueher standen hier 15 Prozent je
-      //  Seite – eine schmale Seitenspalte mit wenigen, langen Textstuecken
-      //  (Terminal: 23 von 217) fiel damit durch, und ihr Inhalt landete
-      //  zeilenweise im Werdegang.
-      if (left < 6 || right < 6) return;
-      if (left < items.length * 0.05 || right < items.length * 0.05) return;
-      if (!best || gap > best.gap) best = { edge: edge, gap: gap };
-    });
-
-    //  Wie breit muss die Gasse sein, um als Spaltenrand zu gelten? Ein
-    //  fester Anteil der Seitenbreite war zu grob: ein Theme mit schmalem
-    //  Steg (Terminal: knapp vier Millimeter) fiel durch, und seine
-    //  Seitenspalte landete Zeile fuer Zeile im Werdegang. Gemessen wird
-    //  deshalb in Zeilenhoehen, mit einem Boden fuer sehr grosse Schriften.
-    var heights = items.map(function (item) { return item.h; })
-      .sort(function (a, b) { return a - b; });
-    var middle = heights[Math.floor(heights.length / 2)] || 10;
-    var minGap = Math.max(middle * 0.8, width * 0.012);
-
-    if (!best || best.gap < minGap) return [items];
-
-    var leftItems = [], rightItems = [];
-    items.forEach(function (item) {
-      (item.x + item.w <= best.edge ? leftItems : rightItems).push(item);
-    });
-    return [leftItems, rightItems];
-  }
-
-  /* -------------------------------------------------------------- Zeilen */
-
-  //  Gesperrte Ueberschriften ("P R O F I L") kommen aus dem PDF als
-  //  einzelne Buchstaben. Drei oder mehr davon hintereinander waren einmal
-  //  ein Wort – und sind fast immer eine Ueberschrift, was die Auswertung
-  //  spaeter wissen will.
-  function unspace(text) {
-    var tokens = String(text).split(" ");
-    var out = [];
-    var run = [];
-    var spaced = false;
-
-    function flush() {
-      if (run.length >= 3) { out.push(run.join("")); spaced = true; }
-      else out.push.apply(out, run);
-      run = [];
-    }
-
-    tokens.forEach(function (token) {
-      if (token.length === 1 && /[^\s\d]/.test(token)) run.push(token);
-      else { flush(); out.push(token); }
-    });
-    flush();
-
-    //  Nur Leerzeichen zusammenfassen: der Tabulator aus toLines markiert
-    //  eine Spalte und muss die Normalisierung ueberleben.
-    return { text: out.join(" ").replace(/[ ]+/g, " ").trim(), spaced: spaced };
-  }
-
-  //  Eine Zeile ist mehr als ihr Text: Schriftgrad trennt Ueberschrift von
-  //  Fliesstext, und ein breiter Abstand mitten in der Zeile ist eine
-  //  Spalte (Kenntnisse stehen gern zu zweit nebeneinander). Der Abstand
-  //  wird als Tabulator festgehalten.
-  function toLines(items, page) {
-    if (!items.length) return [];
-
-    var heights = items.map(function (item) { return item.h; })
-      .sort(function (a, b) { return a - b; });
-    var tolerance = Math.max(2, heights[Math.floor(heights.length / 2)] * 0.5);
-
-    var sorted = items.slice().sort(function (a, b) {
-      return b.y - a.y || a.x - b.x; // im PDF waechst y nach oben
-    });
-
-    var rows = [];
-    var current = null;
-    sorted.forEach(function (item) {
-      if (!current || Math.abs(current.y - item.y) > tolerance) {
-        current = { y: item.y, parts: [] };
-        rows.push(current);
-      }
-      current.parts.push(item);
-    });
-
-    return rows.map(function (row) {
-      var parts = row.parts.sort(function (a, b) { return a.x - b.x; });
-      var text = "";
-      var previous = null;
-      var size = 0;
-
-      var pendingSpace = false;
-
-      parts.forEach(function (item) {
-        //  Ein Platzhalter traegt nur noch seine Breite bei: kein Text,
-        //  kein Leerzeichen, aber die Geometrie laeuft weiter.
-        if (item.ghost) { previous = item; return; }
-
-        //  Ein Stueck, das nur ein Leerzeichen ist, wird gemerkt, aber nicht
-        //  gemessen: sein Text gehoert in die Zeile, seine Breite gehoert zur
-        //  Luecke. Sonst zerfaellt eine Spaltenluecke in zwei kleine
-        //  Abstaende, und aus zwei Kenntnissen nebeneinander wird eine.
-        if (!item.str.trim()) { pendingSpace = true; return; }
-
-        size = Math.max(size, item.h);
-        if (previous) {
-          var gap = item.x - (previous.x + previous.w);
-          //  Schnipsel stossen im PDF oft mitten im Wort aneinander; erst
-          //  ab einem Viertel Zeichenbreite ist es ein Leerzeichen. Ab dem
-          //  Doppelten der Zeilenhoehe ist es keine Luecke mehr, sondern
-          //  eine eigene Spalte.
-          if (gap > item.h * 2) text += "\t";
-          else if (gap > item.h * 0.25 || pendingSpace) text += " ";
-        }
-        pendingSpace = false;
-        text += item.str;
-        previous = item;
-      });
-
-      var cleaned = unspace(text.replace(/[ ]+/g, " ").trim());
-      var real = parts.filter(function (item) { return !item.ghost; });
-      var first = real[0] || parts[0];
-
-      //  Fett ist die Zeile, wenn der groessere Teil ihrer Zeichen fett
-      //  gesetzt ist – ein fett gesetztes Wort mitten im Satz macht noch
-      //  keine Ueberschrift.
-      var heavy = 0;
-      var total = 0;
-      real.forEach(function (item) {
-        var length = (item.str || "").length;
-        total += length;
-        if (item.bold) heavy += length;
-      });
-
-      return {
-        text: cleaned.text,
-        spaced: cleaned.spaced,
-        bold: total > 0 && heavy / total > 0.6,
-        size: size,
-        x: first.x,
-        y: row.y,
-        page: page,
-      };
-    }).filter(function (row) { return row.text; });
   }
 
   /* --------------------------------------------------------------- Bilder */
@@ -517,8 +352,8 @@
 
       //  Spalte fuer Spalte, jede von oben nach unten – das ist die
       //  Reihenfolge, in der ein Mensch das Blatt liest.
-      return splitColumns(items, width).reduce(function (all, column) {
-        return all.concat(toLines(column, number));
+      return Layout.splitColumns(items, width).reduce(function (all, column) {
+        return all.concat(Layout.toLines(column, number));
       }, []);
     });
   }

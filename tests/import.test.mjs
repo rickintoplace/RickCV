@@ -218,7 +218,8 @@ for (const [input, label] of [['{"foo":1}', "fremdes JSON"], ["", "leerer Text"]
 //  werden muss – Ueberschrift, Tabellenzelle, Aufzaehlung, Bild.
 console.log("\n— Word (.docx) —");
 {
-  const dbox = sandboxWith(["js/i18n.js", "js/model.js", "js/import.js", "js/docx-import.js"]);
+  const dbox = sandboxWith(["js/i18n.js", "js/model.js", "js/import.js", "js/layout.js",
+                            "js/docx-import.js"]);
   const bytes = fs.readFileSync(fixture("beschriftungsspalten.docx"));
   const file = {
     name: "lebenslauf.docx",
@@ -260,6 +261,65 @@ console.log("\n— Word (.docx) —");
   }
 }
 
+//  Vorlagen aus dem Netz bauen ihren Lebenslauf nicht aus Absaetzen,
+//  sondern aus zwei Dutzend Textrahmen, die ueber das Blatt verteilt sind –
+//  und legen jeden davon zweimal ab: einmal als Zeichnung, einmal als
+//  Ersatzdarstellung fuer alte Word-Versionen. Gelesen wird nach Lage, und
+//  die Ersatzdarstellung bleibt liegen.
+console.log("\n— Word aus Textrahmen —");
+{
+  const dbox = sandboxWith(["js/i18n.js", "js/model.js", "js/import.js", "js/layout.js",
+                            "js/docx-import.js"]);
+  const bytes = fs.readFileSync(fixture("textrahmen.docx"));
+  const file = {
+    name: "vorlage.docx",
+    arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+  };
+
+  try {
+    const data = await new Promise((res, rej) =>
+      dbox.RickCVDocx.read(file, (error, value) => (error ? rej(error) : res(value))));
+    const parsed = dbox.RickCVImport.parseText(data.text, "aus-docx.txt", data.lines, data.images);
+    const tb = dbox.RickCVImport.apply(dbox.RickCVModel.createBase("de"), parsed, "replace");
+
+    const once = (data.text.match(/JONNA WIEDEMANN/g) || []).length;
+    ok(once === 1, "die Ersatzdarstellung verdoppelt den Text nicht", once);
+
+    ok(tb.contact.name === "JONNA WIEDEMANN", "Name", tb.contact.name);
+    ok(tb.contact.role === "Fachinformatikerin", "Rolle", tb.contact.role);
+    ok(tb.contact.city === "30159 Hannover", "Ort aus der Seitenspalte", tb.contact.city);
+
+    //  Seitenspalte und Hauptteil stehen nebeneinander auf dem Blatt: ohne
+    //  Spaltenrechnung waeren "KONTAKT" und "BERUFSERFAHRUNG" eine Zeile.
+    ok(data.lines.some((l) => l.text === "KONTAKT"), "Seitenspalte steht fuer sich",
+       data.lines.slice(0, 4).map((l) => l.text).join(" / "));
+
+    ok(tb.events.length === 3, "drei Stationen", tb.events.length);
+    const first = tb.events[0];
+    ok(!!first && first.title === "Softwareentwicklerin", "Titel ueber der Station",
+       first && first.title);
+    ok(!!first && first.company === "Weserwerk Digital GmbH" && first.place === "Hannover",
+       "Arbeitgeber und Ort", first && first.company + " / " + first.place);
+    ok(!!first && first.start === "03/2021" && first.present === true, "Zeitraum, offen",
+       first && first.start + "–" + first.present);
+    ok(!!first && first.list.length === 3, "Aufzaehlung der Station",
+       first && first.list.length);
+
+    ok(tb.skills.items.length === 3, "Kenntnisse aus der Seitenspalte",
+       tb.skills.items.map((i) => i.name).join("|"));
+    ok(tb.languages.items.length === 3, "Sprachen aus der Seitenspalte",
+       tb.languages.items.map((i) => i.name).join("|"));
+    ok(tb.interests.items.length === 2, "Interessen aus der Seitenspalte",
+       tb.interests.items.map((i) => i.name).join("|"));
+
+    //  Das Zeichen aus der Symbolschrift ist ein Bild und kein Buchstabe.
+    ok(data.text.indexOf("\uf0e0") === -1, "Zeichen aus Wingdings faellt weg");
+    ok(/Führerschein Klasse B/.test(data.text), "der Text daneben bleibt");
+  } catch (error) {
+    ok(false, "Textrahmen gelesen", error.message);
+  }
+}
+
 console.log("\n— PDF —");
 const pdfLib = path.join(root, "vendor/pdfjs/pdf.min.js");
 if (!fs.existsSync(pdfLib)) {
@@ -267,7 +327,7 @@ if (!fs.existsSync(pdfLib)) {
 } else {
   const pbox = sandboxWith([
     "vendor/pdfjs/pdf.worker.min.js", "vendor/pdfjs/pdf.min.js",
-    "js/i18n.js", "js/model.js", "js/import.js", "js/pdf-import.js",
+    "js/i18n.js", "js/model.js", "js/import.js", "js/layout.js", "js/pdf-import.js",
   ]);
   //  Im Browser setzt pdf-import.js die Quelle selbst; hier liegt der
   //  Arbeitsprozess schon in der Sandbox.

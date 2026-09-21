@@ -106,7 +106,7 @@ if (!chrome || !hasPdfjs) {
 } else {
   const box = sandboxWith([
     "vendor/pdfjs/pdf.worker.min.js", "vendor/pdfjs/pdf.min.js",
-    "js/i18n.js", "js/model.js", "js/import.js", "js/pdf-import.js",
+    "js/i18n.js", "js/model.js", "js/import.js", "js/layout.js", "js/pdf-import.js",
   ]);
   box.pdfjsLib.GlobalWorkerOptions.workerSrc = "in-sandbox";
 

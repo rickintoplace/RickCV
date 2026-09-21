@@ -54,6 +54,27 @@
     var iso = raw.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
     if (iso) return pad(Number(iso[2])) + "/" + iso[1];
 
+    //  Vorlagen aus dem Netz schreiben "20XX", wo spaeter ein Jahr stehen
+    //  soll. Das ist kein Datum, aber es ist auch kein Versehen: wer eine
+    //  halb ausgefuellte Vorlage importiert, soll seine Stationen
+    //  wiederfinden und die Jahre nachtragen koennen, statt den ganzen
+    //  Werdegang von Hand einzugeben.
+    var blank = raw.match(/^((?:19|20)[Xx]{2})$/);
+    if (blank) return blank[1].toUpperCase();
+
+    var blankMonth = raw.match(/^(\d{1,2})[./]((?:19|20)[Xx]{2})$/);
+    if (blankMonth) return pad(Number(blankMonth[1])) + "/" + blankMonth[2].toUpperCase();
+
+    //  "01/09/2024" – Tag, Monat, Jahr. Steht vorn etwas ueber zwoelf, ist
+    //  es der Tag; steht hinten etwas ueber zwoelf, war es amerikanisch
+    //  geschrieben und der Monat kam zuerst.
+    var full = raw.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
+    if (full) {
+      var first = Number(full[1]);
+      var second = Number(full[2]);
+      return pad(second > 12 ? first : second) + "/" + full[3];
+    }
+
     var slash = raw.match(/^(\d{1,2})[./](\d{4})$/);
     if (slash) return pad(Number(slash[1])) + "/" + slash[2];
 
@@ -68,7 +89,7 @@
     var german = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
     if (german) return pad(Number(german[2])) + "/" + german[3];
 
-    var named = raw.match(/^([A-Za-zÄÖÜäöü]+)\.?\s+(\d{4})$/);
+    var named = raw.match(/^([A-Za-zÄÖÜäöü]+)\.?\s+(\d{4}|(?:19|20)[Xx]{2})$/);
     if (named) {
       var month = MONTHS[named[1].toLowerCase()];
       if (month) return pad(month) + "/" + named[2];
@@ -974,7 +995,11 @@
   function headingInside(value) {
     for (var i = 0; i < HEADINGS.length; i++) {
       var body = HEADINGS[i].pattern.source.replace(/^\^/, "");
-      if (new RegExp("(^|\\s)" + body, "i").test(value)) return HEADINGS[i].role;
+      //  Dieselbe Bedingung wie bei einer Ueberschrift am Zeilenanfang:
+      //  das Wort muss dort aufhoeren.
+      if (keywordFits(value, new RegExp("[\\s\\S]*?(?:^|\\s)" + body, "i"))) {
+        return HEADINGS[i].role;
+      }
     }
     return null;
   }
@@ -991,7 +1016,9 @@
   //  5555, aus "Taught 75 students" eine Station von 1975, und aus einer
   //  Notenangabe "3.70/4.00" der April des Jahres 2000. Genau das ist in
   //  echten Lebenslaeufen passiert.
-  var YEAR = "(?:19|20)\\d{2}";
+  //  Ein Jahr – oder der Platzhalter, den unausgefuellte Vorlagen an seine
+  //  Stelle setzen ("20XX").
+  var YEAR = "(?:19|20)(?:\\d{2}|[Xx]{2})";
 
   //  Monatsnamen kommen aus derselben Liste, mit der sie spaeter gelesen
   //  werden. Frueher stand hier "irgendein Wort aus 3 bis 9 Buchstaben vor
@@ -1002,7 +1029,10 @@
     .sort(function (a, b) { return b.length - a.length; })
     .join("|");
 
-  var DATE = "(?:\\d{1,2}[./](?:\\d{2}|\\d{4}))|" + YEAR +
+  //  Das vollstaendige Datum steht vorn: sonst liest die kuerzere Form
+  //  aus "01/09/2024" ein "01/09" heraus und macht daraus September 2001.
+  var DATE = "(?:\\d{1,2}[./]\\d{1,2}[./]\\d{4})" +
+    "|(?:\\d{1,2}[./](?:\\d{2}|\\d{4}|(?:19|20)[Xx]{2}))|" + YEAR +
     "|(?:" + MONTH_WORDS + ")\\.?\\s+" + YEAR;
   var OPEN = "heute|present|current|aktuell|now|jetzt|dato|today|ongoing|bis heute";
 
@@ -1158,12 +1188,25 @@
     return { label: label, value: value };
   }
 
+  //  Ein Schluesselwort macht die Zeile nur dann zur Ueberschrift, wenn
+  //  das Wort dort auch aufhoert: "Softwareentwicklerin" faengt mit
+  //  "Software" an und ist trotzdem ein Stationstitel – frueher riss sie
+  //  den Abschnitt "Kenntnisse" auf und der halbe Werdegang landete
+  //  darin. Eine Endung von ein, zwei Buchstaben bleibt erlaubt, sonst
+  //  waere "Berufserfahrungen" nicht dieselbe Ueberschrift wie
+  //  "Berufserfahrung".
+  function keywordFits(value, pattern) {
+    var match = value.match(pattern);
+    if (!match) return false;
+    return !/^[A-Za-zÄÖÜäöüß]{3}/.test(value.slice(match[0].length));
+  }
+
   function headingOf(line) {
     var value = normalizeHeading(line);
     if (!value || value.length > 40) return null;
 
     for (var i = 0; i < HEADINGS.length; i++) {
-      if (HEADINGS[i].pattern.test(value)) return HEADINGS[i].role;
+      if (keywordFits(value, HEADINGS[i].pattern)) return HEADINGS[i].role;
     }
 
     //  Gesperrt gesetzte Ueberschriften kommen aus dem PDF in Stuecken
@@ -1172,7 +1215,7 @@
     var tight = value.replace(/\s+/g, "");
     if (tight !== value && tight.length > 3) {
       for (var j = 0; j < HEADINGS.length; j++) {
-        if (HEADINGS[j].pattern.test(tight)) return HEADINGS[j].role;
+        if (keywordFits(tight, HEADINGS[j].pattern)) return HEADINGS[j].role;
       }
     }
 
@@ -1188,6 +1231,7 @@
   function headingStyle(rows) {
     var sizes = [];
     var spaced = 0;
+    var upper = 0;
     var known = 0;
 
     rows.forEach(function (row) {
@@ -1201,10 +1245,40 @@
       known++;
       if (row.size) sizes.push(row.size);
       if (row.spaced) spaced++;
+      if (normalizeHeading(row.text) === normalizeHeading(row.text).toUpperCase()) upper++;
     });
 
     if (!known || !sizes.length) return null;
-    return { size: median(sizes), spaced: spaced >= known * 0.6 };
+    return {
+      size: median(sizes),
+      spaced: spaced >= known * 0.6,
+      upper: upper >= known * 0.8,
+    };
+  }
+
+  //  Traegt eine Station schon etwas, das sie ausmacht? Ein Titel allein
+  //  reicht nicht – der koennte noch auf seinen Zeitraum warten.
+  function stationFilled(entry) {
+    return !!(entry && (entry.start || entry.end || entry.present ||
+      entry.list.length || entry.description.length));
+  }
+
+  //  Hebt sich eine Zeile so ab, dass sie eine Station eroeffnet? Kurz,
+  //  ohne Aufzaehlungszeichen, ohne zweite Spalte – und fett *und*
+  //  groesser als der Fliesstext. Fett allein reicht nicht: in
+  //  Lebenslaeufen, die ihre Stationen ueber eine Beschriftungsspalte
+  //  ordnen, ist auch die Zusatzzeile fett ("Schwerpunkt: Mittelspannung"),
+  //  und die gehoert zur Station darueber.
+  function startsEntry(row, bodySize) {
+    var value = clean(row.text);
+    if (!value || value.length > 60) return false;
+    if (/^[-–—•*·]/.test(value)) return false;
+    if (value.indexOf("\t") !== -1) return false;
+    if (!bodySize || !row.size) return false;
+    //  Fett und etwas groesser – oder deutlich groesser, denn nicht jede
+    //  Vorlage setzt ihre Titel fett.
+    if (row.bold && row.size >= bodySize * 1.08) return true;
+    return row.size >= bodySize * 1.2;
   }
 
   //  Eine Ueberschrift ist kurz. Wo Schriftgrade vorliegen, entscheidet das
@@ -1227,6 +1301,12 @@
       //  Sind die Ueberschriften dieses Dokuments gesperrt, ist eine nicht
       //  gesperrte Zeile keine – egal wie gross sie ist.
       if (style.spaced && !row.spaced) return false;
+      //  Und schreibt dieses Dokument seine Ueberschriften in Versalien,
+      //  ist eine gemischt gesetzte Zeile keine. In Word-Vorlagen tragen
+      //  Abschnitt und Stationstitel oft denselben Grad – "BERUFSERFAHRUNG"
+      //  und "Gesundheits- und Krankenpflegerin" unterscheiden sich dann
+      //  nur noch darin.
+      if (style.upper && value !== value.toUpperCase()) return false;
       if (!row.size) return false;
       //  Liegt der Ueberschriftsgrad dicht am Fliesstext (12 zu 11 Punkt
       //  ist ueblich), traefe die blosse Aehnlichkeit jede Zeile. Eine
@@ -1248,6 +1328,11 @@
 
   //  Abschnitte, die eine Liste fuellen – im Gegensatz zu den Stationen.
   var LIST_SECTIONS = ["skills", "languages", "interests", "projects", "mobility", "profile"];
+
+  function isStationSection(name) {
+    return name === "experience" || name === "education" ||
+           name === "volunteer" || name === "other";
+  }
 
   function isContactLine(line, profile) {
     var value = clean(line);
@@ -1366,7 +1451,23 @@
 
     var current = null;      // laufender Abschnitt
     var event = null;        // laufende Station
-    var pending = null;      // Zeile ohne Datum, die auf ihre Station wartet
+    var pending = [];        // Zeilen ohne Datum, die auf ihre Station warten
+    var pendingTitled = false;   // war die erste davon ein Titel?
+
+    //  Zuruecklegen, bis die Station kommt, zu der die Zeile gehoert. Eine
+    //  zweite Zeile wartet nur mit, wenn die erste ein Titel war: manche
+    //  Vorlagen setzen Titel, Arbeitgeber und Zeitraum untereinander
+    //  ("ARCHITEKTIN" / "Müller & Partner Architekten" / "01/20xx – heute").
+    //  Sonst ersetzt die neue Zeile die alte – in einer Liste ohne Daten
+    //  ist jede Zeile ein Eintrag fuer sich.
+    function hold(line, titled) {
+      if (pendingTitled && pending.length < 2) {
+        pending.push(line);
+        return;
+      }
+      pending = [line];
+      pendingTitled = !!titled;
+    }
     var buffer = [];         // Zeilen des Abschnitts ausserhalb einer Station
     var stopped = false;
     var stopIndex = rows.length;
@@ -1377,12 +1478,13 @@
     //  einer liegengebliebenen Zeile sonst eine eigene Station.
     function startEvent() {
       var carried = pending;
-      pending = null;
+      pending = [];
+      pendingTitled = false;
 
       closeEvent();
       event = newEvent(current);
 
-      if (carried) assignStationLine(event, carried);
+      carried.forEach(function (line) { assignStationLine(event, line); });
       return event;
     }
 
@@ -1390,11 +1492,12 @@
       //  Blieb eine zurueckgestellte Zeile ohne Station, ist sie selbst eine:
       //  "Engagement im Sportverein" unter "Ehrenamt" hat kein Datum und
       //  bleibt trotzdem ein Eintrag.
-      if (pending && !event) {
+      if (pending.length && !event) {
         event = newEvent(current || "experience");
-        assignStationLine(event, pending);
+        pending.forEach(function (line) { assignStationLine(event, line); });
       }
-      pending = null;
+      pending = [];
+      pendingTitled = false;
 
       //  Stand am Ende nur die Einrichtung da ("Engagement im Sportverein"),
       //  ist sie der Eintrag – eine Station ohne Titel zeigt nichts an.
@@ -1471,10 +1574,7 @@
         }
       }
 
-      var isStation = current === "experience" || current === "education" ||
-                      current === "volunteer" || current === "other";
-
-      if (isStation) {
+      if (isStationSection(current)) {
         //  "seit 04/2021 Teamleiterin" – das Wort davor sagt nur, dass die
         //  Station noch laeuft. Ohne diese Regel faellt die Zeile durch alle
         //  Muster, und ihr Inhalt haengt sich an die Station darunter.
@@ -1521,7 +1621,7 @@
           if (head.length === 2 && head[1].length <= 30 && !/\d/.test(head[1]) &&
               head[0].length > 2) {
             closeEvent();
-            pending = line;
+            hold(line, true);
             return;
           }
         }
@@ -1577,7 +1677,19 @@
         //  Sie wird deshalb zurueckgestellt und der naechsten Station
         //  vorangestellt – kommt keine, wird sie selbst zur Station.
         if (!event) {
-          pending = line;
+          hold(line, false);
+          return;
+        }
+
+        //  Dasselbe, waehrend eine Station laeuft: Word-Vorlagen setzen den
+        //  Titel ueber die Station und Arbeitgeber samt Zeitraum darunter
+        //  ("Krankenschwester" / "Seniorenresidenz Sonnenhof | 20XX – 20XX").
+        //  Eine hervorgehobene kurze Zeile ohne Datum gehoert dann der
+        //  naechsten Station. Ohne diese Regel haengt sie als Beschreibung
+        //  an der vorigen, und samtliche Titel liegen eine Station zu tief.
+        if (startsEntry(row, bodyFor(row)) && stationFilled(event)) {
+          closeEvent();
+          hold(line, true);
           return;
         }
       }
@@ -1595,6 +1707,14 @@
     }
 
     var page = null;
+
+    //  Steht in den naechsten Zeilen ein Zeitraum?
+    function dateWithin(from, span) {
+      for (var i = from; i < rows.length && i < from + span; i++) {
+        if (carriesDate(rows[i].text)) return true;
+      }
+      return false;
+    }
 
     rows.forEach(function (row, index) {
       if (stopped) return;
@@ -1706,6 +1826,18 @@
       //  unbekannte Ueberschrift den Abschnitt, sonst sammelt er den Rest
       //  des Blattes ein.
       if (current !== "projects" && styled) {
+        //  In einer Stationsliste ist eine hervorgehobene Zeile aber oft
+        //  der Titel der naechsten Station: Word-Vorlagen setzen
+        //  "ARCHITEKTIN" in genau derselben Schrift wie
+        //  "BERUFSERFAHRUNG". Wer nur die Schrift misst, wirft den halben
+        //  Werdegang weg. Was darunter steht, entscheidet: folgt in den
+        //  naechsten Zeilen ein Zeitraum, war es ein Titel.
+        if (isStationSection(current) && dateWithin(index + 1, 3)) {
+          closeEvent(); flushBuffer();
+          hold(line, true);
+          return;
+        }
+
         closeEvent(); flushBuffer();
         current = null;
         return;
@@ -1979,6 +2111,19 @@
       }
     }
 
+    //  "Werkstudent Marketing - TechNova GmbH" ist beides in einer Zeile,
+    //  und dort steht rechts der Arbeitgeber. Getrennt wird nur, wenn er
+    //  sich als Einrichtung zu erkennen gibt: "Master of Education –
+    //  Deutsch & Geschichte" ist ein Titel mit Fach, kein Arbeitgeber.
+    if (!event.title && !event.company) {
+      var pair = value.match(/^(.{3,60}?)\s+[–—-]\s+(.{2,60})$/);
+      if (pair && ORGANISATION.test(pair[2]) && !ORGANISATION.test(pair[1])) {
+        event.title = clean(pair[1]);
+        splitPlace(event, clean(pair[2]));
+        return;
+      }
+    }
+
     if (!event.title) {
       //  "Mechaniker GmbH, Standort" ist der Arbeitgeber, nicht der Titel –
       //  und "ZOOLINO, Bad Wimpeln" ebenso: ein angehaengter Ort macht aus
@@ -1995,6 +2140,14 @@
     }
 
     if (!event.company) { splitPlace(event, value); return; }
+
+    //  "(Berlin)" hinter dem Zeitraum ist der Ort und keine Beschreibung.
+    //  Ohne Klammer bleibt es dabei, dass eine Zeile unter Titel und
+    //  Arbeitgeber zum Text gehoert – ein Ort steht dort selten allein.
+    if (!event.place && /^\(.{2,30}\)$/.test(value)) {
+      event.place = value.slice(1, -1);
+      return;
+    }
 
     //  "Abschluss: Geprüfter Taucher" liest sich als Aufzählungspunkt
     //  besser denn als Absatz.
@@ -2014,12 +2167,17 @@
     var BARE_LEVEL = /^(.{2,30}?)\s+([ABC][12]|muttersprache|native speaker|native|verhandlungssicher|fließend|fliessend|fluent|grundkenntnisse|basic)$/i;
 
     function add(value) {
-      var entry = clean(value);
+      //  Ein Aufzaehlungszeichen gehoert nicht zum Namen der Sprache.
+      var entry = clean(value).replace(/^[-–—•*·]\s*/, "");
       if (!entry) return;
       var match = entry.match(/^(.{2,30}?)\s*(?:[,(:–—]|\s-\s|\s{2,})\s*(.+?)\)?$/) ||
         entry.match(BARE_LEVEL);
       var name = clean(match ? match[1] : entry);
       var level = clean(match ? match[2] : "");
+      //  Die Stufe endet oft in einer Klammer, die zur Sprache gehoerte
+      //  ("Deutsch (Muttersprache)") – steht die Klammer aber in der Stufe
+      //  selbst ("Fließend (C1)"), fehlt sonst ihr Schluss.
+      if (level.indexOf("(") !== -1 && level.indexOf(")") === -1) level += ")";
       if (!name || name.length > 30) return;
       out.push({ name: name, level: level, percentage: fluencyToPercent(level) });
     }

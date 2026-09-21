@@ -49,6 +49,7 @@
         impTitle: "Daten übernehmen",
         impIntro: "Datei hierher ziehen oder Text einfügen. Alles bleibt auf deinem Gerät – gelesen wird im Browser.",
         impDrop: "Datei hierher ziehen",
+        dropAnywhere: "Loslassen – RickCV liest die Datei",
         impChoose: "Datei wählen",
         impFormats: "RickCV-Sicherung · JSON Resume · Reactive Resume · LinkedIn-Export (ZIP/CSV) · Word (.docx) · PDF · Text",
         impPasteLabel: "Oder Text einfügen",
@@ -71,10 +72,8 @@
         fmtRickcv: "RickCV-Sicherung",
         fmtJsonresume: "JSON Resume",
         fmtReactive: "Reactive Resume",
-        fmtReactive: "Reactive Resume",
         fmtLinkedin: "LinkedIn-Export",
         fmtPdf: "PDF",
-        fmtDocx: "Word document",
         fmtDocx: "Word-Dokument",
         fmtText: "Text",
 
@@ -529,6 +528,7 @@
         impTitle: "Bring your data in",
         impIntro: "Drop a file here or paste text. Everything stays on your device – it is read in the browser.",
         impDrop: "Drop a file here",
+        dropAnywhere: "Let go – RickCV will read the file",
         impChoose: "Choose a file",
         impFormats: "RickCV backup · JSON Resume · Reactive Resume · LinkedIn export (ZIP/CSV) · Word (.docx) · PDF · text",
         impPasteLabel: "Or paste text",
@@ -550,8 +550,10 @@
 
         fmtRickcv: "RickCV backup",
         fmtJsonresume: "JSON Resume",
+        fmtReactive: "Reactive Resume",
         fmtLinkedin: "LinkedIn export",
         fmtPdf: "PDF",
+        fmtDocx: "Word document",
         fmtText: "text",
 
         sumName: "Name",

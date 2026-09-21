@@ -130,7 +130,13 @@
           drop.classList.remove("over");
         });
       });
-      drop.addEventListener("drop", function (event) { accept(event.dataTransfer.files[0]); });
+      drop.addEventListener("drop", function (event) {
+        //  Hier ist die Sache entschieden: sonst faengt der Griff am
+        //  Dokument dieselbe Datei noch einmal und fragt, ob daraus ein
+        //  ganzer Lebenslauf werden soll.
+        event.stopPropagation();
+        accept(event.dataTransfer.files[0]);
+      });
 
       body.appendChild(drop);
       body.appendChild(picker);

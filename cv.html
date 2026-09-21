@@ -124,6 +124,32 @@
           );
         }
 
+        //  Eine Datei, die jemand auf die Vorschau zieht, gehoert dem
+        //  Baukasten und nicht diesem Rahmen: Chrome wuerde sie sonst
+        //  einfach anzeigen und die Vorschau waere weg. Gemeldet wird auch
+        //  das Ziehen selbst – das Fenster darueber zeigt daraufhin an,
+        //  dass es die Datei nimmt.
+        if (window.parent !== window) {
+          ["dragenter", "dragover"].forEach(function (name) {
+            document.addEventListener(name, function (event) {
+              if (!event.dataTransfer) return;
+              event.preventDefault();
+              parent.postMessage({ type: "rickcv:dragging" }, "*");
+            });
+          });
+
+          document.addEventListener("dragleave", function (event) {
+            if (event.relatedTarget) return;
+            parent.postMessage({ type: "rickcv:dragend" }, "*");
+          });
+
+          document.addEventListener("drop", function (event) {
+            event.preventDefault();
+            var file = event.dataTransfer && event.dataTransfer.files[0];
+            parent.postMessage({ type: "rickcv:file", file: file || null }, "*");
+          });
+        }
+
         window.addEventListener("message", function (event) {
           var message = event.data;
           if (!message || typeof message !== "object") return;

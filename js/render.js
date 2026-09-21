@@ -112,7 +112,12 @@
 
   function comparable(date) {
     var parts = String(date || "").split("/");
-    return Number(parts[1] || 0) * 12 + Number(parts[0] || 0);
+    var value = Number(parts[1] || 0) * 12 + Number(parts[0] || 0);
+    //  "20XX" steht in unausgefuellten Vorlagen, wo spaeter ein Jahr
+    //  hinkommt. Als Zahl ist das nichts – die Station zaehlt dann als
+    //  undatiert und bleibt, wo sie steht, statt die Sortierung zu
+    //  verwirren.
+    return isFinite(value) ? value : 0;
   }
 
   function spanMonths(events) {
