@@ -98,13 +98,26 @@
 
   /* ------------------------------------------------------------- Eingaben */
 
+  //  Dasselbe Feld kann an zwei Stellen im Editor stehen – Ort und Datum
+  //  etwa im Anschreiben und unter der Fusszeile. Getippt wird in eines,
+  //  nachgezogen werden beide; sonst zeigt das andere noch den alten Wert,
+  //  und wer dort weitertippt, ueberschreibt den neuen.
+  function mirror(path, value, source) {
+    var others = document.querySelectorAll('[data-path="' + path + '"]');
+    Array.prototype.forEach.call(others, function (node) {
+      if (node !== source && node.value !== value) node.value = value;
+    });
+  }
+
   function text(path, label, placeholder) {
     var input = el("input");
     input.type = "text";
     input.value = get(path) || "";
+    input.dataset.path = path;
     if (placeholder) input.placeholder = placeholder;
     input.addEventListener("input", function () {
       set(path, input.value);
+      mirror(path, input.value, input);
       changed();
     });
     return wrap(label, input);

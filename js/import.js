@@ -2368,13 +2368,28 @@
       ["name", "role", "address", "city", "email", "phone"]);
 
     if (clean(profile.profileText)) {
-      target.profile.text = mode === "merge" && clean(target.profile.text)
-        ? target.profile.text
-        : clean(profile.profileText);
-      target.profile.show = true;
+      //  Beim Ergaenzen bleibt ein vorhandener Profiltext stehen – und
+      //  dann wird der Block auch nicht eingeschaltet: was schon da war,
+      //  war ausgeblendet, weil es jemand ausgeblendet hat.
+      var keepProfile = mode === "merge" && clean(target.profile.text);
+      if (!keepProfile) {
+        target.profile.text = clean(profile.profileText);
+        target.profile.show = true;
+      }
+    }
+
+    //  Beim Ergaenzen kommt oft dieselbe Datei ein zweites Mal – oder eine
+    //  neuere Fassung desselben Lebenslaufs. Was schon dasteht, soll dann
+    //  nicht noch einmal danebenstehen.
+    var known = {};
+    if (mode === "merge") {
+      target.events.forEach(function (event) { known[eventKey(event)] = true; });
     }
 
     profile.events.forEach(function (entry) {
+      if (mode === "merge" && known[eventKey(entry)]) return;
+      known[eventKey(entry)] = true;
+
       var event = Model.emptyEvent(sectionFor(target, entry.role || "experience", locale));
       event.title = clean(entry.title);
       event.company = clean(entry.company);
@@ -2462,6 +2477,18 @@
     return "globe";
   }
 
+  //  Zwei Stationen sind dieselbe, wenn Titel, Arbeitgeber und Beginn
+  //  uebereinstimmen. Gross- und Kleinschreibung und die Zeichensetzung
+  //  zaehlen nicht mit: derselbe Lebenslauf, einmal aus dem PDF und einmal
+  //  aus dem Word-Dokument gelesen, schreibt "GmbH," und "GmbH".
+  function eventKey(event) {
+    return [event.title, event.company, event.start]
+      .map(function (part) {
+        return clean(part).toLowerCase().replace(/[^\wäöüß]+/g, "");
+      })
+      .join("|");
+  }
+
   function appendItems(target, key, items, map) {
     if (!items || !items.length) return;
     var block = target[key];
@@ -2469,13 +2496,19 @@
     var seen = {};
     block.items.forEach(function (item) { seen[clean(item.name).toLowerCase()] = true; });
 
+    var added = 0;
     items.forEach(function (item) {
       var name = clean(item.name);
       if (!name || seen[name.toLowerCase()]) return;
       seen[name.toLowerCase()] = true;
       block.items.push(map(item));
+      added++;
     });
-    if (block.items.length) block.show = true;
+
+    //  Eingeschaltet wird nur, was der Import tatsaechlich gefuellt hat.
+    //  Ein Block, der schon Eintraege hatte und trotzdem ausgeblendet war,
+    //  war mit Absicht ausgeblendet.
+    if (added) block.show = true;
   }
 
   //  Beim Ersetzen bleibt, was zum Aussehen gehoert: Stil, Vorlage,
@@ -2709,6 +2742,7 @@
     //  Der ZIP-Leser wird auch vom docx-Import gebraucht: ein Word-Dokument
     //  ist nichts anderes als ein ZIP mit XML darin.
     readZip: readZip,
+    inflateRaw: inflateRaw,
     decodeText: decodeText,
     emptyProfile: emptyProfile,
     newEvent: newEvent,

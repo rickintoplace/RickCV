@@ -64,7 +64,7 @@ that both people and machines can read. Every theme is one CSS file — see
   hidden text; see below.
 - **Two languages** — German and English for interface and document, including the language
   marking inside the PDF. The editor follows your system's light or dark setting.
-- **Your data stays yours** — everything lives in your browser. Export it as a backup, as
+- **Your data stays yours** — everything lives in your browser. Save it as a backup, as
   `resume.json`, as a link, or as JSON on the clipboard.
 
 ## How to use it
@@ -105,8 +105,10 @@ in it is still text; that was not always so, and the fix was to ship static font
 instead of a variable font, which Firefox's PDF engine used to synthesise into bold.
 
 Your document is saved in the browser as you type. That storage belongs to one browser on one
-device, so use **Export** for a `.json` backup and **Import** to open it elsewhere — or to keep
-several versions side by side.
+device, so use **Save** for a `.json` backup and **Import** to open it elsewhere — or to keep
+several versions side by side. Anything that swaps the whole document — *Example*, *New*, an
+import — can be taken back: the notice that follows carries an *Undo*, and so does the arrow
+in the header (Ctrl+Z).
 
 ## About ATS and hidden text
 
@@ -293,15 +295,18 @@ dialog shows the text it read, so you can sort it in by hand.
 
 ### Going the other way
 
-*Export* offers four doors. Two produce a file: the complete RickCV backup, and `resume.json` in
-the JSON Resume format that other tools, themes and CLI renderers read. They differ on purpose
-— the backup holds everything, the `resume.json` holds what the document actually shows, so a
-section switched off is not part of your resume.
+*Save* offers five doors. The first is the PDF, which also has its own button. Two produce a
+file: the complete RickCV backup, and `resume.json` in the JSON Resume format that other tools,
+themes and CLI renderers read. They differ on purpose — the backup holds everything, the
+`resume.json` holds what the document actually shows, so a section switched off is not part of
+your resume.
 
-The other two copy to the clipboard: **the whole document as a link** (the same `#data=`
-address an agent would build) and **the raw JSON**, for when a photo would make the link
-unwieldy. None of it involves a server; pdf.js lives in `vendor/` and is loaded from your own
-copy of the site.
+The last two copy to the clipboard: **the whole document as a link** and **the raw JSON**. The
+link carries the document compressed (`#z=`, deflate — a resume without a photo lands around a
+kilobyte); if a photo would push the address past 100 000 characters, the picture is scaled
+down for the link, and only if even that does not fit does it go without images. The notice
+says which of the three happened, so a link always comes out. None of it involves a server;
+pdf.js lives in `vendor/` and is loaded from your own copy of the site.
 
 ## Hosting it yourself
 

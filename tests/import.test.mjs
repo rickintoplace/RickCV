@@ -132,7 +132,8 @@ ok(rs.footers.right.links.length === 3, "Webseite, eigenes Feld und Profil als L
 ok(rs.photo.src.indexOf("data:image") === 0, "Bild übernommen");
 
 console.log("\n— Fließtext —");
-const txt = Imp.parseText(fs.readFileSync(fixture("lebenslauf.txt"), "utf8"), "lebenslauf.txt");
+const plain = fs.readFileSync(fixture("lebenslauf.txt"), "utf8");
+const txt = Imp.parseText(plain, "lebenslauf.txt");
 const ts = Imp.apply(base(), txt, "replace");
 ok(ts.contact.name === "Max Mustermann", "Name aus dem Kopf", ts.contact.name);
 ok(ts.contact.email === "max.mustermann@example.com", "E-Mail");
@@ -168,6 +169,28 @@ console.log("\n— Ergänzen statt ersetzen —");
 const merged = Imp.apply(Imp.apply(base(), txt, "replace"), jr, "merge");
 ok(merged.contact.name === "Max Mustermann", "vorhandener Name bleibt stehen");
 ok(merged.events.length === 3 + jr.summary.events, "Stationen wurden angehängt", merged.events.length);
+
+//  Zweimal dieselbe Datei ergänzen ist der häufigste Fehlgriff: es soll
+//  nichts doppelt danebenstehen, und ein Block, den jemand ausgeblendet
+//  hat, soll ausgeblendet bleiben.
+{
+  const once = Imp.apply(base(), Imp.parseText(plain, "lebenslauf.txt"), "replace");
+  once.interests.show = false;
+  const twice = Imp.apply(once, Imp.parseText(plain, "lebenslauf.txt"), "merge");
+
+  ok(twice.events.length === once.events.length, "dieselben Stationen kommen nicht doppelt",
+     once.events.length + " → " + twice.events.length);
+  ok(twice.skills.items.length === once.skills.items.length, "dieselben Kenntnisse auch nicht",
+     once.skills.items.length + " → " + twice.skills.items.length);
+  ok(twice.interests.show === false,
+     "ein ausgeblendeter Block bleibt aus, wenn nichts Neues dazukommt");
+
+  //  Eine geänderte Fassung soll dagegen ankommen.
+  const more = Imp.apply(twice, Imp.parseText(plain + "\n\nEhrenamt\nSchatzmeister\n" +
+    "Kleingartenverein Süd, Kassel | 01/2019 – 12/2020\n", "lebenslauf.txt"), "merge");
+  ok(more.events.length === twice.events.length + 1, "eine neue Station kommt hinzu",
+     twice.events.length + " → " + more.events.length);
+}
 
 //  Die Anleitung für Sprachmodelle zeigt ein Beispieldokument. Wenn das
 //  nicht mehr stimmt, schickt jeder Agent kaputte Links – deshalb wird es

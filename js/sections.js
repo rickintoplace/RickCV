@@ -612,10 +612,11 @@
 
       if (F.get(path + ".dateLine")) {
         inner.appendChild(F.row(
-          F.text(path + ".place", t("footerDatePlace"), t("footerDatePlaceholder")),
-          F.text(path + ".date", t("footerDateDate"), t("footerDateToday"))
+          F.text("settings.place", t("footerDatePlace"), t("footerDatePlaceholder")),
+          F.text("settings.date", t("footerDateDate"), t("footerDateToday"))
         ));
         inner.appendChild(F.hint(t("footerDateHint")));
+        inner.appendChild(F.hint(t("dateSharedHint")));
       }
 
       inner.appendChild(F.listEditor({
@@ -659,10 +660,11 @@
       body.appendChild(F.toggle("settings.showCoverLetter", t("createLetter")));
       body.appendChild(F.textarea("coverLetter.recipient", t("recipient"), 4, t("recipientPlaceholder")));
       body.appendChild(F.row(
-        F.text("coverLetter.place", t("place"), t("footerDatePlaceholder")),
-        F.text("coverLetter.date", t("date"), t("footerDateToday"))
+        F.text("settings.place", t("place"), t("footerDatePlaceholder")),
+        F.text("settings.date", t("date"), t("footerDateToday"))
       ));
       body.appendChild(F.hint(t("footerDateHint")));
+      body.appendChild(F.hint(t("dateSharedHint")));
       body.appendChild(F.text("coverLetter.subject", t("subject")));
       body.appendChild(F.text("coverLetter.salutation", t("salutation")));
       body.appendChild(F.listEditor({

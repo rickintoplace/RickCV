@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = 4;
+  var VERSION = 5;
 
   function icon(set, name) {
     return { set: set, name: name };
@@ -43,11 +43,10 @@
     return {
       show: false, mode: "iconText", intro: "", page: "last", links: [],
       //  "Ort, Datum" unter dem Lebenslauf – in deutschen Bewerbungen
-      //  ueblich, anderswo unbekannt, deshalb ausgeschaltet. Bleiben Ort und
-      //  Datum leer, nimmt der Renderer den Wohnort und den heutigen Tag:
-      //  ein Dokument, das in vier Wochen wieder geoeffnet wird, traegt dann
-      //  nicht mehr das Datum von damals.
-      dateLine: false, place: "", date: "",
+      //  ueblich, anderswo unbekannt, deshalb ausgeschaltet. Was dort steht,
+      //  steht in settings.place und settings.date: dieselbe Angabe wie im
+      //  Anschreiben, an einer Stelle gepflegt.
+      dateLine: false,
     };
   }
 
@@ -88,6 +87,14 @@
         //  jedem Drucker skaliert oder beschnitten heraus.
         pageSize: "a4",
         dateFormat: "short",
+
+        //  Ort und Datum, wie sie im Anschreiben und unter dem Lebenslauf
+        //  stehen. Beides bleibt am besten leer: dann nimmt das Dokument
+        //  den Wohnort und den heutigen Tag – eines, das in vier Wochen
+        //  wieder geoeffnet wird, traegt dann nicht mehr das Datum von
+        //  damals.
+        place: "",
+        date: "",
         reverseTimeline: true,
         alignText: "left",
         showCoverLetter: true,
@@ -232,8 +239,6 @@
 
       coverLetter: {
         recipient: "",
-        place: "",
-        date: "",
         subject: "",
         salutation: "",
         paragraphs: [""],
@@ -247,6 +252,7 @@
   /* -------------------------------------------------------------- Beispiel */
 
   var EXAMPLE_DE = {
+    place: "Musterstadt",
     profileText:
       "Bezwinger des Dunklen Lords der Eurythmie (der, dessen Name nicht getanzt " +
       "werden darf) möchte Fahrkartenkontrollen in vollen Zügen genießen.",
@@ -351,8 +357,6 @@
     },
     coverLetter: {
       recipient: "Firma Beispiel GmbH\nAnsprechpartner Beate Beispiel\nBeispielstraße 2\n54321 Beispielstadt",
-      place: "Musterstadt",
-      date: "",
       subject: "Bewerbung als Zugbegleiter",
       salutation: "Sehr geehrte Damen und Herren,",
       paragraphs: [
@@ -365,6 +369,7 @@
   };
 
   var EXAMPLE_EN = {
+    place: "Lower Piddling",
     profileText:
       "The conqueror of the Dark Lord of Eurythmy (he whose name must not be danced) aims to enchant passengers with his charm.",
     contact: {
@@ -468,8 +473,6 @@
     },
     coverLetter: {
       recipient: "Northern Rail Ltd\nAttn. Ms Beatrice Sample\n2 Station Approach\nManchester M1 2AB",
-      place: "Lower Piddling",
-      date: "",
       subject: "Application for the position of train conductor",
       salutation: "Dear Sir or Madam,",
       paragraphs: [
@@ -499,6 +502,7 @@
     data.projects.items = JSON.parse(JSON.stringify(ex.projects));
     data.references.items = JSON.parse(JSON.stringify(ex.references));
     data.footers = JSON.parse(JSON.stringify(ex.footers));
+    data.settings.place = ex.place;
     data.events = ex.events.map(function (event) {
       return Object.assign(emptyEvent(event.sectionId), event);
     });
@@ -632,6 +636,28 @@
       }
       delete oldSettings.multiPage;
       data.version = 4;
+    }
+
+    //  v4 -> v5: Ort und Datum standen dreimal im Dokument – im
+    //  Anschreiben und in jeder der beiden Fusszeilen. Wer das Anschreiben
+    //  datierte, hatte den Lebenslauf darunter noch nicht datiert. Jetzt
+    //  steht beides einmal in den Einstellungen; uebernommen wird der
+    //  erste Wert, den das alte Dokument traegt.
+    if (data.version < 5) {
+      var into = data.settings || (data.settings = {});
+      var sources = [data.coverLetter,
+                     data.footers && data.footers.left,
+                     data.footers && data.footers.right];
+
+      sources.forEach(function (source) {
+        if (!source) return;
+        if (!into.place && source.place) into.place = source.place;
+        if (!into.date && source.date) into.date = source.date;
+        delete source.place;
+        delete source.date;
+      });
+
+      data.version = 5;
     }
 
     //  v4 -> Themes: die Vorlage war eine Einstellung, jetzt ist sie ein

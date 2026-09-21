@@ -45,6 +45,68 @@
     return node;
   }
 
+  /*  Symbole fuer die Oberflaeche selbst – nicht zu verwechseln mit dem
+   *  Katalog in js/icon-data.js, aus dem die Symbole des Dokuments kommen.
+   *  Der ist auf Lebenslauf-Inhalte kuratiert und soll nicht mit
+   *  Werkzeugsymbolen zugestellt werden. Es sind dieselben Striche
+   *  (Lucide, ISC – siehe licenses/), nur eben die des Baukastens.
+   */
+  var UI_ICONS = {
+    undo: '<path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />',
+    sparkles:
+      '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936' +
+      'A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937' +
+      'l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />',
+    "file-plus":
+      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" />' +
+      '<path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M12 18v-6" /><path d="M9 15h6" />',
+    upload:
+      '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />' +
+      '<path d="m17 8-5-5-5 5" /><path d="M12 3v12" />',
+    download:
+      '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />' +
+      '<path d="m7 10 5 5 5-5" /><path d="M12 15V3" />',
+    "external-link":
+      '<path d="M15 3h6v6" /><path d="M10 14 21 3" />' +
+      '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />',
+    printer:
+      '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />' +
+      '<path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />' +
+      '<rect x="6" y="14" width="12" height="8" rx="1" />',
+    link:
+      '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />' +
+      '<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />',
+    copy:
+      '<rect width="14" height="14" x="8" y="8" rx="2" ry="2" />' +
+      '<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />',
+    braces:
+      '<path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1" />' +
+      '<path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1" />',
+    "file-text":
+      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" />' +
+      '<path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" />' +
+      '<path d="M16 13H8" /><path d="M16 17H8" />',
+  };
+
+  function iconHtml(name) {
+    var paths = UI_ICONS[name];
+    if (!paths) return "";
+    return '<svg class="rc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' +
+      'focusable="false">' + paths + "</svg>";
+  }
+
+  //  Jede Schaltflaeche mit data-icon bekommt ihr Symbol, sobald die Seite
+  //  steht – so steht die Zeichnung an einer Stelle und nicht in jeder
+  //  Zeile HTML.
+  function paintIcons(root) {
+    var nodes = (root || document).querySelectorAll("[data-icon]");
+    Array.prototype.forEach.call(nodes, function (node) {
+      var slot = node.querySelector(".btn-glyph") || node;
+      slot.innerHTML = iconHtml(node.getAttribute("data-icon"));
+    });
+  }
+
   function debounce(fn, wait) {
     var timer = null;
     return function () {
@@ -59,12 +121,29 @@
   }
 
   var toastTimer = null;
-  function toast(message) {
+
+  //  Der Hinweis kann einen Handgriff tragen: "Beispiel geladen ·
+  //  Rueckgaengig". Dort steht er im Weg des Blicks, im Augenblick der
+  //  Reue – besser als jede Tastenkombination, die niemand kennt.
+  function toast(message, action) {
     var node = document.getElementById("toast");
-    node.textContent = message;
+    node.textContent = "";
+    node.appendChild(el("span", null, message));
+
+    if (action) {
+      var button = el("button", "toast-action", action.label);
+      button.type = "button";
+      button.addEventListener("click", function () {
+        node.classList.remove("visible");
+        action.run();
+      });
+      node.appendChild(button);
+    }
+
     node.classList.add("visible");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { node.classList.remove("visible"); }, 2600);
+    toastTimer = setTimeout(function () { node.classList.remove("visible"); },
+      action ? 6000 : 2600);
   }
   global.RickCVToast = toast;
 
@@ -127,6 +206,7 @@
       }
       pendingSnapshot = null;
       committed = current;
+      showUndo();
     }, 600);
   }
 
@@ -138,6 +218,24 @@
     toast(t("undone"));
   }
 
+  //  Ein Schritt, der den ganzen Stand austauscht – Beispiel, Neu, Import.
+  //  Er kommt mit seinem eigenen Rueckweg: im Hinweis steht, dass er sich
+  //  zuruecknehmen laesst, und ein Klick darauf tut es.
+  function replaceAll(next, message) {
+    history.push(committed);
+    replaceState(next);
+    toast(message, { label: t("undo"), run: undo });
+  }
+
+  //  Der Knopf sagt, ob es etwas zurueckzunehmen gibt. Ohne ihn wussten
+  //  nur die von Strg+Z, dass ein Klick auf "Beispiel" oder "Neu"
+  //  umkehrbar ist – und wer das nicht weiss, verliert seine Arbeit.
+  function showUndo() {
+    var button = document.getElementById("btn-undo");
+    if (!button) return;
+    button.disabled = !history.length;
+  }
+
   function replaceState(next) {
     state = next;
     committed = JSON.stringify(state);
@@ -147,6 +245,7 @@
     buildEditor();
     sendToPreview();
     save();
+    showUndo();
   }
 
   /* -------------------------------------------------------------- Vorschau */
@@ -281,7 +380,11 @@
     };
     Object.keys(texts).forEach(function (id) {
       var node = document.getElementById(id);
-      if (node) node.textContent = t(texts[id]);
+      if (!node) return;
+      //  Traegt die Schaltflaeche ein Symbol, gehoert der Text in ihre
+      //  Beschriftung – sonst wuerde er die Zeichnung daneben loeschen.
+      var label = node.querySelector(".btn-label");
+      (label || node).textContent = t(texts[id]);
     });
 
     //  Auch der Reiter im Browser: er stand fest auf Deutsch, waehrend
@@ -297,6 +400,7 @@
     applyTheme();
 
     var titles = {
+      "btn-undo": "undoTitle",
       "btn-example": "exampleTitle",
       "lang-switch": "languageTitle",
       "btn-reset": "resetTitle",
@@ -307,7 +411,12 @@
     };
     Object.keys(titles).forEach(function (id) {
       var node = document.getElementById(id);
-      if (node) node.title = t(titles[id]);
+      if (!node) return;
+      node.title = t(titles[id]);
+      //  Wo nur ein Symbol steht, ist der Titel auch der Name des Knopfes.
+      if (!node.querySelector(".btn-label") && !node.textContent.trim()) {
+        node.setAttribute("aria-label", t(titles[id]));
+      }
     });
 
     var fit = document.querySelector('#zoom option[value="fit"]');
@@ -488,8 +597,7 @@
    *  oder jemandem den Stand zu schicken – und es ist derselbe Weg, den
    *  auch ein Sprachmodell nimmt (siehe AGENTS.md).
    */
-  function toBase64Url(text) {
-    var bytes = new TextEncoder().encode(text);
+  function bytesToBase64Url(bytes) {
     var binary = "";
     for (var i = 0; i < bytes.length; i += 8192) {
       binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
@@ -498,11 +606,107 @@
       .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
 
-  function documentLink() {
-    var base = global.location.origin && global.location.origin !== "null"
+  function toBase64Url(text) {
+    return bytesToBase64Url(new TextEncoder().encode(text));
+  }
+
+  function linkBase() {
+    return global.location.origin && global.location.origin !== "null"
       ? global.location.origin + global.location.pathname
       : global.location.href.split("#")[0];
-    return base + "#data=" + toBase64Url(JSON.stringify(state));
+  }
+
+  //  Gepackt wird mit dem, was der Browser mitbringt. Ein Lebenslauf ist
+  //  Text mit vielen wiederkehrenden Schluesselnamen – das schrumpft auf
+  //  ein Drittel bis ein Viertel. Kann der Browser es nicht, geht der Link
+  //  eben ungepackt hinaus.
+  function deflateRaw(text) {
+    var bytes = new TextEncoder().encode(text);
+    if (typeof global.CompressionStream !== "function") return Promise.resolve(null);
+
+    try {
+      var stream = new Blob([bytes]).stream()
+        .pipeThrough(new global.CompressionStream("deflate-raw"));
+      return new Response(stream).arrayBuffer().then(function (buffer) {
+        return new Uint8Array(buffer);
+      }, function () { return null; });
+    } catch (error) {
+      return Promise.resolve(null);
+    }
+  }
+
+  //  Ein Bild kleiner rechnen, aber nur fuer den Link: im Dokument bleibt
+  //  es, wie es ist.
+  function scaleImage(dataUrl, maxSide, quality) {
+    return new Promise(function (resolve) {
+      if (!/^data:image\//.test(dataUrl || "")) return resolve(dataUrl || "");
+
+      var image = new Image();
+      image.onload = function () {
+        var scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+        var canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        var small = canvas.toDataURL("image/jpeg", quality);
+        resolve(small.length < dataUrl.length ? small : dataUrl);
+      };
+      image.onerror = function () { resolve(dataUrl); };
+      image.src = dataUrl;
+    });
+  }
+
+  //  Dasselbe Dokument, aber mit Bildern in Linkgroesse. 640 Punkte
+  //  reichen fuer ein Bewerbungsfoto in Druckqualitaet; passt es damit
+  //  noch nicht in eine Adresse, wird weiter heruntergerechnet, bevor das
+  //  Bild ganz herausfaellt. Unterschrift und Projektbilder stehen
+  //  kleiner auf dem Blatt und duerfen entsprechend kleiner sein.
+  var IMAGE_STEPS = [
+    { photo: 640, small: 260, quality: 0.72 },
+    { photo: 440, small: 200, quality: 0.68 },
+    { photo: 300, small: 160, quality: 0.62 },
+  ];
+
+  function stateWithSmallImages(step) {
+    var copy = JSON.parse(JSON.stringify(state));
+    var jobs = [];
+
+    if (copy.photo && copy.photo.src) {
+      jobs.push(scaleImage(copy.photo.src, step.photo, step.quality).then(function (src) {
+        copy.photo.src = src;
+      }));
+    }
+    if (copy.coverLetter && copy.coverLetter.signatureImg) {
+      jobs.push(scaleImage(copy.coverLetter.signatureImg, step.small + 160, 0.75)
+        .then(function (src) { copy.coverLetter.signatureImg = src; }));
+    }
+    (copy.projects && copy.projects.items ? copy.projects.items : []).forEach(function (item) {
+      if (!item.img) return;
+      jobs.push(scaleImage(item.img, step.small, step.quality).then(function (src) {
+        item.img = src;
+      }));
+    });
+
+    return Promise.all(jobs).then(function () { return copy; });
+  }
+
+  function stateWithoutImages() {
+    var copy = JSON.parse(JSON.stringify(state));
+    if (copy.photo) copy.photo.src = "";
+    if (copy.coverLetter) copy.coverLetter.signatureImg = "";
+    (copy.projects && copy.projects.items ? copy.projects.items : []).forEach(function (item) {
+      if (/^data:/.test(item.img || "")) item.img = "";
+    });
+    return copy;
+  }
+
+  function linkFor(data) {
+    var json = JSON.stringify(data);
+    return deflateRaw(json).then(function (packed) {
+      if (packed) return linkBase() + "#z=" + bytesToBase64Url(packed);
+      return linkBase() + "#data=" + toBase64Url(json);
+    });
   }
 
   //  Die Zwischenablage gibt es nur im sicheren Kontext; per Doppelklick
@@ -529,18 +733,49 @@
     return worked;
   }
 
+  //  Ab hier wird eine Adresse den meisten Chatfenstern und
+  //  Mailprogrammen zu lang. Browser selbst tragen ein Vielfaches.
+  var LINK_LIMIT = 100000;
+
+  /*  "Als Link kopieren" soll immer einen Link ergeben. Mit einem
+   *  Bewerbungsfoto ist das ganze Dokument schnell eine Viertelmillion
+   *  Zeichen – frueher kam dann nur die Meldung, der Link sei zu lang, und
+   *  damit war die Sache erledigt. Jetzt wird der Reihe nach versucht, und
+   *  der Hinweis sagt, was auf dem Weg geblieben ist:
+   *
+   *    1. alles, gepackt                  – ohne Foto ein paar Kilobyte
+   *    2. Bilder Schritt fuer Schritt kleiner gerechnet
+   *    3. ohne Bilder                     – der Rest passt immer
+   */
   function copyLink() {
-    var link = documentLink();
-    //  Mit Bild wird die Adresse sehr lang. Browser tragen das, Chatfenster
-    //  und Mailprogramme nicht immer – dann ist das JSON der bessere Weg.
-    if (link.length > 60000) {
-      toast(t("expLinkTooLong"));
-      return;
+    status(t("expLinkWorking"));
+
+    function smaller(index) {
+      if (index >= IMAGE_STEPS.length) {
+        return linkFor(stateWithoutImages()).then(function (bare) {
+          return { link: bare, note: t("expLinkNoImages") };
+        });
+      }
+      return stateWithSmallImages(IMAGE_STEPS[index]).then(function (small) {
+        return linkFor(small).then(function (link) {
+          if (link.length <= LINK_LIMIT) {
+            return { link: link, note: t("expLinkSmallImages") };
+          }
+          return smaller(index + 1);
+        });
+      });
     }
-    copyText(link, function (worked) {
-      toast(worked
-        ? t("expLinkCopied").replace("{kb}", Math.round(link.length / 1024))
-        : t("expCopyFailed"));
+
+    linkFor(state).then(function (full) {
+      if (full.length <= LINK_LIMIT) return { link: full, note: "" };
+      return smaller(0);
+    }).then(function (result) {
+      status(t("saved"));
+      copyText(result.link, function (worked) {
+        if (!worked) return toast(t("expCopyFailed"));
+        var size = t("expLinkCopied").replace("{kb}", Math.round(result.link.length / 1024));
+        toast(result.note ? size + " – " + result.note : size);
+      });
     });
   }
 
@@ -555,9 +790,7 @@
       t: t,
       state: function () { return state; },
       onApply: function (next, info) {
-        history.push(committed);
-        replaceState(next);
-        toast(t("impDone").replace("{count}", info.count));
+        replaceAll(next, t("impDone").replace("{count}", info.count));
         if (pendingPrint) {
           pendingPrint = false;
           //  Erst zeichnen lassen, dann drucken: sonst liegt im PDF der
@@ -593,10 +826,23 @@
     return new TextDecoder().decode(bytes);
   }
 
+  function base64UrlToBytes(value) {
+    var base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) base64 += "=";
+    var binary = global.atob(base64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+
   function readHash() {
     var hash = global.location.hash || "";
+    //  "z" ist der gepackte Weg, "data" der einfache. Beide bleiben
+    //  lesbar: Links aus frueheren Fassungen und aus Anleitungen fuer
+    //  Sprachmodelle sollen nicht eines Tages ins Leere laufen.
+    var packed = /[#&]z=([^&]+)/.exec(hash);
     var data = /[#&]data=([^&]+)/.exec(hash);
-    if (!data) return;
+    if (!packed && !data) return;
 
     pendingPrint = /[#&]print=1\b/.test(hash);
 
@@ -607,11 +853,20 @@
         global.location.pathname + global.location.search);
     } catch (error) { /* file:// erlaubt das nicht – dann bleibt er stehen */ }
 
-    try {
-      openImport(null, fromBase64Url(data[1]));
-    } catch (error) {
-      toast(t("importFailed"));
+    if (!packed) {
+      try {
+        openImport(null, fromBase64Url(data[1]));
+      } catch (error) {
+        toast(t("importFailed"));
+      }
+      return;
     }
+
+    global.RickCVImport.inflateRaw(base64UrlToBytes(packed[1])).then(function (bytes) {
+      openImport(null, new TextDecoder().decode(bytes));
+    }).catch(function () {
+      toast(t("importFailed"));
+    });
   }
 
   /* ----------------------------------------------------------- Kleines Menue */
@@ -642,6 +897,13 @@
     entries.forEach(function (entry) {
       var item = el("button", "menu-item");
       item.type = "button";
+
+      if (entry.icon) {
+        var glyph = el("span", "menu-glyph");
+        glyph.innerHTML = iconHtml(entry.icon);
+        item.appendChild(glyph);
+      }
+
       item.appendChild(el("strong", null, entry.label));
       if (entry.hint) item.appendChild(el("small", null, entry.hint));
       item.addEventListener("click", function () {
@@ -882,27 +1144,30 @@
 
     document.getElementById("btn-print").addEventListener("click", printCv);
     document.getElementById("btn-export").addEventListener("click", function (event) {
+      //  Das PDF steht auch hier, obwohl es einen eigenen Knopf hat: wer
+      //  "Speichern" sucht, sucht meistens genau das.
       popupMenu(event.currentTarget, [
-        { label: t("expRickcv"), hint: t("expRickcvHint"), action: exportJson },
-        { label: t("expJsonResume"), hint: t("expJsonResumeHint"), action: exportJsonResume },
-        { label: t("expLink"), hint: t("expLinkHint"), action: copyLink },
-        { label: t("expCopyJson"), hint: t("expCopyJsonHint"), action: copyJson },
+        { label: t("expPdf"), hint: t("expPdfHint"), icon: "printer", action: printCv },
+        { label: t("expRickcv"), hint: t("expRickcvHint"), icon: "download", action: exportJson },
+        { label: t("expJsonResume"), hint: t("expJsonResumeHint"), icon: "braces",
+          action: exportJsonResume },
+        { label: t("expLink"), hint: t("expLinkHint"), icon: "link", action: copyLink },
+        { label: t("expCopyJson"), hint: t("expCopyJsonHint"), icon: "copy", action: copyJson },
       ]);
     });
     document.getElementById("btn-import").addEventListener("click", function () {
       openImport();
     });
     document.getElementById("btn-example").addEventListener("click", function () {
-      history.push(committed);
-      replaceState(Model.createExample(state.locale));
-      toast(t("exampleLoaded"));
+      replaceAll(Model.createExample(state.locale), t("exampleLoaded"));
     });
     document.getElementById("btn-reset").addEventListener("click", function () {
+      //  Die Rueckfrage bleibt: "Rueckgaengig" gilt nur, solange der
+      //  Reiter offen ist – wer danach neu laedt, hat nichts mehr.
       if (!global.confirm(t("confirmReset"))) return;
-      history.push(committed);
-      replaceState(Model.createBase(state.locale));
-      toast(t("newStarted"));
+      replaceAll(Model.createBase(state.locale), t("newStarted"));
     });
+    document.getElementById("btn-undo").addEventListener("click", undo);
     document.getElementById("btn-open").addEventListener("click", function () {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1271,6 +1536,7 @@
       }
     });
 
+    paintIcons();
     watchFrame();
     applyLocale();
     buildEditor();

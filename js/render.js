@@ -103,6 +103,17 @@
     return city.trim();
   }
 
+  //  "Musterstadt, 21. September 2026" – die Zeile steht im Anschreiben
+  //  ueber der Betreffzeile und unter dem Lebenslauf ueber der Unterschrift.
+  //  Beide holen sie hier, damit niemand dasselbe Datum zweimal eintragen
+  //  muss und die beiden Blaetter einer Bewerbung nicht verschieden datiert
+  //  sind.
+  function dateLine(data) {
+    var settings = data.settings || {};
+    return [settings.place || placeOf(data),
+            settings.date || today(data.locale)].filter(Boolean).join(", ");
+  }
+
   function monthsBetween(start, end) {
     var a = String(start || "").split("/").map(Number);
     var b = String(end || "").split("/").map(Number);
@@ -467,10 +478,7 @@
     var links = footerLinks(footer);
     //  "Ort, Datum" unter dem Lebenslauf ist in deutschen Bewerbungen
     //  ueblich – und steht dort, wo sonst die Links stehen.
-    var dated = footer.dateLine
-      ? [footer.place || placeOf(data),
-         footer.date || today(data.locale)].filter(Boolean).join(", ")
-      : "";
+    var dated = footer.dateLine ? dateLine(data) : "";
     if (!links && !dated) return "";
     var intro = String(footer.intro || "").trim();
 
@@ -731,8 +739,7 @@
           nl2br(text) + "</p></div>";
       }).join("");
 
-    var dateLine = [letter.place || placeOf(data),
-                    letter.date || today(data.locale)].filter(Boolean).join(", ");
+    var stamp = dateLine(data);
 
     return '<div class="cover-letter"><div class="cover-letter_wrapper">' +
       '<div class="cover-letter-header"><div class="cover-letter-sender">' +
@@ -741,7 +748,7 @@
       '<div class="header-contact-section">' + contactBlock(data.contact) + "</div></div></div>" +
       '<div class="cover-letter-content">' +
       '<div class="cover-letter-recipient">' + nl2br(letter.recipient) + "</div>" +
-      '<div class="cover-letter-date">' + esc(dateLine) + "</div>" +
+      '<div class="cover-letter-date">' + esc(stamp) + "</div>" +
       '<div class="cover-letter-regard textblock" style="text-align:' + align + '">' +
       esc(letter.subject) + "</div>" +
       '<div class="cover-letter-salutation textblock" style="text-align:' + align + '">' +

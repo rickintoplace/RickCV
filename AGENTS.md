@@ -20,6 +20,10 @@ Nothing is fetched over the network: the data travels inside the link. And no
 document is overwritten silently — the import goes through the same confirmation
 step as any other file.
 
+RickCV's own *Copy as a link* writes `#z=<base64url(deflate-raw(json))>`, which is
+three to four times shorter. Both forms are read; `#data=` is the simpler one to
+produce and stays supported.
+
 ## Building the link
 
 ```js
@@ -36,8 +40,8 @@ url = f"https://cv.rickinto.place/#data={token}"
 ```
 
 A resume without a photo makes a link of one to three kilobytes. With a photo it
-gets long — then hand the person the JSON instead and tell them:
-**Importieren / Import → paste the text**. The result is the same.
+gets long; past roughly 100 000 characters, hand the person the JSON instead and
+tell them: **Importieren / Import → paste the text**. The result is the same.
 
 ## The document
 
@@ -46,9 +50,9 @@ example is complete enough for a real application:
 
 ```json
 {
-  "version": 4,
+  "version": 5,
   "locale": "de",
-  "settings": { "pageSize": "a4", "showCoverLetter": true },
+  "settings": { "pageSize": "a4", "showCoverLetter": true, "place": "Berlin" },
   "theme": { "slug": "clean" },
   "contact": {
     "name": "Nora Feldmann",
@@ -90,8 +94,6 @@ example is complete enough for a real application:
   ] },
   "coverLetter": {
     "recipient": "Klinikum Süd\nFrau Dr. Beispiel\nSüdstraße 3\n12345 Berlin",
-    "place": "Berlin",
-    "date": "17. September 2026",
     "subject": "Bewerbung als Hebamme",
     "salutation": "Sehr geehrte Frau Dr. Beispiel,",
     "paragraphs": ["Erster Absatz.", "Zweiter Absatz."],
@@ -106,6 +108,7 @@ Field by field:
 | --- | --- |
 | `locale` | `"de"` or `"en"`; sets the interface, the default headings and the language marker inside the PDF |
 | `settings.pageSize` | `"a4"` or `"letter"` — use `"letter"` for the US and Canada |
+| `settings.place`, `settings.date` | The place and date line, used by the cover letter and by the resume footer alike. Leave both empty: the document then uses the person's city and the day it is opened |
 | `settings.pageMode` | `"single"` (one sheet), `"flow"` (as many as the content needs), `"two"` (two sheets, each block assigned) |
 | `settings.showCoverLetter` | include the cover letter |
 | `settings.page2.sidebar` | `"keep"` (default) or `"none"` — whether sheets after the first keep the sidebar |

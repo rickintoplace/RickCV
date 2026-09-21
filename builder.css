@@ -210,6 +210,30 @@ textarea {
   border-radius: 6px;
 }
 
+/*  Symbole in den Schaltflaechen der Kopfzeile und im kleinen Menue: sie
+    laufen mit der Schrift mit und nehmen deren Farbe an.  */
+.btn .rc-icon,
+.menu-glyph .rc-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.btn-glyph {
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn:disabled:hover {
+  background: var(--ui-panel-2);
+  border-color: var(--ui-line);
+}
+
 .btn-icon {
   padding: 3px 7px;
   font-size: 13px;
@@ -756,6 +780,25 @@ body.dragging-file .drop-hint {
 .toast.visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+  /*  Mit einem Handgriff darin will der Hinweis angeklickt werden.  */
+  pointer-events: auto;
+}
+
+.toast-action {
+  margin-left: 12px;
+  padding: 3px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toast-action:hover {
+  background: var(--ui-bg);
+  color: var(--ui-text);
 }
 
 /* --------------------------------------------------------- Schmale Bildschirme */
@@ -1839,9 +1882,11 @@ body.legal-body {
 }
 
 .menu-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  column-gap: 10px;
+  row-gap: 2px;
   padding: 8px 10px;
   border: 0;
   border-radius: 8px;
@@ -1860,6 +1905,21 @@ body.legal-body {
 .menu-item small {
   color: var(--ui-muted);
   font-size: 12px;
+}
+
+/*  Das Symbol steht neben beiden Zeilen, Beschriftung und Erklaerung
+    liegen rechts davon untereinander.  */
+.menu-glyph {
+  grid-row: 1 / span 2;
+  display: flex;
+  align-items: center;
+  padding-top: 2px;
+  color: var(--ui-muted);
+}
+
+.menu-item strong,
+.menu-item small {
+  grid-column: 2;
 }
 
 /*  Auf dem Telefon sitzt der Dialog am unteren Rand: dort ist der Daumen. */
