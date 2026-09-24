@@ -7,9 +7,9 @@
  *
  *    Mit Browser   – rendert das Beispieldokument und hält jeden Haken fest,
  *                    der in themes/CONTRACT.md dokumentiert ist. Fehlt ein
- *                    Chromium, wird dieser Teil übersprungen statt zu
- *                    scheitern; ohne ihn kann man den Vertrag aber brechen,
- *                    ohne es zu merken.
+ *                    Chromium, wird dieser Teil übersprungen – außer mit
+ *                    REQUIRE_BROWSER=1 oder in der CI, dann ist das ein
+ *                    Fehler (siehe tests/chromium.mjs).
  *
  *  Aufruf aus dem Projektverzeichnis:  node tests/theme.test.mjs
  */
@@ -19,6 +19,7 @@ import vm from "node:vm";
 import { execFile, execFileSync, spawn } from "node:child_process";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { findChromium, browserRequired } from "./chromium.mjs";
 
 //  Asynchron aufrufen, wo der Server nebenher antworten muss.
 const run = promisify(execFile);
@@ -117,27 +118,10 @@ function serve() {
   });
 }
 
-//  Den Browser im PATH suchen, ohne eine Shell zu bemühen: das spart eine
-//  Warnung und eine Angriffsfläche.
-function findChromium() {
-  const names = ["chromium", "chromium-browser", "google-chrome", "google-chrome-stable"];
-  const dirs = (process.env.PATH || "").split(path.delimiter).filter(Boolean);
-
-  for (const dir of dirs) {
-    for (const name of names) {
-      const candidate = path.join(dir, name);
-      try {
-        fs.accessSync(candidate, fs.constants.X_OK);
-        return candidate;
-      } catch { /* nächster Kandidat */ }
-    }
-  }
-  return null;
-}
-
 const browser = findChromium();
 if (!browser) {
-  console.log("  übersprungen (kein Chromium gefunden)");
+  if (browserRequired()) ok(false, "Chromium gefunden", "CHROME=/pfad/zum/browser setzen");
+  else console.log("  übersprungen (kein Chromium gefunden – CHROME=… setzen)");
 } else {
   const server = serve();
   await new Promise((done) => setTimeout(done, 800));

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!--
+    demo-stage.html – die Buehne fuer tools/make-demo.mjs.
+
+    Rahmt den Baukasten ein und zeichnet darueber einen Mauszeiger, einen
+    Klickring und die Datei, die gerade gezogen wird. Alles darueber faengt
+    keine Ereignisse ab: Maus, Tastatur und Drag & Drop kommen echt ueber
+    das DevTools-Protokoll in den Baukasten, so wie bei einem Menschen.
+
+    Wird ueber einen lokalen Server geoeffnet (tools/make-demo.mjs startet
+    ihn), damit der Rahmen dieselbe Adresse hat und die Buehne vor dem Start
+    den Speicher leeren kann.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RickCV demo stage</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #16191d; }
+      #app { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; }
+      #cursor, #chip, #ring {
+        position: fixed; left: 0; top: 0; pointer-events: none; z-index: 10;
+        will-change: transform;
+      }
+      #cursor { width: 22px; height: 28px; }
+      #chip {
+        display: none; align-items: center; gap: 7px;
+        padding: 6px 11px 6px 8px; border-radius: 8px;
+        background: #fff; color: #22262b;
+        font: 600 13px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+      }
+      #chip b {
+        padding: 2px 5px; border-radius: 4px; background: #c9302c; color: #fff;
+        font-size: 10px; letter-spacing: 0.04em;
+      }
+      #ring {
+        width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%;
+        border: 2px solid rgba(79, 168, 161, 0.95); opacity: 0;
+      }
+      #ring.on { animation: ring 0.45s ease-out; }
+      @keyframes ring {
+        from { opacity: 1; transform: var(--at) scale(0.4); }
+        to { opacity: 0; transform: var(--at) scale(1.3); }
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      //  Ein frischer Besuch: kein gespeichertes Dokument, die Startkarte
+      //  kommt, das Druckhilfe-Fenster auch. Dunkel wie die Bilder im README.
+      [
+        "rickcv.data.v3", "rickcv.data.v2", "rickcv.ui.group", "rickcv.ui.printGuide",
+      ].forEach(function (key) { localStorage.removeItem(key); });
+      localStorage.setItem("rickcv.theme", "dark");
+    </script>
+    <iframe id="app" title="RickCV"></iframe>
+    <script>
+      //  Beim Kodieren braucht die Buehne nur ihre Adresse, nicht den Baukasten.
+      if (location.search !== "?encode") document.getElementById("app").src = "../index.html";
+    </script>
+
+    <svg id="cursor" viewBox="0 0 22 28" aria-hidden="true">
+      <path d="M2 2 L2 22 L7.5 17 L11.5 26 L15 24.5 L11 15.8 L18.5 15.8 Z"
+            fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round" />
+    </svg>
+    <div id="chip"><b>PDF</b><span id="chip-name"></span></div>
+    <div id="ring"></div>
+
+    <script>
+      var cursor = document.getElementById("cursor");
+      var chip = document.getElementById("chip");
+      var ring = document.getElementById("ring");
+
+      window.demo = {
+        //  Zeiger an eine Stelle; die Datei haengt rechts unten daran.
+        pointer: function (x, y) {
+          cursor.style.transform = "translate(" + x + "px," + y + "px)";
+          chip.style.transform = "translate(" + (x + 18) + "px," + (y + 20) + "px)";
+          ring.style.setProperty("--at", "translate(" + x + "px," + y + "px)");
+          ring.style.transform = "translate(" + x + "px," + y + "px)";
+        },
+        chip: function (name) {
+          chip.style.display = name ? "flex" : "none";
+          document.getElementById("chip-name").textContent = name || "";
+        },
+        ring: function () {
+          ring.classList.remove("on");
+          void ring.offsetWidth;
+          ring.classList.add("on");
+        },
+        app: function () {
+          return document.getElementById("app").contentWindow;
+        },
+        //  Mittelpunkt eines Elements im Baukasten, in Koordinaten der Buehne.
+        center: function (selector, index) {
+          var d = demo.app().document;
+          var node = typeof selector === "string"
+            ? d.querySelectorAll(selector)[index || 0] : selector;
+          if (!node) return null;
+          var rect = node.getBoundingClientRect();
+          return { x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + rect.height / 2) };
+        },
+        //  Dasselbe fuer ein Element in der Vorschau: deren Rahmen ist
+        //  verkleinert, der Punkt wird umgerechnet.
+        previewPoint: function (selector, index, dx, dy) {
+          var d = demo.app().document;
+          var frame = d.getElementById("preview-frame");
+          var node = frame.contentDocument.querySelectorAll(selector)[index || 0];
+          if (!node) return null;
+          var outer = frame.getBoundingClientRect();
+          var scale = outer.width / frame.offsetWidth;
+          var rect = node.getBoundingClientRect();
+          return {
+            x: Math.round(outer.left + (rect.left + (dx === undefined ? rect.width / 2 : dx)) * scale),
+            y: Math.round(outer.top + (rect.top + (dy === undefined ? rect.height / 2 : dy)) * scale),
+          };
+        },
+        //  Das Formular sanft so weit rollen, dass ein Element in der Mitte
+        //  steht – wie jemand, der mit dem Mausrad dorthin scrollt.
+        reveal: function (selector, index) {
+          var d = demo.app().document;
+          var node = d.querySelectorAll(selector)[index || 0];
+          if (node) node.scrollIntoView({ block: "center", behavior: "smooth" });
+          return !!node;
+        },
+        //  Dasselbe fuer ein Element, das an seinem Text erkannt wird – eine
+        //  Theme-Karte etwa.
+        revealText: function (selector, text) {
+          var d = demo.app().document;
+          var node = Array.prototype.filter.call(d.querySelectorAll(selector), function (item) {
+            return item.textContent.indexOf(text) !== -1;
+          })[0];
+          if (node) node.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          return !!node;
+        },
+        ready: function () {
+          var d = demo.app().document;
+          return !!(d.readyState === "complete" && d.getElementById("preview-frame") &&
+            d.getElementById("preview-frame").contentDocument.querySelector("h1.name"));
+        },
+      };
+      demo.pointer(1272, 670);
+    </script>
+  </body>
+</html>

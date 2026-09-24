@@ -158,6 +158,40 @@ textarea {
   border-color: var(--ui-accent);
 }
 
+/*  Wer mit der Tastatur unterwegs ist, sieht, wo er ist – deutlich, und nur
+    dann: ein Mausklick hinterlaesst keinen Rahmen. */
+.btn:focus-visible,
+.editor-tab:focus-visible,
+.section > summary:focus-visible,
+.sub-block > summary:focus-visible,
+.list-item-toggle:focus-visible,
+.icon-button:focus-visible,
+.swatch:focus-visible,
+.theme-card:focus-visible,
+.resizer:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+}
+
+/*  Rueckgaengig und Wiederholen gehoeren zusammen und stehen als ein
+    Paar da. */
+.btn-pair {
+  display: inline-flex;
+}
+
+.btn-pair .btn:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.btn-pair .btn:last-child {
+  border-radius: 0 8px 8px 0;
+  margin-left: -1px;
+}
+
+.header-actions .btn-icon {
+  padding: 7px 9px;
+}
+
 .btn-primary {
   background: var(--ui-accent);
   border-color: var(--ui-accent);
@@ -284,6 +318,42 @@ textarea {
   padding-bottom: 30vh;
 }
 
+/*  Startkarte beim ersten Besuch: sagt, dass rechts ein Beispiel steht, und
+    bietet die drei Wege an, anzufangen. */
+.welcome {
+  position: relative;
+  flex-shrink: 0;
+  margin: 12px 12px 4px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--ui-line);
+  border-left: 3px solid var(--ui-accent);
+  border-radius: var(--ui-radius);
+  background: var(--ui-accent-soft);
+}
+
+.welcome-title {
+  margin: 0 28px 6px 0;
+  font-size: 16px;
+}
+
+.welcome-text {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.welcome-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
 .resizer {
   width: 6px;
   cursor: col-resize;
@@ -295,6 +365,68 @@ textarea {
 
 .resizer:hover {
   background: var(--ui-accent-soft);
+}
+
+/* --------------------------------------------------------------------- Reiter */
+
+/*  Vier Reiter ueber dem Formular. Sie bleiben oben stehen, wenn das
+    Formular darunter rollt: man sieht immer, wo man ist. */
+.editor-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 2px;
+  padding: 8px 12px;
+  background: var(--ui-panel);
+  border-bottom: 1px solid var(--ui-line);
+}
+
+/*  Symbol ueber der Beschriftung: so passen auch "Anschreiben" und
+    "Einstellungen" in ein Viertel der Spalte, und die Reiter lassen sich
+    schon am Symbol unterscheiden. */
+.editor-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 4px 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-muted);
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.editor-tab-icon {
+  display: inline-flex;
+}
+
+.editor-tab-icon .rc-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.editor-tab-label {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.editor-tab:hover {
+  background: var(--ui-panel-2);
+  color: var(--ui-text);
+}
+
+.editor-tab[aria-selected="true"] {
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent);
 }
 
 /* ------------------------------------------------------------------ Sektionen */
@@ -318,19 +450,73 @@ textarea {
   display: none;
 }
 
-.section > summary::before {
-  content: "●";
-  color: var(--ui-muted);
-  font-size: 11px;
-  transition: transform 0.15s;
+.section > summary:hover {
+  background: var(--ui-panel-2);
 }
 
-.section[open] > summary::before {
+/*  Ein Pfeil, der sich dreht: zu zeigt er nach rechts, auf nach unten.
+    Vorher stand hier ein Punkt, der sich drehte – und gleich aussah. */
+.section-chevron,
+.list-item-chevron {
+  display: inline-flex;
+  color: var(--ui-muted);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.section-chevron .rc-icon,
+.list-item-chevron .rc-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.section[open] > summary .section-chevron,
+.list-item.is-open .list-item-chevron {
   transform: rotate(90deg);
 }
 
-.section > summary:hover {
-  background: var(--ui-panel-2);
+.section-icon {
+  display: inline-flex;
+  color: var(--ui-accent);
+  flex-shrink: 0;
+}
+
+.section-icon .rc-icon {
+  width: 17px;
+  height: 17px;
+}
+
+.section-title {
+  min-width: 0;
+}
+
+/*  Ein Block, der gerade nicht im Dokument steht. */
+.section.is-hidden .section-title,
+.section.is-hidden .section-icon {
+  opacity: 0.55;
+}
+
+.section-hidden {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ui-muted);
+}
+
+.section-hidden[hidden] {
+  display: none;
+}
+
+.section-hidden .rc-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.section-hidden:not([hidden]) + .section-count {
+  margin-left: 0;
 }
 
 .section-count {
@@ -342,6 +528,16 @@ textarea {
   border: 1px solid var(--ui-line);
   border-radius: 20px;
   padding: 1px 8px;
+}
+
+/*  Ein Abschnitt ohne Auf und Zu: ein fester Kopf ueber den anderen. */
+.section-plain > .section-body {
+  padding: 14px 16px 4px;
+  background: var(--ui-panel-2);
+}
+
+.section-plain .hint:last-child {
+  margin-bottom: 10px;
 }
 
 .section-body {
@@ -372,6 +568,8 @@ textarea {
 .field input[type="number"],
 .field input[type="url"],
 .field input[type="email"],
+.field input[type="tel"],
+.field input[type="search"],
 .field select,
 .field textarea {
   width: 100%;
@@ -499,6 +697,25 @@ textarea {
   flex-wrap: wrap;
 }
 
+/* Bildfeld: Stand, Hochladen, Entfernen */
+.image-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.image-status {
+  flex: 1;
+  min-width: 8em;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.image-status-warn {
+  color: var(--ui-danger);
+}
+
 .swatch {
   width: 22px;
   height: 22px;
@@ -534,32 +751,66 @@ textarea {
 .list-item {
   border: 1px solid var(--ui-line);
   border-radius: var(--ui-radius);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   background: var(--ui-panel-2);
   overflow: hidden;
 }
 
-.list-item > summary {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
-  cursor: pointer;
-  list-style: none;
-  font-size: 13px;
+.list-item.is-open {
+  border-color: color-mix(in oklab, var(--ui-accent), var(--ui-line) 60%);
 }
 
-.list-item > summary::-webkit-details-marker {
-  display: none;
+.list-item-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 6px;
+}
+
+/*  Der ganze Kopf bis zu den Aktionen klappt auf – eine grosse Flaeche,
+    nicht nur der Titel. */
+.list-item-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 4px 9px 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--ui-radius);
+}
+
+.list-item-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .list-item-title {
-  flex: 1;
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
+}
+
+.list-item-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11.5px;
+  color: var(--ui-muted);
+}
+
+.list-item-sub:empty {
+  display: none;
 }
 
 .list-item-badge {
@@ -570,15 +821,65 @@ textarea {
 }
 
 .list-item-body {
-  padding: 10px;
+  padding: 12px 10px 4px;
   border-top: 1px solid var(--ui-line);
   background: var(--ui-panel);
 }
 
+.list-item-body[hidden] {
+  display: none;
+}
+
 .list-actions {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   flex-shrink: 0;
+}
+
+/*  Die Aktionen sind leise, bis man den Eintrag beruehrt – acht Eintraege
+    mit je vier Knoepfen waeren sonst vor allem Knoepfe. Mit der Tastatur
+    und auf Beruehrungsbildschirmen bleiben sie sichtbar. */
+.list-actions .btn {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ui-muted);
+  padding: 5px;
+  min-width: 0;
+}
+
+.list-actions .btn .rc-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.list-actions .btn:hover:not(:disabled) {
+  background: var(--ui-panel);
+  border-color: var(--ui-line);
+  color: var(--ui-text);
+}
+
+.list-actions .btn-danger:hover:not(:disabled) {
+  color: var(--ui-danger);
+  border-color: var(--ui-danger);
+}
+
+.list-actions .btn:disabled {
+  opacity: 0.25;
+}
+
+@media (hover: hover) {
+  .list-item:not(:hover):not(:focus-within) .list-actions .btn {
+    opacity: 0.35;
+  }
+}
+
+.btn-add {
+  gap: 4px;
+}
+
+.btn-add .rc-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .add-row {
@@ -707,15 +1008,24 @@ body.dragging-file .drop-hint {
   background: var(--ui-bg);
 }
 
+/*  Eine ruhige Werkzeugzeile ueber dem Blatt, so breit wie die Vorschau.
+    Frueher war sie ein schmaler Kasten mit Hintergrund und Unterkante, der
+    mittig unter der Kopfzeile hing – wie ein Reiter, der sich geloest hat. */
 .preview-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--ui-line);
-  background: var(--ui-panel);
+  padding: 8px 16px 0;
   font-size: 13px;
-  margin: auto;
+  color: var(--ui-muted);
+}
+
+.preview-bar select {
+  padding: 3px 6px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-panel);
+  color: var(--ui-text);
 }
 
 /*  In der Kopfzeile ist die Leiste kein eigenes Band mehr, sondern eine
@@ -771,7 +1081,11 @@ body.dragging-file .drop-hint {
   border-radius: 999px;
   box-shadow: var(--ui-shadow);
   opacity: 0;
-  transition: opacity 0.2s, transform 0.2s;
+  /*  Unsichtbar heisst auch: nicht erreichbar. Mit opacity allein blieb
+      der Knopf "Rueckgaengig" eines verblassten Hinweises per Tab
+      anwaehlbar. visibility wechselt erst nach dem Ausblenden. */
+  visibility: hidden;
+  transition: opacity 0.2s, transform 0.2s, visibility 0s 0.2s;
   pointer-events: none;
   z-index: 100;
   font-size: 13px;
@@ -779,6 +1093,8 @@ body.dragging-file .drop-hint {
 
 .toast.visible {
   opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s, transform 0.2s, visibility 0s;
   transform: translateX(-50%) translateY(0);
   /*  Mit einem Handgriff darin will der Hinweis angeklickt werden.  */
   pointer-events: auto;
@@ -1028,8 +1344,11 @@ body.dragging-file .drop-hint {
     right: 0;
     z-index: 25;
     margin: 0;
+    padding: 8px 14px;
     flex-wrap: wrap;
     row-gap: 6px;
+    background: var(--ui-panel);
+    border-bottom: 1px solid var(--ui-line);
     transition: transform 200ms ease;
   }
 
@@ -1071,8 +1390,66 @@ body.dragging-file .drop-hint {
     color: #fff;
   }
 
-  .header-actions .btn span.label {
+  /*  Rueckgaengig, Wiederholen und das Menue bleiben quadratisch; die
+      beschrifteten Knoepfe teilen sich den Rest der Zeile. */
+  .header-actions .btn-pair,
+  .header-actions #btn-more {
+    flex: none;
+  }
+
+  /*  Die Reiter kleben unter der Kopfzeile – und rutschen nach oben, wenn
+      sie beim Scrollen weicht. Sonst blieben sie in der Luft haengen, dort,
+      wo eben noch die Kopfzeile war. */
+  .editor-tabs {
+    transition: top 200ms ease;
+  }
+
+  body.chrome-away .editor-tabs {
+    top: calc(-1 * var(--chrome-h, 0px));
+  }
+}
+
+/*  Auf dem Telefon tragen Importieren und Exportieren nur ihr Symbol. Die
+    Beschriftung bleibt fuer Vorlesesoftware im Dokument. */
+@media (max-width: 560px) {
+  /*  Die Symbolknoepfe teilen sich die erste Zeile; "Als PDF speichern"
+      bekommt die zweite ganz – es ist der eine Knopf, den man am Ende
+      sucht. */
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  /*  Auf dem Telefon zaehlt jede Zeile. Die Marke weicht, damit Sprache,
+      Verlauf und Dateiaktionen in eine passen; wo man ist, sagen der Titel
+      des Tabs und die Startkarte. */
+  .app-header .brand {
     display: none;
+  }
+
+  .header-actions #btn-print {
+    flex: 1 1 100%;
+  }
+
+  #btn-import .btn-label,
+  #btn-export .btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .header-actions .btn#btn-import,
+  .header-actions .btn#btn-export {
+    flex: none;
+  }
+
+  .editor-tab {
+    font-size: 12.5px;
+    padding: 7px 2px;
   }
 }
 
@@ -1127,6 +1504,9 @@ body.dragging-file .drop-hint {
 }
 
 .sub-block > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 10px;
   cursor: pointer;
   font-size: 13px;
@@ -1138,14 +1518,21 @@ body.dragging-file .drop-hint {
   display: none;
 }
 
+/*  Derselbe Pfeil wie an den Abschnitten, als Rahmenecke gezeichnet. */
 .sub-block > summary::before {
-  content: "● ";
-  color: var(--ui-muted);
-  font-size: 10px;
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin: 0 3px;
+  border-right: 2px solid var(--ui-muted);
+  border-bottom: 2px solid var(--ui-muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+  flex-shrink: 0;
 }
 
 .sub-block[open] > summary::before {
-  content: "● ";
+  transform: rotate(45deg);
 }
 
 .sub-block-body {
@@ -1359,6 +1746,10 @@ body.picker-open {
 }
 
 /* ---------------------------------------------------------- Seitenzahl */
+
+.page-count:empty {
+  display: none;
+}
 
 .page-count {
   font-size: 12px;
@@ -2100,4 +2491,89 @@ textarea.theme-editor {
 .theme-hook small {
   font-size: 11px;
   color: var(--ui-muted);
+}
+
+/* ------------------------------------------------------------- Druckhilfe */
+
+.print-steps {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  background: var(--ui-panel-2);
+  font-size: 13.5px;
+}
+
+.print-steps dt {
+  color: var(--ui-muted);
+}
+
+.print-steps dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.print-guide-again {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ui-muted);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------ Weniger Bewegung */
+
+/*  Wer im System weniger Bewegung eingestellt hat, bekommt sie hier auch:
+    Hinweise, Reiter, Pfeile und die Schiene auf dem Telefon springen, statt
+    zu gleiten. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------ Rueckfragen */
+
+.rc-dialog-confirm .imp-panel {
+  width: min(440px, 100%);
+}
+
+.rc-dialog-message {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.btn-primary-danger,
+.btn-primary-danger:hover {
+  background: var(--ui-danger);
+  border-color: var(--ui-danger);
+  color: #fff;
+  color: light-dark(#fff, #16191d);
+}
+
+/* ------------------------------------------------------- Aus der Vorschau */
+
+/*  Wer aus der Vorschau hierher springt, sieht kurz, wo er gelandet ist. */
+.flash {
+  animation: rc-flash 1.6s ease-out;
+  border-radius: 8px;
+}
+
+@keyframes rc-flash {
+  0%,
+  35% {
+    box-shadow: 0 0 0 3px var(--ui-panel), 0 0 0 5px var(--ui-accent);
+  }
+  100% {
+    box-shadow: 0 0 0 3px transparent, 0 0 0 5px transparent;
+  }
 }

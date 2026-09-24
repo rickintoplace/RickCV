@@ -45,7 +45,9 @@ tell them: **Importieren / Import → paste the text**. The result is the same.
 
 ## The document
 
-Everything is optional; whatever is missing, RickCV fills with defaults. This
+Everything is optional, `version` included; whatever is missing, RickCV fills with
+defaults, and a value it does not know (a colour that is not a colour, an option
+that does not exist) falls back to the default too. This
 example is complete enough for a real application:
 
 ```json
@@ -119,10 +121,10 @@ Field by field:
 | `events[].sectionId` | `"experience"`, `"education"` or `"volunteer"` |
 | `events[].start` / `end` | `"MM/YYYY"` or `"YYYY"`; `present: true` means "to this day" |
 | `events[].dateMode` | `"auto"` (default), `"range"`, `"start"`, `"none"` — for entries without a period |
-| `events[].description` | paragraphs, as a list of strings |
+| `events[].description` | paragraphs, as a list of strings (a single string is split at its line breaks) |
 | `events[].list` | bullet points |
 | `skills.items[].rank` | 0 to 5; **0 means "not stated"** and is the honest choice when you do not know |
-| `photo.src` | a `data:` URI; please keep it under a megabyte |
+| `photo.src` | a `data:` URI; please keep it under a megabyte. Web addresses (`https://…`) are not loaded — neither here nor in `projects.items[].img` or `coverLetter.signatureImg` |
 
 German documents use German headings by default (`locale: "de"`), including the
 cover letter laid out to DIN 5008 — the norm German employers expect.
@@ -162,7 +164,8 @@ Do not send it anywhere else.
 
 * **No invisible keywords.** RickCV can emit a plain-text version for applicant
   tracking systems, but text hidden behind the layout counts as manipulation
-  there. Leave `ats.mode` at `"off"` or `"appendix"`.
+  there. Leave `ats.mode` at `"off"` or `"appendix"` — an import switches
+  `"hidden"` off anyway and tells the person so.
 * **No invented stations, grades or self-assessments.** If you do not know a
   skill level, write `"rank": 0`.
 * **You cannot produce the PDF yourself.** Printing happens in the person's

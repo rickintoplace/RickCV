@@ -24,6 +24,7 @@ import vm from "node:vm";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { findChromium, browserRequired } from "./chromium.mjs";
 
 const run = promisify(execFile);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -36,20 +37,10 @@ const ok = (cond, label, extra) => {
   else { fails++; console.log("  FAIL " + label + (extra === undefined ? "" : " → " + extra)); }
 };
 
-function browser() {
-  for (const name of ["chromium", "chromium-browser", "google-chrome", "google-chrome-stable"]) {
-    const found = process.env.PATH.split(":")
-      .map((dir) => path.join(dir, name))
-      .find((file) => fs.existsSync(file));
-    if (found) return found;
-  }
-  return null;
-}
-
 const TYPES = {
   ".html": "text/html", ".css": "text/css", ".js": "text/javascript",
   ".woff2": "font/woff2", ".webp": "image/webp", ".png": "image/png",
-  ".svg": "image/svg+xml", ".json": "application/json",
+  ".svg": "image/svg+xml", ".json": "application/json", ".jpg": "image/jpeg",
 };
 
 function serve() {
@@ -96,13 +87,15 @@ function sandboxWith(files) {
   return box;
 }
 
-const chrome = browser();
+const chrome = findChromium();
 const hasPdfjs = fs.existsSync(path.join(root, "vendor/pdfjs/pdf.min.js"));
 
 console.log("\n— Gedruckt und wieder eingelesen —");
 
 if (!chrome || !hasPdfjs) {
-  console.log(chrome ? "  übersprungen (vendor/pdfjs/ fehlt)" : "  übersprungen (kein Chromium gefunden)");
+  const why = chrome ? "vendor/pdfjs/ fehlt" : "kein Chromium gefunden – CHROME=… setzen";
+  if (browserRequired()) ok(false, "Rundlauf möglich", why);
+  else console.log(`  übersprungen (${why})`);
 } else {
   const box = sandboxWith([
     "vendor/pdfjs/pdf.worker.min.js", "vendor/pdfjs/pdf.min.js",

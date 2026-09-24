@@ -14,6 +14,15 @@
 <html lang="de">
   <head>
     <meta charset="utf-8" />
+    <!--  Der Baukasten laedt nur, was neben ihm liegt: Skripte, Schriften,
+          Bilder (auch als data:) und den Vorschaurahmen. Ein Skript, das
+          ueber ein importiertes Dokument hereinkaeme, liefe nicht, und
+          nichts geht an fremde Adressen. Der PDF-Import startet seinen
+          Arbeitsprozess aus vendor/pdfjs/. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-src 'self'; base-uri 'none'; form-action 'none'"
+    />
     <title>RickCV | Resume builder</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
@@ -46,25 +55,35 @@
 
           <span class="header-divider" aria-hidden="true"></span>
 
-          <button class="btn btn-icon" id="btn-undo" type="button" data-icon="undo" disabled>
-            <span class="btn-glyph" aria-hidden="true"></span>
-          </button>
-          <button class="btn" id="btn-example" data-icon="sparkles">
-            <span class="btn-glyph" aria-hidden="true"></span><span class="btn-label">Beispiel</span>
-          </button>
-          <button class="btn" id="btn-reset" data-icon="file-plus">
-            <span class="btn-glyph" aria-hidden="true"></span><span class="btn-label">Neu</span>
-          </button>
-          <button class="btn" id="btn-import" data-icon="upload">
+          <!--  Rueckgaengig und Wiederholen: nur Symbole, der Name steht im
+                Titel und in aria-label (applyLocale). -->
+          <div class="btn-pair" role="group" id="history-group">
+            <button class="btn btn-icon" id="btn-undo" type="button" data-icon="undo" disabled>
+              <span class="btn-glyph" aria-hidden="true"></span>
+            </button>
+            <button class="btn btn-icon" id="btn-redo" type="button" data-icon="redo" disabled>
+              <span class="btn-glyph" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <span class="header-divider" aria-hidden="true"></span>
+
+          <!--  Die Dateiaktionen. Was selten gebraucht wird – ein leeres
+                Dokument, das Beispiel, ein eigener Tab –, steht im Menue
+                hinter "…", damit die Zeile nicht aus sieben gleich lauten
+                Knoepfen besteht. -->
+          <button class="btn" id="btn-import" type="button" data-icon="upload">
             <span class="btn-glyph" aria-hidden="true"></span><span class="btn-label">Importieren</span>
           </button>
-          <button class="btn" id="btn-export" data-icon="download" aria-haspopup="menu">
-            <span class="btn-glyph" aria-hidden="true"></span><span class="btn-label">Speichern</span>
+          <button class="btn" id="btn-export" type="button" data-icon="download"
+                  aria-haspopup="menu" aria-expanded="false">
+            <span class="btn-glyph" aria-hidden="true"></span><span class="btn-label">Exportieren</span>
           </button>
-          <button class="btn" id="btn-open" data-icon="external-link">
-            <span class="btn-glyph" aria-hidden="true"></span><span class="btn-label">Neuer Tab</span>
+          <button class="btn btn-icon" id="btn-more" type="button" data-icon="more"
+                  aria-haspopup="menu" aria-expanded="false">
+            <span class="btn-glyph" aria-hidden="true"></span>
           </button>
-          <button class="btn btn-primary" id="btn-print" data-icon="printer">
+          <button class="btn btn-primary" id="btn-print" type="button" data-icon="printer">
             <span class="btn-glyph" aria-hidden="true"></span><span class="btn-label">Als PDF speichern</span>
           </button>
         </div>
@@ -83,14 +102,18 @@
             sich verschieben – dazu muss der Rahmen sie beschneiden. -->
       <div class="app-track">
         <aside class="editor-pane">
-          <div class="editor" id="editor"></div>
+          <!--  Vier Reiter statt sechzehn gleichrangiger Abschnitte: was im
+                Lebenslauf steht, das Anschreiben, das Aussehen und der Rest.
+                builder.js baut sie, damit sie mit der Sprache wechseln. -->
+          <div class="editor-tabs" id="editor-tabs" role="tablist"></div>
+          <div class="editor" id="editor" role="tabpanel"></div>
 
           <footer class="app-footer">
             <span class="app-footer-note" id="footer-note"
               >Alle Daten bleiben in deinem Browser.</span
             >
 
-            <nav class="app-footer-links" aria-label="Rechtliches und Quellen">
+            <nav class="app-footer-links" id="footer-nav" aria-label="Rechtliches und Quellen">
               <a href="legal.html#impressum" id="footer-imprint">Impressum</a>
               <a href="legal.html#datenschutz" id="footer-privacy">Datenschutz</a>
               <a
@@ -139,6 +162,9 @@
     <script src="js/i18n.js"></script>
     <script src="js/icon-data.js"></script>
     <script src="js/icons.js"></script>
+    <script src="js/ui-icons.js"></script>
+    <script src="js/focus.js"></script>
+    <script src="js/dialog.js"></script>
     <script src="js/icon-picker.js"></script>
     <script src="js/theme-data.js"></script>
     <script src="js/themes.js"></script>
@@ -154,6 +180,7 @@
     <script src="js/pdf-import.js"></script>
     <script src="js/docx-import.js"></script>
     <script src="js/import-dialog.js"></script>
+    <script src="js/history.js"></script>
     <script src="js/builder.js"></script>
   </body>
 </html>

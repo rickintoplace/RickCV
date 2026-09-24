@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Projektbild "aufdiepalme.de – Baumschule fuer Problempflanzen".
+       Eigene Zeichnung fuer RickCV, CC0. Im Dokument erscheint es als
+       Kreis, deshalb steht alles Wichtige in der Mitte. -->
+  <rect width="400" height="400" fill="#f3e7c9"/>
+  <circle cx="290" cy="110" r="46" fill="#f7c55f"/>
+  <path d="M0 300 Q100 270 200 292 T400 286 V400 H0 Z" fill="#e3cf9f"/>
+
+  <!-- Stamm, leicht beleidigt gebogen -->
+  <path d="M192 300 Q176 230 200 150" fill="none" stroke="#8a5a36" stroke-width="22" stroke-linecap="round"/>
+  <path d="M186 272 h18 M183 244 h18 M187 216 h17 M193 188 h15" stroke="#6f4528" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Wedel -->
+  <g fill="#3f8f5a">
+    <path d="M200 150 Q150 110 88 128 Q140 128 196 162 Z"/>
+    <path d="M200 150 Q170 84 118 70 Q160 100 192 158 Z"/>
+    <path d="M200 150 Q214 82 262 62 Q226 100 206 158 Z"/>
+    <path d="M200 150 Q256 112 320 132 Q262 130 206 164 Z"/>
+    <path d="M200 150 Q246 166 282 214 Q238 180 202 164 Z"/>
+    <path d="M200 150 Q156 166 120 212 Q162 180 198 164 Z"/>
+  </g>
+  <g fill="none" stroke="#2f6f45" stroke-width="3" stroke-linecap="round">
+    <path d="M198 154 Q150 124 100 128"/>
+    <path d="M198 152 Q170 100 124 76"/>
+    <path d="M202 152 Q224 98 256 68"/>
+    <path d="M204 154 Q254 126 308 132"/>
+  </g>
+  <circle cx="192" cy="160" r="10" fill="#7a4e2c"/>
+  <circle cx="208" cy="162" r="9" fill="#6a4226"/>
+
+  <!-- Topf -->
+  <path d="M132 292 H268 L252 372 H148 Z" fill="#c8643b"/>
+  <rect x="124" y="280" width="152" height="26" rx="8" fill="#d97a4f"/>
+  <path d="M150 330 H250" stroke="#b5552f" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Das Schild: eine Problempflanze eben -->
+  <path d="M244 300 V252" stroke="#8a6a48" stroke-width="5" stroke-linecap="round"/>
+  <rect x="222" y="226" width="54" height="32" rx="5" fill="#ffffff" stroke="#8a6a48" stroke-width="3"/>
+  <path d="M236 236 Q249 250 262 236" fill="none" stroke="#c8643b" stroke-width="4" stroke-linecap="round" transform="rotate(180 249 243)"/>
+  <circle cx="238" cy="236" r="3" fill="#33333b"/>
+  <circle cx="260" cy="236" r="3" fill="#33333b"/>
+</svg>

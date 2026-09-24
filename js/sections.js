@@ -147,7 +147,13 @@
       var controls = el("div", "photo-controls");
       var image = null;
 
-      if (state.photo.src) {
+      //  Ein Foto von einer Adresse im Netz, aus einem aelteren Dokument:
+      //  RickCV laedt es nicht (siehe RickCVModel.isLocalImage). Lieber das
+      //  sagen als einen leeren Rahmen zeigen.
+      var remote = state.photo.src && !Model.isLocalImage(state.photo.src);
+      if (remote) body.appendChild(F.note(t("remotePhoto"), "warn"));
+
+      if (state.photo.src && !remote) {
         image = el("img");
         image.src = state.photo.src;
         image.alt = "";
@@ -273,12 +279,6 @@
       buttons.appendChild(remove);
       body.appendChild(buttons);
 
-      var url = F.text("photo.src", t("photoUrl"), "https://…");
-      url.querySelector("input").addEventListener("change", function () {
-        refreshSection("photo");
-      });
-      body.appendChild(url);
-
       sync();
     }
 
@@ -337,14 +337,20 @@
             global.RickCVToast(t("lastCategory"));
             return false;
           }
-          if (!global.confirm(t("categoryHasEntries").replace("{n}", used.length))) return false;
-          // Eintraege nicht wegwerfen, sondern in die erste andere Kategorie schieben
-          var fallback = state.sections.filter(function (other) {
-            return other.id !== section.id;
-          })[0];
-          used.forEach(function (event) { event.sectionId = fallback.id; });
-          setTimeout(function () { refreshSection("events"); }, 0);
-          return true;
+          return global.RickCVDialog.confirm({
+            title: t("categoryRemoveTitle"),
+            message: t("categoryHasEntries").replace("{n}", used.length),
+            confirm: t("categoryRemoveGo"), cancel: t("impCancel"), danger: true,
+          }).then(function (yes) {
+            if (!yes) return false;
+            // Eintraege nicht wegwerfen, sondern in die erste andere Kategorie schieben
+            var fallback = state.sections.filter(function (other) {
+              return other.id !== section.id;
+            })[0];
+            used.forEach(function (event) { event.sectionId = fallback.id; });
+            setTimeout(function () { refreshSection("events"); }, 0);
+            return true;
+          });
         },
         body: function (container, index, path, refresh) {
           var title = F.text(path + ".title", t("headline"));
@@ -378,25 +384,41 @@
           event.icon = Model.icon(state.style.iconSet, "briefcase");
           return event;
         },
+        //  Die Reihenfolge im Dokument ergibt sich aus den Daten – eine
+        //  Station von Hand nach oben zu schieben, aenderte dort nichts. Also
+        //  gibt es die Pfeile hier nicht, und die Liste steht so da, wie das
+        //  Dokument sie zeigt: neueste zuerst.
+        movable: false,
+        order: function (list) {
+          return list.map(function (event, index) { return index; }).sort(function (a, b) {
+            return Model.compareStart(list[b], list[a]) || a - b;
+          });
+        },
         title: function (event) { return event.title; },
-        badge: function (event) {
+        subtitle: function (event) {
+          var section = state.sections.filter(function (item) {
+            return item.id === event.sectionId;
+          })[0];
           var mode = event.dateMode || "auto";
-          if (mode === "none") return "";
-          if (!event.start && !event.end && !event.present) return "";
-          if (mode === "start" || (mode === "auto" && !event.end && !event.present)) {
-            return event.start;
+          var when = "";
+          if (mode !== "none" && (event.start || event.end || event.present)) {
+            when = mode === "start" || (mode === "auto" && !event.end && !event.present)
+              ? event.start
+              : event.start + " – " + (event.present ? t("today") : event.end);
           }
-          return event.start + " – " + (event.present ? t("today") : event.end);
+          return [section ? section.title : "", when].filter(Boolean).join(" · ");
         },
         body: function (container, index, path, refresh) {
           var title = F.text(path + ".title", t("title"));
           title.querySelector("input").addEventListener("input", refresh);
           container.appendChild(title);
 
-          container.appendChild(F.select(path + ".sectionId", t("category"),
+          var category = F.select(path + ".sectionId", t("category"),
             state.sections.map(function (section) {
               return { value: section.id, label: section.title };
-            })));
+            }));
+          category.querySelector("select").addEventListener("change", refresh);
+          container.appendChild(category);
 
           var start = F.text(path + ".start", t("from"), "07/2019");
           var end = F.text(path + ".end", t("to"), "09/2021");
@@ -656,8 +678,15 @@
 
     /* -------------------------------------------------------- Anschreiben */
 
-    function buildLetter(body) {
+    //  Das Anschreiben hat einen eigenen Reiter und darin mehrere
+    //  Abschnitte, so wie der Lebenslauf: wer den Text schreibt, braucht die
+    //  Einstellungen fuer Folgeseiten nicht im Blick.
+    function buildLetterIntro(body) {
       body.appendChild(F.toggle("settings.showCoverLetter", t("createLetter")));
+      body.appendChild(F.hint(t("letterIntroHint")));
+    }
+
+    function buildLetterAddress(body) {
       body.appendChild(F.textarea("coverLetter.recipient", t("recipient"), 4, t("recipientPlaceholder")));
       body.appendChild(F.row(
         F.text("settings.place", t("place"), t("footerDatePlaceholder")),
@@ -665,6 +694,9 @@
       ));
       body.appendChild(F.hint(t("footerDateHint")));
       body.appendChild(F.hint(t("dateSharedHint")));
+    }
+
+    function buildLetterText(body) {
       body.appendChild(F.text("coverLetter.subject", t("subject")));
       body.appendChild(F.text("coverLetter.salutation", t("salutation")));
       body.appendChild(F.listEditor({
@@ -683,14 +715,10 @@
         },
       }));
       body.appendChild(F.text("coverLetter.closing", t("closing")));
-      body.appendChild(F.imageField("coverLetter.signatureImg", t("signature")));
-      body.appendChild(F.range("coverLetter.signatureHeight", t("signatureHeight"), 1, 5, 0.1, " " + t("linesUnit")));
       body.appendChild(F.select("settings.alignText", t("textAlign"), [
         { value: "left", label: t("alignLeft") },
         { value: "justify", label: t("alignJustify") },
       ]));
-
-      body.appendChild(el("hr"));
 
       //  Die Warnung steht immer im Markup und wird vom Baukasten ein- und
       //  ausgeblendet, sobald die Vorschau die Seitenzahl meldet. Sie neu zu
@@ -699,36 +727,35 @@
       warn.id = "letter-length-warn";
       warn.hidden = true;
       body.appendChild(warn);
+    }
 
-      //  Wieviele Blaetter es werden, entscheidet der Text. Einzustellen
-      //  bleibt nur, wie die Folgeblaetter aussehen – deshalb ein eigener,
-      //  zugeklappter Block statt vier Feldern im Weg.
-      var letterPages = el("details", "sub-block");
-      letterPages.appendChild(el("summary", null, t("letterPagesBlock")));
-      var letterBody = el("div", "sub-block-body");
+    function buildLetterSignature(body) {
+      body.appendChild(F.imageField("coverLetter.signatureImg", t("signature")));
+      body.appendChild(F.range("coverLetter.signatureHeight", t("signatureHeight"), 1, 5, 0.1,
+        " " + t("linesUnit")));
+    }
 
-      letterBody.appendChild(F.hint(t("letterPagesHint")));
-      letterBody.appendChild(F.toggle("settings.letterPages.repeatHeader",
-        t("letterRepeatHeader")));
-      letterBody.appendChild(F.hint(t("letterRepeatHeaderHint")));
+    //  Wieviele Blaetter es werden, entscheidet der Text. Einzustellen
+    //  bleibt nur, wie die Folgeblaetter aussehen.
+    function buildLetterPages(body) {
+      body.appendChild(F.hint(t("letterPagesHint")));
+      body.appendChild(F.toggle("settings.letterPages.repeatHeader", t("letterRepeatHeader")));
+      body.appendChild(F.hint(t("letterRepeatHeaderHint")));
 
       var numbers = F.toggle("settings.letterPages.pageNumbers", t("letterPageNumbers"));
       numbers.querySelector("input").addEventListener("change", function () {
-        setTimeout(function () { refreshSection("letter"); }, 0);
+        setTimeout(function () { refreshSection("letterPages"); }, 0);
       });
-      letterBody.appendChild(numbers);
-      letterBody.appendChild(F.hint(t("letterPageNumbersHint")));
+      body.appendChild(numbers);
+      body.appendChild(F.hint(t("letterPageNumbersHint")));
 
       //  Die Beschriftung steht nur zur Wahl, wenn es ueberhaupt eine
       //  Seitenzahl gibt.
       if (state.settings.letterPages.pageNumbers) {
-        letterBody.appendChild(F.text("settings.letterPages.numberFormat",
+        body.appendChild(F.text("settings.letterPages.numberFormat",
           t("letterNumberFormat"), "Seite {page} von {pages}"));
-        letterBody.appendChild(F.hint(t("letterNumberFormatHint")));
+        body.appendChild(F.hint(t("letterNumberFormatHint")));
       }
-
-      letterPages.appendChild(letterBody);
-      body.appendChild(letterPages);
     }
 
     /* -------------------------------------------------------------- Design */
@@ -1244,32 +1271,64 @@
 
     /* ------------------------------------------------------------- Register */
 
+    //  group: auf welchem Reiter der Abschnitt steht. icon: ein Name aus dem
+    //  Lucide-Katalog. hidden: ob der Block gerade nicht im Dokument steht –
+    //  die Kopfzeile des Abschnitts sagt es, ohne dass man ihn aufklappen muss.
+    function off(block) {
+      return function () { return !block().show; };
+    }
+
     return [
-      { id: "person", title: t("secPerson"), open: true, build: buildPerson },
-      { id: "photo", title: t("secPhoto"), build: buildPhoto },
-      { id: "profile", title: t("secProfile"), build: buildProfile },
-      { id: "events", title: t("secTimeline"), build: buildTimeline,
-        count: function () { return state.events.length; } },
-      { id: "skills", title: t("secSkills"), build: buildSkills,
-        count: function () { return state.skills.items.length; } },
-      { id: "languages", title: t("secLanguages"), build: buildLanguages,
-        count: function () { return state.languages.items.length; } },
-      { id: "interests", title: t("secInterests"), build: buildInterests,
-        count: function () { return state.interests.items.length; } },
-      { id: "mobility", title: t("secMobility"), build: buildMobility },
-      { id: "projects", title: t("secProjects"), build: buildProjects,
-        count: function () { return state.projects.items.length; } },
-      { id: "references", title: t("secReferences"), build: buildReferences,
-        count: function () { return state.references.items.length; } },
-      { id: "footer", title: t("secFooter"), build: buildFooter,
+      { id: "person", group: "resume", icon: "user-round", title: t("secPerson"), open: true,
+        build: buildPerson },
+      { id: "photo", group: "resume", icon: "image", title: t("secPhoto"), build: buildPhoto,
+        hidden: function () { return !state.photo.show || !state.photo.src; } },
+      { id: "profile", group: "resume", icon: "file-text", title: t("secProfile"),
+        build: buildProfile, hidden: off(function () { return state.profile; }) },
+      { id: "events", group: "resume", icon: "briefcase", title: t("secTimeline"),
+        build: buildTimeline, count: function () { return state.events.length; } },
+      { id: "skills", group: "resume", icon: "star", title: t("secSkills"), build: buildSkills,
+        count: function () { return state.skills.items.length; },
+        hidden: off(function () { return state.skills; }) },
+      { id: "languages", group: "resume", icon: "languages", title: t("secLanguages"),
+        build: buildLanguages, count: function () { return state.languages.items.length; },
+        hidden: off(function () { return state.languages; }) },
+      { id: "interests", group: "resume", icon: "puzzle", title: t("secInterests"),
+        build: buildInterests, count: function () { return state.interests.items.length; },
+        hidden: off(function () { return state.interests; }) },
+      { id: "mobility", group: "resume", icon: "car-front", title: t("secMobility"),
+        build: buildMobility,
+        hidden: function () { return !state.mobility.show && !state.mobilitySB.show; } },
+      { id: "projects", group: "resume", icon: "rocket", title: t("secProjects"),
+        build: buildProjects, count: function () { return state.projects.items.length; },
+        hidden: off(function () { return state.projects; }) },
+      { id: "references", group: "resume", icon: "users", title: t("secReferences"),
+        build: buildReferences, count: function () { return state.references.items.length; },
+        hidden: off(function () { return state.references; }) },
+      { id: "footer", group: "resume", icon: "link", title: t("secFooter"), build: buildFooter,
         count: function () {
           return state.footers.left.links.length + state.footers.right.links.length;
         } },
-      { id: "letter", title: t("secLetter"), build: buildLetter },
-      { id: "design", title: t("secDesign"), build: buildDesign },
-      { id: "theme", title: t("secTheme"), build: buildTheme },
-      { id: "ats", title: t("secAts"), build: buildAts },
-      { id: "options", title: t("secOptions"), build: buildOptions },
+      //  plain: kein Auf- und Zuklappen – der Schalter, ob es ueberhaupt ein
+      //  Anschreiben gibt, steht immer sichtbar ueber den Abschnitten.
+      { id: "letter", group: "letter", plain: true, title: t("secLetter"), build: buildLetterIntro },
+      { id: "letterAddress", group: "letter", icon: "send", title: t("secLetterAddress"),
+        open: true, build: buildLetterAddress },
+      { id: "letterText", group: "letter", icon: "file-text", title: t("secLetterText"),
+        open: true, build: buildLetterText,
+        count: function () { return state.coverLetter.paragraphs.filter(function (text) {
+          return String(text || "").trim();
+        }).length; } },
+      { id: "letterSignature", group: "letter", icon: "pen-tool", title: t("secLetterSignature"),
+        build: buildLetterSignature },
+      { id: "letterPages", group: "letter", icon: "layers", title: t("secLetterPages"),
+        build: buildLetterPages },
+      { id: "theme", group: "design", icon: "shapes", title: t("secTheme"), open: true,
+        build: buildTheme },
+      { id: "design", group: "design", icon: "palette", title: t("secDesign"), build: buildDesign },
+      { id: "options", group: "settings", icon: "settings", title: t("secOptions"), open: true,
+        build: buildOptions },
+      { id: "ats", group: "settings", icon: "type", title: t("secAts"), build: buildAts },
     ];
   }
 

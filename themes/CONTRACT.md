@@ -63,6 +63,12 @@ own name does not need to appear in the selector.
 
 Every block also carries `.resume_item`, every block heading `.resume_title`.
 
+Inside `[data-block="skills"]`, each skill is a `.skills` with `.skill-description`
+and `.rank`. A skill whose name would wrap in its column carries `[data-wide]` —
+the renderer measures that — and by default spans the full row. Likewise a language bar whose
+level does not fit into its fill carries `[data-level="outside"]`; the level then sits just
+behind the fill, in the empty part of the bar.
+
 Further sheets look the same but carry `data-page="2"`, `"3"` … — a hook if you
 want to set them differently — plus `[data-sidebar="none"]` on the sheet when
 follow-up sheets are set to run full width. A repeated letterhead also carries

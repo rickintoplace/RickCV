@@ -665,6 +665,10 @@ if (!fs.existsSync(pdfLib)) {
   try {
     const { state: ds, parsed } = await readPdf("demo-cv.pdf");
     ok(ds.contact.name === "Nora Feldkamp", "Name", ds.contact.name);
+    //  Gesperrt gesetzt: zwischen den Buchstaben Abstand, zwischen den
+    //  Woertern ein Leerzeichen. Beim Zusammenziehen bleibt die Wortgrenze.
+    ok(/^backend engineer$/i.test(ds.contact.role), "gesperrte Rolle behält ihre Wortgrenze",
+       ds.contact.role);
     ok(ds.events.length === 6, "alle sechs Stationen", ds.events.length);
     ok(ds.events.some((e) => e.title === "Software Developer"),
        "ein Stationstitel, der wie eine Überschrift klingt, bleibt eine Station",

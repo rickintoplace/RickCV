@@ -135,7 +135,7 @@
 
       // Neueste zuerst – das erwartete Format fuer Lebenslaeufe.
       events = events.slice().sort(function (a, b) {
-        return compareDate(b.start, a.start);
+        return global.RickCVModel.compareStart(b, a);
       });
 
       add(h(role), events.map(function (event) {
@@ -180,12 +180,6 @@
     }
 
     return blocks;
-  }
-
-  function compareDate(a, b) {
-    var pa = String(a || "").split("/");
-    var pb = String(b || "").split("/");
-    return (Number(pa[1] || 0) * 12 + Number(pa[0] || 0)) - (Number(pb[1] || 0) * 12 + Number(pb[0] || 0));
   }
 
   /* Reiner Text – das ist die Fassung, die der Nutzer im Editor sieht. */

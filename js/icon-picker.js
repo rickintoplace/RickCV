@@ -17,6 +17,9 @@
   var activeSet = "lucide";
   var onPick = null;
   var lastFocused = null;
+  var release = null;   // gibt die Seite hinter dem Dialog wieder frei
+  var panel = null;
+  var closeButton = null;
   var translate = function (key) { return key; };
 
   function setTranslator(fn) {
@@ -44,7 +47,7 @@
     overlay.setAttribute("aria-modal", "true");
     overlay.hidden = true;
 
-    var panel = el("div", "picker-panel");
+    panel = el("div", "picker-panel");
 
     var head = el("div", "picker-head");
     input = el("input", "picker-search");
@@ -55,6 +58,7 @@
     var close = el("button", "btn btn-icon picker-close", "✕");
     close.type = "button";
     close.addEventListener("click", hide);
+    closeButton = close;
     head.appendChild(close);
     panel.appendChild(head);
 
@@ -136,8 +140,20 @@
         if (onPick) onPick({ set: result.set, name: result.name });
         hide();
       });
+      //  Ein einziger Tab-Halt fuer das ganze Raster: frueher war jedes der
+      //  rund 150 Symbole einer, und hinter dem Raster kam man kaum hervor.
+      //  Zwischen den Symbolen fuehren die Pfeiltasten (handleKeys).
+      button.tabIndex = -1;
+      button.addEventListener("focus", function () {
+        Array.prototype.forEach.call(grid.querySelectorAll(".picker-item"), function (other) {
+          other.tabIndex = other === button ? 0 : -1;
+        });
+      });
       grid.appendChild(button);
     });
+
+    var start = grid.querySelector(".picker-item.is-current") || grid.querySelector(".picker-item");
+    if (start) start.tabIndex = 0;
   }
 
   function handleKeys(event) {
@@ -185,11 +201,19 @@
     lastFocused = document.activeElement;
     input.value = "";
     input.placeholder = translate("searchIcons");
+    //  Ein Platzhalter ist keine Beschriftung: er verschwindet beim Tippen,
+    //  und nicht jede Vorlesesoftware liest ihn.
+    input.setAttribute("aria-label", translate("searchIcons"));
+    overlay.setAttribute("aria-label", translate("icon"));
+    closeButton.setAttribute("aria-label", translate("close"));
+    closeButton.title = translate("close");
     paintTabs();
     paintGrid();
 
     overlay.hidden = false;
     document.body.classList.add("picker-open");
+    if (release) release();
+    release = global.RickCVFocus ? global.RickCVFocus.trap(panel, hide) : null;
     input.focus();
   }
 
@@ -197,6 +221,8 @@
     if (!overlay) return;
     overlay.hidden = true;
     document.body.classList.remove("picker-open");
+    if (release) release();
+    release = null;
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 

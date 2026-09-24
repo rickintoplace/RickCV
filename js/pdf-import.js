@@ -238,17 +238,18 @@
 
   //  Wieviele Zeichen kamen ohne Zuordnung zurueck? Das passiert bei
   //  Ligaturglyphen in Dateien ohne Zuordnungstabelle: der Leser weiss, dass
-  //  da etwas stand, aber nicht was. Der Zaehler wandert in die Warnung.
-  var unmapped = 0;
+  //  da etwas stand, aber nicht was. Der Zaehler wandert in die Warnung. Er
+  //  gehoert zu einem Lesevorgang, nicht zum Modul: laufen zwei zugleich,
+  //  zaehlte sonst jeder die Zeichen des anderen mit.
   var UNMAPPED = /\uFFFD/g;
 
-  function stripSymbols(items) {
+  function stripSymbols(items, counter) {
     var total = 0;
     var symbols = 0;
     items.forEach(function (item) {
       total += item.str.length;
       symbols += (item.str.match(PRIVATE_USE) || []).length;
-      unmapped += (item.str.match(UNMAPPED) || []).length;
+      counter.unmapped += (item.str.match(UNMAPPED) || []).length;
     });
 
     var keepSymbols = !total || symbols / total > 0.15;
@@ -314,7 +315,7 @@
     return map;
   }
 
-  function pageText(page, number) {
+  function pageText(page, number, counter) {
     return page.getTextContent().then(function (content) {
       var view = page.view || [0, 0, 595, 842];
       var width = view[2] - view[0];
@@ -324,7 +325,7 @@
       //  "Tierpflege" wuerde "Tierp ege" statt "Tierpege".
       var icons = iconFontMap(page, content.items);
       var bold = boldFontMap(page, content.items);
-      var cleaned = stripSymbols(content.items).map(function (item) {
+      var cleaned = stripSymbols(content.items, counter).map(function (item) {
         if (!icons[item.fontName]) return item;
         return Object.assign({}, item, { str: "", ghost: true });
       });
@@ -360,7 +361,18 @@
 
   function extract(file, callback) {
     var library = null;
-    unmapped = 0;
+    var loaded = null;
+    var counter = { unmapped: 0 };
+
+    //  pdf.js haelt ein geoeffnetes Dokument samt Seiten im Speicher, bis
+    //  man es ausdruecklich freigibt – ohne das blieb jedes importierte PDF
+    //  liegen, bis der Tab geschlossen wurde.
+    function release() {
+      if (loaded && loaded.destroy) {
+        try { loaded.destroy(); } catch (error) { /* schon freigegeben */ }
+      }
+      loaded = null;
+    }
 
     load().then(function (pdfjsLib) {
       library = pdfjsLib;
@@ -374,6 +386,7 @@
         }).promise;
       });
     }).then(function (pdf) {
+      loaded = pdf;
       var rows = [];
       var images = [];
       var chain = Promise.resolve();
@@ -386,7 +399,7 @@
               //  einer Textschrift unterscheiden.
               return pageImages(page, index, library).then(function (found) {
                 images = images.concat(found);
-                return pageText(page, index);
+                return pageText(page, index, counter);
               }).then(function (lines) {
                 rows = rows.concat(lines);
               });
@@ -396,24 +409,33 @@
       }
       return chain.then(function () { return { rows: rows, images: images }; });
     }).then(function (result) {
+      release();
       var text = result.rows.map(function (row) { return row.text; }).join("\n");
       if (!text.replace(/\s/g, "")) {
         //  Ein eingescanntes PDF enthaelt Bilder, keinen Text. Das ist kein
         //  Fehler im Import, und Texterkennung gehoert nicht hierher.
-        return callback(new Error("pdfNoText"));
+        throw new Error("pdfNoText");
       }
       //  Der Text ist das, was man anschauen kann; die Zeilen tragen
       //  zusaetzlich Schriftgrad und Seite, die Bilder ihre Platzierung –
       //  damit erkennt die Auswertung Ueberschriften, Namen und Foto,
       //  statt zu raten.
-      callback(null, {
-        text: text, lines: result.rows, images: result.images, unmapped: unmapped,
-      });
-    }).catch(function (error) {
+      return {
+        text: text, lines: result.rows, images: result.images, unmapped: counter.unmapped,
+      };
+    }).then(function (data) {
+      //  Ausserhalb der Kette aufgerufen: wirft der Rueckruf selbst, soll er
+      //  nicht ein zweites Mal kommen, dann mit seinem eigenen Fehler.
+      callback(null, data);
+    }, function (error) {
+      release();
+      if (error && (error.message === "noPdfSupport" || error.message === "pdfNoText")) {
+        return callback(error);
+      }
       //  Der Grund bleibt in der Konsole: fuer den Nutzer ist "ging nicht"
       //  die richtige Auskunft, fuer einen Fehlerbericht nicht.
       console.warn("PDF-Import fehlgeschlagen:", error);
-      callback(error && error.message === "noPdfSupport" ? error : new Error("pdfFailed"));
+      callback(new Error("pdfFailed"));
     });
   }
 

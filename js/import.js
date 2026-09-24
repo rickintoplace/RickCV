@@ -750,24 +750,42 @@
   //  Ein einzelner deflate-Block. Was vor einem Fehler herauskam, wird
   //  behalten: am Ende des Blocks folgt im ZIP der naechste Kopf, und
   //  daran verschluckt sich der Strom sonst mitsamt dem Ergebnis.
-  function inflateRaw(chunk) {
+  //
+  //  limit: hoechstens so viele Bytes. Gepackt schrumpft Gleichfoermiges
+  //  auf einen Bruchteil – ein Link von zwei Megabyte kann zu mehr als einem
+  //  Gigabyte aufgehen und den Tab mitreissen, bevor irgendein Dialog
+  //  erscheint. Ein Lebenslauf braucht davon nichts. Das Budget darf auch
+  //  ein Objekt { left } sein, das sich mehrere Dateien eines ZIP teilen.
+  var INFLATE_LIMIT = 64 * 1024 * 1024;
+
+  function inflateRaw(chunk, limit) {
     if (typeof global.DecompressionStream !== "function") {
       return Promise.reject(new Error("noDecompression"));
     }
+    var budget = limit && typeof limit === "object" ? limit
+      : { left: limit || INFLATE_LIMIT };
     var reader = new Blob([chunk]).stream()
       .pipeThrough(new global.DecompressionStream("deflate-raw"))
       .getReader();
     var parts = [];
+    var tooLarge = false;
 
     function pump() {
       return reader.read().then(function (step) {
         if (step.done) return;
+        budget.left -= step.value.length;
+        if (budget.left < 0) {
+          tooLarge = true;
+          reader.cancel().catch(function () {});
+          return;
+        }
         parts.push(step.value);
         return pump();
       }, function () { /* Rest ist nicht mehr unser Block */ });
     }
 
     return pump().then(function () {
+      if (tooLarge) throw new Error("tooLarge");
       var total = parts.reduce(function (sum, part) { return sum + part.length; }, 0);
       var out = new Uint8Array(total);
       var at = 0;
@@ -779,6 +797,9 @@
   function decodeText(bytes) {
     return bytes ? new TextDecoder().decode(bytes) : "";
   }
+
+  var ZIP_LIMIT = 256 * 1024 * 1024;
+  var ZIP_MAX_ENTRIES = 20000;
 
   function readZip(buffer) {
     var view = new DataView(buffer);
@@ -795,6 +816,12 @@
     var count = view.getUint16(end + 10, true);
     var offset = view.getUint32(end + 16, true);
     var entries = [];
+
+    //  Alle Dateien eines ZIP teilen sich ein Budget. Ein Word-Dokument
+    //  oder ein LinkedIn-Export bleibt weit darunter; eine Datei, die
+    //  darueber aufgeht, ist keine, die man als Lebenslauf lesen will.
+    if (count > ZIP_MAX_ENTRIES) return Promise.reject(new Error("tooLarge"));
+    var budget = { left: ZIP_LIMIT };
 
     for (var n = 0; n < count; n++) {
       if (view.getUint32(offset, true) !== 0x02014b50) break;
@@ -818,6 +845,8 @@
       var start = head + 30 + view.getUint16(head + 26, true) + view.getUint16(head + 28, true);
 
       if (entry.method === 0) {
+        budget.left -= entry.size;
+        if (budget.left < 0) throw new Error("tooLarge");
         return { name: entry.name, bytes: bytes.slice(start, start + entry.size) };
       }
       if (entry.method !== 8) return { name: entry.name, bytes: new Uint8Array(0) };
@@ -828,7 +857,7 @@
       var slice = entry.packed
         ? bytes.subarray(start, start + entry.packed)
         : bytes.subarray(start);
-      return inflateRaw(slice).then(function (data) {
+      return inflateRaw(slice, budget).then(function (data) {
         return { name: entry.name, bytes: data };
       });
     })).then(function (files) {
@@ -2557,14 +2586,24 @@
     var trimmed = clean(text);
     if (trimmed.charAt(0) === "{") {
       var data = null;
-      try { data = JSON.parse(trimmed); } catch (error) { return "text"; }
-      if (data && (data.settings || data.contactTitle) && data.contact) return "rickcv";
+      //  Beginnt es wie JSON und endet es wie JSON, ist es als JSON gemeint –
+      //  kaputt, meist von Hand oder von einem Sprachmodell geschrieben. Das
+      //  als Fliesstext zu lesen, ergaebe nur "nichts erkannt".
+      try { data = JSON.parse(trimmed); } catch (error) {
+        return trimmed.charAt(trimmed.length - 1) === "}" ? "json-broken" : "text";
+      }
+      if (!data || typeof data !== "object") return "json-unknown";
+      if ((data.settings || data.contactTitle) && data.contact) return "rickcv";
       //  Reactive Resume legt seine Bloecke in ein Objekt "sections"; JSON
       //  Resume kennt stattdessen Listen auf oberster Ebene.
-      if (data && data.sections && typeof data.sections === "object" &&
+      if (data.sections && typeof data.sections === "object" &&
           !Array.isArray(data.sections)) return "reactive";
-      if (data && (data.basics || data.work || data.education ||
-                   /jsonresume/i.test(clean(data.$schema)))) return "jsonresume";
+      if (data.basics || data.work || data.education ||
+          /jsonresume/i.test(clean(data.$schema))) return "jsonresume";
+      //  AGENTS.md sagt: alles ist optional. Ein Dokument, das nur eine
+      //  Fassung und Kontaktdaten traegt, ist trotzdem eines von RickCV.
+      if (typeof data.version === "number" &&
+          (data.contact || data.events || data.coverLetter || data.profile)) return "rickcv";
       return "json-unknown";
     }
     return "text";
@@ -2615,13 +2654,28 @@
   function parseText(text, name, lines, images) {
     var format = detect(name, text);
 
+    if (format === "json-broken") throw new Error("brokenJson");
+
     if (format === "rickcv" || format === "jsonresume" || format === "reactive" ||
         format === "json-unknown") {
       var data = JSON.parse(text);
       if (format === "rickcv") {
+        var newer = Number(data.version) > Model.VERSION;
         var migrated = Model.migrate(data);
         if (!migrated) throw new Error("unreadable");
-        return result("rickcv", null, migrated);
+        var own = result("rickcv", null, migrated);
+        //  Was das Dokument ausser Inhalt noch mitbringt, steht in der
+        //  Bestaetigung – nicht erst hinterher im Editor.
+        if (newer) own.warnings.push("newer");
+        if (migrated.theme && migrated.theme.css) own.warnings.push("customTheme");
+        //  Unsichtbarer Text zaehlt bei Bewerbungssystemen als Manipulation
+        //  (siehe ats.js). Ein Import schaltet ihn deshalb nicht still mit
+        //  ein, sondern aus – und sagt es.
+        if (migrated.ats && migrated.ats.mode === "hidden") {
+          migrated.ats.mode = "off";
+          own.warnings.push("hiddenAts");
+        }
+        return own;
       }
       if (format === "json-unknown") throw new Error("unknownJson");
       if (format === "reactive") {
@@ -2672,11 +2726,14 @@
     var format = detect(name, "");
 
     if (format === "linkedin-zip") {
+      //  Der Rueckruf steht ausserhalb der Kette: wirft er selbst, soll er
+      //  nicht ein zweites Mal – dann mit seinem eigenen Fehler – kommen.
       file.arrayBuffer().then(readZip).then(function (files) {
         var profile = fromLinkedIn(files);
         if (!hasContent(profile)) throw new Error("emptyZip");
-        callback(null, result("linkedin", profile));
-      }).catch(function (error) { callback(error); });
+        return result("linkedin", profile);
+      }).then(function (parsed) { callback(null, parsed); },
+              function (error) { callback(error); });
       return;
     }
 
@@ -2684,11 +2741,12 @@
       if (!global.RickCVDocx) return callback(new Error("noDocxSupport"));
       global.RickCVDocx.read(file, function (error, data) {
         if (error) return callback(error);
+        var parsed;
         try {
-          var parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
+          parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
           parsed.format = "docx";
-          callback(null, parsed);
-        } catch (parseError) { callback(parseError); }
+        } catch (parseError) { return callback(parseError); }
+        callback(null, parsed);
       });
       return;
     }
@@ -2697,16 +2755,17 @@
       if (!global.RickCVPdf) return callback(new Error("noPdfSupport"));
       global.RickCVPdf.extract(file, function (error, data) {
         if (error) return callback(error);
+        var parsed;
         try {
-          var parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
+          parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
           parsed.format = "pdf";
           //  Fehlende Zeichenzuordnung betrifft den Text, nicht den Aufbau –
           //  deshalb steht die Warnung hier und nicht in der Auswertung.
           if (data.unmapped && parsed.warnings.indexOf("unmapped") === -1) {
             parsed.warnings.push("unmapped");
           }
-          callback(null, parsed);
-        } catch (parseError) { callback(parseError); }
+        } catch (parseError) { return callback(parseError); }
+        callback(null, parsed);
       });
       return;
     }
@@ -2714,9 +2773,11 @@
     var reader = new FileReader();
     reader.onerror = function () { callback(new Error("unreadable")); };
     reader.onload = function () {
+      var parsed;
       try {
-        callback(null, parseText(String(reader.result), name));
-      } catch (error) { callback(error); }
+        parsed = parseText(String(reader.result), name);
+      } catch (error) { return callback(error); }
+      callback(null, parsed);
     };
     reader.readAsText(file);
   }

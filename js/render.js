@@ -31,6 +31,25 @@
     return "";
   }
 
+  //  Bilder nur, wenn sie ohne Netz auskommen (RickCVModel.isLocalImage).
+  //  Eine fremde Adresse stuende sonst als kaputtes Bild samt Alternativtext
+  //  im PDF – geladen wuerde sie nicht, das verbietet die Content-Security-
+  //  Policy von cv.html.
+  function safeImage(value) {
+    var Model = global.RickCVModel;
+    var src = String(value || "").trim();
+    if (!src || (Model && !Model.isLocalImage(src))) return "";
+    return esc(src);
+  }
+
+  //  Wohin im Editor ein Stueck des Dokuments gehoert: der Pfad in den Daten
+  //  ("events.3", "skills.items.2"). Die Vorschau bietet damit an, genau
+  //  dort weiterzubearbeiten (js/preview.js). Im PDF bewirkt das Attribut
+  //  nichts.
+  function edit(path) {
+    return ' data-edit="' + esc(path) + '"';
+  }
+
   function nl2br(value) {
     return esc(value).replace(/\n/g, "<br>");
   }
@@ -114,31 +133,28 @@
             settings.date || today(data.locale)].filter(Boolean).join(", ");
   }
 
-  function monthsBetween(start, end) {
-    var a = String(start || "").split("/").map(Number);
-    var b = String(end || "").split("/").map(Number);
-    if (a.length < 2 || b.length < 2) return 0;
-    return (b[1] - a[1]) * 12 + (b[0] - a[0]);
-  }
+  //  Die Rechnung mit Monaten steht in model.js, fuer Renderer und
+  //  Textfassung gemeinsam: "04/2019", "2019" und "bis heute".
+  var Dates = global.RickCVModel;
 
-  function comparable(date) {
-    var parts = String(date || "").split("/");
-    var value = Number(parts[1] || 0) * 12 + Number(parts[0] || 0);
-    //  "20XX" steht in unausgefuellten Vorlagen, wo spaeter ein Jahr
-    //  hinkommt. Als Zahl ist das nichts – die Station zaehlt dann als
-    //  undatiert und bleibt, wo sie steht, statt die Sortierung zu
-    //  verwirren.
-    return isFinite(value) ? value : 0;
-  }
-
+  //  Gesamtspanne einer Zeitleiste in Monaten, vom fruehesten Beginn bis
+  //  zum spaetesten Ende. "bis heute" zaehlt bis heute – frueher endete
+  //  eine laufende Stelle fuer diese Rechnung, bevor sie angefangen hatte.
   function spanMonths(events) {
-    if (!events.length) return 1;
-    var earliest = events[0].start, latest = events[0].end;
+    var earliest = null, latest = null;
     events.forEach(function (event) {
-      if (comparable(event.start) < comparable(earliest)) earliest = event.start;
-      if (comparable(event.end) > comparable(latest)) latest = event.end;
+      var start = Dates.eventStart(event);
+      var end = Dates.eventEnd(event);
+      if (start !== null && (earliest === null || start < earliest)) earliest = start;
+      if (end !== null && (latest === null || end > latest)) latest = end;
     });
-    return monthsBetween(earliest, latest) || 1;
+    return earliest === null || latest === null ? 1 : Math.max(1, latest - earliest);
+  }
+
+  function durationMonths(event) {
+    var start = Dates.eventStart(event);
+    var end = Dates.eventEnd(event);
+    return start === null || end === null ? 0 : Math.max(0, end - start);
   }
 
   /* ------------------------------------------------------------ CSS-Styling */
@@ -188,6 +204,8 @@
     }
     return "color-mix(in oklab, " + style.accentColor + ", white 80%)";
   }
+
+  var PHOTO_SHAPES = ["band", "rounded", "circle"];
 
   function applyStyle(doc, data) {
     var style = data.style;
@@ -287,7 +305,7 @@
       //  Theme laeuft, sagt data-template.
       return name && !/^(template-|photo-|pages-)/.test(name);
     }).join(" ");
-    body.classList.add("photo-" + (photo.shape || "band"));
+    body.classList.add("photo-" + (PHOTO_SHAPES.indexOf(photo.shape) !== -1 ? photo.shape : "band"));
     var mode = data.settings.pageMode || "single";
     body.classList.add(
       mode === "flow" ? "pages-flow" : mode === "two" ? "pages-two" : "pages-fixed");
@@ -338,9 +356,10 @@
     return out;
   }
 
-  function iconRows(list) {
-    return list.map(function (item) {
-      return '<div class="resume_subinfo">' + Icons.html(item.icon) + esc(item.name) + "</div>";
+  function iconRows(list, path) {
+    return list.map(function (item, index) {
+      return '<div class="resume_subinfo"' + edit(path + "." + index) + ">" +
+        Icons.html(item.icon) + esc(item.name) + "</div>";
     }).join("");
   }
 
@@ -363,14 +382,14 @@
   function languageBlock(list, mode) {
     var where = mode === "below" || mode === "none" ? mode : "inside";
 
-    return list.map(function (language) {
+    return list.map(function (language, index) {
       var width = Math.max(0, Math.min(100, Number(language.percentage) || 0));
       var level = String(language.level || "");
       var inside = where === "inside" ? esc(level) : "";
       var below = where === "below" && level
         ? '<div class="language_note">' + esc(level) + "</div>" : "";
 
-      return '<div class="language_entry">' +
+      return '<div class="language_entry"' + edit("languages.items." + index) + ">" +
         '<div class="language_list">' +
         '<div class="language_left">' + esc(language.name) + "</div>" +
         '<div class="language_bar"><p><span style="width:' + width + '%">' +
@@ -379,9 +398,9 @@
   }
 
   function projectBlock(list) {
-    return list.map(function (project) {
+    return list.map(function (project, index) {
       var url = safeUrl(project.url);
-      var img = safeUrl(project.img);
+      var img = safeImage(project.img);
       var picture = img
         ? '<div class="project-img-holder">' + (url ? '<a href="' + url + '">' : "") +
           '<img src="' + img + '" alt="' + esc(project.name) + '">' + (url ? "</a>" : "") + "</div>"
@@ -389,7 +408,7 @@
       var title = url
         ? '<a href="' + url + '"><h3 class="project-title">' + esc(project.name) + "</h3></a>"
         : '<h3 class="project-title">' + esc(project.name) + "</h3>";
-      return '<div class="resume_info project">' + picture +
+      return '<div class="resume_info project"' + edit("projects.items." + index) + ">" + picture +
         '<div class="project-txt">' + title + "<span>" + esc(project.description) + "</span></div></div>";
     }).join("");
   }
@@ -422,15 +441,19 @@
     return '<svg class="rank-dots" viewBox="0 0 ' + width + " " + height +
       '" role="img" aria-label="' + Math.round(ratio / 20) + " / " + RANK_DOTS + '">' +
       '<g class="rank-empty">' + circles + "</g>" +
-      '<clipPath id="' + clip + '"><rect x="0" y="0" width="' +
-      (width * ratio / 100) + '" height="' + height + '"/></clipPath>' +
+      //  Die Beschneidung reicht einen Punkt ueber oben und unten hinaus: an
+      //  der Kante liegt die Glaettung der Kreise, und genau die fiel sonst
+      //  in einer verkleinerten Vorschau weg – die Punkte sahen unten
+      //  abgeflacht aus.
+      '<clipPath id="' + clip + '"><rect x="-1" y="-1" width="' +
+      (width * ratio / 100 + 1) + '" height="' + (height + 2) + '"/></clipPath>' +
       '<g class="rank-full" clip-path="url(#' + clip + ')">' + circles + "</g></svg>";
   }
 
   function skillBlock(list) {
     return list.map(function (skill, index) {
       var ratio = (Math.max(0, Math.min(5, Number(skill.rank) || 0)) / 5) * 100;
-      return '<ul class="skills">' +
+      return '<ul class="skills"' + edit("skills.items." + index) + ">" +
         '<li class="skill-description">' + esc(skill.name) + "</li>" +
         '<li class="rank">' + rankDots(ratio, index) + "</li></ul>";
     }).join("");
@@ -483,7 +506,8 @@
     var intro = String(footer.intro || "").trim();
 
     return '<footer class="resume-link-footer ' + sideClass +
-      " resume-footer-mode-" + esc(footer.mode || "iconText") + '">' +
+      " resume-footer-mode-" + esc(footer.mode || "iconText") + '"' +
+      edit(sideClass === "resume-link-footer-left" ? "footers.left" : "footers.right") + ">" +
       (intro ? '<div class="resume-footer-intro">' + nl2br(intro) + "</div>" : "") +
       (links ? '<div class="resume-footer-links">' + links + "</div>" : "") +
       (dated ? '<div class="resume-footer-date">' + esc(dated) + "</div>" : "") +
@@ -514,7 +538,8 @@
     if (data.profile.show && data.profile.text && onPage(data.profile, page, pages)) {
       blocks += '<div class="resume_item resume_profile" data-block="profile">' +
         '<div class="resume_title">' + esc(data.profile.title) + "</div>" +
-        '<div class="resume_info profile-container">' + nl2br(data.profile.text) + "</div></div>";
+        '<div class="resume_info profile-container"' + edit("profile.text") + ">" +
+        nl2br(data.profile.text) + "</div></div>";
     }
 
     //  Der Kontaktblock gehoert immer auf die erste Seite; auf der zweiten ist
@@ -522,7 +547,7 @@
     if (page === 1 || page2.repeatContact) {
       blocks += '<div class="resume_item resume_contact" data-block="contact">' +
         '<div class="resume_title">' + esc(data.contactTitle) + "</div>" +
-        '<div class="resume_info"><div class="contact_container">' +
+        '<div class="resume_info"><div class="contact_container"' + edit("contact") + ">" +
         contactBlock(data.contact) + "</div></div></div>";
     }
 
@@ -534,12 +559,12 @@
     }
     if (isOn(data.mobilitySB) && onPage(data.mobilitySB, page, pages)) {
       blocks += sidebarItem(data.mobilitySB.title,
-        '<div class="mobilitySB_container">' + iconRows(items(data.mobilitySB)) + "</div>",
+        '<div class="mobilitySB_container">' + iconRows(items(data.mobilitySB), "mobilitySB.items") + "</div>",
         "resume_mobilitySB", "mobilitySB");
     }
     if (isOn(data.interests) && onPage(data.interests, page, pages)) {
       blocks += sidebarItem(data.interests.title,
-        '<div class="interests_container">' + iconRows(items(data.interests)) + "</div>",
+        '<div class="interests_container">' + iconRows(items(data.interests), "interests.items") + "</div>",
         "resume_interests", "interests");
     }
     if (data.settings.projectsColumn !== "main" &&
@@ -547,10 +572,11 @@
       blocks += projectsBlock(data, false);
     }
 
-    var showPhoto = data.photo.show && data.photo.src &&
+    var showPhoto = data.photo.show && safeImage(data.photo.src) &&
       (page === 1 || page2.repeatPhoto);
     var photo = showPhoto
-      ? '<div class="resume_image profile-image-container" data-block="photo"><img src="' + safeUrl(data.photo.src) +
+      ? '<div class="resume_image profile-image-container" data-block="photo"' + edit("photo") +
+        '><img src="' + safeImage(data.photo.src) +
         '" alt="' + esc(I18n.t("doc", "photoAlt", data.locale)) + '"></div>'
       : "";
 
@@ -568,8 +594,8 @@
     if (page === 1 || page2.repeatHeader) {
       out += '<div class="resume_item resume_namerole' +
         (page > 1 ? " resume_namerole-repeat" : "") + '" data-block="namerole">' +
-        '<h1 class="name">' + esc(data.contact.name) + "</h1>" +
-        '<div class="role">' + esc(data.contact.role) + "</div></div>";
+        '<h1 class="name"' + edit("contact.name") + ">" + esc(data.contact.name) + "</h1>" +
+        '<div class="role"' + edit("contact.role") + ">" + esc(data.contact.role) + "</div></div>";
     }
 
     (data.sections || []).forEach(function (section) {
@@ -579,7 +605,8 @@
       out += '<div class="resume_item timeline-container" data-block="section"' +
         ' data-section-id="' + esc(section.id) + '"' +
         ' data-role="' + esc(section.atsRole || "experience") + '">' +
-        '<h2 class="resume_title">' + Icons.html(section.icon) + esc(section.title) + "</h2>" +
+        '<h2 class="resume_title"' + edit("sections") + ">" + Icons.html(section.icon) +
+        esc(section.title) + "</h2>" +
         '<div class="timeline" data-timeline="' + esc(section.id) + '"></div></div>';
     });
 
@@ -596,7 +623,7 @@
     if (isOn(data.mobility) && onPage(data.mobility, page, pages)) {
       out += '<div class="resume_item resmue_mobility" data-block="mobility">' +
         '<h2 class="resume_title">' + Icons.html(data.mobility.icon) + esc(data.mobility.title) + "</h2>" +
-        '<div class="resume_info mobility-container">' +
+        '<div class="resume_info mobility-container"' + edit("mobility.items") + ">" +
         items(data.mobility).map(function (item) { return esc(item.name); }).join("<br>") +
         "</div></div>";
     }
@@ -604,9 +631,9 @@
       out += '<div class="resume_item resume_references" data-block="references">' +
         '<h2 class="resume_title">' + Icons.html(data.references.icon) + esc(data.references.title) + "</h2>" +
         '<div class="resume_info references-container">' +
-        items(data.references).map(function (reference) {
+        items(data.references).map(function (reference, index) {
           var line = [esc(reference.role), esc(reference.company)].filter(Boolean).join(", ");
-          return '<div class="reference">' +
+          return '<div class="reference"' + edit("references.items." + index) + ">" +
             '<span class="reference-name">' + esc(reference.name) + "</span>" +
             (line ? '<span class="reference-role">' + line + "</span>" : "") +
             (reference.contact ? '<span class="reference-contact">' + esc(reference.contact) + "</span>" : "") +
@@ -658,6 +685,9 @@
       var node = doc.createElement("div");
       node.className = "event";
       node.setAttribute("data-date-mode", dateMode(event));
+      //  Die Stelle in den Daten, nicht in der sortierten Zeitleiste.
+      var at = (data.events || []).indexOf(event);
+      if (at !== -1) node.setAttribute("data-edit", "events." + at);
 
       var date = doc.createElement("div");
       date.className = "date";
@@ -691,7 +721,7 @@
       node.appendChild(content);
 
       node.style.setProperty("--color", event.color);
-      node.style.setProperty("--months-duration", String(monthsBetween(event.start, event.end) / span));
+      node.style.setProperty("--months-duration", String(durationMonths(event) / span));
       node.style.setProperty("--offset", (event.hoffset || 0) + "px");
       node.style.marginTop = (event.voffset || 0) + "px";
 
@@ -706,13 +736,23 @@
     var nodes = timeline.querySelectorAll(".event");
     var span = spanMonths(events);
 
+    var first = Dates.eventStart(events[0]);
+
     nodes.forEach(function (node, index) {
       var event = events[index];
       var start = node.offsetTop;
-      var end = (monthsBetween(events[0].start, event.end) / span) * timeline.offsetHeight;
+      var finish = Dates.eventEnd(event);
+      var end = first === null || finish === null ? 0
+        : ((finish - first) / span) * timeline.offsetHeight;
 
+      //  Die Linie reicht bis zur naechsten Station, die nach dieser
+      //  beginnt. Verglichen wird mit dem Anfang des letzten Monats oder
+      //  Jahres – "2018–2019" und danach "2019–2021" schliessen aneinander
+      //  an. Was sich nicht vergleichen laesst, gilt als Nachfolger.
+      var until = event.present ? finish : Dates.monthIndex(event.end, false);
       for (var j = index + 1; j < events.length; j++) {
-        if (monthsBetween(event.end, events[j].start) >= 0) {
+        var next = Dates.eventStart(events[j]);
+        if (until === null || next === null || next - until >= 0) {
           end = nodes[j].offsetTop;
           break;
         }
@@ -729,14 +769,17 @@
 
   function buildCoverLetter(data) {
     var letter = data.coverLetter;
-    var align = data.settings.alignText;
-    var signature = safeUrl(letter.signatureImg);
+    //  Der Wert landet in einem style-Attribut. Nur was der Editor anbietet,
+    //  kommt dort hinein – ein Dokument aus einem Link koennte sonst mit
+    //  einem Anfuehrungszeichen aus dem Attribut ausbrechen.
+    var align = data.settings.alignText === "justify" ? "justify" : "left";
+    var signature = safeImage(letter.signatureImg);
 
     var paragraphs = (letter.paragraphs || [])
-      .filter(function (text) { return String(text || "").trim(); })
-      .map(function (text) {
-        return '<div class="cover-letter-body textblock" style="text-align:' + align + '"><p>' +
-          nl2br(text) + "</p></div>";
+      .map(function (text, index) {
+        if (!String(text || "").trim()) return "";
+        return '<div class="cover-letter-body textblock" style="text-align:' + align + '"' +
+          edit("coverLetter.paragraphs." + index) + "><p>" + nl2br(text) + "</p></div>";
       }).join("");
 
     var stamp = dateLine(data);
@@ -745,15 +788,18 @@
       '<div class="cover-letter-header"><div class="cover-letter-sender">' +
       '<div class="resume_item resume_namerole"><h1>' + esc(data.contact.name) + "</h1>" +
       '<div class="cover-letter-role">' + esc(data.contact.role) + "</div></div>" +
-      '<div class="header-contact-section">' + contactBlock(data.contact) + "</div></div></div>" +
+      '<div class="header-contact-section"' + edit("contact") + ">" +
+      contactBlock(data.contact) + "</div></div></div>" +
       '<div class="cover-letter-content">' +
-      '<div class="cover-letter-recipient">' + nl2br(letter.recipient) + "</div>" +
-      '<div class="cover-letter-date">' + esc(stamp) + "</div>" +
-      '<div class="cover-letter-regard textblock" style="text-align:' + align + '">' +
-      esc(letter.subject) + "</div>" +
-      '<div class="cover-letter-salutation textblock" style="text-align:' + align + '">' +
-      esc(letter.salutation) + "</div>" + paragraphs +
-      '<div class="cover-letter-closing textblock" style="text-align:' + align + '">' +
+      '<div class="cover-letter-recipient"' + edit("coverLetter.recipient") + ">" +
+      nl2br(letter.recipient) + "</div>" +
+      '<div class="cover-letter-date"' + edit("settings.date") + ">" + esc(stamp) + "</div>" +
+      '<div class="cover-letter-regard textblock" style="text-align:' + align + '"' +
+      edit("coverLetter.subject") + ">" + esc(letter.subject) + "</div>" +
+      '<div class="cover-letter-salutation textblock" style="text-align:' + align + '"' +
+      edit("coverLetter.salutation") + ">" + esc(letter.salutation) + "</div>" + paragraphs +
+      '<div class="cover-letter-closing textblock" style="text-align:' + align + '"' +
+      edit("coverLetter.closing") + ">" +
       esc(letter.closing) + "<br>" +
       (signature ? '<div class="signature"><img src="' + signature + '" alt="' +
         esc(I18n.t("doc", "signatureAlt", data.locale)) + '" style="height:' +
@@ -1076,7 +1122,7 @@
     // Innerhalb einer Sektion immer aufsteigend rechnen; die Anzeigerichtung
     // uebernimmt danach das Flex-Layout.
     Object.keys(grouped).forEach(function (id) {
-      grouped[id].sort(function (a, b) { return comparable(a.start) - comparable(b.start); });
+      grouped[id].sort(Dates.compareStart);
     });
     return grouped;
   }
@@ -1519,7 +1565,69 @@
     root.style.setProperty("--date-column", Math.ceil(widest) + "px");
   }
 
+  //  Die Zeitleiste einer Kategorie. Ihre id kommt aus dem Dokument und
+  //  gehoert deshalb nicht in einen Selektor: ein Anfuehrungszeichen darin
+  //  liesse querySelector werfen.
+  function timelineOf(host, id) {
+    var nodes = host.querySelectorAll("[data-timeline]");
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].getAttribute("data-timeline") === String(id)) return nodes[i];
+    }
+    return null;
+  }
+
+  //  Jeder Durchgang zaehlt hoch. Die Linien werden erst im naechsten Bild
+  //  gezeichnet; kommt vorher schon der naechste Durchgang, gehoert das
+  //  Bild ihm – sonst stuenden die Linien doppelt oder an Stationen, die es
+  //  nicht mehr gibt.
+  var generation = 0;
+
+  /*  Eine Kenntnis, deren Name in ihrer Spalte umbricht, bekommt die ganze
+   *  Zeile. Vorher quetschte sich "Projektmanagement nach PRINCE2" in eine
+   *  halbe Spalte und brach mitten im Wort, waehrend daneben Platz war. Ob
+   *  ein Name umbricht, haengt an Schrift, Groesse und Theme – also wird es
+   *  gemessen, nicht an der Zeichenzahl geraten. Themes erkennen solche
+   *  Eintraege an data-wide (themes/CONTRACT.md).
+   */
+  function markWideSkills(doc) {
+    var names = doc.querySelectorAll('[data-block="skills"] .skill-description');
+    Array.prototype.forEach.call(names, function (name) {
+      var range = doc.createRange();
+      range.selectNodeContents(name);
+      var tops = {};
+      Array.prototype.forEach.call(range.getClientRects(), function (rect) {
+        if (rect.width) tops[Math.round(rect.top)] = true;
+      });
+      if (Object.keys(tops).length > 1) name.parentNode.setAttribute("data-wide", "");
+    });
+  }
+
+  /*  Die Stufe im Sprachbalken. Passt sie nicht in die Fuellung – "basic
+   *  (A2)" bei einem Drittel –, brach sie frueher darin um und wurde
+   *  abgeschnitten. Jetzt steht sie gleich hinter der Fuellung, in der
+   *  freien Spur des Balkens und in Schriftfarbe: noch im Balken, wie
+   *  eingestellt, und ganz lesbar. Themes erkennen das an data-level.
+   */
+  function fitLanguageLevels(doc) {
+    var fills = doc.querySelectorAll('[data-block="languages"] .language_bar span');
+    Array.prototype.forEach.call(fills, function (fill) {
+      var bar = fill.closest(".language_bar");
+      bar.removeAttribute("data-level");
+      if (!fill.textContent.trim()) return;
+      //  Gemessen am Text selbst: die Fuellung ist ein Flex-Kasten in
+      //  umgekehrter Richtung, dort laeuft Ueberstehendes nach links hinaus,
+      //  und scrollWidth sieht davon nichts.
+      var range = doc.createRange();
+      range.selectNodeContents(fill);
+      var text = range.getBoundingClientRect().width;
+      var room = fill.getBoundingClientRect().width - parseFloat(
+        (doc.defaultView || global).getComputedStyle(fill).textIndent || 0);
+      if (text > room + 0.5) bar.setAttribute("data-level", "outside");
+    });
+  }
+
   function render(doc, data) {
+    var mine = ++generation;
     var grouped = groupEvents(data);
     applyStyle(doc, data);
 
@@ -1556,18 +1664,20 @@
 
     var direction = data.settings.reverseTimeline ? "column-reverse" : "column";
     (data.sections || []).forEach(function (section) {
-      var timeline = host.querySelector('[data-timeline="' + section.id + '"]');
+      var timeline = timelineOf(host, section.id);
       if (timeline) timeline.style.flexDirection = direction;
       fillTimeline(doc, grouped[section.id] || [], timeline, data);
     });
 
     sizeDateColumn(doc);
+    markWideSkills(doc);
+    fitLanguageLevels(doc);
     resumeSheets = paginateResume(doc, data);
 
     (doc.defaultView || global).requestAnimationFrame(function () {
+      if (mine !== generation) return;
       (data.sections || []).forEach(function (section) {
-        drawLines(doc, grouped[section.id] || [],
-          host.querySelector('[data-timeline="' + section.id + '"]'), data);
+        drawLines(doc, grouped[section.id] || [], timelineOf(host, section.id), data);
       });
       if (typeof data.onRendered === "function") data.onRendered();
     });

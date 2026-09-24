@@ -17,16 +17,38 @@
 
   var state = null;
   var sections = [];
+  //  Welche Abschnitte aufgeklappt sind, ueber Reiterwechsel hinweg.
+  var sectionOpen = {};
   var t = I18n.ui("de");
   var committedLocale = "de";
 
   var frame = null;
   var frameReady = false;
 
-  var history = [];
-  var historyTimer = null;
-  var pendingSnapshot = null;
-  var committed = "";
+  //  Nachrichten an den Vorschaurahmen gehen nur an die eigene Adresse –
+  //  der Rahmen traegt den ganzen Lebenslauf. Per Doppelklick geoeffnet
+  //  (file://) gibt es keinen Ursprung, den man nennen koennte.
+  var ORIGIN = global.location.origin && global.location.origin !== "null"
+    ? global.location.origin : "*";
+
+  //  Nur der eigene Vorschaurahmen darf hier melden. Eine fremde Seite,
+  //  die den Baukasten oeffnet, koennte sonst eine Datei als Theme
+  //  einschmuggeln – ganz ohne Rueckfrage.
+  function fromFrame(event) {
+    if (!frame || event.source !== frame.contentWindow) return false;
+    return ORIGIN === "*" || event.origin === ORIGIN;
+  }
+
+  //  Der Verlauf hinter "Rueckgaengig" (js/history.js). Er heisst nicht
+  //  "history", damit er window.history nicht verdeckt.
+  var steps = null;
+
+  //  Zaehler fuer die Staende, die an die Vorschau gehen, und fuer den, den
+  //  sie zuletzt gezeichnet hat. Gedruckt wird erst, wenn beide sich
+  //  einholen – sonst laege im PDF der vorige Stand.
+  var sentSeq = 0;
+  var paintedSeq = 0;
+  var afterPaint = [];
 
   //  Erscheinungsbild des Editors. "system" traegt kein Attribut – dann
   //  entscheidet color-scheme anhand der Einstellung des Betriebssystems.
@@ -45,55 +67,9 @@
     return node;
   }
 
-  /*  Symbole fuer die Oberflaeche selbst – nicht zu verwechseln mit dem
-   *  Katalog in js/icon-data.js, aus dem die Symbole des Dokuments kommen.
-   *  Der ist auf Lebenslauf-Inhalte kuratiert und soll nicht mit
-   *  Werkzeugsymbolen zugestellt werden. Es sind dieselben Striche
-   *  (Lucide, ISC – siehe licenses/), nur eben die des Baukastens.
-   */
-  var UI_ICONS = {
-    undo: '<path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />',
-    sparkles:
-      '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936' +
-      'A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937' +
-      'l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />',
-    "file-plus":
-      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" />' +
-      '<path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M12 18v-6" /><path d="M9 15h6" />',
-    upload:
-      '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />' +
-      '<path d="m17 8-5-5-5 5" /><path d="M12 3v12" />',
-    download:
-      '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />' +
-      '<path d="m7 10 5 5 5-5" /><path d="M12 15V3" />',
-    "external-link":
-      '<path d="M15 3h6v6" /><path d="M10 14 21 3" />' +
-      '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />',
-    printer:
-      '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />' +
-      '<path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />' +
-      '<rect x="6" y="14" width="12" height="8" rx="1" />',
-    link:
-      '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />' +
-      '<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />',
-    copy:
-      '<rect width="14" height="14" x="8" y="8" rx="2" ry="2" />' +
-      '<path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />',
-    braces:
-      '<path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1" />' +
-      '<path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1" />',
-    "file-text":
-      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" />' +
-      '<path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" />' +
-      '<path d="M16 13H8" /><path d="M16 17H8" />',
-  };
-
+  //  Die Symbole der Oberflaeche stehen in js/ui-icons.js.
   function iconHtml(name) {
-    var paths = UI_ICONS[name];
-    if (!paths) return "";
-    return '<svg class="rc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' +
-      'focusable="false">' + paths + "</svg>";
+    return global.RickCVUi.icon(name);
   }
 
   //  Jede Schaltflaeche mit data-icon bekommt ihr Symbol, sobald die Seite
@@ -149,6 +125,11 @@
 
   /* ------------------------------------------------------- Laden/Speichern */
 
+  //  Beim allerersten Besuch steht nichts im Speicher. Dann zeigt der
+  //  Editor eine Karte, die sagt, dass rechts ein Beispiel steht – und wie
+  //  man anders anfaengt.
+  var firstVisit = false;
+
   function load() {
     var raw = null;
     try {
@@ -163,6 +144,8 @@
       } catch (error) {
         console.warn("Gespeicherte Daten unlesbar, starte mit Beispiel:", error);
       }
+    } else {
+      firstVisit = true;
     }
     return Model.createExample(startLocale());
   }
@@ -181,48 +164,77 @@
     return "de";
   }
 
-  var save = debounce(function () {
+  //  Gespeichert wird kurz nach dem letzten Tastendruck – und sofort, wenn
+  //  der Tab geschlossen oder verlassen wird. Sonst ging verloren, was in
+  //  der letzten halben Sekunde getippt wurde.
+  var saveTimer = null;
+  var storageFull = false;
+
+  function saveNow() {
+    clearTimeout(saveTimer);
+    saveTimer = null;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      status(t("saved"));
+      storageFull = false;
     } catch (error) {
-      status(t("storageFull")); // meist ein zu grosses Profilbild
+      //  Meist ein zu grosses Profilbild. Das soll niemand erst beim
+      //  naechsten Neuladen merken: der Hinweis kommt einmal als Meldung
+      //  und bleibt in der Statuszeile stehen, bis es wieder klappt.
+      if (!storageFull) toast(t("storageFull"));
+      storageFull = true;
     }
-  }, 500);
+    showSaveState();
+  }
+
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNow, 500);
+  }
+
+  function flushSave() {
+    if (saveTimer !== null) saveNow();
+  }
+
+  //  Die Statuszeile sagt, was mit den Daten ist – und nur das. Frueher
+  //  meldete auch die Vorschau "Gespeichert", sobald sie fertig gezeichnet
+  //  hatte, und ueberschrieb damit "Speicher voll".
+  function showSaveState() {
+    if (saveTimer !== null) status(t("saving"));
+    else status(storageFull ? t("storageFull") : t("saved"));
+  }
 
   /* ---------------------------------------------------------------- Verlauf */
 
-  //  Der Stand VOR einer Aenderungsserie wird gesichert und erst abgelegt,
-  //  wenn 600 ms nichts mehr passiert – so wird aus einem getippten Wort ein
-  //  einziger Undo-Schritt.
+  function snapshot() {
+    return JSON.stringify(state);
+  }
+
+  //  Aus einem getippten Wort wird ein einziger Undo-Schritt; die Regeln
+  //  dafuer stehen in js/history.js.
   function pushHistory() {
-    if (pendingSnapshot === null) pendingSnapshot = committed;
-    clearTimeout(historyTimer);
-    historyTimer = setTimeout(function () {
-      var current = JSON.stringify(state);
-      if (pendingSnapshot !== null && pendingSnapshot !== current) {
-        history.push(pendingSnapshot);
-        if (history.length > 40) history.shift();
-      }
-      pendingSnapshot = null;
-      committed = current;
-      showUndo();
-    }, 600);
+    steps.touch();
   }
 
   function undo() {
-    if (!history.length) return toast(t("nothingToUndo"));
-    clearTimeout(historyTimer);
-    pendingSnapshot = null;
-    replaceState(JSON.parse(history.pop()));
+    var previous = steps.undo();
+    if (previous === null) return toast(t("nothingToUndo"));
+    replaceState(JSON.parse(previous));
     toast(t("undone"));
+  }
+
+  function redo() {
+    var next = steps.redo();
+    if (next === null) return toast(t("nothingToRedo"));
+    replaceState(JSON.parse(next));
+    toast(t("redone"));
   }
 
   //  Ein Schritt, der den ganzen Stand austauscht – Beispiel, Neu, Import.
   //  Er kommt mit seinem eigenen Rueckweg: im Hinweis steht, dass er sich
   //  zuruecknehmen laesst, und ein Klick darauf tut es.
   function replaceAll(next, message) {
-    history.push(committed);
+    hideWelcome();
+    steps.checkpoint();
     replaceState(next);
     toast(message, { label: t("undo"), run: undo });
   }
@@ -231,21 +243,108 @@
   //  nur die von Strg+Z, dass ein Klick auf "Beispiel" oder "Neu"
   //  umkehrbar ist – und wer das nicht weiss, verliert seine Arbeit.
   function showUndo() {
-    var button = document.getElementById("btn-undo");
-    if (!button) return;
-    button.disabled = !history.length;
+    if (!steps) return;
+    var back = document.getElementById("btn-undo");
+    var ahead = document.getElementById("btn-redo");
+    if (back) back.disabled = !steps.canUndo();
+    if (ahead) ahead.disabled = !steps.canRedo();
   }
 
   function replaceState(next) {
     state = next;
-    committed = JSON.stringify(state);
     committedLocale = state.locale;
     Fields.setState(state);
     applyLocale();
     buildEditor();
     sendToPreview();
     save();
-    showUndo();
+    steps.reset();
+  }
+
+  /*  Ist das Dokument noch das Beispiel oder ein leeres? Dann geht bei
+   *  "Beispiel" und "Neu" nichts verloren, und eine Rueckfrage waere nur im
+   *  Weg. Sonst fragen beide nach: Rueckgaengig gibt es nur, solange der Tab
+   *  offen ist, gespeichert wird der neue Stand aber sofort.
+   */
+  function stable(value) {
+    if (Array.isArray(value)) return "[" + value.map(stable).join(",") + "]";
+    if (value && typeof value === "object") {
+      return "{" + Object.keys(value).sort().map(function (key) {
+        return JSON.stringify(key) + ":" + stable(value[key]);
+      }).join(",") + "}";
+    }
+    return JSON.stringify(value);
+  }
+
+  function untouched() {
+    var current = stable(Model.migrate(JSON.parse(snapshot())));
+    return [Model.createExample(state.locale), Model.createBase(state.locale)]
+      .some(function (doc) { return stable(Model.migrate(doc)) === current; });
+  }
+
+  //  Steht noch genau das Beispiel in dieser Sprache da?
+  function isExample(locale) {
+    var current = JSON.parse(snapshot());
+    current.locale = locale;
+    return stable(Model.migrate(current)) === stable(Model.migrate(Model.createExample(locale)));
+  }
+
+  /* ---------------------------------------------------------- Startkarte */
+
+  var welcome = null;
+
+  function showWelcome() {
+    var pane = document.querySelector(".editor-pane");
+    if (!pane || welcome) return;
+    welcome = el("section", "welcome");
+    welcome.setAttribute("aria-labelledby", "welcome-title");
+    pane.insertBefore(welcome, pane.firstChild);
+    paintWelcome();
+  }
+
+  function paintWelcome() {
+    if (!welcome) return;
+    welcome.textContent = "";
+
+    var close = el("button", "btn btn-icon welcome-close", "✕");
+    close.type = "button";
+    close.title = t("close");
+    close.setAttribute("aria-label", t("close"));
+    close.addEventListener("click", hideWelcome);
+
+    var title = el("h2", "welcome-title", t("welcomeTitle"));
+    title.id = "welcome-title";
+
+    var actions = el("div", "welcome-actions");
+    [
+      { label: t("welcomeEdit"), primary: true, run: function () {
+        var name = document.querySelector('[data-section="person"] input');
+        if (name) name.focus();
+      } },
+      { label: t("welcomeImport"), run: function () { openImport(); } },
+      { label: t("welcomeEmpty"), run: function () {
+        replaceAll(Model.createBase(state.locale), t("newStarted"));
+      } },
+    ].forEach(function (entry) {
+      var button = el("button", "btn" + (entry.primary ? " btn-primary" : ""), entry.label);
+      button.type = "button";
+      button.addEventListener("click", function () {
+        hideWelcome();
+        entry.run();
+      });
+      actions.appendChild(button);
+    });
+
+    welcome.appendChild(close);
+    welcome.appendChild(title);
+    welcome.appendChild(el("p", "welcome-text", t("welcomeText")));
+    welcome.appendChild(actions);
+  }
+
+  function hideWelcome() {
+    if (!welcome) return;
+    welcome.parentNode.removeChild(welcome);
+    welcome = null;
   }
 
   /* -------------------------------------------------------------- Vorschau */
@@ -256,17 +355,19 @@
   //  jemand schnell schreibt oder einen Regler zieht.
   var previewQueued = false;
 
+  function flushPreview() {
+    if (!previewQueued) return;   // schon abgeschickt
+    previewQueued = false;
+    if (!frameReady || !frame.contentWindow) return;
+    frame.contentWindow.postMessage({ type: "rickcv:data", data: state, seq: ++sentSeq },
+      ORIGIN);
+  }
+
   function sendToPreview() {
     if (previewQueued) return;
     previewQueued = true;
 
-    function flush() {
-      if (!previewQueued) return;   // schon abgeschickt
-      previewQueued = false;
-      if (!frameReady || !frame.contentWindow) return;
-      frame.contentWindow.postMessage({ type: "rickcv:data", data: state }, "*");
-    }
-
+    var flush = flushPreview;
     global.requestAnimationFrame(flush);
 
     //  requestAnimationFrame laeuft nur, solange gezeichnet wird – im
@@ -301,12 +402,15 @@
     if (doc && doc.readyState === "complete") markFrameReady();
   }
 
-  function changed(structural) {
+  function changed() {
+    //  Wer tippt, hat sich entschieden; die Startkarte hat ihren Dienst getan.
+    hideWelcome();
     pushHistory();
     sendToPreview();
     save();
-    status(t("saving"));
-    if (structural) updateCounts();
+    showSaveState();
+    //  Zahl und "ausgeblendet" koennen sich mit jedem Schalter aendern.
+    updateCounts();
   }
 
   /* ------------------------------------------------------ Erscheinungsbild */
@@ -364,11 +468,8 @@
 
     var texts = {
       "brand-tagline": "tagline",
-      "btn-example": "example",
-      "btn-reset": "reset",
       "btn-import": "import",
       "btn-export": "export",
-      "btn-open": "openTab",
       "btn-print": "print",
       "zoom-label": "zoom",
       "tab-edit": "tabEdit",
@@ -398,25 +499,47 @@
 
     //  Das Erscheinungsbild ist beschriftet, also faellt es mit der Sprache um.
     applyTheme();
+    paintWelcome();
 
     var titles = {
       "btn-undo": "undoTitle",
-      "btn-example": "exampleTitle",
+      "btn-redo": "redoTitle",
+      "btn-more": "moreTitle",
       "lang-switch": "languageTitle",
-      "btn-reset": "resetTitle",
       "btn-import": "importTitle",
       "btn-export": "exportTitle",
-      "btn-open": "openTabTitle",
+      "btn-print": "printTitle",
       "resizer": "dragWidth",
     };
+    //  Auf dem Mac heisst Strg dort Cmd – die Tastenkuerzel in den Titeln
+    //  sollen stimmen.
+    var mac = /Mac|iPhone|iPad/.test(global.navigator.platform || global.navigator.userAgent);
+    function keys(text) {
+      return mac ? text.replace(/Strg\+Umschalt\+|Ctrl\+Shift\+/g, "⇧⌘").replace(/Strg\+|Ctrl\+/g, "⌘")
+                 : text;
+    }
+
     Object.keys(titles).forEach(function (id) {
       var node = document.getElementById(id);
       if (!node) return;
-      node.title = t(titles[id]);
+      node.title = keys(t(titles[id]));
       //  Wo nur ein Symbol steht, ist der Titel auch der Name des Knopfes.
       if (!node.querySelector(".btn-label") && !node.textContent.trim()) {
-        node.setAttribute("aria-label", t(titles[id]));
+        node.setAttribute("aria-label", t(titles[id]).replace(/\s*\(.*\)$/, ""));
       }
+    });
+
+    //  Was nur Vorlesesoftware hoert, stand fest auf Deutsch.
+    var labels = {
+      "lang-switch": "languageTitle",
+      "preview-frame": "tabPreview",
+      "footer-nav": "footerNavLabel",
+    };
+    Object.keys(labels).forEach(function (id) {
+      var node = document.getElementById(id);
+      if (!node) return;
+      if (id === "preview-frame") node.title = t(labels[id]);
+      else node.setAttribute("aria-label", t(labels[id]));
     });
 
     var fit = document.querySelector('#zoom option[value="fit"]');
@@ -446,6 +569,15 @@
   //  Beim Sprachwechsel werden Vorgabe-Ueberschriften mitgezogen, sofern der
   //  Nutzer sie nicht selbst geaendert hat. Eigene Formulierungen bleiben.
   function switchLocale() {
+    //  Das unveraenderte Beispiel wechselt mit der Sprache. Wer auf einem
+    //  deutschen Rechner ankommt und auf Englisch umstellt, will kein
+    //  deutsches Beispiel mit englischen Ueberschriften – und verliert
+    //  nichts, wenn es ausgetauscht wird.
+    if (committedLocale !== state.locale && isExample(committedLocale)) {
+      replaceState(Model.createExample(state.locale));
+      return;
+    }
+
     var previous = I18n.doc(committedLocale);
     var next = I18n.doc(state.locale);
 
@@ -484,13 +616,173 @@
     showLetterLength();
   }
 
+  //  Kopfzeile eines Abschnitts: Zahl der Eintraege und ob der Block
+  //  gerade nicht im Dokument steht. Beides aendert sich beim Bearbeiten,
+  //  ohne dass der Abschnitt neu gebaut wird.
   function updateCounts() {
     sections.forEach(function (section) {
-      if (!section.count) return;
-      var badge = document.querySelector('[data-section="' + section.id + '"] .section-count');
-      if (badge) badge.textContent = section.count();
+      var node = document.querySelector('[data-section="' + section.id + '"]');
+      if (!node) return;
+      var badge = node.querySelector(".section-count");
+      if (badge && section.count) badge.textContent = section.count();
+      var hidden = !!(section.hidden && section.hidden());
+      node.classList.toggle("is-hidden", hidden);
+      var flag = node.querySelector(".section-hidden");
+      if (flag) flag.hidden = !hidden;
     });
   }
+
+  /* ------------------------------------------------- Aus der Vorschau */
+
+  //  Welcher Abschnitt einen Pfad in den Daten bearbeitet. Die Vorschau
+  //  meldet den Pfad (js/preview.js, render.js setzt ihn als data-edit).
+  var SECTION_FOR = [
+    [/^(contact|contactTitle)(\.|$)/, "person"],
+    [/^photo(\.|$)/, "photo"],
+    [/^profile(\.|$)/, "profile"],
+    [/^(events|sections)(\.|$)/, "events"],
+    [/^skills(\.|$)/, "skills"],
+    [/^languages(\.|$)/, "languages"],
+    [/^interests(\.|$)/, "interests"],
+    [/^(mobility|mobilitySB)(\.|$)/, "mobility"],
+    [/^projects(\.|$)/, "projects"],
+    [/^references(\.|$)/, "references"],
+    [/^footers(\.|$)/, "footer"],
+    [/^(coverLetter\.recipient|settings\.(date|place))$/, "letterAddress"],
+    [/^coverLetter\.signature/, "letterSignature"],
+    [/^coverLetter(\.|$)/, "letterText"],
+  ];
+
+  function revealPath(path) {
+    if (typeof path !== "string" || !/^[\w.]+$/.test(path)) return;
+    var rule = SECTION_FOR.filter(function (entry) { return entry[0].test(path); })[0];
+    if (!rule) return;
+    var section = sections.filter(function (item) { return item.id === rule[1]; })[0];
+    if (!section) return;
+
+    hideWelcome();
+    if (narrowLayout()) showColumn(false);
+    selectGroup(section.group || "resume", false);
+
+    var details = document.querySelector('[data-section="' + section.id + '"]');
+    if (!details) return;
+    if (details.reveal) details.reveal();
+
+    var target = null;
+    var field = null;
+
+    //  Ein Eintrag einer Liste: "events.3", "skills.items.2" …
+    var item = /^(.*)\.(\d+)$/.exec(path);
+    var list = item && details.querySelector('.list-editor[data-path="' + item[1] + '"]');
+    if (list) {
+      target = list.openItem(Number(item[2]));
+      field = target && target.querySelector(".list-item-body input:not([type=checkbox]), " +
+        ".list-item-body textarea, .list-item-body select");
+    }
+    //  Ein Feld: "contact.name", "coverLetter.subject" …
+    if (!target) {
+      field = details.querySelector('[data-path="' + path + '"]');
+      target = field && (field.closest(".field") || field);
+    }
+    //  Eine ganze Liste oder ein Block: "sections", "footers.left" …
+    if (!target) {
+      target = details.querySelector('.list-editor[data-path="' + path + '"]') ||
+        (details.querySelector('[data-path^="' + path + '."]') || {}).parentNode || null;
+      field = target && target.querySelector("input:not([type=checkbox]), textarea, select, " +
+        ".list-item-toggle");
+    }
+    if (!target) target = details;
+
+    //  Was dazwischen zugeklappt ist, geht auf – "Kategorien verwalten" etwa.
+    for (var node = target; node && node !== details; node = node.parentNode) {
+      if (node.tagName === "DETAILS") node.open = true;
+    }
+
+    target.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (field) field.focus({ preventScroll: true });
+    target.classList.remove("flash");
+    void target.offsetWidth;            // die Animation neu starten
+    target.classList.add("flash");
+    setTimeout(function () { target.classList.remove("flash"); }, 1700);
+  }
+
+  /* ------------------------------------------------------------- Reiter */
+
+  //  Vier Reiter statt sechzehn Abschnitte untereinander: was im Lebenslauf
+  //  steht, das Anschreiben, das Aussehen und alles andere. Welcher offen
+  //  ist, merkt sich der Browser – nur fuer diesen Besucher, als
+  //  Bequemlichkeit.
+  var GROUPS = [
+    { id: "resume", label: "tabResume", icon: "user-round" },
+    { id: "letter", label: "tabLetter", icon: "mail" },
+    { id: "design", label: "tabDesign", icon: "palette" },
+    { id: "settings", label: "tabSettings", icon: "settings" },
+  ];
+  var GROUP_KEY = "rickcv.ui.group";
+  var activeGroup = "resume";
+
+  try {
+    var storedGroup = localStorage.getItem(GROUP_KEY);
+    if (GROUPS.some(function (group) { return group.id === storedGroup; })) activeGroup = storedGroup;
+  } catch (error) { /* ohne Speicher beginnt man eben beim Lebenslauf */ }
+
+  function buildTabs() {
+    var bar = document.getElementById("editor-tabs");
+    if (!bar) return;
+    bar.textContent = "";
+    bar.setAttribute("aria-label", t("editorTabs"));
+
+    GROUPS.forEach(function (group) {
+      var tab = el("button", "editor-tab");
+      tab.type = "button";
+      var glyph = el("span", "editor-tab-icon");
+      glyph.setAttribute("aria-hidden", "true");
+      glyph.innerHTML = iconHtml(group.icon);
+      tab.appendChild(glyph);
+      tab.appendChild(el("span", "editor-tab-label", t(group.label)));
+      tab.id = "tab-" + group.id;
+      tab.setAttribute("role", "tab");
+      tab.setAttribute("aria-controls", "editor");
+      var selected = group.id === activeGroup;
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      tab.addEventListener("click", function () { selectGroup(group.id, true); });
+      bar.appendChild(tab);
+    });
+
+    document.getElementById("editor").setAttribute("aria-labelledby", "tab-" + activeGroup);
+  }
+
+  //  Pfeiltasten wandern zwischen den Reitern, wie bei jeder Reiterleiste.
+  function bindTabKeys() {
+    var bar = document.getElementById("editor-tabs");
+    if (!bar) return;
+    bar.addEventListener("keydown", function (event) {
+      var index = GROUPS.map(function (group) { return group.id; }).indexOf(activeGroup);
+      var next = null;
+      if (event.key === "ArrowRight") next = (index + 1) % GROUPS.length;
+      else if (event.key === "ArrowLeft") next = (index + GROUPS.length - 1) % GROUPS.length;
+      else if (event.key === "Home") next = 0;
+      else if (event.key === "End") next = GROUPS.length - 1;
+      if (next === null) return;
+      event.preventDefault();
+      selectGroup(GROUPS[next].id, true);
+      var tab = document.getElementById("tab-" + GROUPS[next].id);
+      if (tab) tab.focus();
+    });
+  }
+
+  function selectGroup(id, scroll) {
+    if (id === activeGroup) return;
+    activeGroup = id;
+    try { localStorage.setItem(GROUP_KEY, id); } catch (error) { /* nur Bequemlichkeit */ }
+    buildEditor();
+    document.querySelector(".editor-pane").scrollTop = 0;
+    //  Die Vorschau geht mit: wer das Anschreiben bearbeitet, will es sehen.
+    if (scroll) scrollPreviewTo(id === "letter" ? "letter" : "top");
+  }
+
+  /* --------------------------------------------------------- Editor bauen */
 
   function buildEditor() {
     var editor = document.getElementById("editor");
@@ -500,17 +792,53 @@
     editor.querySelectorAll(".section").forEach(function (node) {
       openState[node.dataset.section] = node.open;
     });
+    Object.keys(openState).forEach(function (id) { sectionOpen[id] = openState[id]; });
 
     sections = global.RickCVSections.build(sectionContext());
     editor.innerHTML = "";
+    buildTabs();
 
-    sections.forEach(function (section) {
+    sections.filter(function (section) {
+      return (section.group || "resume") === activeGroup;
+    }).forEach(function (section) {
+      //  Ein fester Kopf ohne Auf und Zu – etwa der Schalter, ob es ein
+      //  Anschreiben gibt. Einzuklappen gaebe es da nichts.
+      if (section.plain) {
+        var panel = el("div", "section section-plain");
+        panel.dataset.section = section.id;
+        var inner = el("div", "section-body");
+        section.build(inner);
+        panel.appendChild(inner);
+        editor.appendChild(panel);
+        return;
+      }
+
       var details = el("details", "section");
       details.dataset.section = section.id;
-      details.open = openState[section.id] !== undefined ? openState[section.id] : !!section.open;
+      details.open = sectionOpen[section.id] !== undefined ? sectionOpen[section.id] : !!section.open;
 
       var summary = el("summary");
-      summary.appendChild(el("span", null, section.title));
+      var chevron = el("span", "section-chevron");
+      chevron.setAttribute("aria-hidden", "true");
+      chevron.innerHTML = iconHtml("chevron-right");
+      summary.appendChild(chevron);
+
+      if (section.icon) {
+        var glyph = el("span", "section-icon");
+        glyph.setAttribute("aria-hidden", "true");
+        glyph.innerHTML = iconHtml(section.icon);
+        summary.appendChild(glyph);
+      }
+      summary.appendChild(el("span", "section-title", section.title));
+
+      //  "ausgeblendet": der Block steht gerade nicht im Dokument. Das sah
+      //  man bisher erst nach dem Aufklappen am Schalter darin.
+      var flag = el("span", "section-hidden");
+      flag.innerHTML = iconHtml("eye-off");
+      flag.appendChild(el("span", null, t("sectionHidden")));
+      flag.hidden = true;
+      summary.appendChild(flag);
+
       if (section.count) {
         summary.appendChild(el("span", "section-count", String(section.count())));
       }
@@ -519,21 +847,30 @@
       var body = el("div", "section-body");
       // Inhalte erst bauen, wenn der Abschnitt zum ersten Mal aufgeht:
       // das haelt den Start schnell, auch bei vielen Eintraegen.
-      if (details.open) {
+      function ensureBuilt() {
+        if (body.dataset.built) return;
         section.build(body);
         body.dataset.built = "1";
+        showLetterLength();
       }
+      //  Sofort aufklappen und bauen – "toggle" kommt erst eine Runde
+      //  spaeter, und wer aus der Vorschau hierher springt, braucht die
+      //  Felder jetzt.
+      details.reveal = function () {
+        details.open = true;
+        sectionOpen[section.id] = true;
+        ensureBuilt();
+      };
+      if (details.open) ensureBuilt();
       details.addEventListener("toggle", function () {
-        if (details.open && !body.dataset.built) {
-          section.build(body);
-          body.dataset.built = "1";
-          showLetterLength();
-        }
+        sectionOpen[section.id] = details.open;
+        if (details.open) ensureBuilt();
       });
       details.appendChild(body);
       editor.appendChild(details);
     });
 
+    updateCounts();
     showLetterLength();
   }
 
@@ -583,7 +920,7 @@
     reader.onload = function () {
       var css = String(reader.result);
       var read = Themes.read(css, file.name.replace(/\.css$/i, ""));
-      history.push(committed);
+      steps.checkpoint();
       state.theme = { slug: "", name: read.name, css: css, source: "file" };
       state.settings.template = "custom";
       replaceState(state);
@@ -644,12 +981,9 @@
       var image = new Image();
       image.onload = function () {
         var scale = Math.min(1, maxSide / Math.max(image.width, image.height));
-        var canvas = document.createElement("canvas");
-        canvas.width = Math.max(1, Math.round(image.width * scale));
-        canvas.height = Math.max(1, Math.round(image.height * scale));
-        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
-
-        var small = canvas.toDataURL("image/jpeg", quality);
+        //  Dieselbe Umrechnung wie beim Hochladen: Transparenz bleibt
+        //  erhalten, statt im JPEG schwarz zu werden.
+        var small = Fields.encodeImage(image, image.width * scale, image.height * scale, quality);
         resolve(small.length < dataUrl.length ? small : dataUrl);
       };
       image.onerror = function () { resolve(dataUrl); };
@@ -737,6 +1071,11 @@
   //  Mailprogrammen zu lang. Browser selbst tragen ein Vielfaches.
   var LINK_LIMIT = 100000;
 
+  //  Wieviel ein gepackter Link beim Auspacken hoechstens ergeben darf. Ein
+  //  Dokument mit Foto braucht ein paar Megabyte; wer mehr in einen Link
+  //  packt, will etwas anderes als einen Lebenslauf zeigen.
+  var LINK_BYTES = 16 * 1024 * 1024;
+
   /*  "Als Link kopieren" soll immer einen Link ergeben. Mit einem
    *  Bewerbungsfoto ist das ganze Dokument schnell eine Viertelmillion
    *  Zeichen – frueher kam dann nur die Meldung, der Link sei zu lang, und
@@ -770,12 +1109,17 @@
       if (full.length <= LINK_LIMIT) return { link: full, note: "" };
       return smaller(0);
     }).then(function (result) {
-      status(t("saved"));
+      showSaveState();
       copyText(result.link, function (worked) {
         if (!worked) return toast(t("expCopyFailed"));
         var size = t("expLinkCopied").replace("{kb}", Math.round(result.link.length / 1024));
         toast(result.note ? size + " – " + result.note : size);
       });
+    }, function (error) {
+      //  Ohne diesen Zweig blieb "wird erstellt …" fuer immer stehen.
+      console.warn("Link nicht erstellt:", error);
+      showSaveState();
+      toast(t("expCopyFailed"));
     });
   }
 
@@ -785,18 +1129,16 @@
     });
   }
 
-  function openImport(file, text) {
+  //  printAfter: der Link verlangte den Druckdialog (&print=1). Das gilt nur
+  //  fuer genau diesen Import – bricht jemand ab, oeffnet der naechste,
+  //  ganz andere Import nicht ploetzlich den Druck.
+  function openImport(file, text, printAfter) {
     global.RickCVImportDialog.open({
       t: t,
       state: function () { return state; },
       onApply: function (next, info) {
         replaceAll(next, t("impDone").replace("{count}", info.count));
-        if (pendingPrint) {
-          pendingPrint = false;
-          //  Erst zeichnen lassen, dann drucken: sonst liegt im PDF der
-          //  vorige Stand.
-          setTimeout(printCv, 600);
-        }
+        if (printAfter) printCv();
       },
     }, file, text);
   }
@@ -813,7 +1155,6 @@
    *
    *  Beschrieben in AGENTS.md.
    */
-  var pendingPrint = false;
 
   function fromBase64Url(value) {
     var base64 = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -844,7 +1185,7 @@
     var data = /[#&]data=([^&]+)/.exec(hash);
     if (!packed && !data) return;
 
-    pendingPrint = /[#&]print=1\b/.test(hash);
+    var printAfter = /[#&]print=1\b/.test(hash);
 
     //  Der Link soll nicht im Verlauf stehenbleiben: er enthaelt den
     //  halben Lebenslauf.
@@ -855,15 +1196,15 @@
 
     if (!packed) {
       try {
-        openImport(null, fromBase64Url(data[1]));
+        openImport(null, fromBase64Url(data[1]), printAfter);
       } catch (error) {
         toast(t("importFailed"));
       }
       return;
     }
 
-    global.RickCVImport.inflateRaw(base64UrlToBytes(packed[1])).then(function (bytes) {
-      openImport(null, new TextDecoder().decode(bytes));
+    global.RickCVImport.inflateRaw(base64UrlToBytes(packed[1]), LINK_BYTES).then(function (bytes) {
+      openImport(null, new TextDecoder().decode(bytes), printAfter);
     }).catch(function () {
       toast(t("importFailed"));
     });
@@ -872,31 +1213,63 @@
   /* ----------------------------------------------------------- Kleines Menue */
 
   var openPopup = null;
+  var popupAnchor = null;
 
-  function closePopup() {
+  function closePopup(returnFocus) {
     if (!openPopup) return;
     openPopup.parentNode.removeChild(openPopup);
     openPopup = null;
     document.removeEventListener("mousedown", onPopupOutside, true);
     document.removeEventListener("keydown", onPopupKey, true);
+    if (popupAnchor) {
+      popupAnchor.setAttribute("aria-expanded", "false");
+      if (returnFocus) popupAnchor.focus();
+    }
+    popupAnchor = null;
   }
 
   function onPopupOutside(event) {
-    if (openPopup && !openPopup.contains(event.target)) closePopup();
+    if (openPopup && !openPopup.contains(event.target) &&
+        !(popupAnchor && popupAnchor.contains(event.target))) closePopup(false);
   }
 
+  //  Ein Menue bedient sich wie eines: Pfeiltasten wandern, Pos1 und Ende
+  //  springen, Escape schliesst und gibt den Fokus an den Knopf zurueck.
   function onPopupKey(event) {
-    if (event.key === "Escape") closePopup();
+    var items = Array.prototype.slice.call(openPopup.querySelectorAll(".menu-item"));
+    var index = items.indexOf(document.activeElement);
+    var next = null;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closePopup(true);
+      return;
+    }
+    if (event.key === "Tab") { closePopup(false); return; }
+    if (event.key === "ArrowDown") next = (index + 1) % items.length;
+    else if (event.key === "ArrowUp") next = (index + items.length - 1) % items.length;
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = items.length - 1;
+    if (next === null) return;
+    event.preventDefault();
+    items[next].focus();
   }
 
-  //  entries: [{ label, hint, action }]
+  //  entries: [{ label, hint, icon, action }]
   function popupMenu(anchor, entries) {
-    if (openPopup) { closePopup(); return; }
+    if (openPopup) {
+      var same = popupAnchor === anchor;
+      closePopup(false);
+      if (same) return;
+    }
 
     var menu = el("div", "menu-pop");
+    menu.setAttribute("role", "menu");
+    if (anchor.id) menu.setAttribute("aria-labelledby", anchor.id);
     entries.forEach(function (entry) {
       var item = el("button", "menu-item");
       item.type = "button";
+      item.setAttribute("role", "menuitem");
+      item.tabIndex = -1;
 
       if (entry.icon) {
         var glyph = el("span", "menu-glyph");
@@ -907,7 +1280,7 @@
       item.appendChild(el("strong", null, entry.label));
       if (entry.hint) item.appendChild(el("small", null, entry.hint));
       item.addEventListener("click", function () {
-        closePopup();
+        closePopup(true);
         entry.action();
       });
       menu.appendChild(item);
@@ -922,6 +1295,8 @@
     menu.style.top = (rect.bottom + 6) + "px";
 
     openPopup = menu;
+    popupAnchor = anchor;
+    anchor.setAttribute("aria-expanded", "true");
     document.addEventListener("mousedown", onPopupOutside, true);
     document.addEventListener("keydown", onPopupKey, true);
     menu.querySelector(".menu-item").focus();
@@ -1024,10 +1399,98 @@
     return /Chrome|Chromium|Edg\//.test(ua) && !/OPR\//.test(ua);
   }
 
+  //  Gedruckt wird der Stand, der gerade im Editor steht. Was noch auf dem
+  //  Weg zur Vorschau ist, geht sofort hinaus, und der Druck wartet, bis
+  //  die Vorschau ihn gezeichnet und gemessen hat – Bilder und Schriften
+  //  eingeschlossen. Der Zeitgeber ist nur die Rueckfallebene, falls der
+  //  Rahmen gerade nicht zeichnet (ausgeblendet auf dem Telefon).
+  function whenPainted(fn) {
+    flushPreview();
+    if (paintedSeq >= sentSeq) return fn();
+    var done = false;
+    function run() {
+      if (done) return;
+      done = true;
+      fn();
+    }
+    afterPaint.push({ seq: sentSeq, run: run });
+    setTimeout(run, 2500);
+  }
+
+  /*  Beim ersten PDF steht vor dem Druckdialog, was darin einzustellen ist.
+   *  Frueher war das ein Hinweis von zwei Sekunden, der unter dem
+   *  aufgehenden Druckdialog verschwand – gelesen hat ihn niemand, und das
+   *  PDF bekam Raender und verlor die Hintergrundfarben. Wer es einmal
+   *  gesehen hat, kann es abwaehlen.
+   */
+  var PRINT_GUIDE_KEY = "rickcv.ui.printGuide";
+
+  function wantsPrintGuide() {
+    try { return localStorage.getItem(PRINT_GUIDE_KEY) !== "off"; } catch (error) { return true; }
+  }
+
+  function printGuide() {
+    if (!wantsPrintGuide()) return printCv();
+
+    var steps = el("dl", "print-steps");
+    [
+      [t("printGuideDestination"), t("printGuideDestinationValue")],
+      [t("printGuidePaper"), state.settings.pageSize === "letter" ? "Letter" : "A4"],
+      [t("printGuideMargins"), t("printGuideMarginsValue")],
+      [t("printGuideBackground"), t("printGuideBackgroundValue")],
+    ].forEach(function (row) {
+      steps.appendChild(el("dt", null, row[0]));
+      steps.appendChild(el("dd", null, row[1]));
+    });
+
+    var again = el("label", "print-guide-again");
+    var box = el("input");
+    box.type = "checkbox";
+    again.appendChild(box);
+    again.appendChild(el("span", null, t("printGuideHide")));
+
+    var body = [steps];
+    if (!isChromium()) body.push(el("p", "imp-warn", t("printHintChrome")));
+    body.push(again);
+
+    global.RickCVDialog.open({
+      title: t("printGuideTitle"),
+      message: t("printGuideIntro"),
+      body: body,
+      className: "print-guide",
+      actions: [
+        { label: t("impCancel"), value: false },
+        { label: t("printGuideGo"), value: true, primary: true },
+      ],
+    }).then(function (go) {
+      if (!go) return;
+      if (box.checked) {
+        try { localStorage.setItem(PRINT_GUIDE_KEY, "off"); } catch (error) { /* dann eben wieder */ }
+      }
+      printCv();
+    });
+  }
+
+  //  Die Vorschau an eine Stelle rollen: zum Anfang oder zum Anschreiben.
+  //  Wo das Anschreiben beginnt, meldet der Rahmen mit jeder Messung.
+  var letterTop = 0;
+
+  function scrollPreviewTo(where) {
+    var scroll = document.getElementById("preview-scroll");
+    if (!scroll) return;
+    var top = where === "letter" && letterTop ? letterTop * currentScale : 0;
+    scroll.scrollTo({ top: top, behavior: "smooth" });
+  }
+
   function printCv() {
     if (!frame.contentWindow) return;
-    frame.contentWindow.postMessage({ type: "rickcv:print" }, "*");
-    toast(isChromium() ? t("printHint") : t("printHint") + " " + t("printHintChrome"));
+    whenPainted(function () {
+      frame.contentWindow.postMessage({ type: "rickcv:print" }, ORIGIN);
+    });
+    //  Das Papier, das eingestellt ist – der Hinweis sagte frueher immer A4.
+    var hint = t("printHint").replace("{size}",
+      state.settings.pageSize === "letter" ? "Letter" : "A4");
+    toast(isChromium() ? hint : hint + " " + t("printHintChrome"));
   }
 
   /* ---------------------------------------------------- Zoom & Seitenzahl */
@@ -1035,6 +1498,7 @@
   var previewHeight = 1200;
   var previewPages = 1;
   var zoomMode = "fit";
+  var currentScale = 1;
   var PAGE_HEIGHT = 1123; // 29,7 cm bei 96 dpi
 
   function applyZoom() {
@@ -1052,6 +1516,7 @@
     if (available <= 0) return;
 
     var scale = zoomMode === "fit" ? Math.min(1, available / 820) : Number(zoomMode);
+    currentScale = scale;
 
     //  Passt das Blatt in die Breite, gehoert die Querbewegung der
     //  Wischgeste – sonst muss man es waagerecht schieben koennen. Die
@@ -1133,21 +1598,64 @@
 
   /* ---------------------------------------------------------------- Start */
 
+  //  Frueher ohne Rueckfrage – direkt neben "Neu", und nach einem Neuladen
+  //  war die eigene Arbeit weg.
+  //  Eine Rueckfrage nur, wo es etwas zu verlieren gibt – und im Stil des
+  //  Baukastens, nicht als Kasten des Browsers (js/dialog.js).
+  function ask(titleKey, messageKey, goKey, danger) {
+    if (untouched()) return Promise.resolve(true);
+    return global.RickCVDialog.confirm({
+      title: t(titleKey), message: t(messageKey),
+      confirm: t(goKey), cancel: t("impCancel"), danger: danger,
+    });
+  }
+
+  function loadExample() {
+    ask("confirmExampleTitle", "confirmExample", "confirmExampleGo", false).then(function (yes) {
+      if (!yes) return;
+      hideWelcome();
+      replaceAll(Model.createExample(state.locale), t("exampleLoaded"));
+    });
+  }
+
+  //  Die Rueckfrage bleibt, wo es etwas zu verlieren gibt: "Rueckgaengig"
+  //  gilt nur, solange der Reiter offen ist – wer danach neu laedt, hat
+  //  nichts mehr.
+  function newDocument() {
+    ask("confirmResetTitle", "confirmReset", "confirmResetGo", true).then(function (yes) {
+      if (!yes) return;
+      hideWelcome();
+      replaceAll(Model.createBase(state.locale), t("newStarted"));
+    });
+  }
+
+  function openTab() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      /* Vorschau nutzt dann den zuletzt gespeicherten Stand */
+    }
+    global.open("cv.html", "_blank");
+  }
+
   function bindHeader() {
     document.getElementById("btn-theme").addEventListener("click", cycleTheme);
 
     document.getElementById("lang-switch").addEventListener("change", function (event) {
       if (event.target.value === state.locale) return;
       state.locale = event.target.value;
+      //  Ein Schritt im Verlauf wie jede andere Aenderung: sonst nahm das
+      //  naechste Rueckgaengig den Sprachwechsel stillschweigend mit zurueck.
+      pushHistory();
       switchLocale(); // uebersetzt auch die Vorgabe-Ueberschriften mit
     });
 
-    document.getElementById("btn-print").addEventListener("click", printCv);
+    document.getElementById("btn-print").addEventListener("click", printGuide);
     document.getElementById("btn-export").addEventListener("click", function (event) {
       //  Das PDF steht auch hier, obwohl es einen eigenen Knopf hat: wer
-      //  "Speichern" sucht, sucht meistens genau das.
+      //  "Exportieren" sucht, sucht meistens genau das.
       popupMenu(event.currentTarget, [
-        { label: t("expPdf"), hint: t("expPdfHint"), icon: "printer", action: printCv },
+        { label: t("expPdf"), hint: t("expPdfHint"), icon: "printer", action: printGuide },
         { label: t("expRickcv"), hint: t("expRickcvHint"), icon: "download", action: exportJson },
         { label: t("expJsonResume"), hint: t("expJsonResumeHint"), icon: "braces",
           action: exportJsonResume },
@@ -1155,27 +1663,18 @@
         { label: t("expCopyJson"), hint: t("expCopyJsonHint"), icon: "copy", action: copyJson },
       ]);
     });
+    document.getElementById("btn-more").addEventListener("click", function (event) {
+      popupMenu(event.currentTarget, [
+        { label: t("reset"), hint: t("resetTitle"), icon: "file-plus", action: newDocument },
+        { label: t("example"), hint: t("exampleTitle"), icon: "sparkles", action: loadExample },
+        { label: t("openTab"), hint: t("openTabTitle"), icon: "external-link", action: openTab },
+      ]);
+    });
     document.getElementById("btn-import").addEventListener("click", function () {
       openImport();
     });
-    document.getElementById("btn-example").addEventListener("click", function () {
-      replaceAll(Model.createExample(state.locale), t("exampleLoaded"));
-    });
-    document.getElementById("btn-reset").addEventListener("click", function () {
-      //  Die Rueckfrage bleibt: "Rueckgaengig" gilt nur, solange der
-      //  Reiter offen ist – wer danach neu laedt, hat nichts mehr.
-      if (!global.confirm(t("confirmReset"))) return;
-      replaceAll(Model.createBase(state.locale), t("newStarted"));
-    });
     document.getElementById("btn-undo").addEventListener("click", undo);
-    document.getElementById("btn-open").addEventListener("click", function () {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (error) {
-        /* Vorschau nutzt dann den zuletzt gespeicherten Stand */
-      }
-      global.open("cv.html", "_blank");
-    });
+    document.getElementById("btn-redo").addEventListener("click", redo);
 
     document.getElementById("zoom").addEventListener("change", function (event) {
       zoomMode = event.target.value;
@@ -1199,8 +1698,23 @@
    */
   var onColumnChange = [];
 
+  //  Auf dem Telefon liegt die andere Spalte neben dem Bildschirm. Sie
+  //  bleibt dort unerreichbar – sonst landete Tab in Feldern, die man nicht
+  //  sieht, und Vorlesesoftware laese beide Spalten durcheinander.
+  function narrowLayout() {
+    return global.matchMedia("(max-width: 900px)").matches;
+  }
+
+  function applyInert() {
+    var preview = document.body.classList.contains("show-preview");
+    var narrow = narrowLayout();
+    document.querySelector(".editor-pane").inert = narrow && preview;
+    document.querySelector(".preview").inert = narrow && !preview;
+  }
+
   function showColumn(preview) {
     document.body.classList.toggle("show-preview", preview);
+    applyInert();
 
     document.getElementById("tab-edit")
       .setAttribute("aria-pressed", String(!preview));
@@ -1458,9 +1972,37 @@
     measure();
   }
 
+  //  Der Teiler zwischen Formular und Vorschau: mit der Maus zu ziehen, mit
+  //  den Pfeiltasten zu schieben.
+  function setSidebarWidth(width) {
+    var clamped = Math.round(Math.max(320, Math.min(global.innerWidth * 0.7, width)));
+    document.documentElement.style.setProperty("--ui-sidebar-w", clamped + "px");
+    var resizer = document.getElementById("resizer");
+    resizer.setAttribute("aria-valuenow", String(clamped));
+    resizer.setAttribute("aria-valuemax", String(Math.round(global.innerWidth * 0.7)));
+    applyZoom();
+  }
+
   function bindResizer() {
     var resizer = document.getElementById("resizer");
     var resizing = false;
+
+    resizer.setAttribute("role", "separator");
+    resizer.setAttribute("aria-orientation", "vertical");
+    resizer.setAttribute("aria-controls", "editor");
+    resizer.setAttribute("aria-valuemin", "320");
+    resizer.tabIndex = 0;
+    resizer.addEventListener("keydown", function (event) {
+      var width = document.querySelector(".editor-pane").getBoundingClientRect().width;
+      var step = event.shiftKey ? 80 : 20;
+      if (event.key === "ArrowLeft") width -= step;
+      else if (event.key === "ArrowRight") width += step;
+      else if (event.key === "Home") width = 320;
+      else if (event.key === "End") width = global.innerWidth * 0.7;
+      else return;
+      event.preventDefault();
+      setSidebarWidth(width);
+    });
 
     resizer.addEventListener("pointerdown", function (event) {
       resizing = true;
@@ -1468,13 +2010,22 @@
     });
     resizer.addEventListener("pointermove", function (event) {
       if (!resizing) return;
-      var width = Math.max(320, Math.min(global.innerWidth * 0.7, event.clientX));
-      document.documentElement.style.setProperty("--ui-sidebar-w", width + "px");
-      applyZoom();
+      setSidebarWidth(event.clientX);
     });
     ["pointerup", "pointercancel"].forEach(function (type) {
       resizer.addEventListener(type, function () { resizing = false; });
     });
+  }
+
+  //  Nur wo Text steht, hat der Browser ein eigenes Rueckgaengig. In einem
+  //  Schalter, Regler oder Auswahlfeld hat er keines – dort gilt der Verlauf
+  //  des Baukastens.
+  var TEXT_INPUTS = ["text", "search", "email", "url", "tel", "number", "password"];
+
+  function editsText(target) {
+    var tag = (target.tagName || "").toLowerCase();
+    if (tag === "textarea" || target.isContentEditable) return true;
+    return tag === "input" && TEXT_INPUTS.indexOf((target.type || "text").toLowerCase()) !== -1;
   }
 
   function bindKeys() {
@@ -1485,12 +2036,16 @@
       var tag = (event.target.tagName || "").toLowerCase();
 
       if (key === "z" && !event.shiftKey) {
-        if (tag === "input" || tag === "textarea") return; // dort gilt Browser-Undo
+        if (editsText(event.target)) return; // dort gilt Browser-Undo
         event.preventDefault();
         undo();
+      } else if ((key === "z" && event.shiftKey) || key === "y") {
+        if (editsText(event.target)) return;
+        event.preventDefault();
+        redo();
       } else if (key === "p") {
         event.preventDefault();
-        printCv();
+        printGuide();
       } else if (key === "s") {
         event.preventDefault();
         exportJson();
@@ -1501,16 +2056,19 @@
   function init() {
     state = load();
     frame = document.getElementById("preview-frame");
-    committed = JSON.stringify(state);
     committedLocale = state.locale;
+    steps = global.RickCVHistory.create({ read: snapshot, onChange: showUndo });
 
     Fields.configure({
       state: state,
       onChange: changed,
       t: function (key) { return t(key); },
+      commit: function () { steps.settle(); },
+      notify: function (message) { toast(message, { label: t("undo"), run: undo }); },
     });
 
     global.addEventListener("message", function (event) {
+      if (!fromFrame(event)) return;
       var message = event.data;
       if (!message || typeof message !== "object") return;
 
@@ -1521,9 +2079,15 @@
         showPageCount(message.pages || Math.max(1, Math.round(message.height / PAGE_HEIGHT)));
         showLetterLength(message.letterPages || 0);
         applyZoom();
-        status(t("saved"));
+        paintedSeq = Math.max(paintedSeq, Number(message.seq) || 0);
+        letterTop = Number(message.letterTop) || 0;
+        afterPaint = afterPaint.filter(function (entry) {
+          if (entry.seq > paintedSeq) return true;
+          entry.run();
+          return false;
+        });
       } else if (message.type === "rickcv:error") {
-        status("Fehler: " + message.message);
+        status(t("previewError") + " " + message.message);
       } else if (message.type === "rickcv:dragging") {
         //  Die Vorschau liegt in einem eigenen Rahmen; was dort gezogen
         //  wird, sieht dieses Fenster nicht von selbst.
@@ -1533,6 +2097,8 @@
       } else if (message.type === "rickcv:file") {
         hideDropHint();
         takeFile(message.file);
+      } else if (message.type === "rickcv:edit") {
+        revealPath(message.path);
       }
     });
 
@@ -1540,6 +2106,7 @@
     watchFrame();
     applyLocale();
     buildEditor();
+    bindTabKeys();
     bindHeader();
     bindResizer();
     bindSwipe();
@@ -1547,9 +2114,23 @@
     bindWideLayout();
     bindFileDrop();
     bindKeys();
+    //  Kommt jemand ueber einen Link mit Daten, sagt der Import-Dialog
+    //  schon, was passiert – die Karte stuende nur daneben.
+    if (firstVisit && !/[#&](z|data)=/.test(global.location.hash || "")) showWelcome();
+    //  Die Statuszeile stand bis zur ersten Aenderung fest auf "Bereit" – auf
+    //  Deutsch, auch in der englischen Oberflaeche.
+    status(firstVisit ? t("ready") : t("saved"));
     readHash();
-    global.addEventListener("resize", debounce(applyZoom, 100));
+    global.addEventListener("pagehide", flushSave);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") flushSave();
+    });
+    global.addEventListener("resize", debounce(function () {
+      applyZoom();
+      applyInert();
+    }, 100));
     applyZoom();
+    applyInert();
   }
 
   if (document.readyState === "loading") {

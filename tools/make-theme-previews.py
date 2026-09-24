@@ -16,11 +16,13 @@ import http.server
 import io
 import os
 import re
-import shutil
 import socketserver
 import subprocess
 import sys
 import threading
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from chromium import find_chromium  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 THEMES = os.path.join(ROOT, "themes")
@@ -60,11 +62,11 @@ PAGE = """<!DOCTYPE html><html lang="%(locale)s"><head><meta charset="utf-8">
 
 
 def browser():
-    for name in ("chromium", "chromium-browser", "google-chrome", "google-chrome-stable"):
-        found = shutil.which(name)
-        if found:
-            return found
-    raise SystemExit("Kein Chromium gefunden – ohne Browser keine Vorschau.")
+    found = find_chromium()
+    if not found:
+        raise SystemExit("Kein Chromium gefunden – ohne Browser keine Vorschau. "
+                         "CHROME=/pfad/zum/browser setzen.")
+    return found
 
 
 def serve():

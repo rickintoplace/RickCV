@@ -75,17 +75,25 @@
   display: none;
 }
 
-/*  Kenntnisse als Plaketten statt als Zeile mit Punkten.  */
+/*  Kenntnisse als Plaketten statt als Zeile mit Punkten. Jede ist so breit
+    wie ihr Inhalt, und sie fliessen wie Woerter – in einem Raster gleich
+    breiter Spalten brach ein laengerer Name in der Plakette um, und aus der
+    Pille wurde eine Blase. Wird ein Name laenger als die Zeile, rundet die
+    Plakette nur noch ihre Ecken.  */
 .skills-container {
-  gap: 0.4em 0.5em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em 0.45em;
 }
 
 .skills-container .skills {
   gap: 0.45em;
+  align-items: center;
   border: 1px solid color-mix(in oklab, var(--accent-color), transparent 65%);
-  border-radius: 999px;
+  border-radius: 1em;
   padding: 0.12em 0.7em;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  max-width: 100%;
 }
 
 .skills-container .skill-description {

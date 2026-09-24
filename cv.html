@@ -2,12 +2,22 @@
 <!--
     cv.html – das eigentliche Dokument (Lebenslauf, Anschreiben, Textfassung).
 
-    Laeuft im Vorschaurahmen des Builders und wird per postMessage befuellt.
-    Direkt geoeffnet zeigt es den zuletzt gespeicherten Stand.
+    Laeuft im Vorschaurahmen des Builders und wird per postMessage befuellt
+    (js/preview.js). Direkt geoeffnet zeigt es den zuletzt gespeicherten Stand.
 -->
 <html lang="de">
   <head>
     <meta charset="utf-8" />
+    <!--  Was dieses Dokument laden darf: Skripte, Schriften und Bilder von
+          der eigenen Adresse, Bilder und Schriften auch als data:. Kein
+          Theme und kein importiertes Dokument kann damit etwas aus dem
+          Netz holen oder ein Skript einschleusen. Inline-Stile bleiben
+          erlaubt: das Theme ist ein <style>, und der Renderer setzt Masse
+          als style-Attribut. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'"
+    />
     <title>Lebenslauf</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="fonts/fonts.css" />
@@ -30,7 +40,44 @@
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
         flex-shrink: 0;
       }
+      /*  Umrandung und Knopf, mit denen die Vorschau in den Editor fuehrt
+          (js/preview.js). Sie stehen ausserhalb der Kaskadenebenen und
+          gewinnen damit gegen jedes Theme – und sie gehoeren nie ins PDF. */
+      .rickcv-edit-frame {
+        position: absolute;
+        z-index: 1000;
+        border: 2px solid rgba(40, 111, 111, 0.55);
+        border-radius: 6px;
+        background: rgba(40, 111, 111, 0.05);
+        pointer-events: none;
+      }
+      .rickcv-edit-button {
+        position: absolute;
+        z-index: 1001;
+        margin: 0;
+        padding: 3px 9px 3px 8px;
+        border: 0;
+        border-radius: 6px 6px 0 6px;
+        background: #286f6f;
+        color: #fff;
+        font: 600 12px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+        text-transform: none;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+      }
+      .rickcv-edit-button:hover {
+        background: #1f5a5a;
+      }
+      .rickcv-edit-frame[hidden],
+      .rickcv-edit-button[hidden] {
+        display: none;
+      }
       @media print {
+        .rickcv-edit-frame,
+        .rickcv-edit-button {
+          display: none !important;
+        }
         body {
           background: #fff;
         }
@@ -57,162 +104,6 @@
     <script src="js/model.js"></script>
     <script src="js/ats.js"></script>
     <script src="js/render.js"></script>
-    <script>
-      (function () {
-        "use strict";
-        var STORAGE_KEY = "rickcv.data.v3";
-        var LEGACY_KEY = "rickcv.data.v2";
-        //  Das Blattmass kommt aus den Daten: A4 oder US Letter.
-
-        //  Der Seitenumbruch des Anschreibens wird gemessen, und Messen setzt
-        //  die endgueltige Schrift voraus: laedt sie erst spaeter nach,
-        //  stimmen Zeilenumbruch und Seitengrenze nicht mehr. Deshalb merkt
-        //  sich die Seite ihren letzten Stand und zeichnet ihn neu, sobald
-        //  die Schriften stehen.
-        var lastData = null;
-
-        function paint(data) {
-          lastData = data;
-          try {
-            RickCVRender.render(document, data);
-          } catch (error) {
-            console.error("RickCV Render-Fehler:", error);
-            parent.postMessage(
-              { type: "rickcv:error", message: String(error && error.message) },
-              "*"
-            );
-          }
-        }
-
-        //  Die Seitenzahl wird aus der tatsaechlichen Hoehe der Bloecke
-        //  berechnet – der Builder zeigt sie neben dem Zoom an.
-        function countPages() {
-          var perPage = RickCVRender.pageHeightPx(lastData || {});
-          var pages = 0;
-          document.querySelectorAll(
-            ".resume_wrapper, .cover-letter_wrapper, .ats-appendix_wrapper"
-          ).forEach(function (block) {
-            pages += Math.max(1, Math.ceil(block.offsetHeight / perPage - 0.02));
-          });
-          return pages || 1;
-        }
-
-        //  Hoehe und Seitenzahl erzwingen ein Layout. Das kostet, also wird
-        //  bei mehreren Renderdurchgaengen kurz hintereinander nur einmal
-        //  gemessen – gezeichnet wird trotzdem sofort.
-        var reportQueued = false;
-        function scheduleReport() {
-          if (reportQueued) return;
-          reportQueued = true;
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              reportQueued = false;
-              report();
-            });
-          });
-        }
-
-        function report() {
-          parent.postMessage(
-            {
-              type: "rickcv:height",
-              height: document.documentElement.scrollHeight,
-              pages: countPages(),
-              letterPages: RickCVRender.letterPages(),
-            },
-            "*"
-          );
-        }
-
-        //  Eine Datei, die jemand auf die Vorschau zieht, gehoert dem
-        //  Baukasten und nicht diesem Rahmen: Chrome wuerde sie sonst
-        //  einfach anzeigen und die Vorschau waere weg. Gemeldet wird auch
-        //  das Ziehen selbst – das Fenster darueber zeigt daraufhin an,
-        //  dass es die Datei nimmt.
-        if (window.parent !== window) {
-          ["dragenter", "dragover"].forEach(function (name) {
-            document.addEventListener(name, function (event) {
-              if (!event.dataTransfer) return;
-              event.preventDefault();
-              parent.postMessage({ type: "rickcv:dragging" }, "*");
-            });
-          });
-
-          document.addEventListener("dragleave", function (event) {
-            if (event.relatedTarget) return;
-            parent.postMessage({ type: "rickcv:dragend" }, "*");
-          });
-
-          document.addEventListener("drop", function (event) {
-            event.preventDefault();
-            var file = event.dataTransfer && event.dataTransfer.files[0];
-            parent.postMessage({ type: "rickcv:file", file: file || null }, "*");
-          });
-        }
-
-        window.addEventListener("message", function (event) {
-          var message = event.data;
-          if (!message || typeof message !== "object") return;
-
-          if (message.type === "rickcv:data") {
-            paint(message.data);
-            scheduleReport();
-          } else if (message.type === "rickcv:print") {
-            window.focus();
-            window.print();
-          }
-        });
-
-        // Direktaufruf: gespeicherten Stand oder Beispiel zeigen.
-        var initial = null;
-        try {
-          var stored =
-            localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_KEY);
-          if (stored) initial = RickCVModel.migrate(JSON.parse(stored));
-        } catch (error) {
-          /* kein Speicher verfuegbar – dann eben das Beispiel */
-        }
-        paint(initial || RickCVModel.createExample("de"));
-
-        window.addEventListener("load", report);
-
-        if (document.fonts && document.fonts.ready) {
-          document.fonts.ready.then(function () {
-            if (lastData) paint(lastData);
-            scheduleReport();
-          });
-        }
-
-        /*  Allein geoeffnet – ohne Baukasten drumherum – passt sich das
-         *  Blatt der Fensterbreite an, indem es verkleinert wird. Es wird
-         *  nicht umgebaut: sonst saehe man etwas anderes als im PDF, und
-         *  die Seitenaufteilung faende andere Umbrueche als der Drucker.
-         */
-        function fitToWindow() {
-          if (window.parent !== window) return; // im Vorschaurahmen skaliert der Baukasten
-          var sheet = document.querySelector(".resume_wrapper, .cover-letter_wrapper");
-          if (!sheet) return;
-
-          var width = sheet.getBoundingClientRect().width / (currentScale || 1);
-          var room = document.documentElement.clientWidth - 16;
-          currentScale = Math.min(1, room / width);
-
-          var host = document.querySelector(".document");
-          host.style.transformOrigin = "top center";
-          host.style.transform = currentScale < 1 ? "scale(" + currentScale + ")" : "";
-          //  Der verkleinerte Inhalt beansprucht sonst weiter die volle
-          //  Hoehe und haengt unten ins Leere.
-          host.style.height = currentScale < 1
-            ? host.scrollHeight * currentScale + "px" : "";
-        }
-
-        var currentScale = 1;
-        window.addEventListener("resize", fitToWindow);
-        window.addEventListener("load", fitToWindow);
-        setTimeout(fitToWindow, 0);
-
-        parent.postMessage({ type: "rickcv:ready" }, "*");
-      })();
-    </script>
+    <script src="js/preview.js"></script>
   </body>
 </html>

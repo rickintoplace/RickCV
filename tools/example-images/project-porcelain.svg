@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Projektbild "Privatsammlung – Sammelleidenschaft fuer Altporzellan".
+       Eigene Zeichnung fuer RickCV, CC0: eine Tasse mit Zwiebelmuster auf
+       ihrer Untertasse. Im Dokument erscheint es als Kreis. -->
+  <defs>
+    <linearGradient id="cup" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f4f6f8"/>
+      <stop offset="0.55" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dfe4ea"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="#dbe7f2"/>
+  <path d="M0 262 H400 V400 H0 Z" fill="#c9d8e6"/>
+
+  <!-- Untertasse -->
+  <ellipse cx="200" cy="292" rx="150" ry="36" fill="#bfcbd8"/>
+  <ellipse cx="200" cy="284" rx="150" ry="34" fill="url(#cup)"/>
+  <ellipse cx="200" cy="284" rx="118" ry="24" fill="none" stroke="#2f5a9e" stroke-width="3"/>
+  <ellipse cx="200" cy="282" rx="70" ry="13" fill="#e6ebf0"/>
+
+  <!-- Henkel -->
+  <path d="M280 178 Q336 172 332 214 Q328 254 274 248" fill="none" stroke="#2f5a9e" stroke-width="24" stroke-linecap="round"/>
+  <path d="M280 178 Q336 172 332 214 Q328 254 274 248" fill="none" stroke="#f7f9fb" stroke-width="15" stroke-linecap="round"/>
+
+  <!-- Tasse -->
+  <path d="M110 150 H290 Q290 262 200 276 Q110 262 110 150 Z" fill="url(#cup)"/>
+  <ellipse cx="200" cy="150" rx="90" ry="18" fill="#ffffff" stroke="#c7d0da" stroke-width="3"/>
+  <ellipse cx="200" cy="152" rx="76" ry="12" fill="#8a5a3c"/>
+  <path d="M132 150 Q200 170 268 150" fill="none" stroke="#2f5a9e" stroke-width="4"/>
+
+  <!-- Zwiebelmuster: eine schraege Ranke mit zwei Blueten -->
+  <g fill="none" stroke="#2f5a9e" stroke-width="4" stroke-linecap="round">
+    <path d="M128 232 Q170 222 196 196 Q222 170 270 176"/>
+  </g>
+  <g fill="#2f5a9e">
+    <path d="M160 226 q-4 -22 14 -28 q2 18 -14 28 Z"/>
+    <path d="M186 206 q20 6 30 -8 q-18 -8 -30 8 Z"/>
+    <path d="M214 186 q-4 -22 14 -28 q2 18 -14 28 Z"/>
+    <path d="M240 178 q18 10 30 -2 q-16 -10 -30 2 Z"/>
+    <g transform="translate(146 214)">
+      <circle r="7" cx="0" cy="-10"/><circle r="7" cx="10" cy="0"/>
+      <circle r="7" cx="0" cy="10"/><circle r="7" cx="-10" cy="0"/>
+      <circle r="5" fill="#ffffff"/>
+    </g>
+    <g transform="translate(256 206) scale(0.8)">
+      <circle r="7" cx="0" cy="-10"/><circle r="7" cx="10" cy="0"/>
+      <circle r="7" cx="0" cy="10"/><circle r="7" cx="-10" cy="0"/>
+      <circle r="5" fill="#ffffff"/>
+    </g>
+  </g>
+
+  <!-- Dampf -->
+  <g fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.9">
+    <path d="M176 118 Q164 96 180 80 Q194 64 182 44"/>
+    <path d="M220 120 Q208 100 222 84 Q236 68 226 52"/>
+  </g>
+</svg>

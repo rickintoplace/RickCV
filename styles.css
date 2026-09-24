@@ -742,10 +742,26 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   flex-direction: row-reverse;
   justify-content: flex-end;
   text-indent: 0.2em;
-  /*  Was nicht in die Fuellung passt, wird abgeschnitten statt farblos
-      daneben zu liegen – wer lange Stufen schreibt, stellt "neben dem
-      Balken" ein. */
+  white-space: nowrap;
   overflow: hidden;
+}
+
+/*  Passt die Stufe nicht in die Fuellung, steht sie gleich dahinter in der
+    freien Spur, in Schriftfarbe (render.js misst das). text-indent in
+    Prozent bezieht sich auf die Breite der Fuellung – genau so weit
+    rueckt der Text nach rechts. */
+.resume_wrapper
+  .resume_left
+  .resume_language
+  .language_list
+  .language_bar[data-level="outside"]
+  p
+  span {
+  display: block;
+  line-height: 1em;
+  overflow: visible;
+  color: var(--sidebar-font-color);
+  text-indent: calc(100% + 0.3em);
 }
 
 /*  Die Stufe unter dem Balken – die Einstellung "darunter". Dort ist Platz
@@ -937,9 +953,15 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 .skills {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   gap: 0 0.5em;
   min-width: 0;
+}
+
+/*  Ein Name, der in seiner Spalte umbrechen wuerde, bekommt die ganze
+    Zeile – der Renderer misst das und setzt data-wide. */
+.skills[data-wide] {
+  grid-column: 1 / -1;
 }
 
 /*  Die Punkte stehen im Markup hinter dem Namen – im Raster werden beide
@@ -949,29 +971,40 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   grid-row: 1;
 }
 
+/*  Getrennt wird nach Silben, nicht irgendwo: "anywhere" machte aus
+    "Verhandlungsführung" ein "Verhandlungsführu" mit "ng" darunter. Nur ein
+    Wort, das allein breiter ist als die Zeile, bricht noch hart. */
 .skill-description {
   grid-column: 2;
   grid-row: 1;
   text-align: left;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 /*  Die fuenf Punkte kommen als SVG aus render.js. Frueher standen hier
     Zeichen (U+25CF) bei 2.1rem: das Zeichen fehlt in den Textschriften,
     also sprang jeder Browser auf eine andere Ersatzschrift – in Firefox
     kamen die Punkte deutlich groesser heraus und ueberlappten sich. */
+/*  Die Punkte stehen auf der Hoehe der ersten Zeile, auch wenn der Name
+    darunter weiterlaeuft. */
 .rank {
   display: flex;
   align-items: center;
   flex: none;
   max-width: min-content;
+  height: 1lh;
 }
 
+/*  overflow: visible – die Kreise beruehren den Rand ihres Kastens. Liegt
+    der auf einem Bruchteil eines Pixels (die Punkte stehen auf der Hoehe
+    der ersten Zeile, siehe .rank), fiele ihre Unterkante sonst heraus. */
 .rank-dots {
   height: 0.8em;
   width: auto;
   display: block;
+  overflow: visible;
 }
 
 .rank-empty {

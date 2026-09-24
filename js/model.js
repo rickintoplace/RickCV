@@ -251,6 +251,37 @@
 
   /* -------------------------------------------------------------- Beispiel */
 
+  //  Die Bilder des Beispiels liegen im Projekt (img/example/; die
+  //  Projektbilder sind in tools/example-images/ gezeichnet). Frueher kamen
+  //  sie von ibb.co, pexels und opengameart – wer den Baukasten oeffnete,
+  //  meldete sich damit bei drei Fremden.
+  var EXAMPLE_IMAGES = {
+    photo: "./img/example/photo.webp",
+    palm: "./img/example/project-palm.webp",
+    porcelain: "./img/example/project-porcelain.webp",
+  };
+
+  //  Wer mit dem Beispiel angefangen hat, traegt dessen alte Adressen noch
+  //  im Speicher. Sie werden gegen die neuen Bilder getauscht – geladen
+  //  wuerden sie ohnehin nicht mehr (siehe isLocalImage).
+  var OLD_EXAMPLE_IMAGES = {
+    "https://i.ibb.co/QKnK1ry/image.webp": EXAMPLE_IMAGES.photo,
+    "https://opengameart.org/sites/default/files/1_7.jpg": EXAMPLE_IMAGES.palm,
+    "https://images.pexels.com/photos/1724184/pexels-photo-1724184.jpeg?auto=compress&cs=tinysrgb&w=200":
+      EXAMPLE_IMAGES.porcelain,
+  };
+
+  //  Ein Bild, das ohne Netz auskommt: eingebettet (data:) oder eine Datei
+  //  neben dem Baukasten. Adressen im Netz laedt RickCV nicht – ein
+  //  Lebenslauf soll nicht verraten, wann und wo er geoeffnet wird, und
+  //  cv.html verbietet es per Content-Security-Policy ohnehin.
+  function isLocalImage(value) {
+    var src = String(value === null || value === undefined ? "" : value).trim();
+    if (/^data:image\//i.test(src)) return true;
+    if (/^[a-z][a-z0-9+.-]*:/i.test(src) || /^\/\//.test(src)) return false;
+    return /^[\w./-]+$/.test(src) && !/\.\./.test(src);
+  }
+
   var EXAMPLE_DE = {
     place: "Musterstadt",
     profileText:
@@ -285,13 +316,13 @@
     projects: [
       {
         name: "aufdiepalme.de",
-        img: "https://opengameart.org/sites/default/files/1_7.jpg",
+        img: EXAMPLE_IMAGES.palm,
         url: "https://github.com/rickintoplace/RickCV",
         description: "Baumschule für Problempflanzen",
       },
       {
         name: "Privatsammlung",
-        img: "https://images.pexels.com/photos/1724184/pexels-photo-1724184.jpeg?auto=compress&cs=tinysrgb&w=200",
+        img: EXAMPLE_IMAGES.porcelain,
         url: "https://github.com/rickintoplace/RickCV",
         description: "Sammelleidenschaft für Altporzellan",
       },
@@ -401,13 +432,13 @@
     projects: [
       {
         name: "outonalimb.co.uk",
-        img: "https://opengameart.org/sites/default/files/1_7.jpg",
+        img: EXAMPLE_IMAGES.palm,
         url: "https://github.com/rickintoplace/RickCV",
         description: "A nursery for difficult houseplants",
       },
       {
         name: "The collection",
-        img: "https://images.pexels.com/photos/1724184/pexels-photo-1724184.jpeg?auto=compress&cs=tinysrgb&w=200",
+        img: EXAMPLE_IMAGES.porcelain,
         url: "https://github.com/rickintoplace/RickCV",
         description: "Devoted hoarding of antique porcelain",
       },
@@ -488,7 +519,7 @@
     var data = createBase(locale || "de");
     var ex = (locale || "de") === "en" ? EXAMPLE_EN : EXAMPLE_DE;
 
-    data.photo.src = "https://i.ibb.co/QKnK1ry/image.webp";
+    data.photo.src = EXAMPLE_IMAGES.photo;
     data.profile.text = ex.profileText;
     data.contact = JSON.parse(JSON.stringify(ex.contact));
     data.interests.items = JSON.parse(JSON.stringify(ex.interests));
@@ -546,12 +577,310 @@
     return target;
   }
 
+  /* ---------------------------------------------------------------- Datum */
+
+  //  Ein Zeitpunkt als fortlaufende Monatszahl: "04/2019" und "2019" – so
+  //  steht es in AGENTS.md, und so schreibt es der Import. Frueher rechneten
+  //  Renderer und Textfassung jeder fuer sich, und "2019" kam dabei als
+  //  2019 heraus, "04/2019" als 24232: eine Station mit blosser Jahreszahl
+  //  sortierte vor jede andere. atEnd: ein blosses Jahr als Ende meint
+  //  dessen Dezember. Was sich nicht lesen laesst ("20XX"), ergibt null.
+  function monthIndex(value, atEnd) {
+    var text = String(value === null || value === undefined ? "" : value).trim();
+    var match = /^(\d{1,2})\/(\d{4})$/.exec(text);
+    if (match) {
+      var month = Number(match[1]);
+      return month >= 1 && month <= 12 ? Number(match[2]) * 12 + month - 1 : null;
+    }
+    match = /^(\d{4})$/.exec(text);
+    return match ? Number(match[1]) * 12 + (atEnd ? 11 : 0) : null;
+  }
+
+  function currentMonth(now) {
+    var date = now || new Date();
+    return date.getFullYear() * 12 + date.getMonth();
+  }
+
+  //  Beginn und Ende einer Station. "bis heute" endet diesen Monat; ohne
+  //  Ende ist eine Station ein Zeitpunkt.
+  function eventStart(event) {
+    return monthIndex(event && event.start, false);
+  }
+
+  function eventEnd(event, now) {
+    if (!event) return null;
+    if (event.present) return currentMonth(now);
+    var end = monthIndex(event.end, true);
+    return end === null ? monthIndex(event.start, true) : end;
+  }
+
+  //  Zum Sortieren: neueste zuerst oder zuletzt – undatierte Stationen
+  //  zaehlen als 0 und bleiben damit beisammen am Anfang der Reihe.
+  function compareStart(a, b) {
+    return (eventStart(a) || 0) - (eventStart(b) || 0);
+  }
+
+  /* --------------------------------------------------------------- Pruefung */
+
+  //  Ein Dokument kommt nicht nur aus dem eigenen Editor, sondern aus
+  //  Dateien, Links und Sprachmodellen. Was dort an einer Stelle steht, an
+  //  der der Editor nur eine Auswahl anbietet, landet im Dokument als
+  //  Klasse, als Stilangabe oder in einem Attribut – ein fremder Wert hat
+  //  dort nichts verloren. Also gilt, was der Editor anbietet, und sonst die
+  //  Vorgabe.
+  var CHOICES = {
+    "settings.pageSize": ["a4", "letter"],
+    "settings.dateFormat": ["short", "full"],
+    "settings.alignText": ["left", "justify"],
+    "settings.pageMode": ["flow", "single", "two"],
+    "settings.projectsColumn": ["sidebar", "main"],
+    "settings.page2.sidebar": ["keep", "none"],
+    "style.sidebarMode": ["light", "dark", "custom"],
+    "style.profileAlign": ["auto", "left", "center", "justify"],
+    "style.iconSet": ["lucide", "material"],
+    "style.iconColor": ["accent", "text", "custom"],
+    "style.iconBg": ["none", "circle", "rounded"],
+    "photo.shape": ["band", "rounded", "circle"],
+    "languages.levelMode": ["inside", "below", "none"],
+    "ats.mode": ["off", "appendix", "hidden"],
+    "footers.left.mode": ["iconText", "icons"],
+    "footers.right.mode": ["iconText", "icons"],
+    "footers.left.page": ["last", "all", "1", "2"],
+    "footers.right.page": ["last", "all", "1", "2"],
+  };
+
+  var DATE_MODES = ["auto", "range", "start", "none"];
+
+  var COLORS = [
+    "accentColor", "fontColor", "backgroundColor", "sidebarColor",
+    "sidebarFontColor", "emptyColor", "iconColorCustom", "iconBgColor",
+  ];
+
+  //  Eine Farbe ist eine Farbe: Hexwert, Name oder eine Farbfunktion wie
+  //  rgb() und var(). Was sonst in einer Stilangabe stehen kann – url()
+  //  vor allem –, laedt im Zweifel etwas aus dem Netz, und genau das soll
+  //  ein Lebenslauf nicht tun.
+  var COLOR_VALUE = /^(#[0-9a-f]{3,8}|[a-z]+|(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix|var)\([-\w\s.,%#()/]*\))$/i;
+
+  function isColor(value) {
+    var text = String(value === null || value === undefined ? "" : value).trim();
+    return COLOR_VALUE.test(text) && !/url\s*\(|image|\\/i.test(text);
+  }
+
+  function copy(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function isObject(value) {
+    return !!value && typeof value === "object" && !Array.isArray(value);
+  }
+
+  function pathGet(data, path) {
+    return path.split(".").reduce(function (current, key) {
+      return current && typeof current === "object" ? current[key] : undefined;
+    }, data);
+  }
+
+  function pathSet(data, path, value) {
+    var keys = path.split(".");
+    var last = keys.pop();
+    var target = keys.reduce(function (current, key) {
+      return current && typeof current === "object" ? current[key] : null;
+    }, data);
+    if (target && typeof target === "object") target[last] = value;
+  }
+
+  //  Jeder Wert bekommt den Typ, den die Vorlage an dieser Stelle hat. Eine
+  //  Zahl als Text wird zur Zahl, ein Text an der Stelle einer Liste zur
+  //  Vorgabe – was der Renderer nicht versteht, soll ihn nicht zum Absturz
+  //  bringen, und ein Absturz beim Laden wuerde sich bei jedem Neuladen
+  //  wiederholen.
+  function conform(target, template) {
+    Object.keys(template).forEach(function (key) {
+      var fallback = template[key];
+      var value = target[key];
+
+      if (typeof fallback === "number") {
+        var number = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+        target[key] = typeof number === "number" && isFinite(number) ? number : fallback;
+      } else if (typeof fallback === "boolean") {
+        if (typeof value === "boolean") return;
+        target[key] = value === 1 || value === "1" || value === "true" ? true
+          : value === 0 || value === "0" || value === "false" || value === "" ? false
+          : fallback;
+      } else if (typeof fallback === "string") {
+        if (typeof value === "string") return;
+        target[key] = typeof value === "number" && isFinite(value) ? String(value) : fallback;
+      } else if (Array.isArray(fallback)) {
+        if (!Array.isArray(value)) target[key] = copy(fallback);
+      } else if (isObject(fallback)) {
+        if (!isObject(value)) target[key] = copy(fallback);
+        else conform(value, fallback);
+      }
+    });
+    return target;
+  }
+
+  //  Ein Symbol steht als { set, name } im Dokument. Ein Sprachmodell
+  //  schreibt gern nur den Namen – Lucide trennt mit Bindestrich, Material
+  //  Symbols mit Unterstrich.
+  function iconOf(value, fallback) {
+    if (isObject(value) && typeof value.name === "string" && value.name) {
+      return { set: typeof value.set === "string" && value.set ? value.set : "lucide",
+               name: value.name };
+    }
+    if (typeof value === "string" && value.trim()) {
+      return upgradeIcon(value.trim(), /_/.test(value) ? "material" : "lucide");
+    }
+    return copy(fallback);
+  }
+
+  //  Zeilen einer Station: eine Liste von Texten. Ein einzelner Text mit
+  //  Zeilenumbruechen ist dieselbe Liste, nur anders aufgeschrieben.
+  function textLines(value) {
+    if (typeof value === "string") {
+      return value.split("\n").filter(function (line) { return line.trim(); });
+    }
+    if (!Array.isArray(value)) return [];
+    return value.filter(function (line) {
+      return typeof line === "string" || (typeof line === "number" && isFinite(line));
+    }).map(String);
+  }
+
+  //  Eintraege einer Liste: jeder ein Objekt mit den Feldern der Vorlage.
+  //  fillMissing laesst Listen bewusst in Ruhe – deshalb dieser Durchgang.
+  function conformItems(list, template, extra) {
+    return (Array.isArray(list) ? list : []).filter(isObject).map(function (item, index) {
+      //  Vor dem Angleichen festhalten: conform ersetzt ein Symbol, das nur
+      //  als Name dasteht, sonst gleich durch die Vorgabe.
+      var original = item.icon;
+      var result = conform(fillMissing(item, template), template);
+      if (template.icon) result.icon = iconOf(original, template.icon);
+      if (extra) extra(result, index);
+      return result;
+    });
+  }
+
+  var ITEM_TEMPLATES = {
+    skills: { name: "", rank: 0 },
+    languages: { name: "", level: "", percentage: 0 },
+    interests: { name: "", icon: icon("lucide", "star") },
+    projects: { name: "", img: "", url: "", description: "" },
+    mobility: { name: "" },
+    mobilitySB: { name: "", icon: icon("lucide", "car-front") },
+    references: { name: "", role: "", company: "", contact: "" },
+  };
+
+  //  Absaetze des Anschreibens. Ein einzelner Text ist einer oder mehrere,
+  //  getrennt durch Leerzeilen – innerhalb eines Absatzes bleibt ein
+  //  Zeilenumbruch ein Zeilenumbruch.
+  function paragraphsOf(value) {
+    if (typeof value === "string") {
+      return value.split(/\n\s*\n/).filter(function (part) { return part.trim(); });
+    }
+    return textLines(value);
+  }
+
+  function conformDocument(data, base) {
+    //  Vor dem Angleichen lesen: conform ersetzt einen Text, wo eine Liste
+    //  stehen sollte, sonst gleich durch die Vorgabe.
+    var paragraphs = isObject(data.coverLetter) ? paragraphsOf(data.coverLetter.paragraphs) : [];
+    conform(data, base);
+
+    Object.keys(CHOICES).forEach(function (path) {
+      if (CHOICES[path].indexOf(pathGet(data, path)) === -1) {
+        pathSet(data, path, pathGet(base, path));
+      }
+    });
+
+    COLORS.forEach(function (key) {
+      if (!isColor(data.style[key])) data.style[key] = base.style[key];
+    });
+
+    ["skills", "mobility", "references"].forEach(function (key) {
+      data[key].icon = iconOf(data[key].icon, base[key].icon);
+    });
+
+    Object.keys(ITEM_TEMPLATES).forEach(function (key) {
+      data[key].items = conformItems(data[key].items, ITEM_TEMPLATES[key]);
+    });
+
+    //  Die Kategorien. Ihre id steht im Dokument als Attribut und wird dort
+    //  wiedergefunden; sie muss deshalb ein Text sein und eindeutig.
+    var seen = {};
+    data.sections = conformItems(data.sections, {
+      id: "", title: "", icon: icon("lucide", "briefcase"), atsRole: "", show: true, page: 1,
+    }, function (section, index) {
+      if (!section.id || seen[section.id]) section.id = "s" + index + "-" + (section.id || "x");
+      seen[section.id] = true;
+      if (ATS_ROLES.indexOf(section.atsRole) === -1) {
+        section.atsRole = ATS_ROLES.indexOf(section.id) !== -1 ? section.id : "other";
+      }
+    });
+
+    data.events = (Array.isArray(data.events) ? data.events : []).filter(isObject)
+      .map(function (event) {
+        var template = emptyEvent("");
+        var description = textLines(event.description);
+        var list = textLines(event.list);
+        var original = event.icon;
+        var result = conform(fillMissing(event, template), template);
+        result.description = description;
+        result.list = list;
+        result.icon = iconOf(original, template.icon);
+        if (!isColor(result.color)) result.color = template.color;
+        if (DATE_MODES.indexOf(result.dateMode) === -1) result.dateMode = "auto";
+        if (!result.sectionId && data.sections[0]) result.sectionId = data.sections[0].id;
+        return result;
+      });
+
+    ["left", "right"].forEach(function (side) {
+      data.footers[side].links = conformItems(data.footers[side].links, emptyFooterLink());
+    });
+
+    if (OLD_EXAMPLE_IMAGES[data.photo.src]) data.photo.src = OLD_EXAMPLE_IMAGES[data.photo.src];
+    data.projects.items.forEach(function (item) {
+      if (OLD_EXAMPLE_IMAGES[item.img]) item.img = OLD_EXAMPLE_IMAGES[item.img];
+    });
+
+    data.coverLetter.paragraphs = paragraphs.length ? paragraphs : [""];
+
+    return data;
+  }
+
+  //  Welche Fassung ein Dokument hat, wenn es keine angibt. Nur sehr alte
+  //  Staende (v2) kamen ohne Nummer aus, und die erkennt man an ihren
+  //  Feldern. Alles andere – ein Link, den ein Sprachmodell gebaut hat,
+  //  eine Datei nach AGENTS.md – ist ein heutiges Dokument, dem nur die
+  //  Nummer fehlt; es durch die Umstellung von v2 zu schicken, wuerde seine
+  //  Kategorien und Referenzen ueberschreiben.
+  function versionOf(data) {
+    var version = Number(data.version);
+    if (isFinite(version) && version >= 1) return version;
+
+    var settings = isObject(data.settings) ? data.settings : {};
+    var legacy = data.sectionTitles || data.sectionIcons || Array.isArray(data.references) ||
+      settings.separateEducation !== undefined || settings.separateVolunteer !== undefined ||
+      settings.activateATS !== undefined ||
+      (Array.isArray(data.events) && data.events.some(function (event) {
+        return event && (event.kind !== undefined || event.education !== undefined ||
+                         event.volunteer !== undefined);
+      }));
+    if (legacy) return 2;
+    //  v4 und nicht v5: der Schritt nach v5 zieht nur Ort und Datum um und
+    //  schadet einem heutigen Dokument nicht; der nach v4 dagegen wuerde
+    //  den fehlenden Seitenmodus auf "ein Blatt" setzen.
+    return 4;
+  }
+
   function migrate(data) {
-    if (!data || typeof data !== "object") return null;
-    var locale = data.locale || "de";
+    if (!isObject(data)) return null;
+    var locale = data.locale === "en" ? "en" : "de";
+    data.version = versionOf(data);
+    if (!isObject(data.settings)) data.settings = {};
 
     // v2 -> v3: feste Kategorien werden zu frei definierbaren Sektionen
-    if (!data.version || data.version < 3) {
+    if (data.version < 3) {
       var titles = data.sectionTitles || {};
       var icons = data.sectionIcons || {};
       var d = RickCVI18n.doc(locale);
@@ -570,13 +899,13 @@
       //  Bloecke bekamen; standen sie auf 0, liefen die Eintraege unter
       //  Berufserfahrung. Das bilden wir ab, indem die Stationen umgehaengt
       //  werden – die Kategorie auszublenden wuerde sie verschwinden lassen.
-      var settings = data.settings || {};
+      var settings = data.settings;
       var merge = {
         education: settings.separateEducation === false || settings.separateEducation === 0,
         volunteer: settings.separateVolunteer === false || settings.separateVolunteer === 0,
       };
 
-      (data.events || []).forEach(function (event) {
+      (Array.isArray(data.events) ? data.events : []).filter(isObject).forEach(function (event) {
         if (!event.sectionId) {
           event.sectionId =
             event.kind === "education" || event.education === "1" ? "education"
@@ -592,7 +921,7 @@
 
       // Alte, unsichtbare ATS-Fassung nicht stillschweigend uebernehmen:
       // sie wird auf "aus" gesetzt und der Nutzer entscheidet neu.
-      var hadAts = data.settings && data.settings.activateATS;
+      var hadAts = data.settings.activateATS;
       data.ats = { mode: "off", custom: false, text: "", migratedFrom: hadAts ? "hidden" : null };
 
       // Referenzen waren eine reine ATS-Liste, jetzt eine echte Sektion
@@ -605,11 +934,13 @@
       };
 
       ["skills", "mobility"].forEach(function (key) {
-        if (data[key]) data[key].icon = upgradeIcon(data[key].icon);
+        if (isObject(data[key])) data[key].icon = upgradeIcon(data[key].icon);
       });
       ["interests", "mobilitySB"].forEach(function (key) {
-        if (data[key] && Array.isArray(data[key].items)) {
-          data[key].items.forEach(function (item) { item.icon = upgradeIcon(item.icon); });
+        if (isObject(data[key]) && Array.isArray(data[key].items)) {
+          data[key].items.filter(isObject).forEach(function (item) {
+            item.icon = upgradeIcon(item.icon);
+          });
         }
       });
 
@@ -619,18 +950,16 @@
 
       delete data.sectionTitles;
       delete data.sectionIcons;
-      if (data.settings) {
-        delete data.settings.separateEducation;
-        delete data.settings.separateVolunteer;
-        delete data.settings.activateATS;
-      }
+      delete data.settings.separateEducation;
+      delete data.settings.separateVolunteer;
+      delete data.settings.activateATS;
       data.version = 3;
     }
 
     //  v3 -> v4: aus dem Schalter "mehrseitig" wird eine Auswahl mit drei
     //  Moeglichkeiten, und jeder Block bekommt eine Seitenzuordnung.
     if (data.version < 4) {
-      var oldSettings = data.settings || (data.settings = {});
+      var oldSettings = data.settings;
       if (!oldSettings.pageMode) {
         oldSettings.pageMode = oldSettings.multiPage ? "flow" : "single";
       }
@@ -644,13 +973,12 @@
     //  steht beides einmal in den Einstellungen; uebernommen wird der
     //  erste Wert, den das alte Dokument traegt.
     if (data.version < 5) {
-      var into = data.settings || (data.settings = {});
-      var sources = [data.coverLetter,
-                     data.footers && data.footers.left,
-                     data.footers && data.footers.right];
+      var into = data.settings;
+      var footers = isObject(data.footers) ? data.footers : {};
+      var sources = [data.coverLetter, footers.left, footers.right];
 
       sources.forEach(function (source) {
-        if (!source) return;
+        if (!isObject(source)) return;
         if (!into.place && source.place) into.place = source.place;
         if (!into.date && source.date) into.date = source.date;
         delete source.place;
@@ -662,9 +990,10 @@
 
     //  v4 -> Themes: die Vorlage war eine Einstellung, jetzt ist sie ein
     //  Theme. Der alte Wert wird zu dessen Namen.
-    if (!data.theme || (!data.theme.slug && !data.theme.css)) {
+    if (!isObject(data.theme) || (!data.theme.slug && !data.theme.css)) {
       data.theme = {
-        slug: (data.settings && data.settings.template) || "clean",
+        slug: typeof data.settings.template === "string" && data.settings.template
+          ? data.settings.template : "clean",
         name: "", css: "", source: "",
       };
     }
@@ -672,16 +1001,11 @@
     //  Kurzzeitig gab es fuer das Anschreiben einen eigenen Seitenmodus. Es
     //  bricht jetzt von selbst um, sobald der Text nicht mehr passt – der
     //  Schluessel soll nicht in Ausgabedateien weiterleben.
-    if (data.settings) delete data.settings.letterPageMode;
-
-    //  Seitenzuordnung nachtragen. Arrays ruehrt fillMissing nicht an, die
-    //  Sektionen brauchen deshalb einen eigenen Durchgang.
-    (data.sections || []).forEach(function (section) {
-      if (!section.page) section.page = 1;
-    });
+    delete data.settings.letterPageMode;
 
     data.locale = locale;
-    data = fillMissing(data, createBase(locale));
+    var base = createBase(locale);
+    data = conformDocument(fillMissing(data, base), base);
 
     //  Alles, was nicht Seite 2 heisst, ist Seite 1 – auch dann, wenn eine
     //  fremde Datei etwas anderes hineingeschrieben hat.
@@ -689,7 +1013,7 @@
      "mobilitySB", "references"].forEach(function (key) {
       data[key].page = Number(data[key].page) === 2 ? 2 : 1;
     });
-    (data.sections || []).forEach(function (section) {
+    data.sections.forEach(function (section) {
       section.page = Number(section.page) === 2 ? 2 : 1;
     });
 
@@ -707,5 +1031,13 @@
     emptyFooterLink: emptyFooterLink,
     migrate: migrate,
     fillMissing: fillMissing,
+    isColor: isColor,
+    isLocalImage: isLocalImage,
+    monthIndex: monthIndex,
+    currentMonth: currentMonth,
+    eventStart: eventStart,
+    eventEnd: eventEnd,
+    compareStart: compareStart,
+    EXAMPLE_IMAGES: EXAMPLE_IMAGES,
   };
 })(typeof window !== "undefined" ? window : this);

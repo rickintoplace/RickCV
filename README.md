@@ -9,7 +9,7 @@
 
 Build your CV and Cover Letter here: https://cv.rickinto.place/
 
-![Pick a theme, change the colour, drop an old resume in](examples/demo.gif)
+![Drop an old resume in, edit straight from the preview, pick a colour and a theme](examples/demo.gif)
 
 **RickCV** is a browser-based builder for resumes and cover letters. Fill in a form, watch the
 document update live, save it as a PDF. No sign-up, no server, no build step: plain HTML, CSS
@@ -80,16 +80,24 @@ ship with the project.
 git clone https://github.com/rickintoplace/RickCV.git
 ```
 
-The editor is a list of sections, in the order they appear on the page: person, photo,
-summary, career, the optional blocks (skills, languages, interests, projects, mobility,
-references), cover letter, design, themes, machine readability, options. Each block has a
-switch to hide it; entries move with ↑ ↓, duplicate with ⧉ and go with ✕. Under *Manage
-categories* you rename or add career categories — a category called "My journey" still
+The editor has four tabs: **Resume** (person, photo, summary, career and the optional
+blocks — skills, languages, interests, projects, mobility, references, links), **Cover
+letter**, **Design** (themes, colours, type, spacing) and **Settings** (page size, pages,
+language, machine readability). Opening *Cover letter* scrolls the preview to the letter. A
+section whose block is switched off says *hidden* in its heading, so you see it without opening
+it. Entries can be duplicated and removed — a removal comes with an *Undo* — and moved where
+their order is yours to choose; career entries sort themselves by date, as on the page. Under
+*Manage categories* you rename or add career categories — a category called "My journey" still
 exports as professional experience, because its machine-readable meaning is set separately.
+
+Everything works from the keyboard: the tabs with the arrow keys, menus with arrows and
+Escape, dialogs keep the focus until they close, and the divider between form and preview
+moves with the arrow keys too.
 
 ### Saving as PDF
 
-Click **Save as PDF**. In the browser's print dialog choose:
+Click **Save as PDF**. The first time, RickCV says what to set before the browser's print
+dialog opens (you can switch that off):
 
 | Setting | Value |
 | --- | --- |
@@ -105,10 +113,12 @@ in it is still text; that was not always so, and the fix was to ship static font
 instead of a variable font, which Firefox's PDF engine used to synthesise into bold.
 
 Your document is saved in the browser as you type. That storage belongs to one browser on one
-device, so use **Save** for a `.json` backup and **Import** to open it elsewhere — or to keep
-several versions side by side. Anything that swaps the whole document — *Example*, *New*, an
-import — can be taken back: the notice that follows carries an *Undo*, and so does the arrow
-in the header (Ctrl+Z).
+device, so use **Export** for a `.json` backup and **Import** to open it elsewhere — or to keep
+several versions side by side. Anything that swaps the whole document — *Example*, *New* (both
+in the **…** menu), an import — can be taken back: the notice that follows carries an *Undo*,
+and so do the arrows in the header (Ctrl+Z, and Ctrl+Shift+Z to redo). *Example* and *New* ask
+first whenever there is something of yours to lose, because *Undo* only lasts as long as the tab
+stays open.
 
 ## About ATS and hidden text
 
@@ -214,7 +224,9 @@ https://cv.rickinto.place/#data=<token>&print=1
 
 One click opens the builder with the document in it, through the same confirmation step as any
 other import — nothing is written behind the person's back, and nothing is fetched over the
-network: the data travels inside the link (one to three kilobytes without a photo).
+network: the data travels inside the link (one to three kilobytes without a photo). The
+confirmation also says what else the document brings: its own theme, or the invisible ATS
+text, which an import switches off rather than on.
 
 What an agent cannot do is produce the PDF; that happens in the person's browser. The
 documentation says so rather than pretending otherwise, and it says what not to do: no
@@ -295,7 +307,7 @@ dialog shows the text it read, so you can sort it in by hand.
 
 ### Going the other way
 
-*Save* offers five doors. The first is the PDF, which also has its own button. Two produce a
+*Export* offers five doors. The first is the PDF, which also has its own button. Two produce a
 file: the complete RickCV backup, and `resume.json` in the JSON Resume format that other tools,
 themes and CLI renderers read. They differ on purpose — the backup holds everything, the
 `resume.json` holds what the document actually shows, so a section switched off is not part of
@@ -314,22 +326,32 @@ RickCV is a static site: copy the folder onto any host, there is nothing to buil
 to configure. The public instance at <https://cv.rickinto.place/> runs on Vercel; GitHub Pages,
 a shared web space or a directory served by nginx work exactly the same.
 
+Both pages carry a **Content-Security-Policy** as a `<meta>` tag, so it travels with the files
+and holds on any host and when opened by double-click: scripts, fonts and images only from the
+site itself (images and fonts also as `data:`), nothing to any other address. That is what makes
+"no third party" enforceable rather than a promise — an imported document or a theme cannot
+load a tracking pixel or run a script, whatever it contains. It is also why RickCV no longer
+shows images from web addresses: upload them instead, and they become part of the document. A
+host that can send headers may add `frame-ancestors 'self'`, which a `<meta>` tag cannot carry.
+
 ## Project structure
 
 | Path | Purpose |
 | --- | --- |
 | `index.html` | The builder – the page visitors open |
-| `cv.html` | The document itself, shown in the preview frame and printed |
+| `cv.html` | The document itself, shown in the preview frame and printed (`js/preview.js`) |
 | `builder.css` | Styling of the editor |
 | `styles.css` | Styling of the resume and cover letter |
 | `js/i18n.js` | German and English texts |
-| `js/model.js` | Data model, example data, migration of older saves |
+| `js/model.js` | Data model, example data, migration of older saves, checks on foreign documents, month arithmetic |
 | `js/render.js` | Turns the data into the resume and cover letter |
 | `js/ats.js` | Builds the plain-text version |
 | `js/icons.js`, `js/icon-data.js`, `js/icon-picker.js` | Icon catalogue and picker |
-| `js/fields.js` | Reusable form controls |
+| `js/fields.js` | Reusable form controls, including the list editor |
+| `js/ui-icons.js`, `js/focus.js` | The builder's own icons; focus handling for dialogs |
 | `js/sections.js` | What each editor section contains |
-| `js/builder.js` | Wiring: state, history, saving, preview, printing |
+| `js/builder.js` | Wiring: state, saving, preview, printing |
+| `js/history.js` | Undo and redo: typing becomes one step, and switching documents never loses one |
 | `js/import.js` | Reading and writing other formats: JSON Resume, LinkedIn, CSV, text |
 | `js/import-dialog.js` | The dialog behind *Import* |
 | `js/layout.js` | Pieces on a sheet become lines: columns, tabs, letter-spacing |
@@ -339,7 +361,10 @@ a shared web space or a directory served by nginx work exactly the same.
 | `js/theme-data.js` | The shipped themes, generated by `tools/build-themes.py` |
 | `themes/` | One CSS file per theme, plus `CONTRACT.md` and `_starter.css` |
 | `vendor/pdfjs/` | Mozilla's pdf.js (Apache-2.0), only fetched when a PDF is imported |
+| `img/example/` | The example's pictures; the project images are drawn in `tools/example-images/` |
 | `tools/gen-icons.py` | Regenerates `js/icon-data.js` from lucide-static |
+| `tools/make-example-images.py` | Renders `tools/example-images/*.svg` to `img/example/*.webp` |
+| `tools/make-demo.mjs` | Records `examples/demo.mp4` and `demo.gif`: real mouse, keyboard and file drop through the DevTools protocol, a drawn pointer on top (`tools/demo-stage.html`); `tools/demo-gif.py` (Pillow, numpy) builds the GIF |
 
 Every file is a plain script which is what lets you
 open `index.html` by double-clicking it.
@@ -349,7 +374,8 @@ open `index.html` by double-clicking it.
 Everything in **Design** writes to CSS variables at the top of `styles.css`; if you want to go
 further than the editor allows, that is the place to look.
 
-Nothing is fetched at runtime. All nine document typefaces live in `fonts/`, as does a
+Nothing is fetched at runtime — the example's pictures included, which live in
+`img/example/`. All nine document typefaces live in `fonts/`, as does a
 Material Symbols icon font cut down to the symbols the builder actually offers (53 kB instead
 of 2.3 MB); [Lucide](https://lucide.dev) icons are embedded in `js/icon-data.js`. So the
 builder works offline and no visitor's IP address reaches a third party. `tools/fetch-fonts.py`
@@ -370,13 +396,20 @@ Fork it, change it, open a pull request. There is no build step and nothing to i
 `index.html` and you are developing. The easiest contribution is a theme — one CSS file, and
 the **workshop** inside the builder writes it for you.
 
-Two test suites, because parsing other people's files is where silent breakage lives:
+Five test suites, because parsing other people's files is where silent breakage lives:
 
 ```bash
+node tests/model.test.mjs       # migration, checks on foreign documents, dates, undo
 node tests/import.test.mjs      # Node only; the browser code runs in a vm sandbox
 node tests/theme.test.mjs       # plus a headless Chromium for the DOM contract
+node tests/app.test.mjs         # the builder in Chromium: CSP, preview, foreign senders
 node tests/roundtrip.test.mjs   # prints every theme and reads the PDF back in
 ```
+
+The browser parts look for Chromium or Chrome in `CHROME`, then in `PATH`, then where macOS
+and Windows install it. Without one they are skipped and say so; with `REQUIRE_BROWSER=1` –
+as in the GitHub workflow that runs all five on every push – a missing browser is a failure,
+so a green run always means the browser tests ran.
 
 The third one tests the import, not the themes: it prints the example document
 in each theme, runs the resulting PDF through the import and compares the result

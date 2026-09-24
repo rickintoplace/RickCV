@@ -15,6 +15,14 @@
   var parsed = null;
   var mode = "replace";
   var lastFocus = null;
+  var release = null;   // gibt die Seite hinter dem Dialog wieder frei
+
+  //  Jedes Lesen bekommt eine Nummer. Wer erst ein grosses PDF und gleich
+  //  danach eine kleine Word-Datei hineinzieht, bekommt sonst zuerst die
+  //  Word-Datei zu sehen – und dann, wenn das PDF fertig ist, dessen
+  //  Ergebnis unter demselben "Uebernehmen". Es zaehlt nur das Letzte, und
+  //  nach dem Schliessen gar keines mehr.
+  var ticket = 0;
 
   function el(tag, className, text) {
     var node = document.createElement(tag);
@@ -44,6 +52,7 @@
     var close = el("button", "btn btn-icon imp-close", "✕");
     close.type = "button";
     close.addEventListener("click", hide);
+    overlay.closeButton = close;
     head.appendChild(title);
     head.appendChild(close);
 
@@ -86,6 +95,7 @@
     overlay.body = body;
     overlay.foot = foot;
     overlay.titleNode = title;
+    overlay.panel = panel;
     return overlay;
   }
 
@@ -95,7 +105,10 @@
     while (node.firstChild) node.removeChild(node.firstChild);
   }
 
-  function stepPick(message) {
+  //  pasted: was im Textfeld stand. Scheitert das Lesen, steht es wieder
+  //  da – sonst muesste man es ein zweites Mal einfuegen, nur um die
+  //  Stelle zu finden, an der es hakt.
+  function stepPick(message, pasted) {
     parsed = null;
     var body = overlay.body;
     clear(body);
@@ -136,12 +149,14 @@
     area.id = "imp-textarea";
     area.rows = 6;
     area.placeholder = t("impPasteHint");
+    if (pasted) area.value = pasted;
 
     var readText = el("button", "btn", t("impPasteBtn"));
     readText.type = "button";
     readText.addEventListener("click", function () {
-      if (!area.value.trim()) return;
-      handle(function () { return Import.parseText(area.value, "eingefuegt.txt"); });
+      var value = area.value;
+      if (!value.trim()) return;
+      handle(function () { return Import.parseText(value, "eingefuegt.txt"); }, value);
     });
 
     paste.appendChild(label);
@@ -156,7 +171,8 @@
     cancel.addEventListener("click", hide);
     overlay.foot.appendChild(cancel);
 
-    choose.focus();
+    if (pasted) area.focus();
+    else choose.focus();
   }
 
   function stepBusy() {
@@ -213,6 +229,7 @@
     var WARNINGS = {
       draft: "warnDraft", skillRanks: "warnSkillRanks",
       thin: "warnThin", images: "warnImages", noStructure: "warnNoStructure", unmapped: "warnUnmapped",
+      newer: "warnNewer", customTheme: "warnCustomTheme", hiddenAts: "warnHiddenAts",
     };
     (parsed.warnings || []).forEach(function (key) {
       if (WARNINGS[key]) body.appendChild(el("p", "imp-warn", t(WARNINGS[key])));
@@ -284,6 +301,7 @@
     pdfNoText: "errPdfNoText", pdfFailed: "errPdfFailed",
     noDocxSupport: "errNoDocxSupport", noDocx: "errNoDocx",
     noDocxText: "errNoDocxText", docxFailed: "errDocxFailed",
+    brokenJson: "errBrokenJson", tooLarge: "errTooLarge",
   };
 
   function message(error) {
@@ -291,23 +309,33 @@
     return key ? t(key) : t("errUnreadable");
   }
 
-  function handle(work) {
+  function current(mine) {
+    return mine === ticket && overlay && !overlay.hidden;
+  }
+
+  function handle(work, pasted) {
+    var mine = ++ticket;
     stepBusy();
     //  Ein Bildaufbau dazwischen, sonst bleibt die Meldung bei grossen
     //  Dateien unsichtbar.
     global.requestAnimationFrame(function () {
+      if (!current(mine)) return;
+      var result;
       try {
-        parsed = work();
-        stepReview();
+        result = work();
       } catch (error) {
-        stepPick(message(error));
+        return stepPick(message(error), pasted);
       }
+      parsed = result;
+      stepReview();
     });
   }
 
   function readFile(file) {
+    var mine = ++ticket;
     stepBusy();
     Import.readFile(file, function (error, result) {
+      if (!current(mine)) return;
       if (error) return stepPick(message(error));
       parsed = result;
       stepReview();
@@ -315,10 +343,6 @@
   }
 
   /* ------------------------------------------------------------- Auf/Zu */
-
-  function onKey(event) {
-    if (event.key === "Escape") hide();
-  }
 
   //  file: eine Datei zum Einlesen. text: bereits vorhandener Inhalt –
   //  so kommt ein Link mit Daten durch dieselbe Bestaetigung wie alles
@@ -329,10 +353,14 @@
     if (!overlay) build();
 
     overlay.titleNode.textContent = t("impTitle");
+    overlay.closeButton.setAttribute("aria-label", t("close"));
+    overlay.closeButton.title = t("close");
     overlay.hidden = false;
     document.body.classList.add("picker-open");
-    document.addEventListener("keydown", onKey);
     lastFocus = document.activeElement;
+    //  Tab bleibt im Dialog, Escape schliesst ihn (js/focus.js).
+    if (release) release();
+    release = global.RickCVFocus ? global.RickCVFocus.trap(overlay.panel, hide) : null;
 
     if (file) readFile(file);
     else if (text) handle(function () { return Import.parseText(text, "link.json"); });
@@ -341,10 +369,12 @@
 
   function hide() {
     if (!overlay) return;
+    ticket++;
     overlay.hidden = true;
     overlay.classList.remove("dragging");
     document.body.classList.remove("picker-open");
-    document.removeEventListener("keydown", onKey);
+    if (release) release();
+    release = null;
     parsed = null;
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }

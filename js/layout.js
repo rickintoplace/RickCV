@@ -157,9 +157,11 @@
       run = [];
     }
 
+    //  Ein leeres Stueck kommt aus einem doppelten Leerzeichen, der Wortgrenze
+    //  (siehe toLines); es beendet ein gesperrtes Wort.
     tokens.forEach(function (token) {
       if (token.length === 1 && /[^\s\d]/.test(token)) run.push(token);
-      else { flush(); out.push(token); }
+      else { flush(); if (token) out.push(token); }
     });
     flush();
 
@@ -225,15 +227,20 @@
           //  zwei Rahmen, und dazwischen gehoert ein Leerzeichen – auch
           //  wenn die Rahmen sich ueberlappen und die Luecke rechnerisch
           //  verschwindet.
-          else if (gap > item.h * 0.25 || pendingSpace ||
-                   item.whole || previous.whole) text += " ";
+          //  Ein echtes Leerzeichen-Stueck ist eine Wortgrenze. In gesperrter
+          //  Schrift ("B A C K E N D   E N G I N E E R") steht zwischen den
+          //  Buchstaben nur Abstand, zwischen den Woertern aber dieses
+          //  Stueck – es wird doppelt notiert, damit unspace() dort das Wort
+          //  beendet, statt "BACKENDENGINEER" daraus zu machen.
+          else if (pendingSpace) text += "  ";
+          else if (gap > item.h * 0.25 || item.whole || previous.whole) text += " ";
         }
         pendingSpace = false;
         text += item.str;
         previous = item;
       });
 
-      var cleaned = unspace(text.replace(/[ ]+/g, " ").trim());
+      var cleaned = unspace(text.replace(/[ ]{3,}/g, "  ").trim());
       var real = parts.filter(function (item) { return !item.ghost; });
       var first = real[0] || parts[0];
 
