@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><style>
+@page { size: A4; margin: 0 }
+body { margin:0; font-family:"DejaVu Sans",sans-serif; font-size:9.5pt; color:#222; line-height:1.4 }
+.head { background:#23395b; color:#fff; padding:12mm 14mm 8mm }
+.head .first { font-size:30pt; font-weight:bold; letter-spacing:2pt; line-height:1 }
+.head .last { font-size:30pt; font-weight:300; letter-spacing:2pt; line-height:1.1 }
+.head .role { font-size:12pt; margin-top:2mm; color:#cfd9e8 }
+.head .line { margin-top:4mm; font-size:9pt }
+.grid { display:flex; padding:8mm 14mm }
+.main { flex:1; padding-right:9mm }
+.side { width:58mm; border-left:1px solid #ccd; padding-left:7mm }
+h2 { font-size:11pt; letter-spacing:3pt; text-transform:uppercase; color:#23395b; margin:0 0 3mm }
+section { margin-bottom:7mm }
+.job { margin-bottom:4mm }
+.job .t { font-weight:bold; font-size:10.5pt }
+.job .m { color:#555 }
+.job .d { color:#23395b; font-size:9pt }
+ul { margin:1mm 0 0 4mm; padding:0 }
+.bar { height:4px; background:#dde; margin:1mm 0 2.5mm } .bar i { display:block; height:4px; background:#23395b }
+</style></head><body>
+<!--  Kopfband mit Namen auf zwei Zeilen, Hauptteil links, Seitenspalte
+      rechts. Der Zeitraum steht unter dem Titel, Kenntnisse als Balken. -->
+<div class="head">
+  <div class="first">LENA</div><div class="last">BRANDT</div>
+  <div class="role">UX Designerin</div>
+  <div class="line">Hamburg · 0170 5566778 · lena.brandt@example.org · lenabrandt.design</div>
+</div>
+<div class="grid">
+  <div class="main">
+    <section><h2>Über mich</h2>
+      <p style="margin:0">Ich gestalte seit acht Jahren digitale Produkte für Menschen, die wenig Zeit haben – zuletzt
+      Werkzeuge für Pflegekräfte. Mein Schwerpunkt liegt auf Nutzerforschung und barrierefreien Oberflächen.</p></section>
+    <section><h2>Berufserfahrung</h2>
+      <div class="job"><div class="t">Senior UX Designerin</div><div class="m">Pflegewerk Digital GmbH | Hamburg</div>
+        <div class="d">03/2021 – heute</div>
+        <ul><li>Leitung der Nutzerforschung für drei Produktteams</li><li>Aufbau eines barrierefreien Designsystems</li></ul></div>
+      <div class="job"><div class="t">UX Designerin</div><div class="m">Hafenblick Agentur | Hamburg</div>
+        <div class="d">06/2017 – 02/2021</div>
+        <ul><li>Konzeption von Apps für Verkehrsbetriebe</li></ul></div>
+      <div class="job"><div class="t">Praktikum Interaction Design</div><div class="m">Studio Nord | Kiel</div>
+        <div class="d">10/2016 – 03/2017</div></div>
+    </section>
+    <section><h2>Ausbildung</h2>
+      <div class="job"><div class="t">B.A. Kommunikationsdesign</div><div class="m">HAW Hamburg</div>
+        <div class="d">10/2012 – 09/2016</div></div>
+    </section>
+  </div>
+  <div class="side">
+    <section><h2>Skills</h2>
+      Nutzerforschung<div class="bar"><i style="width:95%"></i></div>
+      Prototyping<div class="bar"><i style="width:85%"></i></div>
+      Barrierefreiheit<div class="bar"><i style="width:80%"></i></div>
+    </section>
+    <section><h2>Tools</h2>Figma · Sketch · Miro · Maze</section>
+    <section><h2>Sprachen</h2>Deutsch – Muttersprache<br>Englisch – C1<br>Spanisch – A2</section>
+    <section><h2>Interessen</h2>Segeln<br>Siebdruck<br>Stadtgeschichte</section>
+  </div>
+</div>
+</body></html>

@@ -59,7 +59,12 @@ that both people and machines can read. Every theme is one CSS file — see
   empty it fills itself: your city, today's date.
 - **Bring your data in** — drop a file anywhere on the page: a RickCV backup, a
   [JSON Resume](https://jsonresume.org/), a LinkedIn export, an old resume as PDF or `.docx`,
-  or pasted text. Read in your browser; no upload.
+  or pasted text. A cover letter in the same file comes along too, whether it sits before the
+  resume or after it. Read in your browser; no upload.
+- **Let your AI write it** — RickCV has no model built in, but if you use one, it hands you a
+  ready-made brief to copy: for a chat in the browser the complete data format, for an agent
+  a pointer to [AGENTS.md](AGENTS.md). The chat's answer goes back in through the same
+  confirmation as any import.
 - **Honest machine readability** — see exactly what an applicant system reads, and edit it. No
   hidden text; see below.
 - **Two languages** — German and English for interface and document, including the language
@@ -296,8 +301,17 @@ the document back together from what *is* there:
 - **Icon fonts** contribute no text — recognised by the name of the embedded font, which is
   more reliable than the characters: an icon arrives as a private-use character, an empty
   piece, or its spelled-out name (`school`).
-- **The cover letter** stops the reading, and so does the closing line of a German resume
-  (`Beispielstadt, 16.09.2026`).
+- **The cover letter** is lifted out before anything else, found by its salutation and its
+  closing formula — at the front of an application folder or behind the resume. Recipient,
+  subject, salutation, paragraphs and closing go into the letter; the sender's address fills
+  the contact details if the resume has none, the recipient's never does. The date stays
+  behind: an imported letter shows the day you open it. The closing line of a German resume
+  (`Beispielstadt, 16.09.2026`) ends the reading.
+- **Bullets without a bullet** — Chrome and Word often leave the marker out of the text layer.
+  A line indented further than the entry's own text is read as a bullet point anyway.
+- **Entries without emphasis** — where titles are neither bold nor larger, the shape of the
+  first entry is learnt (title, employer, then the dates on a line of their own) and the next
+  one is recognised by it.
 - **A PDF without text for its headings** — bold type drawn as graphics, which is what Firefox
   does with variable fonts — is reported as such, and dates, employers and descriptions are
   still salvaged.
@@ -354,6 +368,7 @@ host that can send headers may add `frame-ancestors 'self'`, which a `<meta>` ta
 | `js/history.js` | Undo and redo: typing becomes one step, and switching documents never loses one |
 | `js/import.js` | Reading and writing other formats: JSON Resume, LinkedIn, CSV, text |
 | `js/import-dialog.js` | The dialog behind *Import* |
+| `js/ai-help.js` | *Let your AI write it*: the brief for a chat or an agent, and the way back |
 | `js/layout.js` | Pieces on a sheet become lines: columns, tabs, letter-spacing |
 | `js/pdf-import.js` | Text and picture extraction from PDFs, loads `vendor/pdfjs` on demand |
 | `js/docx-import.js` | Reads Word documents: ZIP, XML, tables, text boxes, pictures |

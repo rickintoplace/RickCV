@@ -2252,6 +2252,68 @@ body.legal-body {
   line-height: 1.4;
 }
 
+/*  Der Weg zur KI, unten im Import: ein Verweis, kein weiterer Knopf in
+    derselben Lautstärke wie "Datei auswählen". */
+.imp-ai {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-accent);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.imp-ai:hover {
+  text-decoration-thickness: 2px;
+}
+
+/*  "Mit deiner KI erstellen" (js/ai-help.js). Der Auftrag ist lang; er
+    steht in Maschinenschrift, damit man sieht, dass er so bleiben soll. */
+.ai-include {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.ai-include input {
+  margin-top: 2px;
+}
+
+.ai-prompt {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  min-height: 9em;
+}
+
+.ai-copy {
+  align-self: flex-start;
+}
+
+.ai-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  padding-top: 4px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.ai-answer[hidden] {
+  display: none;
+}
+
+.ai-privacy {
+  font-size: 12px;
+}
+
 /*  Ein Menü unter der Schaltfläche "Exportieren": zwei Formate, mehr
     braucht es nicht, aber es hat Platz für mehr. */
 .menu-pop {

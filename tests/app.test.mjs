@@ -286,6 +286,60 @@ if (!browser) {
        flowed && JSON.stringify({ dialog: flowed.dialog, before: flowed.stillThere, after: flowed.afterNew }));
     ok(flowed && flowed.native === 0, "keine Rückfrage des Browsers", flowed && flowed.native);
 
+    /* -- Mit der KI --------------------------------------------------------- */
+
+    //  "Mit deiner KI erstellen": der Auftrag für den Chat trägt das Format
+    //  selbst, der für den Agenten verweist auf AGENTS.md. Die Antwort eines
+    //  Chats – mit Satz davor und Codeblock – landet in der Bestätigung des
+    //  Imports, nicht direkt im Dokument.
+    const ai = probe("ai", `
+<iframe id="app" src="index.html" style="width:1400px;height:900px"></iframe>
+<script>
+  setTimeout(function () {
+    var w = document.getElementById("app").contentWindow, d = w.document, r = {};
+    var item = Array.prototype.find.call(d.querySelectorAll(".welcome-actions .btn"), function (b) {
+      return /KI|AI/.test(b.textContent);
+    });
+    r.welcome = !!item;
+    if (item) item.click();
+    var dialog = d.querySelector(".ai-dialog");
+    r.dialog = !!dialog;
+    var prompt = dialog.querySelector(".ai-prompt");
+    r.chatHasFormat = /\\\`\\\`\\\`json/.test(prompt.value) && /sectionId/.test(prompt.value);
+    r.chatWithoutState = prompt.value.indexOf("Harald") === -1;
+    dialog.querySelector('input[value="agent"]').click();
+    r.agentPointsToDocs = /AGENTS\\.md/.test(prompt.value) && /#data=/.test(prompt.value);
+    r.answerHidden = dialog.querySelector(".ai-answer").hidden;
+    dialog.querySelector('input[value="chat"]').click();
+    var answer = dialog.querySelector(".ai-answer textarea");
+    answer.value = "Gern, hier ist dein Dokument:\\n\\n\\\`\\\`\\\`json\\n" + JSON.stringify({
+      version: 5, locale: "de",
+      contact: { name: "Nora Feldmann", role: "Hebamme" },
+      events: [{ sectionId: "experience", title: "Hebamme", company: "Klinikum Mitte", start: "04/2019", present: true }],
+    }, null, 2) + ",\\n\\\`\\\`\\\`\\n\\nViel Erfolg!";
+    dialog.querySelector(".ai-answer .btn").click();
+    setTimeout(function () {
+      r.aiClosed = !d.querySelector(".ai-dialog");
+      var review = d.querySelector(".imp-summary");
+      r.review = review ? review.textContent : null;
+      r.untouched = d.querySelector('[data-section="person"] input').value;
+      document.title = "RESULT:" + JSON.stringify(r);
+    }, 400);
+  }, 2500);
+</script>`);
+    probes.push(ai.file);
+    const asked = result((await chrome(browser, ai.url, 9000)).dom);
+    ok(asked && asked.welcome && asked.dialog, "die Startkarte öffnet „Mit deiner KI erstellen“",
+       asked && JSON.stringify({ welcome: asked.welcome, dialog: asked.dialog }));
+    ok(asked && asked.chatHasFormat && asked.chatWithoutState,
+       "der Auftrag für den Chat trägt das Format, das Beispiel bleibt draußen");
+    ok(asked && asked.agentPointsToDocs && asked.answerHidden,
+       "der Auftrag für den Agenten verweist auf AGENTS.md und will einen Link");
+    ok(asked && asked.aiClosed && /Nora Feldmann/.test(asked.review || "") &&
+       asked.untouched !== "Nora Feldmann",
+       "die Antwort des Chats geht durch die Bestätigung des Imports",
+       asked && JSON.stringify({ closed: asked.aiClosed, review: asked.review, name: asked.untouched }));
+
     /* -- Fremde Absender ---------------------------------------------------- */
 
     //  Ein Geschwisterrahmen spielt die fremde Seite: gleiche Adresse, aber

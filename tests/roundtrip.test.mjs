@@ -3,7 +3,7 @@
  *  Für jedes Theme wird das Beispieldokument gedruckt, die PDF durch den
  *  Import geschickt und mit dem Ausgangsdokument verglichen – Name, Rolle,
  *  Kontakt, jede Station mit Zeitraum, Arbeitgeber und Ort, dazu Kenntnisse,
- *  Sprachen, Interessen, Projekte und der Profiltext.
+ *  Sprachen, Interessen, Projekte, der Profiltext und das Anschreiben.
  *
  *  Geprüft wird der Import, nicht das Theme. Die Themes setzen dasselbe
  *  Dokument sehr verschieden – Datum links, Datum rechts, Überschriften im
@@ -198,6 +198,19 @@ if (!chrome || !hasPdfjs) {
       compare("languages", "Sprache");
       compare("interests", "Interesse");
       compare("projects", "Projekt");
+
+      //  Das Anschreiben kommt mit: Empfänger, Betreff, Anrede, jeder
+      //  Absatz für sich und der Gruß – und nichts davon im Lebenslauf.
+      const letter = got.coverLetter;
+      const wantLetter = want.coverLetter;
+      if (letter.recipient !== wantLetter.recipient) trouble.push(`Empfänger ${JSON.stringify(letter.recipient)}`);
+      if (letter.subject !== wantLetter.subject) trouble.push(`Betreff ${JSON.stringify(letter.subject)}`);
+      if (letter.salutation !== wantLetter.salutation) trouble.push(`Anrede ${JSON.stringify(letter.salutation)}`);
+      if (letter.closing !== wantLetter.closing) trouble.push(`Gruß ${JSON.stringify(letter.closing)}`);
+      if (JSON.stringify(letter.paragraphs) !== JSON.stringify(wantLetter.paragraphs)) {
+        trouble.push(`Absätze ${letter.paragraphs.length} statt ${wantLetter.paragraphs.length}: ` +
+          JSON.stringify(letter.paragraphs.map((text) => text.slice(0, 24))));
+      }
 
       ok(trouble.length === 0, `${slug}: vollständig zurückgelesen`, trouble.slice(0, 4).join(" · "));
     }

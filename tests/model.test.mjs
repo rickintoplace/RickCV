@@ -222,10 +222,17 @@ ok(text.indexOf("Neu") < text.indexOf("Mitte") && text.indexOf("Mitte") < text.i
 
 console.log("\n— Import: Erkennung und Hinweise —");
 const brokenError = (() => {
-  try { Import.parseText('{"contact": {"name": "x",}}', "eingefuegt.txt"); return null; }
+  try { Import.parseText('{"contact": {"name": "x}}', "eingefuegt.txt"); return null; }
   catch (error) { return error.message; }
 })();
 ok(brokenError === "brokenJson", "kaputtes JSON wird als solches gemeldet", brokenError);
+
+//  Ein Komma vor der Klammer schreiben Menschen und Sprachmodelle gleichermaßen.
+//  Das ist kein Grund, das Dokument abzulehnen – und ohne Fassung ist es
+//  trotzdem eines von RickCV (AGENTS.md: alles ist optional).
+const lenient = Import.parseText('{"contact": {"name": "x",}}', "eingefuegt.txt");
+ok(lenient.format === "rickcv" && lenient.state.contact.name === "x",
+   "ein Komma zu viel und keine Fassung", lenient.format);
 
 const agentDoc = JSON.stringify({ version: 5, contact: { name: "Agent" } });
 const agentParsed = Import.parseText(agentDoc, "link.json");

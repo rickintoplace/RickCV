@@ -258,6 +258,10 @@
       return {
         text: cleaned.text,
         spaced: cleaned.spaced,
+        //  Aus Word bekannt: die Zeile beginnt einen Absatz. Ein PDF weiss
+        //  das nicht – dann bleibt es offen, statt "nein" zu sagen.
+        para: parts.some(function (item) { return item.para !== undefined; })
+          ? parts.some(function (item) { return item.para; }) : undefined,
         bold: total > 0 && heavy / total > 0.6,
         size: size,
         x: first.x,

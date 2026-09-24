@@ -166,6 +166,19 @@
 
     body.appendChild(el("p", "imp-note", t("impLinkedInHelp")));
 
+    //  Wer gar nichts zum Hineinziehen hat, kommt auch ueber eine KI zu
+    //  seinem Lebenslauf – der Weg dorthin steht hier, wo man ihn sucht.
+    if (options.onAi) {
+      var ai = el("button", "btn btn-link imp-ai", t("aiImportHint"));
+      ai.type = "button";
+      ai.addEventListener("click", function () {
+        var run = options.onAi;
+        hide();
+        run();
+      });
+      body.appendChild(ai);
+    }
+
     var cancel = el("button", "btn", t("impCancel"));
     cancel.type = "button";
     cancel.addEventListener("click", hide);
@@ -218,6 +231,10 @@
       list.appendChild(el("dt", null, t("sumProfile")));
       list.appendChild(el("dd", null, "✓"));
     }
+    if (summary.letter) {
+      list.appendChild(el("dt", null, t("sumLetter")));
+      list.appendChild(el("dd", null, "✓"));
+    }
     SUMMARY_ROWS.forEach(function (row) {
       var value = summary[row.key];
       if (!value) return;
@@ -227,7 +244,7 @@
     body.appendChild(list);
 
     var WARNINGS = {
-      draft: "warnDraft", skillRanks: "warnSkillRanks",
+      draft: "warnDraft", skillRanks: "warnSkillRanks", letter: "warnLetter",
       thin: "warnThin", images: "warnImages", noStructure: "warnNoStructure", unmapped: "warnUnmapped",
       newer: "warnNewer", customTheme: "warnCustomTheme", hiddenAts: "warnHiddenAts",
     };
@@ -279,7 +296,7 @@
       var next = Import.apply(options.state(), parsed, mode);
       var count = SUMMARY_ROWS.reduce(function (sum, row) {
         return sum + (Number(summary[row.key]) || 0);
-      }, 0);
+      }, summary.letter ? 1 : 0);
       //  hide() raeumt `parsed` weg – was gemeldet werden soll, muss
       //  vorher festgehalten werden.
       var info = { count: count, format: parsed.format, mode: mode };

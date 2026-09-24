@@ -322,6 +322,7 @@
         if (name) name.focus();
       } },
       { label: t("welcomeImport"), run: function () { openImport(); } },
+      { label: t("welcomeAi"), run: function () { openAi(); } },
       { label: t("welcomeEmpty"), run: function () {
         replaceAll(Model.createBase(state.locale), t("newStarted"));
       } },
@@ -1140,7 +1141,23 @@
         replaceAll(next, t("impDone").replace("{count}", info.count));
         if (printAfter) printCv();
       },
+      onAi: openAi,
     }, file, text);
+  }
+
+  //  "Mit deiner KI erstellen" (js/ai-help.js). Die Antwort des Chats geht
+  //  durch denselben Import wie alles andere – mit Bestaetigung.
+  function openAi() {
+    global.RickCVAi.open({
+      t: t,
+      locale: state.locale,
+      state: function () { return state; },
+      ownContent: !isExample(state.locale) &&
+        !!(String(state.contact.name || "").trim() || state.events.length),
+      copy: copyText,
+      toast: toast,
+      onAnswer: function (text) { openImport(null, text); },
+    });
   }
 
   /*  Daten aus dem Link.
@@ -1667,6 +1684,7 @@
       popupMenu(event.currentTarget, [
         { label: t("reset"), hint: t("resetTitle"), icon: "file-plus", action: newDocument },
         { label: t("example"), hint: t("exampleTitle"), icon: "sparkles", action: loadExample },
+        { label: t("aiMenu"), hint: t("aiMenuHint"), icon: "bot", action: openAi },
         { label: t("openTab"), hint: t("openTabTitle"), icon: "external-link", action: openTab },
       ]);
     });

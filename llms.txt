@@ -9,7 +9,8 @@
 
 If you are writing an application for a person: build the JSON, append it
 base64url to `https://cv.rickinto.place/#data=<token>`, and hand over the link.
-Everything you need is in AGENTS.md.
+Everything you need is in AGENTS.md. A chat that cannot run code answers with the
+JSON instead; the person pastes the whole answer into Import.
 
 ## Docs
 

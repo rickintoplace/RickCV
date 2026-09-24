@@ -1,0 +1,86 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><style>
+@page { size: A4; margin: 0 }
+body { margin:0; font-family:"Liberation Sans",Arial,sans-serif; font-size:11pt; color:#111; line-height:1.4 }
+.sheet { width:210mm; height:297mm; box-sizing:border-box; padding:20mm 20mm 20mm 25mm; page-break-after:always; position:relative }
+.sender-line { font-size:7.5pt; border-bottom:0.5pt solid #444; display:inline-block; margin-top:25mm; padding-bottom:1mm }
+.sender { position:absolute; right:20mm; top:20mm; text-align:right; font-size:10pt }
+.sender b { font-size:13pt }
+.recipient { margin-top:2mm; height:40mm }
+.date { text-align:right; margin:8mm 0 10mm }
+.subject { font-weight:bold; margin-bottom:8mm }
+p { margin:0 0 4mm }
+h1 { font-size:22pt; margin:0 0 6mm; font-weight:normal; letter-spacing:1pt }
+h2 { font-size:12.5pt; margin:7mm 0 2mm; color:#1b4d7a; border-bottom:1px solid #1b4d7a; padding-bottom:1mm }
+table { width:100%; border-collapse:collapse }
+td { vertical-align:top; padding:0 0 2.5mm }
+td.when { width:45mm; padding-right:5mm; white-space:nowrap; color:#333 }
+ul { margin:1mm 0 0 4mm; padding:0 }
+.foot { margin-top:14mm }
+</style></head><body>
+<!--  Die klassische Bewerbungsmappe: erst das Anschreiben, dann der
+      tabellarische Lebenslauf. Monate mit Punkt ("08.2017"), "Persönliche
+      Daten" mit Geburtsdatum, und am Ende Ort und Datum.
+
+      mappe.pdf ist mit Chromium gedruckt. mappe-libreoffice.pdf ist dieselbe
+      Datei, von LibreOffice erst in ein Word-Dokument und dann in ein PDF
+      verwandelt (soffice, convert-to docx und danach pdf): dort
+      sitzt der Zeitraum tiefer als Titel und Arbeitgeber daneben, so wie
+      Tabellenzellen es in Word-PDFs oft tun.  -->
+<div class="sheet">
+  <div class="sender"><b>Jonas Weber</b><br>Gartenweg 3<br>04109 Leipzig<br>Tel. 0341 2233445<br>jonas.weber@example.net</div>
+  <div class="sender-line">Jonas Weber · Gartenweg 3 · 04109 Leipzig</div>
+  <div class="recipient">Stadtwerke Muldental GmbH<br>Frau Katrin Hoffmann<br>Personalabteilung<br>Am Wasserturm 8<br>04808 Wurzen</div>
+  <div class="date">Leipzig, 12. März 2026</div>
+  <div class="subject">Bewerbung als Elektroniker für Betriebstechnik<br>Ihre Stellenanzeige vom 2. März 2026, Kennziffer 4711</div>
+  <p>Sehr geehrte Frau Hoffmann,</p>
+  <p>mit großem Interesse habe ich Ihre Stellenanzeige gelesen. Seit über fünf Jahren halte ich als Elektroniker
+  für Betriebstechnik Anlagen in der Wasserversorgung am Laufen und möchte diese Erfahrung gern bei Ihnen einbringen.</p>
+  <p>Bei den Leipziger Wasserwerken bin ich für die Instandhaltung von Pumpstationen und Schaltanlagen zuständig.
+  Dazu gehören Störungsbeseitigung im Bereitschaftsdienst, die Prüfung ortsveränderlicher Geräte nach DGUV V3 und
+  die Dokumentation in SAP PM.</p>
+  <p>Besonders reizt mich an Ihrer Stelle die Modernisierung der Leittechnik. Mit der Weiterbildung zur
+  SPS-Fachkraft habe ich die Grundlagen dafür bereits gelegt.</p>
+  <p>Über eine Einladung zu einem persönlichen Gespräch freue ich mich sehr. Eintreten könnte ich zum 1. Juni 2026.</p>
+  <p style="margin-top:8mm">Mit freundlichen Grüßen</p>
+  <p style="margin-top:12mm">Jonas Weber</p>
+  <p style="margin-top:10mm; font-size:10pt">Anlagen: Lebenslauf, Zeugnisse</p>
+</div>
+<div class="sheet">
+  <h1>Lebenslauf</h1>
+  <h2>Persönliche Daten</h2>
+  <table>
+    <tr><td class="when">Name</td><td>Jonas Weber</td></tr>
+    <tr><td class="when">Anschrift</td><td>Gartenweg 3, 04109 Leipzig</td></tr>
+    <tr><td class="when">Telefon</td><td>0341 2233445</td></tr>
+    <tr><td class="when">E-Mail</td><td>jonas.weber@example.net</td></tr>
+    <tr><td class="when">Geburtsdatum</td><td>07.05.1994 in Halle (Saale)</td></tr>
+    <tr><td class="when">Staatsangehörigkeit</td><td>deutsch</td></tr>
+  </table>
+  <h2>Beruflicher Werdegang</h2>
+  <table>
+    <tr><td class="when">01.2021 – heute</td><td><b>Elektroniker für Betriebstechnik</b><br>Leipziger Wasserwerke GmbH, Leipzig
+      <ul><li>Instandhaltung von Pumpstationen und Schaltanlagen</li><li>Bereitschaftsdienst und Störungsbeseitigung</li></ul></td></tr>
+    <tr><td class="when">08.2017 – 12.2020</td><td><b>Elektroniker (Geselle)</b><br>Elektro Krause OHG, Halle (Saale)
+      <ul><li>Installation in Wohn- und Gewerbebauten</li></ul></td></tr>
+  </table>
+  <h2>Ausbildung</h2>
+  <table>
+    <tr><td class="when">09.2014 – 07.2017</td><td><b>Ausbildung zum Elektroniker für Betriebstechnik</b><br>Elektro Krause OHG, Halle (Saale)<br>Abschlussnote: 1,8</td></tr>
+    <tr><td class="when">08.2004 – 07.2014</td><td><b>Realschulabschluss</b><br>Sekundarschule am Rosengarten, Halle (Saale)</td></tr>
+  </table>
+  <h2>Weiterbildungen</h2>
+  <table>
+    <tr><td class="when">03.2022</td><td>SPS-Fachkraft (Siemens TIA Portal), TÜV Rheinland Akademie</td></tr>
+    <tr><td class="when">11.2019</td><td>Befähigte Person nach DGUV V3</td></tr>
+  </table>
+  <h2>Kenntnisse</h2>
+  <table>
+    <tr><td class="when">EDV</td><td>MS Office, SAP PM, EPLAN</td></tr>
+    <tr><td class="when">Sprachen</td><td>Englisch (B1), Russisch (Grundkenntnisse)</td></tr>
+    <tr><td class="when">Führerschein</td><td>Klasse B, C1</td></tr>
+  </table>
+  <h2>Interessen</h2>
+  <p>Radtouren, Amateurfunk, Ehrenamt bei der Freiwilligen Feuerwehr</p>
+  <div class="foot">Leipzig, 12.03.2026<br><br>Jonas Weber</div>
+</div>
+</body></html>

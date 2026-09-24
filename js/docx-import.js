@@ -190,12 +190,23 @@
   //  danach liegt auf dem naechsten Blatt. Die Erinnerung an den letzten
   //  Satz ("lastRenderedPageBreak") steht dagegen vor dem ersten Stueck,
   //  das Word schon einmal auf das neue Blatt gesetzt hat.
+  //  Ein Umbruch vor dem ersten Buchstaben des Absatzes wirkt davor: so
+  //  setzt Word "Seitenumbruch einfuegen" an den Anfang der neuen Seite.
+  var PAGE_BREAK = /<w:br\s+w:type="page"\s*\/>/;
+
+  function breakLeads(xml) {
+    var at = xml.search(PAGE_BREAK);
+    var text = xml.search(/<w:t[\s>]/);
+    return at !== -1 && text !== -1 && at < text;
+  }
+
   function breaksAfter(xml) {
-    return /<w:br\s+w:type="page"\s*\/>/.test(xml);
+    return PAGE_BREAK.test(xml) && !breakLeads(xml);
   }
 
   function breaksBefore(xml) {
-    return /<w:lastRenderedPageBreak\s*\/>/.test(xml);
+    return breakLeads(xml) ||
+      /<w:lastRenderedPageBreak\s*\/>|<w:pageBreakBefore\s*\/>|<w:pageBreakBefore\s+w:val="(?:1|true|on)"\s*\/>/.test(xml);
   }
 
   //  Die Absaetze eines Stuecks – einer Tabellenzelle, eines Textrahmens –
@@ -221,17 +232,32 @@
       if (isHeadingStyle(plain)) size = Math.max(size, defaultSize * 1.5);
       else if (heavy && text.trim().length < 40) size = Math.max(size, defaultSize * 1.35);
 
+      var first = true;
       text.split("\n").forEach(function (part) {
         var value = part.replace(/[ ]+/g, " ").trim();
         if (!value) return;
         out.push({
           text: bullet ? "• " + value : value,
-          size: size, bold: heavy, indent: indent,
+          size: size, bold: heavy, indent: indent, para: first,
         });
+        first = false;
       });
     });
 
     return out;
+  }
+
+  //  Abstand vor und nach einem Absatz, in Punkt. Er ist das, was im
+  //  Anschreiben Absender, Empfaenger und Betreff voneinander trennt – ohne
+  //  ihn stuenden sie auf dem gedachten Blatt dicht an dicht.
+  function spacingOf(xml, fallback) {
+    var tag = (xml.match(/<w:spacing\b[^>]*>/) || [""])[0];
+    var before = attribute(tag, "w:before");
+    var after = attribute(tag, "w:after");
+    return {
+      before: before !== "" ? Number(before) / TWIP : fallback.before,
+      after: after !== "" ? Number(after) / TWIP : fallback.after,
+    };
   }
 
   /* -------------------------------------------------------------- Rahmen */
@@ -422,8 +448,9 @@
     var document = dropFallbacks(source);
     var rels = relationships(Import.decodeText(files["word/_rels/document.xml.rels"]));
     var styles = Import.decodeText(files["word/styles.xml"]);
-    var defaultSize =
-      sizeOf((styles.match(/<w:docDefaults>[\s\S]*?<\/w:docDefaults>/) || [""])[0]) || 11;
+    var defaults = (styles.match(/<w:docDefaults>[\s\S]*?<\/w:docDefaults>/) || [""])[0];
+    var defaultSize = sizeOf(defaults) || 11;
+    var defaultSpacing = spacingOf(defaults, { before: 0, after: 0 });
 
     var sheet = sheetOf(document);
     var body = (document.match(/<w:body>([\s\S]*)<\/w:body>/) || [null, document])[1];
@@ -442,7 +469,9 @@
     //  zwischen den Spalten verschwinden. Ein Rahmen deckelt sie
     //  ausserdem: sonst ragte ein kurzer Text in einem breiten Rahmen in
     //  die Nachbarspalte.
-    function push(text, size, x, top, bold, limit) {
+    //  para: die Zeile beginnt einen Absatz. Im Word-Dokument steht das
+    //  ausdruecklich da; das Anschreiben trennt daran seine Absaetze.
+    function push(text, size, x, top, bold, limit, para) {
       var value = String(text).replace(/[ \t]+$/g, "");
       if (!value.trim()) return;
 
@@ -455,6 +484,7 @@
         w: limit ? Math.min(estimate, limit) : Math.min(estimate, sheet.width - x),
         h: size,
         bold: !!bold,
+        para: !!para,
       });
     }
 
@@ -496,7 +526,7 @@
       paragraphsOf(inner, defaultSize).forEach(function (line) {
         var height = lineHeight(line.size);
         push(line.text, line.size, box.x + line.indent, top + height * 0.75,
-             line.bold, box.w);
+             line.bold, box.w, line.para);
         top += height;
       });
       return top - box.top;
@@ -625,7 +655,7 @@
           //  und ihre Tabulatoren sollen keiner Spaltenrechnung mehr zum
           //  Opfer fallen.
           push(parts.join("\t"), size, sheet.left, flowTop + lineHeight(size) * 0.75,
-               false, sheet.width - sheet.left - sheet.right);
+               false, sheet.width - sheet.left - sheet.right, true);
           flowTop += lineHeight(size);
           if (flowTop > sheet.height - sheet.top) turnPage();
         }
@@ -653,12 +683,15 @@
 
       var height = lineHeight(size);
       var written = false;
+      var spacing = spacingOf((plain.match(/<w:pPr>[\s\S]*?<\/w:pPr>/) || [""])[0], defaultSpacing);
 
       text.split("\n").forEach(function (part) {
         var value = part.replace(/[ ]+/g, " ").trim();
         if (!value) return;
+        if (!written) flowTop += spacing.before;
         push(bulleted ? "• " + value : value, size, sheet.left + indent,
-             flowTop + height * 0.75, heavy, sheet.width - sheet.left - sheet.right - indent);
+             flowTop + height * 0.75, heavy, sheet.width - sheet.left - sheet.right - indent,
+             !written);
         flowTop += height;
         written = true;
       });
@@ -666,6 +699,7 @@
       //  Auch ein leerer Absatz nimmt Platz ein – und daran haengen die
       //  Rahmen, die sich auf "den laufenden Absatz" beziehen.
       if (!written) flowTop += Math.max(pushed, height);
+      else flowTop += spacing.after;
 
       if (breaksAfter(plain) || flowTop > sheet.height - sheet.top) turnPage();
     }

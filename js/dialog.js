@@ -10,7 +10,8 @@
  *      title: "…", message: "…", confirm: "Ersetzen", cancel: "Abbrechen", danger: true,
  *    }).then(function (yes) { … });
  *
- *    RickCVDialog.open({ title, body: [Knoten…], actions: [{ label, value, primary }] })
+ *    RickCVDialog.open({ title, body: [Knoten…], actions: [{ label, value, primary }],
+ *                        ready: function (close) { … } })
  *      .then(function (value) { … });   // null, wenn abgebrochen
  */
 (function (global) {
@@ -86,6 +87,9 @@
         if (event.target === overlay) close(null);
       });
       (focus || foot.querySelector(".btn") || panel).focus();
+      //  Wer im Inhalt selbst schliessen will (ein Knopf mitten im Dialog),
+      //  bekommt dafuer den Griff.
+      if (options.ready) options.ready(close);
     });
   }
 

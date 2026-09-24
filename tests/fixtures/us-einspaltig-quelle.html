@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><style>
+@page { size: Letter; margin: 0.6in 0.7in }
+body { margin:0; font-family:"Liberation Serif","Times New Roman",serif; font-size:10.5pt; color:#000; line-height:1.25 }
+.name { text-align:center; font-size:22pt; font-weight:bold; margin:0 }
+.contact { text-align:center; font-size:10pt; margin:2pt 0 8pt }
+h2 { font-size:11.5pt; font-variant:small-caps; margin:9pt 0 3pt; border-bottom:0.8pt solid #000; padding-bottom:1pt; font-weight:normal; letter-spacing:0.5pt }
+.row { display:flex; justify-content:space-between }
+.entry { margin:0 0 5pt }
+ul { margin:1pt 0 0 14pt; padding:0 }
+li { margin:0 0 1pt }
+.letter { page-break-before:always }
+.letter p { margin:0 0 9pt }
+</style></head><body>
+<!--  Der einspaltige Lebenslauf, den amerikanische Career Center austeilen
+      ("Jake's Resume"): links Schule oder Titel, rechts Ort oder Zeitraum,
+      Ueberschriften in Kapitaelchen mit Linie, Aufzaehlungspunkte ohne
+      Zeichen in der Textebene. Dahinter ein Anschreiben.  -->
+<p class="name">Samuel Okafor</p>
+<p class="contact">Seattle, WA · (206) 555-0142 · sam.okafor@example.com · linkedin.com/in/samokafor · github.com/samokafor</p>
+
+<h2>Education</h2>
+<div class="entry">
+  <div class="row"><b>University of Washington</b><span>Seattle, WA</span></div>
+  <div class="row"><i>Bachelor of Science in Computer Science, Minor in Mathematics</i><i>Sep. 2015 – Jun. 2019</i></div>
+</div>
+
+<h2>Experience</h2>
+<div class="entry">
+  <div class="row"><b>Software Engineer II</b><span>Jun. 2021 – Present</span></div>
+  <div class="row"><i>Northwind Labs</i><i>Remote</i></div>
+  <ul>
+    <li>Led the migration of the billing pipeline to event sourcing, cutting reconciliation errors by 80%</li>
+    <li>Mentored four junior engineers and ran the weekly architecture review</li>
+  </ul>
+</div>
+<div class="entry">
+  <div class="row"><b>Software Engineer</b><span>Jul. 2019 – May 2021</span></div>
+  <div class="row"><i>Cascade Freight Systems</i><i>Tacoma, WA</i></div>
+  <ul>
+    <li>Built route-planning services in Go handling 2M requests per day</li>
+    <li>Introduced contract tests between 12 services</li>
+  </ul>
+</div>
+<div class="entry">
+  <div class="row"><b>Undergraduate Research Assistant</b><span>Jan. 2018 – Jun. 2019</span></div>
+  <div class="row"><i>UW Database Group</i><i>Seattle, WA</i></div>
+  <ul><li>Benchmarked learned index structures against B-trees</li></ul>
+</div>
+
+<h2>Projects</h2>
+<div class="entry">
+  <div class="row"><span><b>Tidepool</b> | <i>Rust, WebAssembly</i></span><span>Jan. 2023 – Present</span></div>
+  <ul><li>Offline-first tide chart app with 3,000 monthly users</li></ul>
+</div>
+
+<h2>Technical Skills</h2>
+<div><b>Languages:</b> Go, Rust, TypeScript, Python, SQL</div>
+<div><b>Frameworks:</b> React, gRPC, Axum</div>
+<div><b>Tools:</b> PostgreSQL, Kafka, Docker, Terraform</div>
+
+<div class="letter">
+<p>Samuel Okafor<br>Seattle, WA · sam.okafor@example.com</p>
+<p>March 12, 2026</p>
+<p>Hiring Team<br>Cascade Robotics<br>400 Pine Street<br>Seattle, WA 98101</p>
+<p>Dear Hiring Manager,</p>
+<p>I am writing to apply for the Senior Backend Engineer position at Cascade Robotics. Over the past five years I have
+built and operated distributed systems that move real goods, and I would love to bring that experience to your fleet platform.</p>
+<p>At Northwind Labs I led the migration of our billing pipeline to event sourcing. The project cut reconciliation errors
+by 80% and taught me how to change a system that cannot stop running.</p>
+<p>I would welcome the chance to talk about how I could contribute to your team. Thank you for your time and consideration.</p>
+<p>Sincerely,</p>
+<p>Samuel Okafor</p>
+</div>
+</body></html>

@@ -19,6 +19,10 @@
   var Model = global.RickCVModel;
   var I18n = global.RickCVI18n;
 
+  function isObject(value) {
+    return !!value && typeof value === "object" && !Array.isArray(value);
+  }
+
   function clean(value) {
     return String(value === null || value === undefined ? "" : value).trim();
   }
@@ -125,6 +129,7 @@
       mobility: [],    // { name } – Führerschein und Ähnliches
       photo: "",       // Bewerbungsfoto als Datenadresse
       signature: "",   // Unterschrift aus dem Anschreiben
+      letter: null,    // das Anschreiben selbst, falls eines dabei war
       images: 0,       // wieviele Bilder insgesamt gefunden wurden
       warnings: [],
     };
@@ -699,6 +704,17 @@
       if (block && Array.isArray(block.items)) profile[key] = copy(block.items);
     });
 
+    var letter = state.coverLetter;
+    var paragraphs = letter && Array.isArray(letter.paragraphs)
+      ? letter.paragraphs.map(clean).filter(Boolean) : [];
+    if (paragraphs.length) {
+      profile.letter = {
+        recipient: clean(letter.recipient), subject: clean(letter.subject),
+        salutation: clean(letter.salutation), paragraphs: paragraphs,
+        closing: clean(letter.closing),
+      };
+    }
+
     return profile;
   }
 
@@ -1002,19 +1018,19 @@
   //  Ohne \b am Ende: "Weiterbildungen" ist dieselbe Ueberschrift wie
   //  "Weiterbildung", und Vorlagen setzen mal so, mal so.
   var HEADINGS = [
-    { role: "experience", pattern: /^(berufs?erfahrung|beruflicher werdegang|berufliche erfahrung|praxiserfahrung|berufspraxis|werdegang|work experience|professional experience|experience|employment)/i },
-    { role: "education", pattern: /^(ausbildung|schulbildung|studium|bildungsweg|schulischer werdegang|schule|education|academic)/i },
-    { role: "volunteer", pattern: /^(ehrenamt|engagement|freiwillig|volunteer)/i },
-    { role: "skills", pattern: /^(kenntnisse|f[äa]higkeiten|skills|kompetenzen|technical skills|it-kenntnisse|edv|software)/i },
-    { role: "languages", pattern: /^(sprachen|languages|sprachkenntnisse)/i },
-    { role: "interests", pattern: /^(interessen|hobbys?|interests|freizeit)/i },
-    { role: "projects", pattern: /^(projekte|projects|portfolio)/i },
-    { role: "profile", pattern: /^(profil|über mich|ueber mich|kurzprofil|summary|about|profile|objective)/i },
-    { role: "other", pattern: /^(weiterbildung|fortbildung|seminare|zertifikate|zertifizierungen|certificates|certifications|awards|auszeichnungen|publikationen|publications)/i },
+    { role: "experience", pattern: /^(berufs?erfahrung|beruflicher werdegang|berufliche erfahrung|berufliche stationen|berufliche laufbahn|praxiserfahrung|berufspraxis|berufstätigkeit|werdegang|praktika|work experience|professional experience|relevant experience|work history|employment history|career history|experience|employment|internships)/i },
+    { role: "education", pattern: /^(ausbildung|aus- und weiterbildung|schulbildung|schulische ausbildung|studium|hochschulstudium|akademischer werdegang|bildungsweg|bildung|schulischer werdegang|schule|education and training|education|academic)/i },
+    { role: "volunteer", pattern: /^(ehrenamtliche[sr]? (?:engagement|tätigkeit(?:en)?)|soziales engagement|ehrenamt|engagement|freiwillig|volunteering|volunteer)/i },
+    { role: "skills", pattern: /^(kenntnisse|f[äa]higkeiten|skills|kompetenzen|kernkompetenzen|technical skills|digital skills|computer skills|it skills|soft skills|hard skills|core competencies|key skills|qualifikationen|qualifications|it-kenntnisse|edv|software|tools|werkzeuge|technologien|technologies|tech stack|programmiersprachen|programming languages|stärken|strengths)/i },
+    { role: "languages", pattern: /^(sprachen|languages|language skills|sprachkenntnisse|fremdsprachen|fremdsprachenkenntnisse)/i },
+    { role: "interests", pattern: /^(interessen|hobbys?|hobbies|interests|freizeit|persönliche interessen)/i },
+    { role: "projects", pattern: /^(projekte|projects|portfolio|ausgewählte projekte|selected projects)/i },
+    { role: "profile", pattern: /^(profil|über mich|ueber mich|kurzprofil|persönliches profil|zusammenfassung|summary|professional summary|career objective|about|profile|objective)/i },
+    { role: "other", pattern: /^(weiterbildung|fortbildung|seminare|kurse|courses|zertifikate|zertifizierungen|certificates|certifications|lizenzen|licenses|awards|auszeichnungen|honou?rs|preise|stipendien|scholarships|publikationen|publications|vorträge|talks|mitgliedschaften|memberships)/i },
     { role: "mobility", pattern: /^(f[üu]hrerschein|fahrerlaubnis|driving licen[cs]e|mobilit[äa]t|mobility)/i },
     //  Bekannt, aber ohne eigenen Block: Hauptsache, die Zeilen darunter
     //  landen nicht im vorigen Abschnitt.
-    { role: "ignore", pattern: /^(kontakt|contact|persönliche daten|persoenliche daten|zur person|personal details|referenzen|references|anschrift|adresse|lebenslauf|curriculum vitae|resume)/i },
+    { role: "ignore", pattern: /^(kontakt|contact|persönliche daten|persoenliche daten|persönliche angaben|angaben zur person|zur person|personal details|personal information|personal data|referenzen|references|anschrift|adresse|lebenslauf|curriculum vitae|resume)/i },
   ];
 
   //  Manche Vorlagen stellen der Ueberschrift etwas voran: "Weitere
@@ -1217,6 +1233,18 @@
     return { label: label, value: value };
   }
 
+  //  "Sprachen: Deutsch, Englisch" – eine Beschriftung, die sich als
+  //  bekannte Ueberschrift liest, mit Inhalt dahinter.
+  function colonLabel(text) {
+    var match = clean(text).match(/^([^:\t]{2,28}):\s+(\S.*)$/);
+    if (!match || /\d/.test(match[1]) || !headingOf(match[1])) return null;
+    return { label: clean(match[1]), value: clean(match[2]) };
+  }
+
+  //  Woran man eine gesprochene Sprache erkennt – im Unterschied zu einer
+  //  Programmiersprache, die unter "Languages:" genauso dasteht.
+  var NATURAL_LANGUAGE = /\b(deutsch|englisch|französisch|franzoesisch|spanisch|italienisch|portugiesisch|russisch|polnisch|türkisch|tuerkisch|arabisch|chinesisch|japanisch|niederländisch|schwedisch|dänisch|norwegisch|finnisch|griechisch|tschechisch|ungarisch|rumänisch|ukrainisch|kroatisch|serbisch|persisch|hindi|koreanisch|german|english|french|spanish|italian|portuguese|russian|polish|turkish|arabic|chinese|mandarin|cantonese|japanese|dutch|swedish|danish|norwegian|finnish|greek|czech|hungarian|romanian|ukrainian|croatian|serbian|persian|farsi|korean|muttersprache|native|fluent|fließend|[abc][12])\b/i;
+
   //  Ein Schluesselwort macht die Zeile nur dann zur Ueberschrift, wenn
   //  das Wort dort auch aufhoert: "Softwareentwicklerin" faengt mit
   //  "Software" an und ist trotzdem ein Stationstitel – frueher riss sie
@@ -1261,6 +1289,7 @@
     var sizes = [];
     var spaced = 0;
     var upper = 0;
+    var bold = 0;
     var known = 0;
 
     rows.forEach(function (row) {
@@ -1269,11 +1298,12 @@
       //  Satz, der zufaellig so anfaengt ("Ausbildung zum Berufstaucher"),
       //  wuerden den Massstab verderben.
       if (!headingOf(row.text)) return;
-      if (labelSplit(row.text)) return;
+      if (labelSplit(row.text) || colonLabel(row.text)) return;
       if (clean(row.text).split(/\s+/).length > 3) return;
       known++;
       if (row.size) sizes.push(row.size);
       if (row.spaced) spaced++;
+      if (row.bold) bold++;
       if (normalizeHeading(row.text) === normalizeHeading(row.text).toUpperCase()) upper++;
     });
 
@@ -1282,6 +1312,7 @@
       size: median(sizes),
       spaced: spaced >= known * 0.6,
       upper: upper >= known * 0.8,
+      bold: bold >= known * 0.6,
     };
   }
 
@@ -1314,7 +1345,13 @@
   //  Layout; ohne sie bleibt nur die Form der Zeile.
   function headingShape(line) {
     var value = normalizeHeading(line);
-    return value.split(/\s+/).length <= 2 || /:$/.test(clean(line));
+    if (value.split(/\s+/).length <= 2 || /:$/.test(clean(line))) return true;
+    //  "Education and training", "Aus- und Weiterbildung": laenger, aber
+    //  nichts als die Ueberschrift selbst.
+    return HEADINGS.some(function (heading) {
+      var match = value.match(heading.pattern);
+      return !!match && match[0].length >= value.length;
+    });
   }
 
   //  Eine unbekannte Ueberschrift soll den laufenden Abschnitt trotzdem
@@ -1340,7 +1377,12 @@
       //  Liegt der Ueberschriftsgrad dicht am Fliesstext (12 zu 11 Punkt
       //  ist ueblich), traefe die blosse Aehnlichkeit jede Zeile. Eine
       //  Ueberschrift muss sich auch vom Fliesstext abheben.
-      if (!row.spaced && row.size < bodySize * 1.08) return false;
+      //  Ausnahme: Versalien in Fett, wenn dieses Dokument seine
+      //  Ueberschriften so setzt (Europass: "WORK EXPERIENCE" fett in
+      //  Grundschrift). Die Pruefung auf Versalien steht oben.
+      if (!row.spaced && row.size < bodySize * 1.08 && !(style.upper && style.bold && row.bold)) {
+        return false;
+      }
       return Math.abs(row.size - style.size) <= style.size * 0.15;
     }
 
@@ -1352,7 +1394,90 @@
   //  Linkleiste – nicht in den Abschnitt, unter dem sie zufaellig steht.
   //  Ein blosser Netzwerkname ohne Ziel ("LinkedIn") ist dagegen nichts,
   //  womit sich etwas anfangen liesse.
-  var LINK_LINE = /^(https?:\/\/\S+|www\.\S+|[\w.-]{2,}\.(?:de|com|org|net|io|dev|eu|ch|at|me|page|place|blog|xyz)(?:\/\S*)?)$/i;
+  var LINK_LINE = /^(https?:\/\/\S+|www\.\S+|[\w.-]{2,}\.(?:de|com|org|net|io|dev|eu|ch|at|me|page|place|blog|xyz|design|studio|app|info|co|uk|nl|fr|be|es|it|pl|se|dk|no|fi|pt|cz|ai|tech|online|site|website|art|work|social|link|cloud|codes|engineer|photography|pro)(?:\/\S*)?)$/i;
+
+  //  Eine Kontaktzeile setzt ihre Angaben mit Trennern nebeneinander:
+  //  Tabulator, senkrechter Strich, Mittelpunkt, Aufzaehlungspunkt oder
+  //  ein breiter Abstand.
+  function splitContactLine(line) {
+    return String(line).split(/\t|\s*\|\s*|\s+[·•◦▪|]\s+|\s{3,}/)
+      .map(clean).filter(Boolean);
+  }
+
+  //  Beschriftete Angaben aus den persoenlichen Daten.
+  function labelledContact(rows) {
+    var found = { name: "" };
+    rows.forEach(function (row) {
+      var parts = String(row.text).split("\t").map(clean).filter(Boolean);
+      var match = parts.length === 2 ? [null, parts[0], parts[1]]
+        : clean(row.text).match(/^(name|vor- und nachname|full name)\s*:\s*(.+)$/i);
+      if (!match) return;
+      if (/^(name|vor- und nachname|full name)\s*:?$/i.test(match[1]) && !found.name &&
+          /^[A-ZÄÖÜ][^\d@]{2,48}$/.test(match[2])) {
+        found.name = match[2];
+      }
+    });
+    return found;
+  }
+
+  //  Die Kontaktzeile im Kopf ("Seattle, WA · (206) 555-0142 · sam@… ·
+  //  linkedin.com/in/sam") traegt neben Mail und Telefon auch Ort und
+  //  Profile. Ein Ort ist dort, was weder Nummer noch Adresse noch Link ist –
+  //  aber nur in einer Zeile, die sich durch eine Mailadresse oder Nummer
+  //  als Kontaktzeile ausweist, und nur ganz oben auf dem ersten Blatt.
+  function headerContact(rows, profile) {
+    rows.slice(0, 12).forEach(function (row) {
+      if (row.page !== 1) return;
+      var parts = splitContactLine(row.text);
+      if (parts.length < 2) return;
+      var isContact = parts.some(function (part) {
+        return /@/.test(part) || /^[+(]?\d[\d\s().\/-]{6,}$/.test(part);
+      });
+      if (!isContact) return;
+
+      parts.forEach(function (part) {
+        if (/@/.test(part)) return;
+        if (LINK_LINE.test(part)) {
+          var url = /^https?:\/\//i.test(part) ? part : "https://" + part;
+          var known = profile.links.some(function (link) { return link.url === url; });
+          if (!known) profile.links.push({ label: shortUrl(part).split("/")[0], text: shortUrl(part), url: url });
+          return;
+        }
+        if (!profile.contact.city && !/\d/.test(part) && part.length <= 40 &&
+            /^[A-ZÄÖÜ][\wäöüßéèáàóòúùâêîôûç.'-]*(?:[\s-][A-ZÄÖÜa-zäöü][\wäöüßéèáàóòúùâêîôûç.'-]*){0,3}(?:,\s*[A-Z]{2,3})?$/.test(part) &&
+            clean(part).toLowerCase() !== clean(profile.contact.name).toLowerCase() &&
+            clean(part).toLowerCase() !== clean(profile.contact.role).toLowerCase() &&
+            !headingOf(part) && !NETWORK_NAME.test(part)) {
+          profile.contact.city = part;
+        }
+      });
+    });
+  }
+
+  //  Eingefuegter Text kommt heute oft aus einem Sprachmodell – als
+  //  Markdown. Rauten vor Ueberschriften, Sternchen um Fettes und die
+  //  Striche einer Tabelle sind dann Satzzeichen, die jede Erkennung
+  //  stoeren. Sie fallen weg; eine Tabellenzeile wird zu Spalten mit
+  //  Tabulator, so wie sie auch aus einem PDF kommt.
+  function textLinesOf(text) {
+    return String(text).replace(/\r/g, "").split("\n").map(function (line) {
+      var value = line;
+      if (/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(value)) return { text: "" };
+      if (/^\s*\|.*\|\s*$/.test(value)) {
+        value = value.trim().replace(/^\|/, "").replace(/\|$/, "").split("|")
+          .map(function (cell) { return cell.trim(); }).filter(Boolean).join("\t");
+      }
+      value = value
+        .replace(/^\s{0,3}#{1,6}\s+/, "")
+        .replace(/^\s*[*+]\s+/, "• ")
+        .replace(/\*\*(.+?)\*\*|__(.+?)__/g, function (match, a, b) { return a || b; })
+        .replace(/(^|[\s(])\*(\S[^*]*?)\*(?=[\s),.;:]|$)/g, "$1$2")
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, "$1 $2");
+      if (/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/.test(value)) value = "";
+      return { text: value };
+    });
+  }
   var NETWORK_NAME = /^(linked ?in|github|gitlab|xing|mastodon|bluesky|twitter|instagram|portfolio|webseite|website)$/i;
 
   //  Abschnitte, die eine Liste fuellen – im Gegensatz zu den Stationen.
@@ -1373,7 +1498,330 @@
     return !!name && value.toLowerCase() === name.toLowerCase();
   }
 
-  var SALUTATION = /^(sehr geehrte|liebe[rs]?\s|dear\s|hallo\s)/i;
+  /* ---------------------------------------------------------- Anschreiben */
+
+  //  Liegt dem Lebenslauf ein Anschreiben bei, steht es vorn (die klassische
+  //  Bewerbungsmappe) oder hinten (so druckt RickCV selbst). Frueher endete
+  //  das Lesen an der Anrede – bei einer Mappe, die mit dem Anschreiben
+  //  beginnt, fiel damit der ganze Lebenslauf weg. Jetzt wird das
+  //  Anschreiben vorab herausgeloest und fuer sich gelesen; der Rest ist der
+  //  Lebenslauf, egal wo das Anschreiben stand.
+
+  //  Eine Anrede. Die festen Formeln gelten immer; die lockeren nur mit
+  //  Komma am Ende – "Liebe zum Detail" ist eine Kenntnis, keine Anrede.
+  var GREETING_FIRM = /^(sehr geehrte[rs]?\b|dear\s|to whom it may concern)/i;
+  var GREETING_LOOSE = /^(liebe[rs]?|hallo|guten tag|moin|servus|hello|hi|greetings)\b.{0,60}[,!]$/i;
+
+  //  Die Grussformel. Nur als Zeile fuer sich – "Regards" mitten im Satz
+  //  beendet kein Anschreiben.
+  var VALEDICTION = new RegExp("^(" + [
+    "mit (?:den )?(?:freundlichen|besten|herzlichen|lieben|sonnigen|vielen) gr(?:ü|ue)(?:ß|ss)en",
+    "mit freundlichem gru(?:ß|ss)",
+    "(?:freundliche|beste|herzliche|viele|liebe|sonnige) gr(?:ü|ue)(?:ß|ss)e(?: aus .{2,30})?",
+    "hochachtungsvoll",
+    "(?:yours )?(?:sincerely|faithfully|truly|respectfully)(?: yours)?",
+    "(?:with )?(?:kind|kindest|best|warm|warmest) (?:regards|wishes)",
+    "regards", "best", "cheers", "thank you", "many thanks",
+  ].join("|") + ")[,.!]?$", "i");
+
+  //  "Anlagen: Lebenslauf, Zeugnisse" – steht unter der Unterschrift und
+  //  gehoert noch zum Anschreiben.
+  var ENCLOSURE = /^(anlagen?|enclosures?|attachments?|encl\.?)\b/i;
+
+  //  Die Datumszeile: "Leipzig, 12. März 2026", "12.03.2026",
+  //  "March 12, 2026", "12 March 2026".
+  var LETTER_DATE = new RegExp(
+    "^(?:([^,\\d]{2,40}),\\s*(?:den\\s+)?)?(?:\\d{1,2}\\.\\s?\\d{1,2}\\.\\s?\\d{2,4}|" +
+    "\\d{1,2}\\.?\\s+(?:" + MONTH_WORDS + ")\\.?\\s+\\d{4}|" +
+    "(?:" + MONTH_WORDS + ")\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}|" +
+    "\\d{4}-\\d{2}-\\d{2})$", "i");
+
+  //  Eine Zeile, die wie der Ort einer Postanschrift aussieht – deutsch,
+  //  oesterreichisch, schweizerisch, amerikanisch oder britisch.
+  var POSTAL_LINE = /(^|\s)(?:[A-Z]{1,2}-)?\d{4,5}\s+[A-ZÄÖÜ]|,\s*[A-Z]{2}\s+\d{5}(?:-\d{4})?$|\b[A-Z]{1,2}\d[A-Z\d]?\s+\d[A-Z]{2}$/;
+
+  var SUBJECT_PREFIX = /^(betreff|betr\.|subject|re|ref)\s*:\s*/i;
+
+  function isGreeting(line) {
+    var value = clean(line);
+    if (!value || value.length > 80) return false;
+    return GREETING_FIRM.test(value) || GREETING_LOOSE.test(value);
+  }
+
+  function isValediction(line) {
+    var value = clean(line);
+    return value.length <= 60 && VALEDICTION.test(value);
+  }
+
+  //  Wo liegt das Anschreiben? Zurueck kommen die Grenzen [start, end] in
+  //  der Zeilenliste und die Stellen von Anrede und Grussformel – oder null.
+  function findLetter(rows) {
+    for (var s = 0; s < rows.length; s++) {
+      if (!isGreeting(rows[s].text)) continue;
+
+      //  Die Grussformel folgt innerhalb von gut einer Seite.
+      var v = -1;
+      for (var i = s + 1; i < rows.length && i < s + 90; i++) {
+        if (rows[i].page > rows[s].page + 1) break;
+        if (isValediction(rows[i].text)) { v = i; break; }
+      }
+
+      //  Eine lockere Anrede ohne Grussformel ist zu wenig Beweis.
+      if (v < 0 && !GREETING_FIRM.test(clean(rows[s].text))) continue;
+      //  Und zwischen Anrede und Gruss muss ein Brief stehen, keine Zeile.
+      if (v >= 0 && v - s < 2) continue;
+
+      return { start: letterStart(rows, s), greeting: s, closing: v, end: letterEnd(rows, s, v) };
+    }
+    return null;
+  }
+
+  //  Der Briefkopf: Absender, Empfaenger, Datum, Betreff. Er beginnt oben
+  //  auf dem Blatt der Anrede – ohne Blattgrenzen (eingefuegter Text) nach
+  //  hoechstens vier Absaetzen. Eine Ueberschrift des Lebenslaufs oder ein
+  //  Zeitraum beendet ihn in jedem Fall.
+  function letterStart(rows, s) {
+    var page = rows[s].page;
+    var geometric = rows.some(function (row) { return row.y; });
+    var blocks = 0;
+    var start = s;
+
+    for (var i = s - 1; i >= 0 && s - i <= 24; i--) {
+      var row = rows[i];
+      if (row.page !== page) break;
+      var role = headingOf(row.text);
+      if (role && !/^(kontakt|contact|anschrift|adresse)/i.test(normalizeHeading(row.text))) break;
+      if (RANGE.test(row.text) || /^[-–—•*·]/.test(row.text)) break;
+      if (!geometric && rows[i + 1].gap) {
+        if (++blocks > 4) break;
+      }
+      start = i;
+    }
+    return start;
+  }
+
+  //  Hinter der Grussformel: der Name, vielleicht "Anlagen" samt Liste.
+  function letterEnd(rows, s, v) {
+    if (v < 0) {
+      //  Ohne Grussformel endet der Brief mit seinem Blatt – oder, ohne
+      //  Blaetter, an der naechsten Ueberschrift.
+      var geometric = rows.some(function (row) { return row.y; });
+      for (var i = s + 1; i < rows.length; i++) {
+        if (geometric ? rows[i].page !== rows[s].page : headingOf(rows[i].text)) return i - 1;
+      }
+      return rows.length - 1;
+    }
+
+    var end = v;
+    var enclosure = false;
+    for (var j = v + 1; j < rows.length && j <= v + 8; j++) {
+      var row = rows[j];
+      var value = clean(row.text);
+      if (row.page !== rows[v].page || headingOf(value)) break;
+      if (ENCLOSURE.test(value)) { enclosure = true; end = j; continue; }
+      if (enclosure && /^[-–—•*·]/.test(value)) { end = j; continue; }
+      //  Name und Zusatz unter dem Gruss: kurz, ohne Datum.
+      if (!enclosure && j <= v + 2 && value.length <= 60 && !carriesDate(value)) { end = j; continue; }
+      break;
+    }
+    return end;
+  }
+
+  //  Zeilen, die im Briefkopf beieinanderstehen, bilden einen Block –
+  //  Absender, Empfaenger, Datum, Betreff. Getrennt wird an Leerzeilen
+  //  (eingefuegter Text) oder an Luecken und Spaltenwechseln (PDF, Word).
+  function letterBlocks(rows) {
+    //  Was eine Luecke ist, misst sich am engsten Zeilenabstand dieses
+    //  Briefkopfs: Word setzt zwischen Absaetze gern ein paar Punkt, dann
+    //  steht schon eine Anschrift weiter gesperrt als ein PDF sie setzt.
+    var steps = [];
+    rows.forEach(function (row, index) {
+      var previous = rows[index - 1];
+      if (previous && previous.y && row.y && previous.page === row.page) {
+        steps.push(Math.abs(previous.y - row.y));
+      }
+    });
+    steps.sort(function (a, b) { return a - b; });
+    var pitch = steps.length ? steps[Math.floor((steps.length - 1) / 4)] : 0;
+
+    //  Aus Word weiss jede Zeile, ob sie einen Absatz beginnt. Stehen
+    //  mehrzeilige Absaetze darunter (Zeilen mit Umbruch), ist jeder Absatz
+    //  ein Block. Hat dagegen jede Zeile ihren eigenen Absatz – so tippt man
+    //  eine Anschrift mit der Eingabetaste –, sagt das nichts.
+    var paragraphs = rows.some(function (row) { return row.para === false; });
+
+    var blocks = [];
+    var current = null;
+    rows.forEach(function (row, index) {
+      var previous = rows[index - 1];
+      var together = !!previous && !row.gap && !(paragraphs && row.para);
+      if (together && previous.y && row.y) {
+        var size = Math.max(row.size || 10, previous.size || 10);
+        var dy = Math.abs(previous.y - row.y);
+        var sameSide = Math.abs(previous.x - row.x) < 60 || (previous.x > 250 && row.x > 250);
+        together = previous.page === row.page && sameSide &&
+          dy <= Math.max(size * 1.7, pitch * 1.4) && dy <= size * 3;
+      }
+      if (!together) {
+        current = [];
+        blocks.push(current);
+      }
+      current.push(row);
+    });
+    return blocks;
+  }
+
+  //  Absaetze des Brieftextes. Eine Luecke, die deutlich groesser ist als
+  //  der Zeilenabstand, beginnt einen neuen – ebenso eine Leerzeile im
+  //  eingefuegten Text. Fehlt beides, ist jede Zeile ein Absatz: so fuegt
+  //  man einen Brief aus einer Mail oder einem Chat ein.
+  function letterParagraphs(rows) {
+    var geometric = rows.some(function (row) { return row.y; });
+    var pitches = [];
+    if (geometric) {
+      rows.forEach(function (row, index) {
+        var previous = rows[index - 1];
+        if (previous && previous.page === row.page) pitches.push(Math.abs(previous.y - row.y));
+      });
+    }
+    //  Der Zeilenabstand ist der engere der gemessenen Abstaende: bei
+    //  kurzen Absaetzen gibt es kaum mehr Luecken als Zeilen, und der
+    //  Median laege dann schon auf der Luecke.
+    pitches.sort(function (a, b) { return a - b; });
+    var pitch = pitches.length ? pitches[Math.floor((pitches.length - 1) / 4)] : 0;
+    var anyGap = rows.some(function (row, index) { return index && row.gap; });
+    //  Aus Word weiss jede Zeile, ob sie einen Absatz beginnt. Das ist
+    //  genauer als jede Luecke.
+    var marked = rows.some(function (row) { return row.para !== undefined; });
+    var longest = rows.reduce(function (most, row) {
+      return Math.max(most, clean(row.text).length);
+    }, 0);
+
+    var paragraphs = [];
+    var current = null;
+    rows.forEach(function (row, index) {
+      var previous = rows[index - 1];
+      var fresh = !current;
+      if (!fresh) {
+        //  Eine kurze Zeile, die mit dem Satz endet, schliesst ihren Absatz –
+        //  auch wo zwischen den Absaetzen kein Abstand steht.
+        var closes = /[.!?]$/.test(clean(previous.text)) &&
+          clean(previous.text).length < longest * 0.8;
+        if (marked) {
+          fresh = !!row.para;
+        } else if (geometric && pitch) {
+          if (closes) fresh = true;
+          else if (previous.page === row.page) fresh = Math.abs(previous.y - row.y) > pitch * 1.35;
+          //  Ueber den Seitenwechsel laeuft ein Satz weiter; ein Absatz
+          //  endet dort nur, wenn der Satz schon zu Ende war.
+          else fresh = /[.!?:]$/.test(clean(previous.text));
+        } else if (anyGap) {
+          fresh = !!row.gap;
+        } else {
+          fresh = true;
+        }
+      }
+      if (fresh) {
+        current = [];
+        paragraphs.push(current);
+      }
+      current.push(clean(row.text).replace(/\t+/g, " "));
+    });
+
+    return paragraphs.map(joinLines).filter(Boolean);
+  }
+
+  //  Umbrochene Zeilen wieder zu einem Satz. Ein Trennstrich am Zeilenende
+  //  faellt weg, wenn danach klein weitergeschrieben wird ("Wasser-" /
+  //  "versorgung"); vor "und", "oder" und Grossbuchstaben bleibt er stehen
+  //  ("Wohn- und Gewerbebau", "SPS-" / "Fachkraft").
+  function joinLines(lines) {
+    return lines.reduce(function (text, line) {
+      if (!text) return line;
+      if (/[A-Za-zÄÖÜäöüß]-$/.test(text)) {
+        if (/^(und|oder|bzw|sowie|bis|and|or|to)\b/.test(line)) return text + " " + line;
+        if (/^[a-zäöüß]/.test(line)) return text.slice(0, -1) + line;
+        return text + line;
+      }
+      return text + " " + line;
+    }, "").replace(/\s+/g, " ").trim();
+  }
+
+  function readLetter(rows, found, profile) {
+    var head = rows.slice(found.start, found.greeting);
+    var body = rows.slice(found.greeting + 1, found.closing < 0 ? found.end + 1 : found.closing);
+    var letter = {
+      recipient: "", subject: "", salutation: clean(rows[found.greeting].text),
+      paragraphs: letterParagraphs(body),
+      closing: found.closing >= 0 ? clean(rows[found.closing].text) : "",
+      signer: "", place: "",
+    };
+
+    if (found.closing >= 0) {
+      var signer = rows[found.closing + 1];
+      if (signer && found.closing + 1 <= found.end && !ENCLOSURE.test(clean(signer.text))) {
+        letter.signer = clean(signer.text).split("\t")[0];
+      }
+    }
+
+    var contact = profile.contact;
+    function isSender(block) {
+      return block.some(function (row) {
+        var value = clean(row.text).toLowerCase();
+        if (/@/.test(value) || /(?:tel|phone|mobil|fon)\b/.test(value)) return true;
+        if (contact.phone && value.replace(/\D/g, "").indexOf(contact.phone.replace(/\D/g, "")) !== -1 &&
+            contact.phone.replace(/\D/g, "").length >= 6) return true;
+        var name = clean(contact.name || letter.signer).toLowerCase();
+        return !!name && value.indexOf(name) === 0;
+      }) || (block.length === 1 && / [·•|] .* [·•|] /.test(block[0].text));
+    }
+
+    var blocks = letterBlocks(head);
+    var dateIndex = -1;
+    blocks.forEach(function (block, index) {
+      if (block.length === 1 && LETTER_DATE.test(clean(block[0].text))) {
+        dateIndex = index;
+        var place = clean(block[0].text).match(LETTER_DATE)[1];
+        if (place) letter.place = clean(place);
+      }
+    });
+
+    var recipient = -1;
+    blocks.forEach(function (block, index) {
+      if (recipient >= 0 || index === dateIndex || isSender(block)) return;
+      if (block.length < 2 || block.length > 8) return;
+      if (block.some(function (row) { return POSTAL_LINE.test(clean(row.text)); })) recipient = index;
+    });
+    //  Ohne erkennbare Postleitzahl: der erste mehrzeilige Block, der nicht
+    //  der Absender ist und vor dem Betreff steht.
+    if (recipient < 0) {
+      for (var b = 0; b < blocks.length - 1; b++) {
+        if (b !== dateIndex && blocks[b].length >= 2 && blocks[b].length <= 8 && !isSender(blocks[b])) {
+          recipient = b;
+          break;
+        }
+      }
+    }
+    if (recipient >= 0) {
+      letter.recipient = blocks[recipient].map(function (row) {
+        return clean(row.text).replace(/\t+/g, " ");
+      }).join("\n");
+    }
+
+    //  Der Betreff ist der letzte Block vor der Anrede – sofern er nicht
+    //  schon etwas anderes ist.
+    for (var k = blocks.length - 1; k >= 0; k--) {
+      if (k === dateIndex || k === recipient) continue;
+      var block = blocks[k];
+      if (isSender(block) && !SUBJECT_PREFIX.test(clean(block[0].text))) break;
+      if (block.length > 3) break;
+      letter.subject = block.map(function (row) { return clean(row.text); })
+        .join("\n").replace(SUBJECT_PREFIX, "");
+      break;
+    }
+
+    return letter;
+  }
 
   //  "Musterstadt, 16.09.2026" unter dem Lebenslauf ist die Schlussformel
   //  vor der Unterschrift – ab da kommt nichts Inhaltliches mehr.
@@ -1415,18 +1863,40 @@
 
     //  Aus einem PDF kommen fertige Zeilen mit Zusatzwissen, aus der
     //  Zwischenablage nur Text. Beides wird hier zur selben Form.
-    var rows = (lines && lines.length ? lines : String(text).replace(/\r/g, "").split("\n")
-      .map(function (line) { return { text: line }; }))
+    //  Eine Leerzeile im eingefuegten Text ist das einzige, was dort Absaetze
+    //  trennt. Sie wird an der Zeile danach vermerkt, bevor die leeren Zeilen
+    //  wegfallen – das Anschreiben braucht sie.
+    var blank = false;
+    var allRows = (lines && lines.length ? lines : textLinesOf(text))
       .map(function (row) {
         return {
           text: clean(row.text), size: row.size || 0, spaced: !!row.spaced,
-          bold: !!row.bold,
+          bold: !!row.bold, para: row.para,
           x: row.x || 0, y: row.y || 0, page: row.page || 1,
         };
       })
-      .filter(function (row) { return row.text; });
+      .filter(function (row) {
+        if (row.text) { row.gap = blank; blank = false; return true; }
+        blank = true;
+        return false;
+      });
 
-    if (!rows.length) return profile;
+    if (!allRows.length) return profile;
+
+    //  Das Anschreiben zuerst heraus: es hat seinen eigenen Aufbau, und
+    //  seine Anschriften und Daten gehoeren nicht in den Lebenslauf.
+    var letterSpan = findLetter(allRows);
+    var rows = allRows;
+    var letterRows = [];
+    if (letterSpan) {
+      letterRows = allRows.slice(letterSpan.start, letterSpan.end + 1);
+      rows = allRows.slice(0, letterSpan.start).concat(allRows.slice(letterSpan.end + 1));
+      letterSpan = {
+        start: 0, greeting: letterSpan.greeting - letterSpan.start,
+        closing: letterSpan.closing < 0 ? -1 : letterSpan.closing - letterSpan.start,
+        end: letterSpan.end - letterSpan.start,
+      };
+    }
 
     //  Der Fliesstext wird je Blatt bestimmt. Vorlagen aus dem Netz legen
     //  dem Lebenslauf gern eine Werbeseite bei, die groesser gesetzt ist –
@@ -1454,18 +1924,28 @@
 
     var plain = rows.map(function (row) { return row.text; });
 
+    //  Der Briefkopf traegt oft dieselben Kontaktdaten wie der Lebenslauf –
+    //  und bei einem Anschreiben ohne Lebenslauf die einzigen. Gelesen wird
+    //  er nach dem Lebenslauf, und die Anschrift des Empfaengers bleibt
+    //  draussen: sie ist nicht die eigene.
+    var letter = letterSpan ? readLetter(letterRows, letterSpan, profile) : null;
+    if (letter) {
+      var recipientLines = letter.recipient.split("\n");
+      letterRows.slice(0, letterSpan.greeting).forEach(function (row) {
+        if (recipientLines.indexOf(clean(row.text).replace(/\t+/g, " ")) === -1) plain.push(row.text);
+      });
+    }
+
     var mail = plain.join("\n").match(/[\w.+-]+@[\w-]+\.[\w.]{2,}/);
     if (mail) profile.contact.email = mail[0];
 
     //  Kopfzeilen setzen mehrere Angaben nebeneinander: "Musterstraße 78 |
-    //  23456 Musterstadt". Fuer Telefon und Anschrift wird deshalb an den
-    //  Trennern zerlegt, sonst passt keine Zeile auf ihr Muster.
+    //  23456 Musterstadt", "Seattle, WA · (206) 555-0142 · sam@…". Fuer
+    //  Telefon und Anschrift wird deshalb an den Trennern zerlegt, sonst
+    //  passt keine Zeile auf ihr Muster.
     var segments = [];
     plain.forEach(function (line) {
-      line.split(/\t|\s*\|\s*|\s{3,}/).forEach(function (part) {
-        var value = clean(part);
-        if (value) segments.push(value);
-      });
+      splitContactLine(line).forEach(function (value) { segments.push(value); });
     });
 
     profile.contact.phone = findPhone(segments);
@@ -1478,42 +1958,132 @@
     profile.contact.name = named.name;
     profile.contact.role = named.role;
 
+    //  "Name<TAB>Jonas Weber" – der tabellarische Lebenslauf nennt den
+    //  Namen unter den persoenlichen Daten und setzt "Lebenslauf" darueber.
+    //  Dann ist die Beschriftung die sicherere Quelle als die Schriftgroesse.
+    var labelled = labelledContact(rows);
+    if (labelled.name && (!named.name || !named.bySize)) {
+      profile.contact.name = labelled.name;
+      if (!named.bySize) {
+        //  Was vorher als Name und Rolle geraten war, ist wieder Inhalt.
+        profile.contact.role = "";
+        named.nameIndex = -1;
+        named.roleIndex = -1;
+      }
+    }
+    if (!profile.contact.name && letter && letter.signer &&
+        /^[A-ZÄÖÜ][\wäöüß.'-]+(?:\s+[A-ZÄÖÜ][\wäöüß.'-]+){1,3}$/.test(letter.signer)) {
+      profile.contact.name = letter.signer;
+    }
+
+    headerContact(rows, profile);
+
+    if (letter && letter.paragraphs.length) profile.letter = letter;
+
     var current = null;      // laufender Abschnitt
     var event = null;        // laufende Station
     var pending = [];        // Zeilen ohne Datum, die auf ihre Station warten
     var pendingTitled = false;   // war die erste davon ein Titel?
 
     //  Zuruecklegen, bis die Station kommt, zu der die Zeile gehoert. Eine
-    //  zweite Zeile wartet nur mit, wenn die erste ein Titel war: manche
-    //  Vorlagen setzen Titel, Arbeitgeber und Zeitraum untereinander
-    //  ("ARCHITEKTIN" / "Müller & Partner Architekten" / "01/20xx – heute").
-    //  Sonst ersetzt die neue Zeile die alte – in einer Liste ohne Daten
-    //  ist jede Zeile ein Eintrag fuer sich.
-    function hold(line, titled) {
-      if (pendingTitled && pending.length < 2) {
-        pending.push(line);
+    //  zweite Zeile wartet mit, wenn die erste ein Titel war oder die zweite
+    //  direkt darunter steht: manche Vorlagen setzen Titel, Arbeitgeber und
+    //  Zeitraum untereinander ("ARCHITEKTIN" / "Müller & Partner
+    //  Architekten" / "01/20xx – heute"). Sonst ist die wartende Zeile ein
+    //  Eintrag fuer sich – in einer Liste ohne Daten steht jede Zeile allein.
+    //  Frueher ersetzte die neue Zeile die alte, und die alte war verloren.
+    function hold(row, line, titled) {
+      var entry = { text: line, x: row.x, y: row.y, page: row.page, size: row.size, bold: row.bold };
+      var last = pending[pending.length - 1];
+      var below = !!last && last.y && row.y && last.page === row.page &&
+        Math.abs(last.y - row.y) <= Math.max(row.size || 10, last.size || 10) * 1.7;
+      //  Folgt gleich darauf der Zeitraum, gehoeren die wartenden Zeilen zu
+      //  dieser einen Station – auch wenn nichts hervorgehoben ist und Word
+      //  zwischen die Absaetze Abstand gesetzt hat.
+      var dated = cursor + 1 < rows.length && carriesDate(rows[cursor + 1].text) &&
+        !headingOf(rows[cursor + 1].text);
+      if (pending.length && pending.length < 2 && (pendingTitled || below || dated)) {
+        pending.push(entry);
         return;
       }
-      pending = [line];
+      if (pending.length) closeEvent();
+      pending = [entry];
       pendingTitled = !!titled;
     }
+    var cursor = 0;          // welche Zeile gerade gelesen wird
     var buffer = [];         // Zeilen des Abschnitts ausserhalb einer Station
     var stopped = false;
     var stopIndex = rows.length;
     var sawHeading = false;  // wurde ueberhaupt eine Ueberschrift gefunden?
 
+    //  Wo der Text einer Station anfaengt. Was weiter eingerueckt darunter
+    //  steht, ist eine Aufzaehlung – auch wenn die Punkte davor nur
+    //  gezeichnet waren und im Text fehlen.
+    function noteIndent(target, row, line) {
+      if (!target || target.textX !== undefined || !row || !row.x) return;
+      if (LEADING.test(line) || RANGE.test(line.split("\t")[0]) || SINGLE.test(line)) return;
+      target.textX = row.x;
+    }
+
     //  Eine neue Station beginnt: was zurueckgestellt wurde, gehoert zu ihr.
     //  Erst uebernehmen, dann die vorige schliessen – closeEvent macht aus
     //  einer liegengebliebenen Zeile sonst eine eigene Station.
-    function startEvent() {
+    //  Wieviele Zeilen stehen in diesem Dokument ueber einem Zeitraum, der
+    //  allein in seiner Zeile steht? "Senior UX Designerin" / "Pflegewerk
+    //  GmbH | Hamburg" / "03/2021 – heute" sind zwei. Gelernt an der ersten
+    //  solchen Station; daran erkennt sich die naechste, auch wenn nichts
+    //  an ihr hervorgehoben ist.
+    var headSize = 0;
+
+    //  Und wie sieht hier ein Stationstitel aus? Die erste Station, deren
+    //  Titel sich vom Fliesstext abhebt (fetter, groesser), sagt es. Danach
+    //  eroeffnet jede Zeile in genau dieser Schrift die naechste Station –
+    //  auch dort, wo der Titel nur fett in Grundschrift steht, was fuer die
+    //  allgemeine Regel zu wenig ist.
+    var titleStyle = null;
+
+    function titleLike(row) {
+      if (!titleStyle || !row.size) return false;
+      return !!row.bold === titleStyle.bold && Math.abs(row.size - titleStyle.size) < 0.3 &&
+        clean(row.text).length <= 80 && !/^[-–—•*·]/.test(clean(row.text));
+    }
+
+    function dateOnly(text) {
+      var value = clean(text).replace(SINCE, "");
+      var range = value.match(RANGE);
+      if (range) return !clean(value.replace(range[0], "").replace(/^[|–—,\t-]\s*/, ""));
+      return SINGLE.test(value);
+    }
+
+    function dateOnlyAhead(from, span) {
+      for (var i = from; i < rows.length && i < from + span; i++) {
+        var text = clean(rows[i].text);
+        if (/^[-–—•*·]/.test(text) || headingOf(text)) return false;
+        if (dateOnly(text)) return true;
+        if (carriesDate(text)) return false;
+      }
+      return false;
+    }
+
+    function startEvent(row, line) {
       var carried = pending;
       pending = [];
       pendingTitled = false;
+      if (carried.length && line && dateOnly(line)) headSize = Math.max(headSize, carried.length);
+      var first = carried[0];
+      if (!titleStyle && first && first.size &&
+          (first.bold || first.size >= bodyFor(first) * 1.08) && !/^[A-ZÄÖÜ][\wäöüß ]{2,24}:\s/.test(first.text)) {
+        titleStyle = { size: first.size, bold: !!first.bold };
+      }
 
       closeEvent();
       event = newEvent(current);
 
-      carried.forEach(function (line) { assignStationLine(event, line); });
+      carried.forEach(function (entry) {
+        noteIndent(event, entry, entry.text);
+        assignStationLine(event, entry.text);
+      });
+      if (row) noteIndent(event, row, line);
       return event;
     }
 
@@ -1523,7 +2093,7 @@
       //  bleibt trotzdem ein Eintrag.
       if (pending.length && !event) {
         event = newEvent(current || "experience");
-        pending.forEach(function (line) { assignStationLine(event, line); });
+        pending.forEach(function (entry) { assignStationLine(event, entry.text); });
       }
       pending = [];
       pendingTitled = false;
@@ -1552,12 +2122,26 @@
       } else if (current === "interests") {
         listItems(joined).forEach(function (name) { profile.interests.push({ name: name }); });
       } else if (current === "mobility") {
-        listItems(joined).forEach(function (name) { profile.mobility.push({ name: name }); });
+        //  "Führerschein Klasse B, C1" ist eine Angabe: das Komma trennt
+        //  hier Klassen, keine Eintraege.
+        joined.split(/\n|\t|[;•·|]/).map(clean).filter(Boolean).forEach(function (name) {
+          profile.mobility.push({ name: name.replace(/^[-–—*]\s*/, "") });
+        });
       } else if (current === "languages") {
         //  "Deutsch" / "(Muttersprache)" untereinander ist ein Umbruch,
         //  keine zweite Sprache. Und "Deutsch<TAB>Muttersprache" ist eine
         //  Sprache mit Stufe, keine zwei Sprachen: zweispaltige Listen sind
         //  in Lebenslaeufen die Regel, nicht die Ausnahme.
+        //  Europass beschriftet: "Mother tongue(s)  Portuguese",
+        //  "Other language(s)  English – C1". Die Beschriftung sagt bei der
+        //  Muttersprache die Stufe, sonst nichts.
+        joined = joined.split("\n").map(function (line) {
+          var native = line.match(/^(?:mother tongues?(?:\(s\))?|muttersprachen?(?:\(n\))?|native languages?)\s*:?\s+(.+)$/i);
+          if (native) return native[1].split(/\s*,\s*/).map(function (name) {
+            return name + " (" + (/^[a-z]/i.test(line) && /mother|native/i.test(line) ? "native" : "Muttersprache") + ")";
+          }).join("\n");
+          return line.replace(/^(?:other languages?(?:\(s\))?|weitere sprachen|fremdsprachen)\s*:?\s+/i, "");
+        }).join("\n");
         var glued = pairColumns(joined).replace(/\n\s*\(/g, " (");
         languageEntries(glued).forEach(function (entry) {
           profile.languages.push(entry);
@@ -1632,11 +2216,12 @@
         var range = line.match(RANGE);
         if (range) {
           //  Ein vollstaendiger Zeitraum beginnt immer eine neue Station.
-          startEvent();
+          startEvent(row, line);
           event.start = normDate(range[1]);
           event.present = isPresent(range[2]);
           event.end = event.present ? "" : normDate(range[2]);
-          var rest = clean(line.replace(range[0], "").replace(/^[|–—,\t-]\s*/, ""));
+          var rest = clean(line.replace(range[0], "").replace(/^[|–—,\t-]\s*/, "")
+            .replace(/\s*[|–—,-]\s*$/, ""));
           if (rest) assignStationLine(event, rest);
           return;
         }
@@ -1649,8 +2234,19 @@
           var head = line.split("\t").map(clean).filter(Boolean);
           if (head.length === 2 && head[1].length <= 30 && !/\d/.test(head[1]) &&
               head[0].length > 2) {
+            //  Hat die laufende Station gerade erst ihren Titel samt
+            //  Zeitraum bekommen und noch keinen Arbeitgeber, ist das hier
+            //  ihre zweite Zeile: "Software Engineer   Jun 2021 – Present" /
+            //  "Northwind Labs   Remote". So setzen es die meisten
+            //  amerikanischen Vorlagen.
+            if (event && event.title && !event.company && !event.list.length &&
+                !event.description.length && (event.start || event.present)) {
+              event.company = head[0];
+              event.place = head[1];
+              return;
+            }
             closeEvent();
-            hold(line, true);
+            hold(row, line, true);
             return;
           }
         }
@@ -1659,7 +2255,7 @@
         //  dazwischen fehlt nur der Strich.
         var loose = line.match(LOOSE_RANGE);
         if (loose && !isPresent(loose[2])) {
-          startEvent();
+          startEvent(row, line);
           event.start = normDate(loose[2]);
           event.present = isPresent(loose[3]);
           event.end = event.present ? "" : normDate(loose[3]);
@@ -1669,7 +2265,7 @@
 
         var leading = line.match(LEADING);
         if (leading) {
-          startEvent();
+          startEvent(row, line);
           event.start = normDate(leading[1]);
           assignStationLine(event, leading[2]);
           return;
@@ -1677,12 +2273,16 @@
 
         var single = line.match(SINGLE);
         if (single) {
-          startEvent();
+          startEvent(row, line);
           event.start = normDate(single[1]);
           return;
         }
 
         var trailing = trailingDate(line);
+        //  "Teamleiterin Einkauf   seit 05/2022": das "seit" steht vor dem
+        //  Datum am Zeilenende und sagt nur, dass die Station noch laeuft.
+        var ongoing = trailing && !trailing.isEnd && trailing.rest.match(/\s*\b(seit|since|ab|from)$/i);
+        if (ongoing) trailing.rest = clean(trailing.rest.slice(0, ongoing.index));
         if (trailing) {
           //  "ZOOLINO, Bad Wimpeln – 09/15" schliesst die Station ab,
           //  "Praktikum 07/13" beginnt eine neue.
@@ -1691,9 +2291,10 @@
             event.present = trailing.present;
             if (trailing.rest) assignStationLine(event, trailing.rest);
           } else {
-            startEvent();
+            startEvent(row, line);
             if (trailing.present) event.present = true;
             else event.start = trailing.date;
+            if (ongoing) event.present = true;
             if (trailing.rest) assignStationLine(event, trailing.rest);
           }
           return;
@@ -1706,7 +2307,7 @@
         //  Sie wird deshalb zurueckgestellt und der naechsten Station
         //  vorangestellt – kommt keine, wird sie selbst zur Station.
         if (!event) {
-          hold(line, false);
+          hold(row, line, startsEntry(row, bodyFor(row)) || row.bold);
           return;
         }
 
@@ -1716,26 +2317,77 @@
         //  Eine hervorgehobene kurze Zeile ohne Datum gehoert dann der
         //  naechsten Station. Ohne diese Regel haengt sie als Beschreibung
         //  an der vorigen, und samtliche Titel liegen eine Station zu tief.
-        if (startsEntry(row, bodyFor(row)) && stationFilled(event)) {
+        if ((startsEntry(row, bodyFor(row)) || titleLike(row)) && stationFilled(event)) {
           closeEvent();
-          hold(line, true);
+          hold(row, line, true);
+          return;
+        }
+
+        //  Ohne jede Hervorhebung bleibt der Aufbau: steht nach so vielen
+        //  Zeilen, wie die Stationen hier ueber ihrem Zeitraum tragen, ein
+        //  Zeitraum fuer sich, beginnt mit dieser Zeile die naechste. Nicht
+        //  aber, wenn eine der Zeilen dazwischen hervorgehoben ist – dann
+        //  beginnt die Station dort – und nicht bei einer Angabe mit
+        //  Beschriftung ("Abschlussnote: 1,8"), die immer zur Station
+        //  darueber gehoert.
+        var deeper = event.textX !== undefined && row.x &&
+          row.x > event.textX + Math.max(3, (row.size || 10) * 0.6);
+        var boldAhead = !row.bold && rows.slice(cursor + 1, cursor + 1 + headSize)
+          .some(function (next) { return next.bold && !dateOnly(next.text); });
+        if (headSize && stationFilled(event) && !deeper && !boldAhead &&
+            !/^[-–—•*·]/.test(line) && !/^[A-ZÄÖÜ][\wäöüß ]{2,24}:\s/.test(line) &&
+            dateOnlyAhead(cursor + 1, headSize)) {
+          closeEvent();
+          hold(row, line, false);
           return;
         }
       }
 
       if (event) {
-        if (/^[-–—•*·]\s*/.test(line)) event.list.push(line.replace(/^[-–—•*·]\s*/, ""));
-        else assignStationLine(event, line);
+        var indented = event.textX !== undefined && row.x &&
+          row.x > event.textX + Math.max(3, (row.size || 10) * 0.6);
+        var marked = /^[-–—•*·▪◦‣➢➤✓]\s*/.test(line);
+        var item = line.replace(/^[-–—•*·▪◦‣➢➤✓]\s*/, "");
+        var last = event.list.length - 1;
+        var wasItem = event.lastWasItem;
+        event.lastWasItem = true;
+        if (!marked && indented && wasItem && /^[a-zäöüß(]/.test(item)) {
+          //  Ein umbrochener Punkt: klein weitergeschrieben, gleich tief.
+          event.list[last] = joinLines([event.list[last], item]);
+        } else if (marked || (indented && (event.company || event.list.length ||
+                                           event.description.length))) {
+          event.list.push(item);
+        } else {
+          //  Wo der letzte gewoehnliche Text der Station stand, ist ihre
+          //  Textspalte. Manche Vorlagen ruecken den Arbeitgeber unter dem
+          //  Titel ein – dann gilt ab da dessen Einzug.
+          event.lastWasItem = false;
+          if (row.x) event.textX = row.x;
+          assignStationLine(event, line);
+        }
         return;
       }
 
       if (current) {
         buffer.push({ text: line, size: row.size, bold: row.bold,
-                      y: row.y, page: row.page });
+                      x: row.x, y: row.y, page: row.page });
       }
     }
 
     var page = null;
+
+    function farBelow(row) {
+      var tail = buffer[buffer.length - 1];
+      if (!tail || !tail.y || !row.y || tail.page !== row.page) return false;
+      var jump = tail.y - row.y;
+      var steps = [];
+      for (var i = 1; i < buffer.length; i++) {
+        if (buffer[i].page === buffer[i - 1].page) steps.push(buffer[i - 1].y - buffer[i].y);
+      }
+      var size = row.size || 10;
+      if (steps.length >= 2) return jump > Math.max(Math.max.apply(null, steps) * 2, size * 4);
+      return jump > size * 8;
+    }
 
     //  Steht in den naechsten Zeilen ein Zeitraum?
     function dateWithin(from, span) {
@@ -1747,22 +2399,34 @@
 
     rows.forEach(function (row, index) {
       if (stopped) return;
+      cursor = index;
       var line = row.text;
 
       //  Ein Seitenwechsel beendet die Listenabschnitte. Stationen laufen
       //  ueber Seiten hinweg weiter, Kenntnisse und Interessen nicht – und
       //  auf dem naechsten Blatt faengt sonst gern ein Anschreiben an,
       //  dessen Briefkopf dann unter "Mobilität" landet.
-      if (page !== null && row.page !== page &&
+      //  Stand die Ueberschrift allein unten auf dem Blatt, gehoert der
+      //  Inhalt oben auf dem naechsten noch zu ihr.
+      //  Und steht die erste Zeile des neuen Blattes genau dort, wo die
+      //  letzte des Abschnitts stand – gleiche Flucht, gleiche Schrift –,
+      //  laeuft die Liste einfach weiter.
+      var tail = buffer[buffer.length - 1];
+      var runsOn = !!tail && tail.x !== undefined && Math.abs(tail.x - row.x) <= 8 &&
+        Math.abs((tail.size || 0) - (row.size || 0)) < 0.5 && !carriesDate(row.text) &&
+        !headingOf(row.text);
+      if (page !== null && row.page !== page && buffer.length && !runsOn &&
           current && LIST_SECTIONS.indexOf(current) !== -1) {
         closeEvent(); flushBuffer();
         current = null;
       }
       page = row.page;
 
-      //  Ab der Anrede beginnt das Anschreiben, ab der Schlussformel steht
-      //  nur noch die Unterschrift. Beides gehoert nicht in den Lebenslauf.
-      if (SALUTATION.test(line) || CLOSING.test(line)) {
+      //  Das erkannte Anschreiben ist schon heraus. Steht trotzdem noch eine
+      //  Anrede da, beginnt dort ein Brief, der sich nicht lesen liess; ab
+      //  der Schlussformel ("Ort, Datum") steht nur noch die Unterschrift.
+      //  Beides gehoert nicht in den Lebenslauf.
+      if (isGreeting(line) || CLOSING.test(line)) {
         closeEvent(); flushBuffer(); stopped = true; stopIndex = index; return;
       }
 
@@ -1823,6 +2487,41 @@
         //  das Weglassen der linken Spalte ein Datenverlust.
       }
 
+      //  "Sprachen: Deutsch, Englisch" – dieselbe Beschriftung mit
+      //  Doppelpunkt, wie sie in eingefuegtem Text und in Kenntnislisten
+      //  steht. Innerhalb einer laufenden Station ist sie dagegen Teil der
+      //  Station ("Tools: Jira, Confluence" unter einer Stelle).
+      var colon = !label && !(isStationSection(current) && event) && colonLabel(line);
+      if (colon) {
+        var colonRole = headingOf(colon.label);
+        //  In einer Kenntnisliste sind "Languages:", "Tools:" und
+        //  "Frameworks:" Gruppen dieser Liste. Nur echte Sprachen machen
+        //  aus "Sprachen:" den Sprachenblock.
+        var grouped = current === "skills" && colonRole !== "mobility" &&
+          !(colonRole === "languages" && NATURAL_LANGUAGE.test(colon.value));
+        if (grouped || colonRole === current) {
+          content(row, current === "mobility" ? colon.label + " " + colon.value : colon.value);
+          return;
+        }
+        if (colonRole && colonRole !== "ignore" && !carriesDate(colon.value)) {
+          closeEvent(); flushBuffer();
+          sawHeading = true;
+          current = colonRole;
+          if (current === "mobility") content(row, colon.label + " " + colon.value);
+          else content(row, colon.value);
+          return;
+        }
+      }
+
+      //  "Führerschein Klasse B" steht, wo Platz war – unter Kenntnissen,
+      //  unter Sonstiges, hinter den Sprachen. Es gehoert immer zur
+      //  Mobilitaet, und der laufende Abschnitt bleibt, wie er ist.
+      if (current !== "mobility" && /^(f(?:ü|ue)hrerschein|fahrerlaubnis|driving licen[cs]e)\b\s*:?\s*\S/i.test(line) &&
+          !carriesDate(line) && !(isStationSection(current) && event)) {
+        profile.mobility.push({ name: clean(line.replace(/\t+/g, " ").replace(/^([^:]+):\s*/, "$1 ")) });
+        return;
+      }
+
       //  "Ausbildung" ist eine Ueberschrift, "Ausbildung zum Berufstaucher"
       //  ist eine Station. Liegen Schriftgrade vor, entscheidet das Layout;
       //  sonst die Kuerze der Zeile.
@@ -1833,7 +2532,9 @@
         closeEvent(); flushBuffer();
         sawHeading = true;
         current = glued.role;
-        content(row, glued.rest);
+        //  Die Zeile beginnt mit der Ueberschrift im Rand – wo ihr Text
+        //  anfaengt, ist damit unbekannt.
+        content(Object.assign({}, row, { x: 0 }), glued.rest);
         return;
       }
 
@@ -1863,13 +2564,22 @@
         //  naechsten Zeilen ein Zeitraum, war es ein Titel.
         if (isStationSection(current) && dateWithin(index + 1, 3)) {
           closeEvent(); flushBuffer();
-          hold(line, true);
+          hold(row, line, true);
           return;
         }
 
         closeEvent(); flushBuffer();
         current = null;
         return;
+      }
+
+      //  Ein grosser Sprung nach unten beendet eine Liste: darunter steht
+      //  die Fusszeile ("Mehr dazu im Portfolio: …"), nicht das naechste
+      //  Projekt. Gemessen am Abstand, den die Liste bisher hatte – manche
+      //  Vorlagen setzen ihre Eintraege weit auseinander.
+      if (LIST_SECTIONS.indexOf(current) !== -1 && farBelow(row)) {
+        flushBuffer();
+        current = null;
       }
 
       content(row, line);
@@ -1894,6 +2604,7 @@
       //  brauchbare Zeile – und die gehoert meistens zum Inhalt.
       rows.forEach(function (row, index) {
         if (index >= stopIndex) return;
+        cursor = index;
 
         var line = row.text;
         var carriesDate = RANGE.test(line) || SINGLE.test(line) ||
@@ -1953,6 +2664,15 @@
       if (!value) return;
 
       if (isName(row) || !current) {
+        //  "Tidepool | Rust, WebAssembly   Jan. 2023 – Present": der
+        //  Zeitraum hat in der Projektliste keinen Platz, und hinter dem
+        //  Strich steht, womit es gebaut ist – das ist Beschreibung.
+        var range = value.match(RANGE);
+        if (range && value.indexOf(range[0]) > 0) value = clean(value.replace(range[0], ""));
+        var stack = "";
+        var piped = value.match(/^(.{2,60}?)\s+[|–—]\s+(.{2,80})$/);
+        if (piped && !/https?:/.test(piped[1])) { value = piped[1]; stack = clean(piped[2]); }
+
         var url = (value.match(/https?:\/\/\S+/) || [""])[0];
         var name = clean(value.replace(url, "")) || shortUrl(url);
         if (!url && /^[\w.-]+\.(de|com|org|net|io|dev|eu|ch|at)$/i.test(name)) {
@@ -1960,7 +2680,7 @@
         }
         //  y und Seite bleiben stehen: daran wird gleich das Bild
         //  gefunden, das neben dem Projekt liegt.
-        current = { name: name.slice(0, 60), url: url, description: "",
+        current = { name: name.slice(0, 60), url: url, description: stack ? stack + " –" : "",
                     img: "", y: row.y || 0, page: row.page || 1 };
         projects.push(current);
         return;
@@ -1969,7 +2689,10 @@
       current.description = clean(current.description + " " + value);
     });
 
-    return projects.filter(function (project) { return project.name; });
+    return projects.filter(function (project) {
+      project.description = project.description.replace(/\s+–$/, "");
+      return project.name;
+    });
   }
 
   //  Der Name ist die groesste Schrift auf dem Blatt – das gilt quer durch
@@ -1977,8 +2700,15 @@
   //  zweispaltigen Lebenslaeufen kommt zuerst die Seitenspalte. Fehlen die
   //  Schriftgrade, bleibt es bei der Suche von oben.
   function findName(rows, bodySize) {
+    //  "PERSONAL INFORMATION<TAB>Inês Carvalho" – Europass setzt die
+    //  Beschriftung links neben den Namen.
+    function nameText(row) {
+      var parts = String(row.text).split("\t").map(clean).filter(Boolean);
+      return parts.length === 2 && headingOf(parts[0]) ? parts[1] : row.text;
+    }
+
     function usable(row, maxWords, allowSpaced) {
-      var value = clean(row.text);
+      var value = clean(nameText(row));
       if (!value || /[@|]/.test(value) || /\d/.test(value)) return false;
       //  Ein Aufzaehlungspunkt ist nie ein Name.
       if (/^[-–—•*·]/.test(value)) return false;
@@ -1998,7 +2728,7 @@
       if (best >= 0) {
         //  Steht rechts daneben noch etwas ("DAN BULLDOG   Finance"), gehoert
         //  nur die erste Spalte zum Namen.
-        var name = rows[best].text.split("\t")[0].trim();
+        var name = nameText(rows[best]).split("\t")[0].trim();
         var after = best + 1;
         if (rows[after] && usable(rows[after]) &&
             Math.abs(rows[after].size - rows[best].size) <= rows[best].size * 0.05 &&
@@ -2022,6 +2752,7 @@
           nameIndex: best,
           nameEnd: after - 1,
           roleIndex: roleIndex,
+          bySize: true,
         };
       }
     }
@@ -2029,8 +2760,11 @@
     //  Ohne Schriftgrade als Anhalt ist jede kurze Zeile ein Kandidat –
     //  dann darf es wenigstens kein ganzer Satz sein. Drei Woerter reichen
     //  fuer einen Namen.
+    //  Eine Zeile mit Beschriftung ("Name<TAB>Jonas Weber",
+    //  "Staatsangehörigkeit<TAB>deutsch") ist kein Name und keine Rolle.
     var candidates = [];
     for (var n = 0; n < Math.min(rows.length, 14) && candidates.length < 3; n++) {
+      if (/\t|:/.test(rows[n].text)) continue;
       if (usable(rows[n], 3)) candidates.push({ text: rows[n].text, index: n });
     }
 
@@ -2090,14 +2824,19 @@
     for (var i = 0; i < lines.length; i++) {
       var line = clean(lines[i]).replace(/,\s*$/, "");
 
-      var together = line.match(/^(.{3,60}?),\s*(\d{4,5}\s+[A-ZÄÖÜ][\wäöüßA-ZÄÖÜ.\- ]{2,})$/);
+      var together = line.match(/^(.{3,60}?),\s*(\d{4,5}\s+[A-ZÄÖÜ][\wäöüßA-ZÄÖÜ.()\- ]{2,})$/);
       if (together && /\d/.test(together[1])) {
         found.address = clean(together[1]);
         found.city = clean(together[2]);
         return found;
       }
 
-      if (!/^\d{4,5}\s+[A-ZÄÖÜ][\wäöüßA-ZÄÖÜ.\- ]{2,}$/.test(line)) continue;
+      //  "Lower Piddling, LP3 4RW", "Seattle, WA 98101", "SW1A 1AA London":
+      //  britische und amerikanische Anschriften tragen die Postleitzahl
+      //  hinter dem Ort.
+      var foreign = /^[A-Z][\w .'-]{1,40},\s*(?:[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}|[A-Z]{2}\s+\d{5}(?:-\d{4})?)$/.test(line) ||
+        /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\s+[A-Z][a-z]/.test(line);
+      if (!foreign && !/^\d{4,5}\s+[A-ZÄÖÜ][\wäöüßA-ZÄÖÜ.\- ]{2,}$/.test(line)) continue;
 
       found.city = line;
       var before = clean(lines[i - 1] || "").replace(/,\s*$/, "");
@@ -2114,7 +2853,7 @@
   //  Woran man einen Arbeitgeber oder eine Schule erkennt. Steht so etwas
   //  in der ersten Zeile einer Station, ist es die Einrichtung und nicht
   //  die Taetigkeit – die kommt dann eine Zeile spaeter.
-  var ORGANISATION = /(gmbh|mbh|\bag\b|\bkg\b|\bse\b|\bohg\b|\be\.?\s?v\b|\binc\b|\bltd\b|schule|gymnasium|universit|hochschule|akademie|institut|klinik|krankenhaus|betrieb|werke?\b|zentrum|verein|kanzlei|praxis|agentur|\bamt\b|bundes|stadt\b|gemeinde)/i;
+  var ORGANISATION = /(gmbh|mbh|\bllc\b|\bplc\b|\bcorp\b|corporation|insurance|\bbank\b|\bgroup\b|\blabs?\b|foundation|stiftung|hospital|college|\bschool\b|\bag\b|\bkg\b|\bse\b|\bohg\b|\be\.?\s?v\b|\binc\b|\bltd\b|schule|gymnasium|universit|hochschule|akademie|institut|klinik|krankenhaus|betrieb\b|werke?\b|zentrum|verein|kanzlei|praxis|agentur|\bamt\b|bundes|stadt\b|gemeinde)/i;
 
   function splitPlace(event, value) {
     var parts = value.split(/\s*[|·]\s*|,\s(?=[^,]*$)/);
@@ -2122,10 +2861,72 @@
     if (parts[1]) event.place = clean(parts[1]);
   }
 
+  //  Sieht das aus wie ein Ort? "Hamburg", "Frankfurt (Oder)",
+  //  "Toronto, ON", "Remote". Eine Einrichtung ist es jedenfalls nicht.
+  function placeLike(value) {
+    var text = clean(value);
+    if (!text || text.length > 32 || ORGANISATION.test(text) || /\d/.test(text)) return false;
+    return /^[A-ZÄÖÜ][\wäöüßéèáàóòúùç.'-]+(?:[ -][A-ZÄÖÜ(][\wäöüßéèáàóòúùç.()'-]+){0,2}(?:,\s*[A-Z]{2,3}|,\s*[A-ZÄÖÜ][\wäöüß]+)?$/.test(text);
+  }
+
+  //  Eine Kopfzeile in einem Stueck: "Fachkrankenpflegerin | Uniklinik
+  //  Freiburg", "Senior Data Analyst, Maple Grocers Inc. — Toronto, ON".
+  //  Getrennt wird an senkrechtem Strich, Mittelpunkt und langem
+  //  Gedankenstrich; ein Ort steht hinten. Was bleibt, ist Taetigkeit und
+  //  Einrichtung – in dieser Reihenfolge, ausser die erste gibt sich als
+  //  Einrichtung zu erkennen.
+  function splitHead(value) {
+    var parts = value.split(/\s+[|·—]\s+/).map(clean).filter(Boolean);
+    if (parts.length < 2) return null;
+
+    var head = { title: "", company: "", place: "" };
+    if (parts.length > 2 || placeLike(parts[parts.length - 1])) head.place = parts.pop();
+
+    if (parts.length === 1) {
+      //  "Senior Data Analyst, Maple Grocers Inc." – der Ort ist schon
+      //  abgetrennt, also steht hinter dem Komma die Einrichtung.
+      var comma = parts[0].match(/^(.{2,80}?),\s+(.{2,60})$/);
+      if (!comma) return null;
+      if (ORGANISATION.test(comma[1]) && !ORGANISATION.test(comma[2])) {
+        head.company = comma[1];
+        head.title = comma[2];
+      } else {
+        head.title = comma[1];
+        head.company = comma[2];
+      }
+      return head;
+    }
+
+    if (ORGANISATION.test(parts[0]) && !ORGANISATION.test(parts[1])) {
+      head.company = parts[0];
+      head.title = parts[1];
+    } else {
+      head.title = parts[0];
+      head.company = parts[1];
+    }
+    //  "St. Josefskrankenhaus, Freiburg": der Ort haengt an der Einrichtung.
+    var located = !head.place && head.company.match(/^(.{2,60}),\s+([^,]{2,32})$/);
+    if (located && placeLike(located[2])) {
+      head.company = located[1];
+      head.place = located[2];
+    }
+    return head;
+  }
+
   function assignStationLine(event, line) {
     var raw = String(line);
     var value = clean(line).replace(/\t+/g, " ");
     if (!value) return;
+
+    if (!event.title && !event.company && raw.indexOf("\t") === -1) {
+      var head = splitHead(value);
+      if (head) {
+        event.title = head.title;
+        event.company = head.company;
+        if (head.place) event.place = head.place;
+        return;
+      }
+    }
 
     //  "UBS INVESTMENT BANK        New York, NY" – englische Lebenslaeufe
     //  setzen den Ort an den rechten Rand. Der Spaltensprung ist als
@@ -2149,6 +2950,17 @@
       if (pair && ORGANISATION.test(pair[2]) && !ORGANISATION.test(pair[1])) {
         event.title = clean(pair[1]);
         splitPlace(event, clean(pair[2]));
+        return;
+      }
+    }
+
+    //  "SPS-Fachkraft, TÜV Rheinland Akademie" – vorn die Taetigkeit oder
+    //  der Abschluss, hinter dem letzten Komma die Einrichtung.
+    if (!event.title && !event.company) {
+      var comma = value.match(/^(.{3,80}),\s+([^,]{3,60})$/);
+      if (comma && ORGANISATION.test(comma[2]) && !ORGANISATION.test(comma[1])) {
+        event.title = clean(comma[1]);
+        event.company = clean(comma[2]);
         return;
       }
     }
@@ -2180,8 +2992,16 @@
 
     //  "Abschluss: Geprüfter Taucher" liest sich als Aufzählungspunkt
     //  besser denn als Absatz.
-    if (/^[A-ZÄÖÜ][\wäöüß ]{2,24}:\s/.test(value)) event.list.push(value);
-    else event.description.push(value);
+    if (/^[A-ZÄÖÜ][\wäöüß ]{2,24}:\s/.test(value)) { event.list.push(value); return; }
+
+    //  Ein Satz, der in der naechsten Zeile klein weitergeht, ist umbrochen
+    //  und kein neuer Absatz.
+    var previous = event.description[event.description.length - 1];
+    if (previous && !/[.!?:;]$/.test(previous) && /^[a-zäöüß(]/.test(value)) {
+      event.description[event.description.length - 1] = joinLines([previous, value]);
+      return;
+    }
+    event.description.push(value);
   }
 
   //  Eine Sprachangabe ist ein Paar: "Englisch, fliessend in Wort und
@@ -2253,6 +3073,11 @@
     rows.forEach(function (row) {
       var line = clean(row.text);
       if (!line) return;
+
+      //  "Languages: Go, Rust, SQL" – eine Gruppe in der Kenntnisliste. Die
+      //  Beschriftung ordnet nur; die Eintraege dahinter sind die Kenntnisse.
+      var group = line.match(/^([^:\t]{2,30}):\s+(.+)$/);
+      if (group && /[,;·•|]/.test(group[2])) line = group[2];
 
       var parts = line.split("\t").map(clean).filter(Boolean);
       if (parts.length === 2) {
@@ -2467,6 +3292,21 @@
 
     if (clean(profile.signature)) target.coverLetter.signatureImg = profile.signature;
 
+    //  Das Anschreiben. Beim Ergaenzen nur, wenn noch keines dasteht – ein
+    //  geschriebener Brief wird nicht still durch einen anderen ersetzt.
+    var letter = profile.letter;
+    if (letter && letter.paragraphs && letter.paragraphs.length) {
+      var written = (target.coverLetter.paragraphs || []).some(function (text) { return clean(text); });
+      if (mode !== "merge" || !written) {
+        target.coverLetter.recipient = clean(letter.recipient).replace(/[ \t]*\n[ \t]*/g, "\n");
+        target.coverLetter.subject = clean(letter.subject).replace(/\s*\n\s*/g, " – ");
+        target.coverLetter.salutation = clean(letter.salutation);
+        target.coverLetter.paragraphs = letter.paragraphs.map(clean).filter(Boolean);
+        target.coverLetter.closing = clean(letter.closing);
+        target.settings.showCoverLetter = true;
+      }
+    }
+
     if (profile.links && profile.links.length) {
       var footer = target.footers.right;
       profile.links.slice(0, 4).forEach(function (link) {
@@ -2576,6 +3416,47 @@
 
   /* ---------------------------------------------------------- Erkennung */
 
+  //  Die Antwort eines Sprachmodells, so wie man sie aus dem Chat kopiert:
+  //  mit einem Satz davor, in einem Codeblock mit ```json, manchmal mit
+  //  einem Komma zu viel vor der schliessenden Klammer. Darin steckt ein
+  //  Dokument, und das soll ankommen – nicht als Fliesstext gelesen werden.
+  //  Herausgeloest wird nur, was sich danach als JSON lesen laesst und nach
+  //  einem Lebenslauf aussieht; ein Lebenslauf mit geschweiften Klammern im
+  //  Text bleibt Text.
+  function unwrapJson(text) {
+    var value = String(text || "").replace(/^\uFEFF/, "").trim();
+    if (value.charAt(0) === "{") return value;
+
+    var candidates = [];
+    var fence = /```[a-zA-Z]*[ \t]*\n?([\s\S]*?)```/g;
+    var match;
+    while ((match = fence.exec(value)) !== null) candidates.push(match[1].trim());
+    var first = value.indexOf("{");
+    var last = value.lastIndexOf("}");
+    if (first !== -1 && last > first) candidates.push(value.slice(first, last + 1));
+
+    for (var i = 0; i < candidates.length; i++) {
+      var candidate = candidates[i];
+      if (candidate.charAt(0) !== "{") continue;
+      var data = parseLoose(candidate);
+      if (data && typeof data === "object" &&
+          (data.contact || data.basics || data.settings || data.events || data.coverLetter ||
+           data.work || data.sections)) {
+        return JSON.stringify(data);
+      }
+    }
+    return value;
+  }
+
+  //  JSON, wie Menschen und Modelle es schreiben: ein Komma vor der
+  //  schliessenden Klammer ist kein Grund, ein ganzes Dokument abzulehnen.
+  function parseLoose(text) {
+    try { return JSON.parse(text); } catch (error) { /* weiter unten */ }
+    try { return JSON.parse(String(text).replace(/,(\s*[}\]])/g, "$1")); } catch (error) {
+      return null;
+    }
+  }
+
   function detect(name, text) {
     var filename = clean(name).toLowerCase();
     if (/\.docx$/.test(filename)) return "docx";
@@ -2589,7 +3470,8 @@
       //  Beginnt es wie JSON und endet es wie JSON, ist es als JSON gemeint –
       //  kaputt, meist von Hand oder von einem Sprachmodell geschrieben. Das
       //  als Fliesstext zu lesen, ergaebe nur "nichts erkannt".
-      try { data = JSON.parse(trimmed); } catch (error) {
+      data = parseLoose(trimmed);
+      if (data === null) {
         return trimmed.charAt(trimmed.length - 1) === "}" ? "json-broken" : "text";
       }
       if (!data || typeof data !== "object") return "json-unknown";
@@ -2600,10 +3482,11 @@
           !Array.isArray(data.sections)) return "reactive";
       if (data.basics || data.work || data.education ||
           /jsonresume/i.test(clean(data.$schema))) return "jsonresume";
-      //  AGENTS.md sagt: alles ist optional. Ein Dokument, das nur eine
-      //  Fassung und Kontaktdaten traegt, ist trotzdem eines von RickCV.
-      if (typeof data.version === "number" &&
-          (data.contact || data.events || data.coverLetter || data.profile)) return "rickcv";
+      //  AGENTS.md sagt: alles ist optional, die Fassung eingeschlossen. Ein
+      //  Dokument, das nur Kontaktdaten traegt – so schreibt es ein Chat
+      //  gern –, ist trotzdem eines von RickCV.
+      if (isObject(data.contact) || Array.isArray(data.events) || isObject(data.coverLetter) ||
+          isObject(data.profile)) return "rickcv";
       return "json-unknown";
     }
     return "text";
@@ -2629,6 +3512,7 @@
       projects: profile.projects.length,
       references: profile.references.length,
       links: profile.links.length,
+      letter: profile.letter && profile.letter.paragraphs.length ? 1 : 0,
       images: (profile.photo ? 1 : 0) + (profile.signature ? 1 : 0) +
         profile.projects.filter(function (project) { return clean(project.img); }).length,
     };
@@ -2652,13 +3536,14 @@
   //  lines: die Zeilen aus dem PDF mitsamt Schriftgrad – sie machen aus
   //  Raten eine Auswertung. Fehlen sie, bleibt es beim reinen Text.
   function parseText(text, name, lines, images) {
+    if (!lines) text = unwrapJson(text);
     var format = detect(name, text);
 
     if (format === "json-broken") throw new Error("brokenJson");
 
     if (format === "rickcv" || format === "jsonresume" || format === "reactive" ||
         format === "json-unknown") {
-      var data = JSON.parse(text);
+      var data = parseLoose(clean(text));
       if (format === "rickcv") {
         var newer = Number(data.version) > Model.VERSION;
         var migrated = Model.migrate(data);
@@ -2701,12 +3586,14 @@
     var substance = textProfile.events.length + textProfile.skills.length +
       textProfile.languages.length + textProfile.projects.length +
       (clean(textProfile.contact.email) ? 1 : 0) + (clean(textProfile.contact.phone) ? 1 : 0) +
-      (clean(textProfile.profileText) ? 1 : 0);
+      (clean(textProfile.profileText) ? 1 : 0) + (textProfile.letter ? 1 : 0);
     if (!substance) throw new Error("nothingFound");
 
     //  Kontaktdaten allein sind ein schlechter Import. Dann lieber sagen,
-    //  dass wenig erkannt wurde, statt es als Erfolg auszugeben.
-    if (!textProfile.events.length) textProfile.warnings.push("thin");
+    //  dass wenig erkannt wurde, statt es als Erfolg auszugeben – es sei
+    //  denn, es war nur ein Anschreiben: das hat keine Stationen.
+    if (!textProfile.events.length && !textProfile.letter) textProfile.warnings.push("thin");
+    if (textProfile.letter) textProfile.warnings.push("letter");
     if (textProfile.images) textProfile.warnings.push("images");
 
     //  Aus Text laesst sich keine Selbsteinschaetzung lesen: die Punkte

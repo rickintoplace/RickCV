@@ -135,8 +135,8 @@
    *  Maustaste gedrueckt ist, bleibt der Knopf weg: wer markiert, um zu
    *  kopieren, soll nicht versehentlich woanders landen.
    *
-   *  Nur mit einer Maus (hover und feiner Zeiger). Auf dem Telefon gehoert
-   *  die Vorschau dem Wischen, und einen Hover gibt es dort nicht.
+   *  Nur mit einer Maus. Auf dem Telefon gehoert die Vorschau dem Wischen,
+   *  und einen Hover gibt es dort nicht.
    */
   var editor = { frame: null, button: null, target: null, pressed: false };
 
@@ -229,33 +229,86 @@
     editor.button.style.top = Math.max(0, top - 3 - editor.button.offsetHeight) + "px";
   }
 
-  if (framed && window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+  //  Ob eine Maus da ist, sagt der Zeiger selbst und nicht die Medienabfrage:
+  //  Firefox unter Linux meldet auf Geraeten mit Touchscreen "hover: none",
+  //  auch wenn daneben eine Maus liegt – dann gab es den Knopf gar nicht.
+  //  Umgekehrt schickt ein Fingertipp hinterher ein nachgemachtes
+  //  mousemove; das faellt ueber die Zeit seit der letzten Beruehrung raus.
+  if (framed) {
+    var lastTouch = 0;
+    document.addEventListener("touchstart", function () {
+      lastTouch = Date.now();
+      hideEditHint();
+    }, { passive: true, capture: true });
+
     //  Auf dem Weg von einem Eintrag zu seinem Knopf liegt ein Streifen, der
     //  zu keinem Eintrag gehoert. Solange der Zeiger in der Umrandung oder
     //  auf dem Knopf ist, bleibt beides stehen – sonst verschwaende der
     //  Knopf, kurz bevor man ihn erreicht.
-    function inside(node, event) {
+    function inside(node, x, y) {
       if (!node || node.hidden) return false;
       var rect = node.getBoundingClientRect();
-      return event.clientX >= rect.left && event.clientX <= rect.right &&
-             event.clientY >= rect.top && event.clientY <= rect.bottom;
+      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
 
     //  Wer von einem Eintrag schraeg zu dessen Knopf faehrt, streift oft den
     //  Eintrag daneben – meist die Ueberschrift darueber. Sofort umzuspringen
-    //  hiesse: der Knopf laeuft davon, kurz bevor man ihn erreicht. Also
-    //  wechselt die Umrandung erst, wenn der Zeiger eine Weile auf dem neuen
-    //  Eintrag bleibt; wer vorher den Knopf erreicht, behaelt ihn.
+    //  hiesse: der Knopf laeuft davon, kurz bevor man ihn erreicht.
+    //
+    //  Gewartet wird aber nur, wenn der Zeiger auch auf den Knopf zuhaelt.
+    //  Frueher wartete jeder Wechsel, und die Frist begann bei jeder
+    //  Bewegung von vorn: wer ruhig ueber das Blatt fuhr, sah die Umrandung
+    //  erst, wenn er anhielt. Firefox meldet die Bewegung feiner als
+    //  Chrome, dort hing sie deshalb besonders deutlich hinterher.
     var SWITCH_DELAY = 250;
     var pendingSwitch = null;
+    var pendingTarget = null;
+
+    //  Die Richtung wird ueber ein paar Pixel gemessen, nicht von Ereignis
+    //  zu Ereignis: bei einem Pixel Weg ist jede Richtung Zufall.
+    var anchor = null;
+    var heading = null;
 
     function cancelSwitch() {
       clearTimeout(pendingSwitch);
       pendingSwitch = null;
+      pendingTarget = null;
+    }
+
+    function switchTo(target) {
+      cancelSwitch();
+      if (target && target.isConnected) showEditHint(target);
+      else hideEditHint();
+    }
+
+    //  Haelt der Zeiger auf den Knopf zu? Ein Kegel von gut 50 Grad zu
+    //  jeder Seite – eine Handbewegung ist selten gerade.
+    function towardButton(x, y) {
+      if (!heading || !editor.button || editor.button.hidden) return false;
+      var rect = editor.button.getBoundingClientRect();
+      var dx = Math.max(rect.left - x, 0, x - rect.right);
+      var dy = Math.max(rect.top - y, 0, y - rect.bottom);
+      var toX = x < rect.left ? dx : x > rect.right ? -dx : 0;
+      var toY = y < rect.top ? dy : y > rect.bottom ? -dy : 0;
+      var length = Math.sqrt(toX * toX + toY * toY);
+      if (!length) return true;
+      return (toX * heading.x + toY * heading.y) / length > 0.6;
     }
 
     document.addEventListener("mousemove", function (event) {
-      if (editor.pressed) return;
+      if (editor.pressed || Date.now() - lastTouch < 1000) return;
+      var x = event.clientX;
+      var y = event.clientY;
+
+      if (!anchor) anchor = { x: x, y: y };
+      var mx = x - anchor.x;
+      var my = y - anchor.y;
+      var moved = Math.sqrt(mx * mx + my * my);
+      if (moved >= 4) {
+        heading = { x: mx / moved, y: my / moved };
+        anchor = { x: x, y: y };
+      }
+
       if (editor.button && event.target === editor.button) return cancelSwitch();
       var target = event.target.closest && event.target.closest("[data-edit]");
       if (target === editor.target) return cancelSwitch();
@@ -263,18 +316,19 @@
       //  Ein tiefer liegender Eintrag im umrandeten gewinnt sofort – das
       //  ist kein Weg zum Knopf, sondern ein genaueres Zeigen.
       var deeper = target && editor.target && editor.target.contains(target);
-      if (deeper || !editor.target) {
-        cancelSwitch();
-        return target ? showEditHint(target) : hideEditHint();
-      }
-      if (inside(editor.frame, event) || inside(editor.button, event)) return cancelSwitch();
+      if (deeper || !editor.target) return switchTo(target);
+      if (inside(editor.frame, x, y) || inside(editor.button, x, y)) return cancelSwitch();
 
+      //  Wer nicht zum Knopf will, bekommt den neuen Eintrag sofort. Eine
+      //  Luecke zwischen zwei Eintraegen loescht die Umrandung dagegen nie
+      //  sofort – sonst flackerte sie beim Wechsel.
+      if (target && !towardButton(x, y)) return switchTo(target);
+
+      //  Die Frist laeuft einmal und beginnt nicht bei jeder Bewegung neu.
+      if (pendingSwitch && pendingTarget === target) return;
       cancelSwitch();
-      pendingSwitch = setTimeout(function () {
-        pendingSwitch = null;
-        if (target && target.isConnected) showEditHint(target);
-        else hideEditHint();
-      }, SWITCH_DELAY);
+      pendingTarget = target;
+      pendingSwitch = setTimeout(function () { switchTo(target); }, SWITCH_DELAY);
     });
     document.addEventListener("mousedown", function (event) {
       if (editor.button && event.target === editor.button) return;
@@ -283,7 +337,13 @@
       hideEditHint();
     });
     document.addEventListener("mouseup", function () { editor.pressed = false; });
-    document.addEventListener("mouseleave", hideEditHint);
+    //  Verlaesst der Zeiger den Rahmen, kommt ein mouseout ohne neues Ziel.
+    //  Ein mouseleave am Dokument feuert nicht in jedem Browser.
+    document.addEventListener("mouseout", function (event) {
+      if (event.relatedTarget) return;
+      cancelSwitch();
+      hideEditHint();
+    });
   }
 
   window.addEventListener("message", function (event) {

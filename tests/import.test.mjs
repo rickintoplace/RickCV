@@ -343,6 +343,98 @@ console.log("\n— Word aus Textrahmen —");
   }
 }
 
+//  Ein Word-Dokument, wie man es selbst tippt: Formatvorlagen, rechter
+//  Tabstopp für den Zeitraum, "seit" vor dem Datum, Anschrift Zeile für Zeile
+//  als eigene Absätze, Seitenumbruch vor dem Anschreiben.
+console.log("\n— Word, selbst getippt, mit Anschreiben —");
+{
+  const dbox = sandboxWith(["js/i18n.js", "js/model.js", "js/import.js", "js/layout.js",
+                            "js/docx-import.js"]);
+  const bytes = fs.readFileSync(fixture("word-nativ.docx"));
+  const file = {
+    name: "word.docx",
+    arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+  };
+  try {
+    const data = await new Promise((res, rej) =>
+      dbox.RickCVDocx.read(file, (error, value) => (error ? rej(error) : res(value))));
+    const parsed = dbox.RickCVImport.parseText(data.text, "aus-docx.txt", data.lines, data.images);
+    const wn = dbox.RickCVImport.apply(dbox.RickCVModel.createBase("de"), parsed, "replace");
+    ok(wn.contact.name === "Katharina Wolff" && wn.contact.role === "Industriekauffrau", "Name und Rolle");
+    ok(wn.events.length === 5, "fünf Stationen", wn.events.length);
+    const lead = wn.events[0];
+    ok(lead.title === "Teamleiterin Einkauf" && lead.start === "05/2022" && lead.present,
+       "„seit 05/2022“ am Tabstopp", JSON.stringify([lead.title, lead.start, lead.present]));
+    ok(lead.company === "Frankenguss AG" && lead.place === "Nürnberg", "Arbeitgeber darunter");
+    ok(data.lines.find((l) => l.text === "Birkenweg 17").page === 2, "der Seitenumbruch steht vor dem Brief");
+    ok(wn.coverLetter.recipient === "Kühlwerk Süd GmbH\nFrau Sabine Albrecht\nIndustriestraße 40\n91052 Erlangen",
+       "Empfänger aus Absätzen mit Leerabsätzen dazwischen", JSON.stringify(wn.coverLetter.recipient));
+    ok(wn.coverLetter.subject === "Bewerbung als Leiterin Einkauf" && wn.coverLetter.paragraphs.length === 3 &&
+       wn.coverLetter.closing === "Freundliche Grüße", "Betreff, drei Absätze, Gruß",
+       JSON.stringify([wn.coverLetter.subject, wn.coverLetter.paragraphs.length, wn.coverLetter.closing]));
+  } catch (error) {
+    ok(false, "selbst getipptes Word-Dokument gelesen", error.message);
+  }
+}
+
+console.log("\n— Eingefügt: Markdown, nur ein Anschreiben, Antwort einer KI —");
+{
+  const md = [
+    "# Miriam Hofstetter", "**Pflegefachfrau (B.Sc.)**",
+    "Kastanienallee 9, 79098 Freiburg · 0761 334455 · miriam.hofstetter@example.de", "",
+    "## Berufserfahrung",
+    "**Fachkrankenpflegerin Intensivpflege** | Universitätsklinikum Freiburg | 04/2020 – heute",
+    "- Versorgung beatmeter Patientinnen und Patienten", "",
+    "**Gesundheits- und Krankenpflegerin** | St. Josefskrankenhaus, Freiburg | 10/2017 – 03/2020", "",
+    "## Kenntnisse", "- Beatmungsmanagement", "- Liebe zum Detail", "",
+    "## Sprachen", "- Deutsch: Muttersprache", "- Englisch: B2", "", "---", "",
+    "Sehr geehrte Frau Dr. Lang,", "", "mit großer Freude habe ich Ihre Ausschreibung gelesen.", "",
+    "Ich freue mich auf ein Gespräch.", "", "Mit freundlichen Grüßen", "Miriam Hofstetter",
+  ].join("\n");
+  const mdParsed = Imp.parseText(md, "eingefuegt.txt");
+  const ms = Imp.apply(base(), mdParsed, "replace");
+  ok(ms.contact.name === "Miriam Hofstetter" && ms.contact.city === "79098 Freiburg", "Kopf aus Markdown",
+     ms.contact.name + " / " + ms.contact.city);
+  ok(ms.events.length === 2 && ms.events[0].title === "Fachkrankenpflegerin Intensivpflege" &&
+     ms.events[0].company === "Universitätsklinikum Freiburg", "Zeile mit senkrechten Strichen",
+     ms.events.map((e) => e.title + "@" + e.company).join(" | "));
+  ok(ms.events[1].company === "St. Josefskrankenhaus" && ms.events[1].place === "Freiburg",
+     "Ort hinter dem Komma", ms.events[1].company + " / " + ms.events[1].place);
+  ok(ms.skills.items.some((i) => i.name === "Liebe zum Detail"), "„Liebe zum Detail“ ist keine Anrede");
+  ok(ms.languages.items.length === 2, "Sprachen mit Doppelpunkt", ms.languages.items.length);
+  ok(ms.coverLetter.paragraphs.length === 2 && ms.coverLetter.salutation === "Sehr geehrte Frau Dr. Lang,",
+     "Anschreiben hinter dem Lebenslauf, Absätze an Leerzeilen", JSON.stringify(ms.coverLetter.paragraphs));
+
+  const only = Imp.parseText([
+    "Tom Berger", "Hauptstraße 5", "01067 Dresden", "tom.berger@example.org", "",
+    "Elbe Logistik GmbH", "Herr Klaus Richter", "Hafenweg 12", "01139 Dresden", "",
+    "Dresden, 3. Februar 2026", "", "Bewerbung als Disponent", "",
+    "Sehr geehrter Herr Richter,", "hiermit bewerbe ich mich als Disponent.",
+    "Ich habe Touren für 40 Fahrzeuge geplant.", "Mit freundlichen Grüßen", "Tom Berger",
+  ].join("\n"), "eingefuegt.txt");
+  const os = Imp.apply(base(), only, "replace");
+  ok(!only.warnings.includes("thin") && only.summary.letter === 1, "ein Anschreiben allein ist ein Import");
+  ok(os.contact.name === "Tom Berger" && os.contact.city === "01067 Dresden", "Absender wird Kontakt",
+     os.contact.name + " / " + os.contact.city);
+  ok(os.coverLetter.recipient === "Elbe Logistik GmbH\nHerr Klaus Richter\nHafenweg 12\n01139 Dresden" &&
+     os.coverLetter.subject === "Bewerbung als Disponent" && os.coverLetter.paragraphs.length === 2,
+     "Empfänger, Betreff, eine Zeile je Absatz", JSON.stringify(os.coverLetter));
+
+  const merged = Imp.apply(Model.createExample("de"), only, "merge");
+  ok(merged.coverLetter.subject === Model.createExample("de").coverLetter.subject,
+     "beim Ergänzen bleibt ein vorhandenes Anschreiben stehen");
+
+  const answer = "Gern! Hier ist dein Dokument:\n\n```json\n" + JSON.stringify({
+    version: 5, locale: "de", contact: { name: "Nora Feldmann" },
+    events: [{ sectionId: "experience", title: "Hebamme", start: "04/2019", present: true }],
+  }, null, 2).replace(/\n}$/, ",\n}") + "\n```\n\nViel Erfolg!";
+  const fromChat = Imp.parseText(answer, "eingefuegt.txt");
+  ok(fromChat.format === "rickcv" && fromChat.state.contact.name === "Nora Feldmann",
+     "JSON aus einer Chat-Antwort, trotz Codeblock und Komma zu viel", fromChat.format);
+  const braces = Imp.parseText("Max Muster\nmax@example.org\nKenntnisse\nC {Grundlagen}, Java", "x.txt");
+  ok(braces.format === "text", "ein Lebenslauf mit Klammern bleibt Text", braces.format);
+}
+
 console.log("\n— PDF —");
 const pdfLib = path.join(root, "vendor/pdfjs/pdf.min.js");
 if (!fs.existsSync(pdfLib)) {
@@ -614,6 +706,108 @@ if (!fs.existsSync(pdfLib)) {
     ok(fs2.contact.name === "", "kein geratener Name aus dem Profiltext",
        JSON.stringify(fs2.contact.name));
     ok(fs2.contact.email === "verlinkte@email.com", "Kontaktdaten kommen trotzdem durch");
+  }
+
+  //  Das Anschreiben: vorn in der Bewerbungsmappe oder hinten, wie RickCV
+  //  druckt. Frueher endete das Lesen an der Anrede – bei einer Mappe, die
+  //  mit dem Anschreiben beginnt, fehlte danach der ganze Lebenslauf.
+  console.log("\n— PDF: Bewerbungsmappe mit Anschreiben vorn —");
+  for (const name of ["mappe.pdf", "mappe-libreoffice.pdf"]) {
+    try {
+      const { parsed, state: mp } = await readPdf(name);
+      const role = (event) => mp.sections.find((s) => s.id === event.sectionId).atsRole;
+      ok(mp.contact.name === "Jonas Weber", `${name}: Name aus den persönlichen Daten`, mp.contact.name);
+      ok(mp.contact.address === "Gartenweg 3" && mp.contact.city === "04109 Leipzig",
+         `${name}: eigene Anschrift, nicht die des Empfängers`, mp.contact.address + " / " + mp.contact.city);
+      ok(mp.events.length === 6, `${name}: alle sechs Stationen hinter dem Anschreiben`, mp.events.length);
+      const job = mp.events.find((e) => /Betriebstechnik/.test(e.title) && role(e) === "experience");
+      ok(!!job && job.company === "Leipziger Wasserwerke GmbH" && job.place === "Leipzig" &&
+         job.start === "01/2021" && job.present, `${name}: Monat mit Punkt, Titel und Arbeitgeber`,
+         job && JSON.stringify([job.title, job.company, job.place, job.start]));
+      ok(!!job && job.list.length === 2, `${name}: eingerückte Punkte ohne Zeichen werden Aufzählung`,
+         job && JSON.stringify(job.list));
+      const sps = mp.events.find((e) => /SPS/.test(e.title));
+      ok(!!sps && sps.company === "TÜV Rheinland Akademie", `${name}: Einrichtung hinter dem Komma`,
+         sps && sps.company);
+      ok(mp.mobility.items.length === 1 && mp.mobility.items[0].name === "Führerschein Klasse B, C1",
+         `${name}: Führerschein mit zwei Klassen bleibt eine Angabe`,
+         mp.mobility.items.map((i) => i.name).join("|"));
+      ok(mp.interests.items.length === 3, `${name}: Interessen nach dem Seitenwechsel`,
+         mp.interests.items.map((i) => i.name).join("|"));
+
+      const letter = mp.coverLetter;
+      ok(parsed.summary.letter === 1 && parsed.warnings.includes("letter"),
+         `${name}: Anschreiben in Zusammenfassung und Hinweis`);
+      ok(letter.recipient === "Stadtwerke Muldental GmbH\nFrau Katrin Hoffmann\nPersonalabteilung\nAm Wasserturm 8\n04808 Wurzen",
+         `${name}: Empfänger`, JSON.stringify(letter.recipient));
+      ok(/^Bewerbung als Elektroniker für Betriebstechnik – Ihre Stellenanzeige/.test(letter.subject),
+         `${name}: zweizeiliger Betreff`, letter.subject);
+      ok(letter.salutation === "Sehr geehrte Frau Hoffmann," && letter.closing === "Mit freundlichen Grüßen",
+         `${name}: Anrede und Gruß`);
+      ok(letter.paragraphs.length === 4 && /^mit großem Interesse/.test(letter.paragraphs[0]) &&
+         /Wasserversorgung am Laufen/.test(letter.paragraphs[0]),
+         `${name}: vier Absätze, Zeilen wieder zusammengesetzt`,
+         JSON.stringify(letter.paragraphs.map((p) => p.slice(0, 30))));
+      ok(mp.settings.showCoverLetter === true, `${name}: Anschreiben eingeschaltet`);
+      ok(!/Stadtwerke|Hoffmann/.test(JSON.stringify(mp.events)), `${name}: der Brief bleibt aus dem Lebenslauf`);
+    } catch (error) {
+      ok(false, `${name} gelesen`, error.message);
+    }
+  }
+
+  console.log("\n— PDF: amerikanisch einspaltig, Anschreiben hinten —");
+  try {
+    const { state: us } = await readPdf("us-einspaltig.pdf");
+    ok(us.contact.phone === "(206) 555-0142" && us.contact.city === "Seattle, WA",
+       "Telefon und Ort aus der Kontaktzeile mit Mittelpunkten", us.contact.phone + " / " + us.contact.city);
+    ok(us.footers.right.links.length === 2, "LinkedIn und GitHub aus der Kontaktzeile",
+       us.footers.right.links.map((l) => l.url).join(" "));
+    ok(us.events.length === 4, "drei Stellen und ein Abschluss", us.events.length);
+    const swe = us.events.find((e) => e.title === "Software Engineer II");
+    ok(!!swe && swe.company === "Northwind Labs" && swe.place === "Remote" && swe.present,
+       "Titel mit Zeitraum, darunter Arbeitgeber mit Ort", swe && swe.company + " / " + swe.place);
+    ok(!!swe && swe.list.length === 2, "Punkte ohne Zeichen am Einzug erkannt", swe && swe.list.length);
+    ok(us.skills.items.length === 12 && us.skills.items[0].name === "Go",
+       "Gruppen wie „Languages:“ bleiben Kenntnisse", us.skills.items.map((i) => i.name).join("|"));
+    ok(us.languages.items.length === 0, "„Languages: Go, Rust“ wird kein Sprachenblock");
+    ok(us.projects.items[0] && us.projects.items[0].name === "Tidepool",
+       "Projektname ohne Technik und Zeitraum", us.projects.items[0] && us.projects.items[0].name);
+    ok(us.coverLetter.recipient === "Hiring Team\nCascade Robotics\n400 Pine Street\nSeattle, WA 98101" &&
+       us.coverLetter.salutation === "Dear Hiring Manager," && us.coverLetter.closing === "Sincerely," &&
+       us.coverLetter.paragraphs.length === 3, "englisches Anschreiben",
+       JSON.stringify([us.coverLetter.recipient, us.coverLetter.paragraphs.length]));
+  } catch (error) {
+    ok(false, "amerikanische einspaltige Vorlage gelesen", error.message);
+  }
+
+  console.log("\n— PDF: Europass und Seitenspalte rechts —");
+  try {
+    const { state: eu } = await readPdf("europass.pdf");
+    const role = (event) => eu.sections.find((s) => s.id === event.sectionId).atsRole;
+    ok(eu.contact.city === "1040 Brussels (Belgium)", "Ort mit Land in Klammern", eu.contact.city);
+    ok(eu.events.filter((e) => role(e) === "education").length === 2,
+       "„EDUCATION AND TRAINING“ fett in Grundschrift ist eine Überschrift");
+    ok(eu.events[0].description.length === 1, "umbrochener Satz bleibt ein Absatz",
+       JSON.stringify(eu.events[0].description));
+    ok(eu.languages.items.map((i) => i.name + ":" + i.level).join("|") ===
+       "Portuguese:native|English:C1|French:B2|German:A2", "Muttersprache aus der Beschriftung",
+       eu.languages.items.map((i) => i.name + ":" + i.level).join("|"));
+    ok(eu.skills.items.length === 4, "„Digital skills“", eu.skills.items.length);
+
+    const { state: rs } = await readPdf("rechtsspalte.pdf");
+    ok(rs.contact.name === "LENA BRANDT" && rs.contact.role === "UX Designerin",
+       "Name auf zwei Zeilen", rs.contact.name);
+    ok(rs.contact.city === "Hamburg" && rs.contact.phone === "0170 5566778",
+       "Ort und Telefon aus der Kopfzeile", rs.contact.city + " / " + rs.contact.phone);
+    ok(rs.events.length === 4 && rs.events[0].title === "Senior UX Designerin" &&
+       rs.events[0].company === "Pflegewerk Digital GmbH", "Titel, Arbeitgeber, dann Zeitraum",
+       rs.events.map((e) => e.title + "@" + e.company).join(" | "));
+    ok(rs.events[3].title === "B.A. Kommunikationsdesign" && rs.events[3].company === "HAW Hamburg",
+       "Abschluss und Hochschule", rs.events[3].title + "@" + rs.events[3].company);
+    ok(rs.skills.items.length === 7, "„Tools“ gehört zu den Kenntnissen",
+       rs.skills.items.map((i) => i.name).join("|"));
+  } catch (error) {
+    ok(false, "Europass und Seitenspalte rechts gelesen", error.message);
   }
 
   //  Ein frisches Dokument bringt einen Führerschein mit, damit der

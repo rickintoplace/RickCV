@@ -39,6 +39,13 @@ token = base64.urlsafe_b64encode(
 url = f"https://cv.rickinto.place/#data={token}"
 ```
 
+**If you cannot run code** (a chat in the browser), do not attempt the base64 by
+hand — one wrong character and the link opens nothing. Answer with the JSON in a code
+block instead; the person pastes your whole answer into **Import → paste the text**,
+and RickCV picks the document out of it (a sentence before it, a code fence, a trailing
+comma are all fine). RickCV's *Let your AI write it* dialog prepares exactly that
+brief for the person.
+
 A resume without a photo makes a link of one to three kilobytes. With a photo it
 gets long; past roughly 100 000 characters, hand the person the JSON instead and
 tell them: **Importieren / Import → paste the text**. The result is the same.
