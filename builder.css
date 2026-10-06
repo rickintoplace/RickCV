@@ -326,7 +326,7 @@ textarea {
   margin: 12px 12px 4px;
   padding: 14px 16px 16px;
   border: 1px solid var(--ui-line);
-  border-left: 3px solid var(--ui-accent);
+  border: 1px solid var(--ui-accent);
   border-radius: var(--ui-radius);
   background: var(--ui-accent-soft);
 }
