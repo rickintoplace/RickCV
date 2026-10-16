@@ -173,6 +173,10 @@ itself, so an imported document or theme can neither load a tracking pixel nor r
 For the same reason images from web addresses are not shown; upload them instead. A host that
 sends headers may add `frame-ancestors 'self'`.
 
+The link-preview tags in `index.html` (`og:url`, `og:image`) point at cv.rickinto.place; on
+your own domain, change those two addresses. `python3 tools/make-social-preview.py` redraws
+the preview image from the example document.
+
 ## Project structure
 
 | Path | Purpose |
@@ -194,7 +198,7 @@ sends headers may add `frame-ancestors 'self'`.
 | `themes/` | One CSS file per theme, `CONTRACT.md`, `_starter.css` |
 | `fonts/`, `licenses/` | Typefaces and their licences |
 | `vendor/pdfjs/` | Mozilla's pdf.js, loaded only for PDF imports |
-| `tools/` | Font, icon, example image and demo generators |
+| `tools/` | Font, icon, example image, link preview and demo generators |
 
 Every file is a plain script, which is why `index.html` works by double-click. The
 `js/theme-data.js` and `js/icon-data.js` bundles are committed for the same reason.
