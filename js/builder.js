@@ -184,6 +184,7 @@
       storageFull = true;
     }
     showSaveState();
+    if (global.RickCVLibrary) global.RickCVLibrary.saved();
   }
 
   function save() {
@@ -193,6 +194,7 @@
 
   function flushSave() {
     if (saveTimer !== null) saveNow();
+    if (global.RickCVLibrary) global.RickCVLibrary.flush();
   }
 
   //  Die Statuszeile sagt, was mit den Daten ist – und nur das. Frueher
@@ -232,8 +234,13 @@
   //  Ein Schritt, der den ganzen Stand austauscht – Beispiel, Neu, Import.
   //  Er kommt mit seinem eigenen Rueckweg: im Hinweis steht, dass er sich
   //  zuruecknehmen laesst, und ein Klick darauf tut es.
-  function replaceAll(next, message) {
+  //
+  //  Und mit einer Sicherung, die den Tab ueberlebt: der Stand davor wird
+  //  als Version abgelegt (js/library.js) – ausser er war nur das Beispiel
+  //  oder leer. "reason" sagt in der Versionsliste, was ihn ersetzt hat.
+  function replaceAll(next, message, reason) {
     hideWelcome();
+    if (global.RickCVLibrary && !untouched()) global.RickCVLibrary.beforeReplace(reason || message);
     steps.checkpoint();
     replaceState(next);
     toast(message, { label: t("undo"), run: undo });
@@ -564,6 +571,7 @@
       refreshSection: refreshSection,
       rebuildEditor: buildEditor,
       onLocaleChange: switchLocale,
+      reveal: revealPath,
     };
   }
 
@@ -652,6 +660,7 @@
     [/^(coverLetter\.recipient|settings\.(date|place))$/, "letterAddress"],
     [/^coverLetter\.signature/, "letterSignature"],
     [/^coverLetter(\.|$)/, "letterText"],
+    [/^job(\.|$)/, "job"],
   ];
 
   function revealPath(path) {
@@ -716,6 +725,7 @@
   var GROUPS = [
     { id: "resume", label: "tabResume", icon: "user-round" },
     { id: "letter", label: "tabLetter", icon: "mail" },
+    { id: "job", label: "tabJob", icon: "target" },
     { id: "design", label: "tabDesign", icon: "palette" },
     { id: "settings", label: "tabSettings", icon: "settings" },
   ];
@@ -903,6 +913,28 @@
 
   //  Dieselben Daten im offenen Standard: resume.json laesst sich von
   //  anderen Programmen lesen, traegt dafuer kein Aussehen mit sich.
+  //  Die neutrale, bearbeitbare Fassung (js/export-docs.js): was drinsteht,
+  //  nicht wie es aussieht.
+  function exportDocx() {
+    var Docs = global.RickCVExportDocs;
+    if (!Docs) return;
+    Docs.docx(state).then(function (bytes) {
+      download(slug(state.contact.name) + ".docx", bytes,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+      toast(t("exportedDocx"));
+    }, function (error) {
+      console.warn("DOCX-Export fehlgeschlagen:", error);
+      toast(t("fileFailed"));
+    });
+  }
+
+  function exportMarkdown() {
+    var Docs = global.RickCVExportDocs;
+    if (!Docs) return;
+    download(slug(state.contact.name) + ".md", Docs.markdown(state), "text/markdown;charset=utf-8");
+    toast(t("exported"));
+  }
+
   function exportJsonResume() {
     download(slug(state.contact.name) + ".resume.json",
       JSON.stringify(global.RickCVImport.toJsonResume(state), null, 2), "application/json");
@@ -1138,7 +1170,7 @@
       t: t,
       state: function () { return state; },
       onApply: function (next, info) {
-        replaceAll(next, t("impDone").replace("{count}", info.count));
+        replaceAll(next, t("impDone").replace("{count}", info.count), t("verBeforeImport"));
         if (printAfter) printCv();
       },
       onAi: openAi,
@@ -1449,15 +1481,25 @@
   function printGuide() {
     if (!wantsPrintGuide()) return printCv();
 
+    //  Papier, Raender und Hintergrund bringt das Dokument selbst mit
+    //  (@page in styles.css, print-color-adjust). Einzustellen bleibt das
+    //  Ziel; der Rest steht darunter als Abhilfe, falls ein Browser die
+    //  Vorgaben des Dokuments uebergeht.
     var steps = el("dl", "print-steps");
     [
       [t("printGuideDestination"), t("printGuideDestinationValue")],
+    ].forEach(function (row) {
+      steps.appendChild(el("dt", null, row[0]));
+      steps.appendChild(el("dd", null, row[1]));
+    });
+    var fixes = el("dl", "print-steps print-steps-fix");
+    [
       [t("printGuidePaper"), state.settings.pageSize === "letter" ? "Letter" : "A4"],
       [t("printGuideMargins"), t("printGuideMarginsValue")],
       [t("printGuideBackground"), t("printGuideBackgroundValue")],
     ].forEach(function (row) {
-      steps.appendChild(el("dt", null, row[0]));
-      steps.appendChild(el("dd", null, row[1]));
+      fixes.appendChild(el("dt", null, row[0]));
+      fixes.appendChild(el("dd", null, row[1]));
     });
 
     var again = el("label", "print-guide-again");
@@ -1466,7 +1508,7 @@
     again.appendChild(box);
     again.appendChild(el("span", null, t("printGuideHide")));
 
-    var body = [steps];
+    var body = [steps, el("p", "print-guide-fix", t("printGuideFix")), fixes];
     if (!isChromium()) body.push(el("p", "imp-warn", t("printHintChrome")));
     body.push(again);
 
@@ -1499,10 +1541,26 @@
     scroll.scrollTo({ top: top, behavior: "smooth" });
   }
 
+  //  Den Dateinamen schlaegt der Browser aus dem Titel vor. Der Rahmen
+  //  traegt "Bewerbung – Name" schon; fuer die Dauer des Drucks traegt ihn
+  //  auch der Baukasten, falls ein Browser den Titel des Fensters nimmt.
+  var builderTitle = null;
+
+  function restoreTitle() {
+    if (builderTitle === null) return;
+    document.title = builderTitle;
+    builderTitle = null;
+  }
+
   function printCv() {
     if (!frame.contentWindow) return;
     whenPainted(function () {
+      if (builderTitle === null) builderTitle = document.title;
+      document.title = global.RickCVRender.documentTitle(state);
       frame.contentWindow.postMessage({ type: "rickcv:print" }, ORIGIN);
+      //  Der Druckdialog haelt das Skript an; danach, oder spaetestens nach
+      //  einer Minute, gilt wieder der eigene Titel.
+      setTimeout(restoreTitle, 60000);
     });
     //  Das Papier, das eingestellt ist – der Hinweis sagte frueher immer A4.
     var hint = t("printHint").replace("{size}",
@@ -1631,14 +1689,23 @@
     ask("confirmExampleTitle", "confirmExample", "confirmExampleGo", false).then(function (yes) {
       if (!yes) return;
       hideWelcome();
-      replaceAll(Model.createExample(state.locale), t("exampleLoaded"));
+      replaceAll(Model.createExample(state.locale), t("exampleLoaded"), t("verBeforeExample"));
     });
   }
 
   //  Die Rueckfrage bleibt, wo es etwas zu verlieren gibt: "Rueckgaengig"
   //  gilt nur, solange der Reiter offen ist – wer danach neu laedt, hat
   //  nichts mehr.
+  //
+  //  Mit der Bibliothek geht nichts mehr verloren: "Neu" legt ein weiteres
+  //  Dokument an, das bisherige bleibt unter "Meine Dokumente" liegen.
   function newDocument() {
+    var Library = global.RickCVLibrary;
+    if (Library && Library.ready() && !untouched()) {
+      hideWelcome();
+      Library.newDocument(Model.createBase(state.locale));
+      return;
+    }
     ask("confirmResetTitle", "confirmReset", "confirmResetGo", true).then(function (yes) {
       if (!yes) return;
       hideWelcome();
@@ -1673,7 +1740,11 @@
       //  "Exportieren" sucht, sucht meistens genau das.
       popupMenu(event.currentTarget, [
         { label: t("expPdf"), hint: t("expPdfHint"), icon: "printer", action: printGuide },
+        { label: t("expFile"), hint: t("expFileHint"), icon: "save",
+          action: function () { saveFile(false); } },
         { label: t("expRickcv"), hint: t("expRickcvHint"), icon: "download", action: exportJson },
+        { label: t("expDocx"), hint: t("expDocxHint"), icon: "file-text", action: exportDocx },
+        { label: t("expMarkdown"), hint: t("expMarkdownHint"), icon: "file-text", action: exportMarkdown },
         { label: t("expJsonResume"), hint: t("expJsonResumeHint"), icon: "braces",
           action: exportJsonResume },
         { label: t("expLink"), hint: t("expLinkHint"), icon: "link", action: copyLink },
@@ -1681,12 +1752,19 @@
       ]);
     });
     document.getElementById("btn-more").addEventListener("click", function (event) {
+      var Library = global.RickCVLibrary;
+      var withLibrary = Library && Library.ready();
       popupMenu(event.currentTarget, [
-        { label: t("reset"), hint: t("resetTitle"), icon: "file-plus", action: newDocument },
+        { label: t("reset"), hint: t(withLibrary ? "resetTitleLib" : "resetTitle"), icon: "file-plus",
+          action: newDocument },
+      ].concat(withLibrary ? [
+        { label: t("libTitle"), hint: t("libMenuHint"), icon: "folder", action: Library.openLibrary },
+        { label: t("verTitle"), hint: t("verMenuHint"), icon: "history", action: Library.openVersions },
+      ] : []).concat([
         { label: t("example"), hint: t("exampleTitle"), icon: "sparkles", action: loadExample },
         { label: t("aiMenu"), hint: t("aiMenuHint"), icon: "bot", action: openAi },
         { label: t("openTab"), hint: t("openTabTitle"), icon: "external-link", action: openTab },
-      ]);
+      ]));
     });
     document.getElementById("btn-import").addEventListener("click", function () {
       openImport();
@@ -2046,6 +2124,11 @@
     return tag === "input" && TEXT_INPUTS.indexOf((target.type || "text").toLowerCase()) !== -1;
   }
 
+  function saveFile(again) {
+    flushSave();
+    if (global.RickCVSaveFile) global.RickCVSaveFile.save(again === true);
+  }
+
   function bindKeys() {
     document.addEventListener("keydown", function (event) {
       var meta = event.metaKey || event.ctrlKey;
@@ -2065,8 +2148,10 @@
         event.preventDefault();
         printGuide();
       } else if (key === "s") {
+        //  Strg+S schreibt die Datei, in die zuletzt gespeichert wurde;
+        //  mit Umschalt wird gefragt, wohin ("Speichern unter").
         event.preventDefault();
-        exportJson();
+        saveFile(!event.shiftKey);
       }
     });
   }
@@ -2115,6 +2200,8 @@
       } else if (message.type === "rickcv:file") {
         hideDropHint();
         takeFile(message.file);
+      } else if (message.type === "rickcv:snapshot") {
+        if (global.RickCVSaveFile) global.RickCVSaveFile.receive(message);
       } else if (message.type === "rickcv:edit") {
         revealPath(message.path);
       }
@@ -2139,7 +2226,36 @@
     //  Deutsch, auch in der englischen Oberflaeche.
     status(firstVisit ? t("ready") : t("saved"));
     readHash();
+    if (global.RickCVSaveFile) {
+      global.RickCVSaveFile.init({
+        t: function (key) { return t(key); },
+        state: function () { return state; },
+        docId: function () { return global.RickCVLibrary ? global.RickCVLibrary.currentId() : "default"; },
+        post: function (message) {
+          if (frame && frame.contentWindow) frame.contentWindow.postMessage(message, ORIGIN);
+        },
+        toast: toast,
+        status: status,
+      });
+    }
+    if (global.RickCVLibrary) {
+      global.RickCVLibrary.init({
+        t: function (key) { return t(key); },
+        json: snapshot,
+        state: function () { return state; },
+        locale: function () { return state.locale; },
+        toast: toast,
+        replace: replaceAll,
+        load: function (next) {
+          hideWelcome();
+          replaceState(next);
+          saveNow();
+        },
+        newDocument: newDocument,
+      });
+    }
     global.addEventListener("pagehide", flushSave);
+    global.addEventListener("focus", function () { setTimeout(restoreTitle, 1000); });
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "hidden") flushSave();
     });

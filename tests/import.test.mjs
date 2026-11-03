@@ -66,6 +66,24 @@ ok(Imp.normDate("Dez 2018") === "12/2018", "deutscher Monatsname");
 ok(Imp.normDate("1930") === "1930", "nur Jahr");
 ok(Imp.normDate("3/2019") === "03/2019", "Schrägstrich");
 
+//  "Als Datei speichern" schreibt eine HTML-Datei mit den Daten als JSON
+//  darin (js/savefile.js). Auf RickCV gezogen, muss daraus wieder genau das
+//  Dokument werden – nicht der Text der gezeichneten Seite.
+console.log("\n— Gespeicherte HTML-Datei —");
+{
+  const original = Model.createExample("de");
+  original.contact.name = "Nora </script> Feldmann";
+  const json = JSON.stringify(original).replace(/</g, "\\u003c");
+  const html = `<!DOCTYPE html><html><head><title>Bewerbung</title></head><body>
+    <div class="document"><h1>Irgendein Text</h1></div>
+    <script type="application/json" id="rickcv-data">${json}</script></body></html>`;
+  const parsed = Imp.parseText(html, "Bewerbung – Nora.html");
+  ok(parsed.format === "rickcv", "als RickCV-Dokument erkannt", parsed.format);
+  const back = Imp.apply(base(), parsed, "replace");
+  ok(back.contact.name === "Nora </script> Feldmann", "Name samt </script> heil zurück", back.contact.name);
+  ok(back.events.length === original.events.length, "alle Stationen zurück", back.events.length);
+}
+
 console.log("\n— JSON Resume herein —");
 const jr = Imp.parseText(fs.readFileSync(fixture("resume.json"), "utf8"), "resume.json");
 ok(jr.format === "jsonresume", "als JSON Resume erkannt", jr.format);

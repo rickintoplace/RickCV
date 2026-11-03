@@ -4,6 +4,7 @@
    author:   RickCV
    licence:  CC0-1.0
    contract: 1
+   tags:     viel
    about:    Für lange Lebensläufe: das Datum steht in der Zeile des Titels
              statt daneben, Aufzählungen rücken enger, Ränder schrumpfen.
              Damit passt ein Werdegang auf ein Blatt, der sonst zwei braucht.
@@ -51,12 +52,18 @@
 }
 
 .event .date {
-  position: static;
+  /* relative statt static: sieht gleich aus, malt den Zeitraum aber in
+     derselben Ebene wie die Station – sonst steht er im PDF-Text vor
+     allen Stationen (siehe styles.css, "Die Reihenfolge im PDF"). */
+  position: relative;
   width: auto;
   left: auto;
-  float: right;
+  /*  Vor dem Titel statt am rechten Rand: dort stand bei kurzen Titeln
+      eine halbe Zeile Leere dazwischen, und Textleser lasen die Daten als
+      eigene Spalte, getrennt von ihrer Station (tools/ats-proof.mjs).  */
+  float: left;
   display: block;
-  margin-left: 1em;
+  margin: 0 0.55em 0 0;
   font-variant-numeric: tabular-nums;
   color: color-mix(in oklab, var(--font-color), transparent 30%);
 }

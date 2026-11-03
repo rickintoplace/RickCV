@@ -206,7 +206,7 @@ if (!browser) {
        used && `${used.checked} geprüft: ${used.unnamed.slice(0, 5).join(", ")}`);
     ok(used && used.buttonsInSummary === 0, "kein Knopf steckt in einem <summary>",
        used && used.buttonsInSummary);
-    ok(used && used.tabs === 4 && used.selectedTabs === 1, "vier Reiter, einer gewählt",
+    ok(used && used.tabs === 5 && used.selectedTabs === 1, "fünf Reiter (mit „Stelle“), einer gewählt",
        used && `${used.tabs}/${used.selectedTabs}`);
     ok(used && used.removed === 1 && used.restored, "Löschen lässt sich im Hinweis zurücknehmen",
        used && JSON.stringify({ removed: used.removed, restored: used.restored, toast: used.toast }));
@@ -402,6 +402,7 @@ if (!browser) {
     probes.push(theme.file);
     const themed = result((await chrome(browser, theme.url, 9000)).dom);
     ok(themed && themed.smuggled === false, "fremder Rahmen installiert kein Theme");
+
   } finally {
     server.kill();
     probes.forEach((file) => fs.rmSync(file, { force: true }));

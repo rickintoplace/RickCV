@@ -385,14 +385,16 @@ textarea {
 /*  Symbol ueber der Beschriftung: so passen auch "Anschreiben" und
     "Einstellungen" in ein Viertel der Spalte, und die Reiter lassen sich
     schon am Symbol unterscheiden. */
+/*  Fuenf Reiter: wer den laengeren Namen hat, bekommt mehr Breite
+    ("Einstellungen" neben "Stelle"), statt dass beide abgeschnitten werden. */
 .editor-tab {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 7px 4px 6px;
+  padding: 7px 3px 6px;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -2497,15 +2499,37 @@ body.legal-body {
   color: var(--ui-danger);
 }
 
-/*  Kein Zeilenumbruch: CSS liest sich in Zeilen, und ein umgebrochener
-    Selektor sieht aus wie zwei. */
+/*  Umgebrochen statt abgeschnitten: auf dem Telefon war sonst die Hälfte
+    jeder Regel unsichtbar, und wer CSS nicht kennt, scrollt nicht seitlich. */
 textarea.theme-editor {
   font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
   font-size: 12.5px;
   line-height: 1.55;
-  white-space: pre;
-  overflow-x: auto;
+  white-space: pre-wrap;
   tab-size: 2;
+}
+
+.theme-card .theme-about {
+  font-size: 11.5px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.theme-recipes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.theme-recipe.used {
+  opacity: 0.55;
+}
+
+.theme-errors:empty {
+  display: none;
 }
 
 .theme-hook-title {
@@ -2544,14 +2568,14 @@ textarea.theme-editor {
   background: var(--ui-accent-soft);
 }
 
-.theme-hook code {
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 11.5px;
-  color: var(--ui-accent);
+.theme-hook strong {
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.theme-hook small {
-  font-size: 11px;
+.theme-hook code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10.5px;
   color: var(--ui-muted);
 }
 
@@ -2576,6 +2600,24 @@ textarea.theme-editor {
 .print-steps dd {
   margin: 0;
   font-weight: 600;
+}
+
+/*  Die Abhilfe tritt zurueck: sie gilt nur, wenn ein Browser die Vorgaben
+    des Dokuments uebergeht. */
+.print-guide-fix {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+
+.print-steps-fix {
+  padding: 8px 12px;
+  font-size: 12.5px;
+  background: transparent;
+}
+
+.print-steps-fix dd {
+  font-weight: 500;
 }
 
 .print-guide-again {
@@ -2638,4 +2680,262 @@ textarea.theme-editor {
   100% {
     box-shadow: 0 0 0 3px transparent, 0 0 0 5px transparent;
   }
+}
+
+/* ------------------------------------------- Bibliothek und Versionen */
+
+.lib-dialog .imp-panel {
+  width: min(640px, 100%);
+}
+
+.btn-quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ui-muted);
+}
+
+.btn-quiet:hover {
+  color: var(--ui-text);
+}
+
+.lib-top,
+.lib-name-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.lib-name-input {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.lib-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  overflow: hidden;
+}
+
+.lib-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.lib-item:first-child {
+  border-top: 0;
+}
+
+.lib-active {
+  background: var(--ui-accent-soft);
+}
+
+.lib-text {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lib-text strong {
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}
+
+.lib-text small,
+.lib-hint,
+.lib-empty {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.lib-empty {
+  padding: 12px;
+}
+
+.lib-hint {
+  margin: 6px 0;
+}
+
+.lib-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.lib-trash summary {
+  cursor: pointer;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------- Stellenanzeige */
+
+.job-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.job-summary {
+  margin: 0;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.job-level {
+  margin: 8px 0 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ui-muted);
+}
+
+.job-req {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  background: var(--ui-panel-2);
+}
+
+.job-req-text {
+  font-size: 12.5px;
+  color: var(--ui-muted);
+  line-height: 1.4;
+}
+
+.job-terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.job-term {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--ui-line);
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: 12.5px;
+  background: var(--ui-panel);
+}
+
+.job-term-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+button.job-term-main {
+  cursor: pointer;
+}
+
+button.job-term-main:hover {
+  text-decoration: underline;
+}
+
+.job-term-icon {
+  font-weight: 700;
+}
+
+.job-term-action {
+  border: 0;
+  border-left: 1px solid var(--ui-line);
+  padding: 2px 8px;
+  background: transparent;
+  color: var(--ui-muted);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.job-term-action:hover {
+  color: var(--ui-text);
+  background: var(--ui-accent-soft);
+}
+
+.job-found .job-term-icon,
+.job-alternative .job-term-icon {
+  color: var(--ui-accent);
+}
+
+.job-found {
+  border-color: color-mix(in oklab, var(--ui-accent), transparent 55%);
+}
+
+.job-similar .job-term-icon,
+.job-letter .job-term-icon {
+  color: #a06a00;
+  color: light-dark(#a06a00, #e0b04f);
+}
+
+.job-missing {
+  border-color: color-mix(in oklab, var(--ui-danger), transparent 55%);
+}
+
+.job-missing .job-term-icon {
+  color: var(--ui-danger);
+}
+
+.job-alternative,
+.job-dismissed {
+  opacity: 0.6;
+}
+
+/* ------------------------------------------------- Filter der Galerie */
+
+.theme-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.theme-filter {
+  padding: 4px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 999px;
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.theme-filter:hover {
+  border-color: var(--ui-accent);
+}
+
+.theme-filter[aria-pressed="true"] {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: #fff;
+}
+
+.theme-filter-hint {
+  margin-top: -2px;
 }

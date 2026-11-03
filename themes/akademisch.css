@@ -1,0 +1,412 @@
+/* @rickcv-theme
+   name:     Akademisch
+   name-en:  Academic
+   author:   RickCV
+   licence:  CC0-1.0
+   contract: 1
+   tags:     viel, serioes
+   about:    Für Wissenschaft und Lehre: Serifen, ein zentrierter Kopf, Überschriften
+             in Kapitälchen und hängende Jahreszahlen. Dicht gesetzt für lange
+             Listen mit Stationen, Vorträgen und Veröffentlichungen.
+   about-en: For research and teaching: serifs, a centred header, headings in small
+             capitals and hanging years. Set tightly for long lists of positions,
+             talks and publications.
+*/
+
+/*  Grundform wie "Einspaltig" (themes/einspaltig.css): eine Spalte, alle
+    Bloecke in einem Raster, die kleinen Bloecke als Band oben. Was dieses
+    Theme anders macht, steht am Ende der Datei.  */
+
+
+/*  Wie es gebaut ist: Seitenspalte und Hauptteil werden durchsichtig
+    (display: contents), und alle Bloecke eines Blattes liegen in einem
+    gemeinsamen Raster aus sechs Spalten. Die Reihenfolge setzt `order`.
+    Die kleinen Bloecke der Seitenspalte stehen oben als Band – am Ende
+    landeten sie bei einem langen Werdegang zwischen dessen zwei Haelften.
+
+    Die Raender, die die Seitenaufteilung misst, bleiben an den Spalten
+    stehen (padding-bottom). An einem durchsichtigen Element wirken sie
+    nicht, aber render.js liest sie und haelt dort das Papierende frei.  */
+
+/*  Eine Spalte hat lange Zeilen; eine Spur kleinere Schrift liest sich dort
+    so gut wie die Vorgabe in der schmalen Spalte – und der Werdegang passt
+    auf ein Blatt, wo er sonst eine einzelne Zeile auf ein zweites schiebt.  */
+[data-template] {
+  --base-font-size: 13.2px;
+  --bottom-margin: 1.4cm;
+  --sidebar-color: transparent;
+  --sidebar-font-color: var(--font-color);
+  --profile-align: left;
+}
+
+.resume_wrapper {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-auto-rows: min-content;
+  column-gap: 1.4em;
+  align-content: start;
+  box-sizing: border-box;
+  padding: 1.1cm var(--right-margin) 0 var(--left-margin);
+}
+
+[data-column="sidebar"],
+[data-column="main"],
+[data-column="sidebar"] .resume_bottom {
+  display: contents;
+}
+
+[data-column="main"],
+[data-column="sidebar"] .resume_bottom {
+  padding: 0 0 var(--bottom-margin);
+}
+
+/*  Jeder Block bekommt seinen Platz. */
+.resume_wrapper .resume_item {
+  grid-column: 1 / -1;
+  padding: 0.25em 0;
+  margin: 0;
+}
+
+.resume_wrapper [data-block="photo"] {
+  order: 0;
+  grid-column: 6 / 7;
+  grid-row: 1 / span 2;
+  justify-self: end;
+  width: 2.3cm;
+  height: 2.3cm;
+  margin: 0;
+  border-radius: 50%;
+}
+
+.resume_wrapper [data-block="namerole"] { order: 1; grid-column: 1 / 6; padding-bottom: 0; }
+.resume_wrapper [data-block="contact"] { order: 2; grid-column: 1 / 6; padding-top: 0.2em; }
+.resume_wrapper [data-block="profile"] { order: 3; }
+.resume_wrapper [data-block="languages"],
+.resume_wrapper [data-block="interests"],
+.resume_wrapper [data-block="projects"],
+.resume_wrapper [data-block="mobilitySB"] {
+  order: 4;
+  grid-column: span 2;
+  padding-right: 0.6em;
+}
+.resume_wrapper [data-block="section"] { order: 10; }
+/*  Kenntnisse und Mobilitaet teilen sich eine Zeile, ebenso die beiden
+    Fussleisten – sonst eroeffnete eine einzelne Zeile ein zweites Blatt.  */
+.resume_wrapper [data-block="skills"] { order: 20; grid-column: span 4; padding-right: 1em; }
+.resume_wrapper [data-block="mobility"] { order: 21; grid-column: span 2; }
+.resume_wrapper [data-block="references"] { order: 30; }
+.resume_wrapper .resume-link-footer-left { order: 89; grid-column: 1 / 4; align-self: end; }
+.resume_wrapper .resume-column-bottom { order: 90; grid-column: 4 / -1; align-self: end; padding-top: 0.6em; }
+
+/*  Kopf: Name gross, Rolle darunter, Kontakt als eine Zeile.  */
+[data-block="namerole"] h1 {
+  margin: 0;
+  line-height: 1.1;
+}
+
+[data-block="namerole"] .role {
+  margin-top: 0.15em;
+  color: var(--accent-color);
+  letter-spacing: 0.08em;
+}
+
+[data-block="contact"] .resume_title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+[data-block="contact"] .contact_container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15em 1.1em;
+  margin: 0;
+}
+
+.resume_wrapper .resume_left [data-block="contact"] .resume_subinfo {
+  margin: 0;
+}
+
+/*  Strasse und Ort in einer Zeile, getrennt durch ein Komma.  */
+[data-block="contact"] .address-wrapper {
+  display: flex;
+  gap: 0.35em;
+}
+
+[data-block="contact"] .address-wrapper .contact-info:not(:last-child)::after {
+  content: ",";
+}
+
+/*  Ueberschriften: in beiden Spalten dieselbe ruhige Form – links buendig,
+    eine feine Linie darunter, keine flankierenden Striche.  */
+.resume_wrapper .resume_title,
+.resume_wrapper .resume_left .resume_title,
+.resume_wrapper .resume_right .resume_item .resume_title {
+  display: block;
+  white-space: normal;
+  text-align: left;
+  color: var(--font-color);
+  border-bottom: 1px solid color-mix(in oklab, var(--accent-color), transparent 40%);
+  padding-bottom: 0.1em;
+  margin: 0 0 0.35em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: calc(var(--headline-size-main) * 0.62 * var(--headline-scale-main, 1));
+}
+
+.resume_wrapper .resume_left .resume_title::before,
+.resume_wrapper .resume_left .resume_title::after {
+  display: none;
+}
+
+/*  Die Symbole vor den Ueberschriften haengen sonst in den linken Rand. */
+.resume_title .rc-icon,
+.resume_title .material-symbols-outlined,
+.resume_title .material-icons {
+  display: none;
+}
+
+/*  Das Band: Sprachen, Interessen, Projekte nebeneinander und kompakt.  */
+[data-block="languages"],
+[data-block="interests"],
+[data-block="projects"],
+[data-block="mobilitySB"] {
+  font-size: 0.88em;
+  line-height: 1.3;
+}
+
+/*  Sprachen: Name links, Balken rechts daneben, ueber die Breite des Feldes. */
+.resume_wrapper .resume_left .resume_language .language_list {
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+}
+
+.resume_wrapper .resume_left .resume_language .language_list .language_bar p {
+  width: 5.5em;
+}
+
+.language_left {
+  padding-right: 0.6em;
+}
+
+[data-block="interests"] .resume_subinfo,
+[data-block="projects"] .resume_info.project {
+  margin: 0.1em 0;
+}
+
+.project-img-holder {
+  width: 2em;
+}
+
+/*  Der Werdegang als Liste: links das Datum, rechts der Eintrag. Keine
+    Leiste, keine Punkte, keine Kaesten.
+    Flex bleibt: der Renderer dreht die Reihenfolge ueber
+    flex-direction: column-reverse, wenn "neueste zuerst" eingestellt ist.  */
+.timeline {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.timeline::before,
+.event::after,
+.event .dot,
+.line {
+  display: none;
+}
+
+.event {
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--date-column) 1fr;
+  gap: 0 1.2em;
+  margin: 0;
+  padding: 0.18em 0;
+  line-height: 1.32;
+}
+
+.event .date {
+  position: relative;
+  width: auto;
+  min-width: 0;
+  left: auto;
+  display: block;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in oklab, var(--font-color), transparent 25%);
+}
+
+.event .content {
+  margin-left: 0;
+  left: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.event .content::before {
+  display: none;
+}
+
+.content h3 {
+  font-size: 1em;
+  margin: 0;
+}
+
+.event ul {
+  margin: 0.1em 0 0;
+}
+
+/*  Reihenfolge im PDF: in einer Liste braucht nichts eine eigene Ebene.
+    Positioniert gemalt kaemen Ueberschriften, Daten und Sprachstufen im
+    Datenstrom erst nach allem anderen – ein Parser saehe "PROFIL" am Ende.
+    Statisch malt Chromium alles in der Reihenfolge des Rasters.  */
+.resume_title,
+.timeline,
+.timeline-container,
+.resume_info.project,
+.project-img-holder,
+.project img,
+.event,
+.event .date,
+.event .content,
+.resume_wrapper .resume_left .resume_language .language_list .language_bar p,
+.resume_wrapper .resume_left .resume_language .language_list .language_bar p span {
+  position: static;
+  z-index: auto;
+}
+
+.resume_wrapper .resume_left .resume_language .language_list .language_bar p span {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+  /*  Die Stufe ("B2") steht im Balken in Papierfarbe. Im Grundstil nimmt
+      sie die Farbe der Seitenspalte – die ist hier durchsichtig.  */
+  color: var(--background-color);
+  font-size: 0.78em;
+  line-height: 1.5;
+  padding-left: 0.35em;
+}
+
+/*  Die Fussleisten: beide am selben oberen Rand, ohne eigene Linie und
+    ohne Einzug – sie stehen jetzt nebeneinander statt in zwei Spalten.  */
+.resume_wrapper .resume-link-footer,
+.resume_wrapper .resume-column-bottom {
+  margin: 0;
+  padding: 0.8em 0 0;
+  border: 0;
+}
+
+.resume_wrapper .resume-link-footer-left {
+  padding-left: 0;
+  padding-right: 0;
+  text-align: left;
+}
+
+.resume_wrapper .resume-column-bottom .resume-link-footer {
+  padding-top: 0;
+}
+
+/* -------------------------------------------------------- Akademisch */
+
+[data-template] {
+  --font-family: "EB Garamond", "Merriweather", Georgia, serif;
+  --base-font-size: 14px;
+  --title-size: 30px;
+  --accent-color: #3a3a46;
+  font-family: var(--font-family);
+}
+
+/*  Kopf zentriert, ohne Farbe; das Foto, wenn eines eingeschaltet ist,
+    klein am rechten Rand.  */
+/*  Kopf in den mittleren vier Spalten – so bleibt er mittig und das Foto
+    am rechten Rand verdeckt nichts.  */
+.resume_wrapper [data-block="namerole"],
+.resume_wrapper [data-block="contact"] {
+  grid-column: 2 / 6;
+  text-align: center;
+}
+
+[data-block="contact"] .contact_container {
+  justify-content: center;
+}
+
+/*  Das Foto steht links oben in der ersten Rasterspalte; der Kopf in den
+    mittleren vier bleibt so genau in der Blattmitte und wird nicht
+    verdeckt.  */
+.resume_wrapper [data-block="photo"] {
+  grid-column: 1 / 2;
+  grid-row: 1 / span 2;
+  justify-self: start;
+  width: 1.8cm;
+  height: 1.8cm;
+  border-radius: 2px;
+}
+
+[data-block="namerole"] h1 {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+[data-block="namerole"] .role {
+  color: var(--font-color);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.12em;
+}
+
+.resume_wrapper .resume_title,
+.resume_wrapper .resume_left .resume_title,
+.resume_wrapper .resume_right .resume_item .resume_title {
+  text-transform: none;
+  font-variant-caps: small-caps;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  border-bottom: 0.5px solid currentColor;
+  font-size: calc(var(--headline-size-main) * 0.8 * var(--headline-scale-main, 1));
+}
+
+/*  Hängende Jahreszahlen: das Datum steht rechtsbündig vor dem Eintrag.  */
+.event .date {
+  text-align: right;
+  color: var(--font-color);
+}
+
+.content h3 {
+  font-weight: 600;
+}
+
+.event-company {
+  font-variant: normal;
+  font-style: italic;
+}
+
+/*  Garamond hat ein kleines Bild; dieselbe Groesse wie eine serifenlose
+    Schrift wirkte gedrungen und klein.  */
+[data-template] {
+  --base-font-size: 14px;
+  --bottom-margin: 1.2cm;
+}
+
+.event {
+  padding: 0.12em 0;
+}
+
+.resume_wrapper .resume_item {
+  padding: 0.15em 0;
+}
+
+.resume_wrapper .resume_title,
+.resume_wrapper .resume_left .resume_title,
+.resume_wrapper .resume_right .resume_item .resume_title {
+  margin-bottom: 0.25em;
+}
+
+[data-block="namerole"] h1 {
+  margin-bottom: 0;
+}

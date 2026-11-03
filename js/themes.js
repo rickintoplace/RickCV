@@ -35,10 +35,41 @@
   //    */
   //
   //  Fortsetzungszeilen ohne "schluessel:" gehoeren zum vorigen Wert.
+  /* ------------------------------------------------------------------ Tags */
+
+  //  Wofuer ein Theme taugt – in der Sprache derer, die eins suchen, nicht
+  //  in der von Gestaltern. Wenige, damit die Wahl schnell geht.
+  //  Kein Tag "fuer Bewerbungssysteme": das gilt fuer jedes eingebaute Theme.
+  //  tests/theme.test.mjs prueft, dass jedes im ATS-Nachweis
+  //  (docs/ats-proof.md) bei jedem Leser ohne Befund ist.
+  var TAGS = [
+    { id: "viel", de: "Viel Erfahrung", en: "Long career",
+      hint: { de: "Dichter Satz, damit ein langer Werdegang auf wenige Blätter passt.",
+              en: "Set tightly, so a long career fits on few pages." } },
+    { id: "wenig", de: "Wenig Erfahrung", en: "First job",
+      hint: { de: "Großzügig gesetzt – wenig Inhalt wirkt aufgeräumt statt verloren.",
+              en: "Generous spacing – little content looks tidy rather than lost." } },
+    { id: "serioes", de: "Seriös", en: "Formal",
+      hint: { de: "Zurückhaltend: für Behörden, Banken, Kanzleien, Wissenschaft.",
+              en: "Restrained: for public service, banks, law firms, research." } },
+    { id: "auffallen", de: "Auffallen", en: "Stand out",
+      hint: { de: "Farbe und Form tragen mit – für Berufe, in denen das Gestalten zählt.",
+              en: "Colour and shape do part of the work – for jobs where design counts." } },
+    { id: "lesbar", de: "Gut lesbar", en: "Easy to read",
+      hint: { de: "Große Schrift, starker Kontrast, druckt gut in Schwarzweiß.",
+              en: "Large type, strong contrast, prints well in black and white." } },
+  ];
+  var TAG_IDS = TAGS.map(function (tag) { return tag.id; });
+
+  function tags(locale) {
+    var key = (locale || "de") === "en" ? "en" : "de";
+    return TAGS.map(function (tag) { return { id: tag.id, label: tag[key], hint: tag.hint[key] }; });
+  }
+
   function parseMeta(css) {
     var meta = {
       name: "", name_en: "", author: "", licence: "", about: "", about_en: "",
-      contract: 0, defaults: "",
+      contract: 0, defaults: "", tags: "",
     };
     var head = String(css).match(/\/\*[\s\S]*?@rickcv-theme([\s\S]*?)\*\//);
     if (!head) return meta;
@@ -58,6 +89,11 @@
     });
 
     meta.contract = Number(meta.contract) || 0;
+    //  Nur Tags aus der festen Liste: die Galerie filtert danach, und ein
+    //  Tippfehler soll kein eigenes, leeres Filterfeld ergeben.
+    meta.tags = String(meta.tags || "").toLowerCase().split(/[\s,;]+/).filter(function (tag, index, all) {
+      return TAG_IDS.indexOf(tag) !== -1 && all.indexOf(tag) === index;
+    });
     return meta;
   }
 
@@ -174,6 +210,7 @@
         licence: meta.licence,
         about: (english && meta.about_en) || meta.about,
         contract: meta.contract,
+        tags: meta.tags,
       };
     }).sort(function (a, b) { return a.name.localeCompare(b.name); });
   }
@@ -197,6 +234,9 @@
     var known = theme.slug && data()[theme.slug];
     if (!known && theme.slug && !theme.css) known = data().clean;
     var raw = known || (typeof theme.css === "string" ? theme.css : "");
+    //  Die eigenen Ergaenzungen kommen dahinter: gleiche Ebene, spaeter
+    //  im Text – sie gewinnen, ohne !important.
+    if (typeof theme.extra === "string" && theme.extra.trim()) raw += "\n\n/* Ergaenzungen */\n" + theme.extra;
     if (!raw) return "";
     if (raw === lastSource) return lastResult;
 
@@ -248,7 +288,9 @@
         { sel: ".event .date", de: "Die Zeitangabe", en: "The date" },
         { sel: ".event .dot", de: "Der Punkt auf der Leiste", en: "The dot on the timeline" },
         { sel: ".timeline", de: "Die Zeitleiste", en: "The timeline" },
-        { sel: ".resume_title", de: "Eine Blocküberschrift", en: "A block heading" },
+        { sel: ".resume_title", de: "Alle Blocküberschriften (beide Spalten)", en: "All block headings (both columns)" },
+        { sel: '[data-column="main"] .resume_title', de: "Überschriften im Hauptteil", en: "Headings in the main column" },
+        { sel: '[data-column="sidebar"] .resume_title', de: "Überschriften der Seitenspalte", en: "Headings in the sidebar" },
       ],
     },
     {
@@ -283,6 +325,124 @@
     });
   }
 
+
+  /* ---------------------------------------------------------------- Zutaten */
+
+  //  Fertige Regeln in Alltagssprache. Ein Klick setzt sie in die eigenen
+  //  Ergaenzungen – vollstaendig, mit einem Kommentar, der sagt, was sie
+  //  tun. Wer CSS kann, sieht, wie es geht; wer keins kann, muss es nicht.
+  var RECIPES = [
+    { id: "rule", de: "Linie unter den Überschriften", en: "Rule under headings",
+      css: '[data-column="main"] .resume_title {\n  border-bottom: 2px solid var(--accent-color);\n  padding-bottom: 0.15em;\n}' },
+    { id: "noicons", de: "Keine Symbole vor Überschriften", en: "No icons before headings",
+      css: '.resume_title .rc-icon,\n.resume_title .material-symbols-outlined {\n  display: none;\n}' },
+    { id: "notimeline", de: "Zeitleiste ausblenden", en: "Hide the timeline",
+      css: '.timeline::before,\n.event .dot {\n  display: none;\n}' },
+    { id: "datesbold", de: "Daten fett", en: "Dates in bold",
+      css: '.event .date {\n  font-weight: 700;\n}' },
+    { id: "airy", de: "Mehr Zeilenabstand", en: "More line spacing",
+      css: '.resume_wrapper {\n  line-height: 1.6;\n}' },
+    { id: "nameaccent", de: "Name in Akzentfarbe", en: "Name in accent colour",
+      css: '[data-block="namerole"] h1 {\n  color: var(--accent-color);\n}' },
+    { id: "sidebarplain", de: "Seitenspalte ohne Farbfläche", en: "Sidebar without a colour fill",
+      css: '[data-column="sidebar"] {\n  background: transparent;\n}' },
+  ];
+
+  function recipes(locale) {
+    var key = (locale || "de") === "en" ? "en" : "de";
+    return RECIPES.map(function (recipe) {
+      return {
+        id: recipe.id, label: recipe[key],
+        css: "/* " + recipe[key] + " */\n" + recipe.css + "\n",
+      };
+    });
+  }
+
+  /* ---------------------------------------------------------------- Pruefung */
+
+  //  Eine fehlende Klammer schluckt still alles, was danach kommt – und
+  //  wer CSS nicht kennt, sucht den Fehler dann in der falschen Regel.
+  //  Geprueft wird hier, was sich ohne Netz und ohne Parser sicher sagen
+  //  laesst: Klammern, Kommentare und ob der Browser eine Eigenschaft und
+  //  ihren Wert kennt. Ergebnis: Liste von { line, key, prop, value }.
+  function lint(css) {
+    var text = String(css || "");
+    var problems = [];
+    var line = 1;
+    var stack = [];
+    var chunk = "";
+    var chunkLine = 1;
+    var supports = global.CSS && global.CSS.supports ? global.CSS.supports.bind(global.CSS) : null;
+
+    function declaration(raw, at) {
+      var body = raw.trim();
+      if (!body || !supports || !stack.length) return;
+      var colon = body.indexOf(":");
+      if (colon < 1) return;
+      var prop = body.slice(0, colon).trim().toLowerCase();
+      var value = body.slice(colon + 1).replace(/!important\s*$/i, "").trim();
+      if (prop.indexOf("--") === 0 || /^[-a-z]+$/.test(prop) === false) return;
+      //  Innerhalb einer @-Regel ohne Deklarationen (etwa @media) steht ein
+      //  Selektor, keine Eigenschaft; die Zeile endet dann nicht mit ";".
+      if (!supports(prop, "inherit")) {
+        problems.push({ line: at, key: "themeErrProperty", prop: prop });
+        return;
+      }
+      if (!value || /var\(|env\(|attr\(/i.test(value)) return;
+      if (!supports(prop, value)) problems.push({ line: at, key: "themeErrValue", prop: prop, value: value });
+    }
+
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (c === "/" && text[i + 1] === "*") {
+        var end = text.indexOf("*/", i + 2);
+        var startLine = line;
+        var skipped = end === -1 ? text.slice(i) : text.slice(i, end + 2);
+        line += (skipped.match(/\n/g) || []).length;
+        if (end === -1) {
+          problems.push({ line: startLine, key: "themeErrComment" });
+          break;
+        }
+        i = end + 1;
+        continue;
+      }
+      if (c === '"' || c === "'") {
+        var close = text.indexOf(c, i + 1);
+        if (close === -1) close = text.length - 1;
+        var quoted = text.slice(i, close + 1);
+        line += (quoted.match(/\n/g) || []).length;
+        chunk += quoted;
+        i = close;
+        continue;
+      }
+      if (c === "\n") line++;
+      if (c === "{") {
+        stack.push({ line: line, at: /^\s*@/.test(chunk) });
+        chunk = "";
+        chunkLine = line;
+        continue;
+      }
+      if (c === "}") {
+        declaration(chunk, chunkLine);
+        chunk = "";
+        chunkLine = line;
+        if (!stack.length) problems.push({ line: line, key: "themeErrClose" });
+        else stack.pop();
+        continue;
+      }
+      if (c === ";") {
+        if (!stack.length || !stack[stack.length - 1].at || !/^\s*@/.test(chunk)) declaration(chunk, chunkLine);
+        chunk = "";
+        chunkLine = line;
+        continue;
+      }
+      if (!chunk.trim() && c !== "\n" && /\s/.test(c) === false) chunkLine = line;
+      chunk += c;
+    }
+    if (stack.length) problems.push({ line: stack[stack.length - 1].line, key: "themeErrOpen" });
+    return problems;
+  }
+
   /* --------------------------------------------------------------- Vorlage */
 
   function starter(locale) {
@@ -293,6 +453,8 @@
       "   author:   ",
       "   licence:  CC0-1.0",
       "   contract: " + CONTRACT,
+      german ? "   tags:     (wofuer: viel, wenig, serioes, auffallen, lesbar)"
+             : "   tags:     (what for: viel, wenig, serioes, auffallen, lesbar)",
       "*/",
       "",
       german
@@ -323,6 +485,9 @@
     builtin: builtin,
     source: source,
     hooks: hooks,
+    tags: tags,
+    recipes: recipes,
+    lint: lint,
     resolve: resolve,
     starter: starter,
   };

@@ -1018,10 +1018,10 @@
   //  Ohne \b am Ende: "Weiterbildungen" ist dieselbe Ueberschrift wie
   //  "Weiterbildung", und Vorlagen setzen mal so, mal so.
   var HEADINGS = [
-    { role: "experience", pattern: /^(berufs?erfahrung|beruflicher werdegang|berufliche erfahrung|berufliche stationen|berufliche laufbahn|praxiserfahrung|berufspraxis|berufstätigkeit|werdegang|praktika|work experience|professional experience|relevant experience|work history|employment history|career history|experience|employment|internships)/i },
-    { role: "education", pattern: /^(ausbildung|aus- und weiterbildung|schulbildung|schulische ausbildung|studium|hochschulstudium|akademischer werdegang|bildungsweg|bildung|schulischer werdegang|schule|education and training|education|academic)/i },
+    { role: "experience", pattern: /^(berufs?erfahrung|erfahrung|berufliche erfahrungen|beruflicher werdegang|berufliche erfahrung|berufliche stationen|berufliche laufbahn|praxiserfahrung|berufspraxis|berufstätigkeit|werdegang|praktika|work experience|professional experience|relevant experience|work history|employment history|career history|experience|employment|internships)/i },
+    { role: "education", pattern: /^(ausbildung|aus- und weiterbildung|schul- und berufsbildung|schul- und berufsausbildung|berufsausbildung|bildungsgang|qualifikationen und abschl(ue|ü)sse|schulbildung|schulische ausbildung|studium|hochschulstudium|akademischer werdegang|bildungsweg|bildung|schulischer werdegang|schule|education and training|education|academic)/i },
     { role: "volunteer", pattern: /^(ehrenamtliche[sr]? (?:engagement|tätigkeit(?:en)?)|soziales engagement|ehrenamt|engagement|freiwillig|volunteering|volunteer)/i },
-    { role: "skills", pattern: /^(kenntnisse|f[äa]higkeiten|skills|kompetenzen|kernkompetenzen|technical skills|digital skills|computer skills|it skills|soft skills|hard skills|core competencies|key skills|qualifikationen|qualifications|it-kenntnisse|edv|software|tools|werkzeuge|technologien|technologies|tech stack|programmiersprachen|programming languages|stärken|strengths)/i },
+    { role: "skills", pattern: /^(kenntnisse|f[äa]higkeiten|pers[öo]nliche f[äa]higkeiten|pers[öo]nliche kompetenzen|fachkenntnisse|skills|kompetenzen|kernkompetenzen|technical skills|digital skills|computer skills|it skills|soft skills|hard skills|core competencies|key skills|qualifikationen|qualifications|it-kenntnisse|edv|software|tools|werkzeuge|technologien|technologies|tech stack|programmiersprachen|programming languages|stärken|strengths)/i },
     { role: "languages", pattern: /^(sprachen|languages|language skills|sprachkenntnisse|fremdsprachen|fremdsprachenkenntnisse)/i },
     { role: "interests", pattern: /^(interessen|hobbys?|hobbies|interests|freizeit|persönliche interessen)/i },
     { role: "projects", pattern: /^(projekte|projects|portfolio|ausgewählte projekte|selected projects)/i },
@@ -1299,7 +1299,11 @@
       //  wuerden den Massstab verderben.
       if (!headingOf(row.text)) return;
       if (labelSplit(row.text) || colonLabel(row.text)) return;
-      if (clean(row.text).split(/\s+/).length > 3) return;
+      //  Kapitaelchen kommen aus dem PDF in Stuecken ("BE RU F S E R FAH RU
+      //  N G") – das ist ein Wort, nicht zehn.
+      var words = clean(row.text).split(/\s+/);
+      if (words.length > 3 && words.every(function (word) { return word.length <= 4; })) words = [words.join("")];
+      if (words.length > 3) return;
       known++;
       if (row.size) sizes.push(row.size);
       if (row.spaced) spaced++;
@@ -1372,7 +1376,10 @@
       //  Abschnitt und Stationstitel oft denselben Grad – "BERUFSERFAHRUNG"
       //  und "Gesundheits- und Krankenpflegerin" unterscheiden sich dann
       //  nur noch darin.
-      if (style.upper && value !== value.toUpperCase()) return false;
+      //  Kapitaelchen gibt Chromium bei Umlauten klein aus ("MO B I L I TäT"):
+      //  ein kleiner Umlaut zwischen Grossbuchstaben zaehlt als gross.
+      var capsValue = value.replace(/[äöü](?=[A-ZÄÖÜ]|$)|(?<=[A-ZÄÖÜ])[äöü]/g, function (c) { return c.toUpperCase(); });
+      if (style.upper && capsValue !== capsValue.toUpperCase()) return false;
       if (!row.size) return false;
       //  Liegt der Ueberschriftsgrad dicht am Fliesstext (12 zu 11 Punkt
       //  ist ueblich), traefe die blosse Aehnlichkeit jede Zeile. Eine
@@ -1387,7 +1394,8 @@
     }
 
     if (row.spaced) return true;
-    return row.size >= bodySize * 1.12 && value === value.toUpperCase();
+    var caps = value.replace(/[äöü](?=[A-ZÄÖÜ]|$)|(?<=[A-ZÄÖÜ])[äöü]/g, function (c) { return c.toUpperCase(); });
+    return row.size >= bodySize * 1.12 && caps === caps.toUpperCase();
   }
 
   //  Eine Zeile, die nichts als eine Adresse ist, gehoert in die
@@ -1399,9 +1407,54 @@
   //  Eine Kontaktzeile setzt ihre Angaben mit Trennern nebeneinander:
   //  Tabulator, senkrechter Strich, Mittelpunkt, Aufzaehlungspunkt oder
   //  ein breiter Abstand.
+  //
+  //  Viele Vorlagen setzen die Angaben aber nur mit Abstand nebeneinander,
+  //  und der kommt aus dem PDF als ein einziges Leerzeichen an:
+  //  "maya@example.com +1 (202) 555-0110 London, UK maya.example.com".
+  //  Steht in der Zeile eine Mail- oder Webadresse, ist sie sicher eine
+  //  Kontaktzeile; dann werden Adressen und Telefonnummern auch an
+  //  einfachen Leerzeichen herausgeloest. In anderen Zeilen nicht – im
+  //  Fliesstext waere "1 200 000 Euro" sonst eine Telefonnummer.
+  var MAIL_TOKEN = /^[\w.+-]+@[\w-]+\.[\w.]{2,}$/;
+  var PHONE_RUN = /[+(]?\d[\d ().\/-]{5,}\d\)?/g;
+
   function splitContactLine(line) {
-    return String(line).split(/\t|\s*\|\s*|\s+[·•◦▪|]\s+|\s{3,}/)
+    var parts = String(line).split(/\t|\s*\|\s*|\s+[·•◦▪|]\s+|\s{3,}/)
       .map(clean).filter(Boolean);
+    var isContactLine = parts.some(function (part) {
+      return part.split(/\s+/).some(function (word) {
+        return MAIL_TOKEN.test(word) || LINK_LINE.test(word);
+      });
+    });
+    if (!isContactLine) return parts;
+
+    var out = [];
+    parts.forEach(function (part) {
+      var rest = [];
+      var flush = function () {
+        var text = rest.join(" ");
+        rest = [];
+        var last = 0;
+        text.replace(PHONE_RUN, function (run, at) {
+          if ((run.match(/\d/g) || []).length < 7) return run;
+          out.push(text.slice(last, at));
+          out.push(run);
+          last = at + run.length;
+          return run;
+        });
+        out.push(text.slice(last));
+      };
+      part.split(/\s+/).forEach(function (word) {
+        if (MAIL_TOKEN.test(word) || LINK_LINE.test(word)) {
+          flush();
+          out.push(word);
+        } else {
+          rest.push(word);
+        }
+      });
+      flush();
+    });
+    return out.map(clean).filter(Boolean);
   }
 
   //  Beschriftete Angaben aus den persoenlichen Daten.
@@ -1425,15 +1478,37 @@
   //  Profile. Ein Ort ist dort, was weder Nummer noch Adresse noch Link ist –
   //  aber nur in einer Zeile, die sich durch eine Mailadresse oder Nummer
   //  als Kontaktzeile ausweist, und nur ganz oben auf dem ersten Blatt.
-  function headerContact(rows, profile) {
-    rows.slice(0, 12).forEach(function (row) {
-      if (row.page !== 1) return;
-      var parts = splitContactLine(row.text);
-      if (parts.length < 2) return;
-      var isContact = parts.some(function (part) {
+  //  Eine Webadresse weist eine Zeile ebenso aus ("Milan, Italy ·
+  //  isabella.example.com").
+  //
+  //  Steht der Kopf untereinander – Mail, Telefon, "Toronto, Canada",
+  //  Webseite je auf einer eigenen Zeile –, zaehlt eine Zeile direkt neben
+  //  einer Kontaktzeile mit, sofern sie wie "Ort, Land" gebaut ist oder
+  //  eine Webadresse ist. Ein Komma muss dann sein: ohne waere auch die
+  //  Berufsbezeichnung darueber ein Ort.
+  var PLACE_WORD = "[A-ZÄÖÜ][\\wäöüßéèáàóòúùâêîôûãõç.'-]*";
+  var PLACE = new RegExp("^" + PLACE_WORD + "(?:[\\s-][A-ZÄÖÜa-zäöü][\\wäöüßéèáàóòúùâêîôûãõç.'-]*){0,3}" +
+    "(?:,\\s*(?:[A-Z]{2,3}|" + PLACE_WORD + "(?:\\s" + PLACE_WORD + "){0,2}))?$");
+
+  //
+  //  Ganz oben heisst: die ersten zwoelf Zeilen – oder, wenn eine
+  //  Seitenspalte vor dem Hauptteil ausgelesen wird und der Kopf erst
+  //  mittendrin steht, die Zeilen um den Namen herum.
+  function headerContact(rows, profile, nameIndex) {
+    var from = nameIndex > 6 ? nameIndex : 0;
+    var top = rows.slice(from, from + 12).filter(function (row) { return row.page === 1; });
+    var split = top.map(function (row) { return splitContactLine(row.text); });
+    var contact = split.map(function (parts) {
+      return parts.some(function (part) {
         return /@/.test(part) || /^[+(]?\d[\d\s().\/-]{6,}$/.test(part);
-      });
-      if (!isContact) return;
+      }) || (parts.length >= 2 && parts.some(function (part) { return LINK_LINE.test(part); }));
+    });
+
+    split.forEach(function (parts, i) {
+      var beside = contact[i - 1] || contact[i + 1];
+      var alone = parts.length === 1 && beside &&
+        (LINK_LINE.test(parts[0]) || /,/.test(parts[0]));
+      if (!contact[i] && !alone) return;
 
       parts.forEach(function (part) {
         if (/@/.test(part)) return;
@@ -1443,8 +1518,7 @@
           if (!known) profile.links.push({ label: shortUrl(part).split("/")[0], text: shortUrl(part), url: url });
           return;
         }
-        if (!profile.contact.city && !/\d/.test(part) && part.length <= 40 &&
-            /^[A-ZÄÖÜ][\wäöüßéèáàóòúùâêîôûç.'-]*(?:[\s-][A-ZÄÖÜa-zäöü][\wäöüßéèáàóòúùâêîôûç.'-]*){0,3}(?:,\s*[A-Z]{2,3})?$/.test(part) &&
+        if (!profile.contact.city && !/\d/.test(part) && part.length <= 40 && PLACE.test(part) &&
             clean(part).toLowerCase() !== clean(profile.contact.name).toLowerCase() &&
             clean(part).toLowerCase() !== clean(profile.contact.role).toLowerCase() &&
             !headingOf(part) && !NETWORK_NAME.test(part)) {
@@ -1858,6 +1932,165 @@
     return best || median(values);
   }
 
+  //  Manche Vorlagen setzen die Ueberschrift in den Rand, auf die Hoehe
+  //  der ersten Station: "Experience<TAB>Cedar Cloud<TAB>Austin, TX".
+  //  Dann sind es zwei Zeilen – die Ueberschrift, und die Station mit dem
+  //  Einzug ihrer ersten Zelle.
+  //
+  //  Aber nur, wenn das Dokument seine Ueberschriften sonst nicht auf eine
+  //  eigene Zeile setzt. Im tabellarischen Lebenslauf ist "Sprachen<TAB>
+  //  Deutsch, Englisch" unter KENNTNISSE eine Beschriftung, keine
+  //  Ueberschrift – dort stehen die echten allein.
+  var marginCache = null;
+
+  //  Eine Zelle ist nur dann eine Ueberschrift, wenn das Stichwort sie
+  //  ganz ausfuellt: "Software" ist eine, "Software Engineer" nicht.
+  function wholeHeading(text) {
+    var value = normalizeHeading(text);
+    if (!value || value.length > 40) return false;
+    return HEADINGS.some(function (heading) {
+      var match = value.match(heading.pattern);
+      return match && match[0].length === value.length;
+    });
+  }
+
+  function marginHeads(rows) {
+    if (marginCache && marginCache.rows === rows) return marginCache.value;
+    var alone = 0;
+    var lefts = [];
+    rows.forEach(function (row) {
+      var cells = row.text.split("\t");
+      if (cells.length === 1 && headingOf(row.text)) alone++;
+      else if (cells.length > 1 && row.cells && row.cells.length === cells.length &&
+               wholeHeading(cells[0]) && !headingOf(clean(cells[1]))) {
+        lefts.push(row.cells[0].x);
+      }
+    });
+    //  Die Randueberschriften stehen alle an derselben Stelle, links vom
+    //  Text. Eine Zeile, deren erste Zelle woanders anfaengt, ist Inhalt.
+    var margin = null;
+    if (lefts.length >= 2 && alone < 2) {
+      margin = Math.min.apply(null, lefts);
+      var aligned = lefts.filter(function (x) { return Math.abs(x - margin) < 3; });
+      if (aligned.length < 2) margin = null;
+    }
+    marginCache = { rows: rows, value: margin };
+    return margin;
+  }
+
+  //  "… Berufsfachschule, Halle" und darunter "(Saale)": ein Ortszusatz,
+  //  der beim Umbruch auf die naechste Zeile gerutscht ist. Allein waere er
+  //  der Kopf einer neuen Station.
+  //  Ein Raster aus mehreren Spalten ("SPRACHEN<TAB>INTERESSEN<TAB>
+  //  PROJEKTE", darunter die Eintraege nebeneinander): Zeile fuer Zeile
+  //  gelesen liefe alles quer durcheinander. Jede Zelle gehoert zu der
+  //  Ueberschrift, unter der sie steht; gelesen wird Spalte fuer Spalte,
+  //  bis die naechste Ueberschrift allein steht.
+  function unweaveGrids(rows) {
+    var out = [];
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var cells = row.text.split("\t").map(clean);
+      var grid = cells.length >= 2 && row.cells && row.cells.length === cells.length &&
+        cells.every(function (cell) { return cell && headingOf(cell); });
+      if (!grid) { out.push(row); continue; }
+
+      var heads = row.cells.map(function (cell, index) {
+        return { x: cell.x, rows: [Object.assign({}, row, {
+          text: cells[index], cells: [cell], x: cell.x, bold: cell.bold, size: cell.size || row.size,
+        })] };
+      });
+      var tolerance = 6;
+      var lastY = row.y;
+      var j = i + 1;
+      for (; j < rows.length; j++) {
+        var next = rows[j];
+        var parts = next.text.split("\t").map(clean);
+        if (next.page !== row.page || (parts.length === 1 && headingOf(parts[0]))) break;
+        if (!next.cells || next.cells.length !== parts.length) break;
+        if (next.cells[0].x < heads[0].x - tolerance) break;
+        //  Ein grosser senkrechter Abstand beendet das Raster: darunter steht
+        //  etwas anderes (eine Fusszeile, ein neuer Block).
+        if (lastY && next.y && Math.abs(lastY - next.y) > (next.size || 10) * 2.6) break;
+        //  "Mehr dazu im Portfolio:" kuendigt etwas Neues an.
+        if (/:\s*$/.test(next.text)) break;
+        lastY = next.y;
+        //  Zellen derselben Spalte bleiben eine Zeile: "Klingonisch<TAB>B2".
+        var byColumn = {};
+        next.cells.forEach(function (cell, index) {
+          var column = 0;
+          heads.forEach(function (head, at) { if (cell.x >= head.x - tolerance) column = at; });
+          (byColumn[column] = byColumn[column] || []).push({ cell: cell, text: parts[index] });
+        });
+        Object.keys(byColumn).forEach(function (column) {
+          var group = byColumn[column];
+          heads[column].rows.push(Object.assign({}, next, {
+            text: group.map(function (entry) { return entry.text; }).join("\t"),
+            cells: group.map(function (entry) { return entry.cell; }),
+            x: group[0].cell.x, bold: group[0].cell.bold, size: group[0].cell.size || next.size,
+          }));
+        });
+      }
+      heads.forEach(function (head) { out.push.apply(out, head.rows); });
+      i = j - 1;
+    }
+    return out;
+  }
+
+  //  Eine Randueberschrift, die nicht neben der ersten Zeile ihres
+  //  Abschnitts steht, sondern etwas tiefer – zwischen der ersten und der
+  //  zweiten. Nach Hoehe sortiert kaeme sie mitten in die erste Station.
+  //  Erkennbar daran, dass die Zeilen darueber und darunter direkt
+  //  aufeinander folgen (die Ueberschrift nimmt keine eigene Zeile ein) und
+  //  beide rechts von ihr anfangen. Sie rueckt vor die Zeile darueber.
+  function liftMarginHeadings(rows) {
+    var out = rows.slice();
+    for (var i = 1; i < out.length - 1; i++) {
+      var row = out[i];
+      var above = out[i - 1];
+      var below = out[i + 1];
+      if (row.text.indexOf("\t") !== -1 || !headingOf(row.text)) continue;
+      if (above.page !== row.page || below.page !== row.page) continue;
+      if (!(above.x > row.x + 20 && below.x > row.x + 20)) continue;
+      if (!above.y || !below.y || !row.y) continue;
+      if ((row.y - above.y) * (below.y - row.y) <= 0) continue;
+      if (Math.abs(below.y - above.y) > (above.size || row.size || 10) * 1.9) continue;
+      out[i - 1] = row;
+      out[i] = above;
+    }
+    return out;
+  }
+
+  function joinWrappedPlace(all, row) {
+    var last = all[all.length - 1];
+    if (last && last.page === row.page && /^\([^()]{2,25}\)$/.test(row.text) &&
+        !/[)\].:;!?]$/.test(last.text) && /[A-Za-zÄÖÜäöüß]$/.test(last.text)) {
+      last.text = last.text + " " + row.text;
+      return all;
+    }
+    all.push(row);
+    return all;
+  }
+
+  function splitMarginHeading(all, row, margin) {
+    var cells = row.text.split("\t");
+    if (margin !== null && cells.length > 1 && row.cells && row.cells.length === cells.length &&
+        Math.abs(row.cells[0].x - margin) < 3 && wholeHeading(cells[0]) && !headingOf(clean(cells[1]))) {
+      var rest = row.cells.slice(1);
+      all.push(Object.assign({}, row, {
+        text: clean(cells[0]), cells: [row.cells[0]], bold: row.cells[0].bold, size: row.cells[0].size || row.size,
+      }));
+      all.push(Object.assign({}, row, {
+        text: clean(cells.slice(1).join("\t")), cells: rest, x: rest[0].x,
+        bold: rest.every(function (cell) { return cell.bold; }),
+        size: Math.max.apply(null, rest.map(function (cell) { return cell.size || 0; })) || row.size,
+      }));
+    } else {
+      all.push(row);
+    }
+    return all;
+  }
+
   function fromText(text, lines) {
     var profile = emptyProfile();
 
@@ -1871,9 +2104,22 @@
       .map(function (row) {
         return {
           text: clean(row.text), size: row.size || 0, spaced: !!row.spaced,
-          bold: !!row.bold, para: row.para,
+          bold: !!row.bold, para: row.para, cells: row.cells,
           x: row.x || 0, y: row.y || 0, page: row.page || 1,
         };
+      });
+    allRows = liftMarginHeadings(allRows)
+      .reduce(function (all, row, index, list) {
+        return splitMarginHeading(all, row, marginHeads(list));
+      }, [])
+      .reduce(joinWrappedPlace, []);
+    allRows = unweaveGrids(allRows)
+      .map(function (row) {
+        //  "Zeitraum: 06/2016 – 02/2021": die Beschriftung vor einem Datum
+        //  sagt nichts; ohne sie ist es die Datumszeile, die eine Station
+        //  abschliesst, und nicht der Titel der naechsten.
+        row.text = row.text.replace(/^(zeitraum|dauer|zeit|von\s*[-–]\s*bis|period|dates?|datum|beschäftigungszeitraum)\s*:\s*(?=\S*\d)/i, "");
+        return row;
       })
       .filter(function (row) {
         if (row.text) { row.gap = blank; blank = false; return true; }
@@ -1936,7 +2182,11 @@
       });
     }
 
-    var mail = plain.join("\n").match(/[\w.+-]+@[\w-]+\.[\w.]{2,}/);
+    //  Eine lange Adresse bricht am Bindestrich um: "johanna.weiss-" am
+    //  Zeilenende, "becker@example.com" darunter. Zusammengesetzt, bevor
+    //  gesucht wird – sonst bliebe nur die zweite Haelfte.
+    var mail = plain.join("\n").replace(/([\w.+]-)[ \t]*\n?[ \t]*(?=[\w.+-]*@)/g, "$1")
+      .match(/[\w.+-]+@[\w-]+\.[\w.]{2,}/);
     if (mail) profile.contact.email = mail[0];
 
     //  Kopfzeilen setzen mehrere Angaben nebeneinander: "Musterstraße 78 |
@@ -1976,7 +2226,7 @@
       profile.contact.name = letter.signer;
     }
 
-    headerContact(rows, profile);
+    headerContact(rows, profile, named.nameIndex);
 
     if (letter && letter.paragraphs.length) profile.letter = letter;
 
@@ -2335,7 +2585,7 @@
         var boldAhead = !row.bold && rows.slice(cursor + 1, cursor + 1 + headSize)
           .some(function (next) { return next.bold && !dateOnly(next.text); });
         if (headSize && stationFilled(event) && !deeper && !boldAhead &&
-            !/^[-–—•*·]/.test(line) && !/^[A-ZÄÖÜ][\wäöüß ]{2,24}:\s/.test(line) &&
+            !/^[-–—•*·]/.test(line) && (!/^[A-ZÄÖÜ][\wäöüß ]{2,24}:\s/.test(line) || HEAD_LABEL.test(line)) &&
             dateOnlyAhead(cursor + 1, headSize)) {
           closeEvent();
           hold(row, line, false);
@@ -2351,8 +2601,12 @@
         var last = event.list.length - 1;
         var wasItem = event.lastWasItem;
         event.lastWasItem = true;
-        if (!marked && indented && wasItem && /^[a-zäöüß(]/.test(item)) {
+        if (!marked && indented && wasItem && (/^[a-zäöüß(]/.test(item) ||
+            (/^[\d%€$&+\/]/.test(item) && last >= 0 && !/[.!?:;]$/.test(event.list[last])))) {
           //  Ein umbrochener Punkt: klein weitergeschrieben, gleich tief.
+          //  Oder mit einer Zahl weiter ("… reduced processing time by /
+          //  25%. Tracked …"), wenn der Punkt davor nicht mit einem Satz
+          //  endete.
           event.list[last] = joinLines([event.list[last], item]);
         } else if (marked || (indented && (event.company || event.list.length ||
                                            event.description.length))) {
@@ -2702,9 +2956,15 @@
   function findName(rows, bodySize) {
     //  "PERSONAL INFORMATION<TAB>Inês Carvalho" – Europass setzt die
     //  Beschriftung links neben den Namen.
+    //  Steht rechts daneben etwas anderes – die Anschrift im Europass-Kopf,
+    //  "Mehmet Yılmaz<TAB>28217 Bremen" –, zaehlt nur die erste Spalte.
+    //  "Lebenslauf Lukas Brandt" als Ueberschrift: das Wort davor ist die
+    //  Art des Dokuments, der Rest der Name.
     function nameText(row) {
       var parts = String(row.text).split("\t").map(clean).filter(Boolean);
-      return parts.length === 2 && headingOf(parts[0]) ? parts[1] : row.text;
+      var text = parts.length === 2 && headingOf(parts[0]) ? parts[1]
+        : parts.length >= 2 ? parts[0] : row.text;
+      return String(text).replace(/^(tabellarischer lebenslauf|lebenslauf|curriculum vitae|cv|resume|résumé)\s*[–—:|-]?\s+(?=[A-ZÄÖÜ])/i, "");
     }
 
     function usable(row, maxWords, allowSpaced) {
@@ -2728,7 +2988,9 @@
       if (best >= 0) {
         //  Steht rechts daneben noch etwas ("DAN BULLDOG   Finance"), gehoert
         //  nur die erste Spalte zum Namen.
-        var name = nameText(rows[best]).split("\t")[0].trim();
+        //  "Weiß-" am Zeilenende, "Becker" darunter: ein Doppelname, der
+        //  umgebrochen ist, verliert sonst seinen Bindestrich an ein Leerzeichen.
+        var name = nameText(rows[best]).split("\t")[0].trim().replace(/(\S)-\s+(?=[A-ZÄÖÜ])/g, "$1-");
         var after = best + 1;
         if (rows[after] && usable(rows[after]) &&
             Math.abs(rows[after].size - rows[best].size) <= rows[best].size * 0.05 &&
@@ -2736,6 +2998,7 @@
           name += " " + rows[after].text;
           after++;
         }
+        name = name.replace(/(\S)-\s+(?=[A-ZÄÖÜ])/g, "$1-");
 
         //  Die Rolle steht direkt darunter: kurz, keine Ueberschrift.
         var roleIndex = -1;
@@ -2748,7 +3011,7 @@
 
         return {
           name: name,
-          role: roleIndex >= 0 ? rows[roleIndex].text : "",
+          role: roleIndex >= 0 ? clean(nameText(rows[roleIndex])) : "",
           nameIndex: best,
           nameEnd: after - 1,
           roleIndex: roleIndex,
@@ -2853,9 +3116,26 @@
   //  Woran man einen Arbeitgeber oder eine Schule erkennt. Steht so etwas
   //  in der ersten Zeile einer Station, ist es die Einrichtung und nicht
   //  die Taetigkeit – die kommt dann eine Zeile spaeter.
-  var ORGANISATION = /(gmbh|mbh|\bllc\b|\bplc\b|\bcorp\b|corporation|insurance|\bbank\b|\bgroup\b|\blabs?\b|foundation|stiftung|hospital|college|\bschool\b|\bag\b|\bkg\b|\bse\b|\bohg\b|\be\.?\s?v\b|\binc\b|\bltd\b|schule|gymnasium|universit|hochschule|akademie|institut|klinik|krankenhaus|betrieb\b|werke?\b|zentrum|verein|kanzlei|praxis|agentur|\bamt\b|bundes|stadt\b|gemeinde)/i;
+  var ORGANISATION = /(gmbh|mbh|\bllc\b|\bplc\b|\bcorp\b|corporation|insurance|\bbank\b|\bgroup\b|\blabs?\b|foundation|stiftung|hospital|college|\bschool\b|\bag\b|\bkg\b|\bse\b|\bohg\b|\be\.?\s?v\b|\binc\b|\bltd\b|schule|gymnasium|universit|hochschule|akademie|institut|klinik|krankenhaus|betrieb\b|werke?\b|zentrum|verein|kanzlei|praxis|agentur|\bamt\b|bundes|\bstadt\b|stadtverwaltung|stadtwerke|gemeinde)/i;
 
+  //  Ein Abschluss am Anfang der Zeile ist nie die Einrichtung, auch wenn
+  //  er nach einer klingt: "Zweites Staatsexamen Lehramt an Grundschulen".
+  var DEGREE = /^(studium|ausbildung|weiterbildung|fortbildung|umschulung|abitur|fachabitur|fachhochschulreife|mittlere reife|hauptschulabschluss|realschulabschluss|erstes|zweites|staatsexamen|lehramt|bachelor|master|diplom|magister|promotion|meister|staatlich|b\.?\s?a\.?\b|b\.?\s?sc|m\.?\s?sc|m\.?\s?a\.?\b|ph\.?\s?d)/i;
+
+  function orgLike(value) {
+    var text = clean(value);
+    return ORGANISATION.test(text) && !DEGREE.test(text);
+  }
+
+  //  "Grundschule am Elbufer – Dresden": auch ein Gedankenstrich trennt den
+  //  Ort ab, wenn dahinter einer steht.
   function splitPlace(event, value) {
+    var dash = value.match(/^(.{2,80}?)\s+[–—-]\s+([^\s–—-][^–—]{1,39})$/);
+    if (dash && placeLike(dash[2]) && !/[|·]/.test(value)) {
+      event.company = clean(dash[1]);
+      event.place = clean(dash[2]);
+      return;
+    }
     var parts = value.split(/\s*[|·]\s*|,\s(?=[^,]*$)/);
     event.company = clean(parts[0]);
     if (parts[1]) event.place = clean(parts[1]);
@@ -2866,7 +3146,8 @@
   function placeLike(value) {
     var text = clean(value);
     if (!text || text.length > 32 || ORGANISATION.test(text) || /\d/.test(text)) return false;
-    return /^[A-ZÄÖÜ][\wäöüßéèáàóòúùç.'-]+(?:[ -][A-ZÄÖÜ(][\wäöüßéèáàóòúùç.()'-]+){0,2}(?:,\s*[A-Z]{2,3}|,\s*[A-ZÄÖÜ][\wäöüß]+)?$/.test(text);
+    //  Auch "Frankfurt am Main", "Freiburg im Breisgau", "Halle an der Saale".
+    return /^[A-ZÄÖÜ][\wäöüßéèáàóòúùç.'-]+(?:[ -](?:(?:am|an|im|in|ob|bei|vor|unter|der|den|upon|on)\s)?[A-ZÄÖÜ(][\wäöüßéèáàóòúùç.()'-]+){0,2}(?:,\s*[A-Z]{2,3}|,\s*[A-ZÄÖÜ][\wäöüß]+)?$/.test(text);
   }
 
   //  Eine Kopfzeile in einem Stueck: "Fachkrankenpflegerin | Uniklinik
@@ -2887,7 +3168,7 @@
       //  abgetrennt, also steht hinter dem Komma die Einrichtung.
       var comma = parts[0].match(/^(.{2,80}?),\s+(.{2,60})$/);
       if (!comma) return null;
-      if (ORGANISATION.test(comma[1]) && !ORGANISATION.test(comma[2])) {
+      if (orgLike(comma[1]) && !orgLike(comma[2])) {
         head.company = comma[1];
         head.title = comma[2];
       } else {
@@ -2897,7 +3178,7 @@
       return head;
     }
 
-    if (ORGANISATION.test(parts[0]) && !ORGANISATION.test(parts[1])) {
+    if (orgLike(parts[0]) && !orgLike(parts[1])) {
       head.company = parts[0];
       head.title = parts[1];
     } else {
@@ -2913,10 +3194,56 @@
     return head;
   }
 
+  //  Ein Titel, der in einer schmalen Spalte umbricht, endet auf ein Wort,
+  //  das nicht das Ende sein kann: "Gesundheits- und", "Weiterbildung
+  //  Intensiv- und". Die naechste Zeile gehoert dann noch zum Titel.
+  //  Beschriftungen, mit denen eine Station anfaengt – im Gegensatz zu
+  //  "Abschlussnote: 1,8", das immer zur Station darueber gehoert.
+  var HEAD_LABEL = /^(position|t(?:ae|ä)tigkeit|funktion|rolle|stelle|berufsbezeichnung|job title|title|role|arbeitgeber|unternehmen|firma|einrichtung|institution|ausbildungsbetrieb|employer|company)\s*:/i;
+
+  var DANGLING = /(?:\s(?:und|oder|sowie|f(?:ue|ü)r|der|die|des|im|in|zur|zum|&|and|or|of|for)|-)$/i;
+
   function assignStationLine(event, line) {
     var raw = String(line);
     var value = clean(line).replace(/\t+/g, " ");
     if (!value) return;
+
+    if (event.title && !event.company && raw.indexOf("\t") === -1 && value.length <= 60 &&
+        (event.continueTitle || DANGLING.test(event.title) || (DANGLING.test(value) && !/[.,;:]/.test(value)))) {
+      event.title = /[A-Za-zÄÖÜäöüß]-$/.test(event.title) && /^[a-zäöüß]/.test(value)
+        ? event.title.slice(0, -1) + value
+        : event.title + " " + value;
+      event.continueTitle = DANGLING.test(value);
+      return;
+    }
+
+    //  Beschriftete Felder: "Position: Sous-Chef", "Arbeitgeber: Hotel
+    //  Schwarzwaldblick, Titisee-Neustadt", "Ort: Berlin". Die Beschriftung
+    //  sagt, wohin die Angabe gehoert – besser als jede Vermutung.
+    var label = value.match(/^(position|t(?:ae|ä)tigkeit|funktion|rolle|stelle|berufsbezeichnung|job title|title|role|arbeitgeber|unternehmen|firma|einrichtung|institution|schule|hochschule|universit(?:ae|ä)t|ausbildungsbetrieb|betrieb|employer|company|organi[sz]ation|school|ort|standort|location)\s*:\s*(.+)$/i);
+    if (label) {
+      var kind = label[1].toLowerCase();
+      if (/^(ort|standort|location)$/.test(kind)) { if (!event.place) { event.place = clean(label[2]); return; } }
+      else if (/^(position|t(ae|ä)tigkeit|funktion|rolle|stelle|berufsbezeichnung|job title|title|role)$/.test(kind)) {
+        if (!event.title) { event.title = clean(label[2]); return; }
+      } else if (!event.company) { splitPlace(event, clean(label[2])); return; }
+    }
+
+    //  "Wissenschaftliche" / "Mitarbeiterin" / "Goethe-Universität · Frankfurt":
+    //  kommt nach Titel und vermeintlichem Arbeitgeber noch eine Zeile, die
+    //  eindeutig Einrichtung und Ort ist, dann war die zweite Zeile der Rest
+    //  des umgebrochenen Titels.
+    if (event.title && event.company && !event.place && !event.list.length &&
+        !(event.description || []).length && !orgLike(event.company) &&
+        raw.indexOf("\t") === -1) {
+      var tail = value.split(/\s+[|·]\s+/);
+      if (tail.length === 2 && placeLike(tail[1]) && !placeLike(tail[0])) {
+        event.title = event.title + " " + event.company;
+        event.company = clean(tail[0]);
+        event.place = clean(tail[1]);
+        return;
+      }
+    }
 
     if (!event.title && !event.company && raw.indexOf("\t") === -1) {
       var head = splitHead(value);
@@ -2945,20 +3272,51 @@
     //  und dort steht rechts der Arbeitgeber. Getrennt wird nur, wenn er
     //  sich als Einrichtung zu erkennen gibt: "Master of Education –
     //  Deutsch & Geschichte" ist ein Titel mit Fach, kein Arbeitgeber.
+    //  Ebenso "Abitur – IGS für Zauberei und Kunst, Bad Wimpeln": hinter dem
+    //  Strich eine Einrichtung mit angehaengtem Ort. Bricht die Zeile nach
+    //  dem Komma um, kommt der Ort in der naechsten.
     if (!event.title && !event.company) {
-      var pair = value.match(/^(.{3,60}?)\s+[–—-]\s+(.{2,60})$/);
-      if (pair && ORGANISATION.test(pair[2]) && !ORGANISATION.test(pair[1])) {
+      var pair = value.match(/^(.{3,60}?)\s+[–—-]\s+(.{2,80})$/);
+      var located = pair && pair[2].match(/^(.{2,60}),\s+([^,]{2,32})$/);
+      if (pair && !orgLike(pair[1]) &&
+          (orgLike(pair[2]) || (located && placeLike(located[2]) && !/[|·]/.test(pair[2])))) {
         event.title = clean(pair[1]);
-        splitPlace(event, clean(pair[2]));
+        if (located && placeLike(located[2])) {
+          event.company = clean(located[1]);
+          event.place = clean(located[2]);
+        } else {
+          splitPlace(event, clean(pair[2]).replace(/,$/, ""));
+          event.placeNext = /,$/.test(pair[2]) && !event.place;
+        }
         return;
       }
     }
 
+    if (event.placeNext) {
+      event.placeNext = false;
+      if (!event.place && placeLike(value)) { event.place = value; return; }
+    }
+
     //  "SPS-Fachkraft, TÜV Rheinland Akademie" – vorn die Taetigkeit oder
     //  der Abschluss, hinter dem letzten Komma die Einrichtung.
+    //  "Stationsleitung, Universitätsklinikum Leipzig, Leipzig" – drei Teile
+    //  mit Komma, hinten ein Ort: Taetigkeit, Einrichtung, Ort. Gibt sich der
+    //  erste Teil als Einrichtung zu erkennen, steht die Taetigkeit dahinter.
+    if (!event.title && !event.company) {
+      var three = value.split(/,\s+/);
+      if (three.length === 3 && placeLike(three[2]) && !placeLike(three[1]) &&
+          three[0].length >= 3 && three[1].length >= 3) {
+        var firstIsOrg = orgLike(three[0]) && !orgLike(three[1]);
+        event.title = clean(firstIsOrg ? three[1] : three[0]);
+        event.company = clean(firstIsOrg ? three[0] : three[1]);
+        event.place = clean(three[2]);
+        return;
+      }
+    }
+
     if (!event.title && !event.company) {
       var comma = value.match(/^(.{3,80}),\s+([^,]{3,60})$/);
-      if (comma && ORGANISATION.test(comma[2]) && !ORGANISATION.test(comma[1])) {
+      if (comma && orgLike(comma[2]) && !orgLike(comma[1])) {
         event.title = clean(comma[1]);
         event.company = clean(comma[2]);
         return;
@@ -2970,13 +3328,16 @@
       //  und "ZOOLINO, Bad Wimpeln" ebenso: ein angehaengter Ort macht aus
       //  der Zeile eine Angabe zur Einrichtung, nicht zur Taetigkeit.
       if (!event.company &&
-          (ORGANISATION.test(value) || /,\s*[A-ZÄÖÜ][\wäöüß.() -]{2,25}$/.test(value))) {
+          (orgLike(value) || /,\s*[A-ZÄÖÜ][\wäöüß.() -]{2,25}$/.test(value))) {
         splitPlace(event, value);
         return;
       }
       //  Bleibt nur "Abschluss: Mittlere Reife" uebrig, ist der Abschluss
       //  der Eintrag – die Beschriftung davor sagt nichts Eigenes.
-      event.title = value.replace(/^(abschluss|abgeschlossen als|degree|qualification)\s*:\s*/i, "");
+      //  "Nachhaltigkeitsprojekt im Naturschutz –": der Strich kuendigt den
+      //  Arbeitgeber in der naechsten Zeile an und gehoert nicht zum Titel.
+      event.title = value.replace(/^(abschluss|abgeschlossen als|degree|qualification)\s*:\s*/i, "")
+        .replace(/\s+[–—-]$/, "");
       return;
     }
 
@@ -3535,7 +3896,17 @@
 
   //  lines: die Zeilen aus dem PDF mitsamt Schriftgrad – sie machen aus
   //  Raten eine Auswertung. Fehlen sie, bleibt es beim reinen Text.
+  //  Eine mit "Als Datei speichern" geschriebene HTML-Datei traegt ihre
+  //  Daten als JSON in sich (js/savefile.js). Dann zaehlt nur das – das
+  //  gezeichnete Dokument drumherum ist zum Ansehen da.
+  function unwrapSavedFile(text) {
+    var match = /<script[^>]*id=["']?rickcv-data["']?[^>]*>([\s\S]*?)<\/script>/i.exec(String(text));
+    return match ? match[1].trim() : null;
+  }
+
   function parseText(text, name, lines, images) {
+    var saved = !lines && unwrapSavedFile(text);
+    if (saved) { text = saved; name = "rickcv.json"; }
     if (!lines) text = unwrapJson(text);
     var format = detect(name, text);
 

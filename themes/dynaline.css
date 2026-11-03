@@ -3,6 +3,7 @@
    author:   RickCV
    licence:  CC0-1.0
    contract: 1
+   tags:     auffallen
    about:    Die Zeitleiste wird zur Achse: Stationen sitzen auf einer
              durchgehenden Linie, die Dauer bestimmt ihren Abstand.
    about-en: The timeline becomes the axis: stations sit on one continuous
@@ -57,6 +58,14 @@
     color: #5a5a5a;
     }
 
+  /*  Arbeitgeber in normaler Schrift statt in Kapitaelchen. Kapitaelchen
+      kommen aus dem PDF als Stuecke verschiedener Groesse, und als letzte
+      Zeile einer Station wurden sie fuer pdftotext ein eigener Block, weit
+      weg von ihrer Station (tools/ats-proof.mjs).  */
+  .event-company {
+    font-variant: normal;
+  }
+
   .content::before {
     content: "";
     position: absolute;
@@ -88,4 +97,42 @@
     padding-top: 2px;
     padding-bottom: 2px;
   }
+}
+
+/*  Die Abschnittsueberschriften stehen buendig mit dem Text der Stationen,
+    die Datumsspalte links davon bleibt frei. Ragte die Ueberschrift in die
+    Textspalte hinein, las pdftotext eine lange letzte Zeile darueber als
+    eigenen Strang, weit weg von ihrer Station (tools/ats-proof.mjs).  */
+[data-column="main"] [data-block="section"] > .resume_title {
+  margin-left: 2.75cm;
+}
+
+/*  Titel und Arbeitgeber in einer Zeile: "A-levels – St Cuthbert's School".
+    Stand ein kurzer Titel allein ueber einer langen Arbeitgeberzeile, hielt
+    pdftotext die beiden fuer verschiedene Bloecke und riss den Arbeitgeber
+    von seiner Station los (tools/ats-proof.mjs).  */
+.event .content h3,
+.event .content h3 + p {
+  display: inline;
+}
+
+.event .content h3 + p::before {
+  content: " – ";
+}
+
+.event .content h3 + p + * {
+  margin-top: 0.15em;
+}
+
+/*  Die anderen Bloecke im Hauptteil stehen auf derselben Kante wie die
+    Abschnitte darueber. Bei den Kenntnissen nur die Ueberschrift: die
+    Punkte stehen links davon wie die Daten im Werdegang, die Namen beginnen
+    ungefaehr dort, wo der Text der Stationen beginnt – und es bleibt Platz
+    fuer zwei Spalten.  */
+[data-column="main"] [data-block="skills"] > .resume_title {
+  margin-left: 2.75cm;
+}
+
+[data-column="main"] [data-block]:not([data-block="section"]):not([data-block="skills"]):not([data-block="namerole"]):not([data-block="photo"]):not([data-block="contact"]) {
+  padding-left: 2.75cm;
 }

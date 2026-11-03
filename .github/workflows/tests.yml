@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Chromium vorhanden
         run: google-chrome --version
@@ -33,9 +33,30 @@ jobs:
         run: node tests/model.test.mjs
       - name: Import
         run: node tests/import.test.mjs
+      - name: Abgleich mit Stellenanzeigen
+        run: |
+          node tests/jobmatch.test.mjs
+          node tests/jobmatch-corpus.mjs --check
+      - name: Export als Word und Markdown
+        run: node tests/export.test.mjs
+      - name: Prüfstand fremder Vorlagen (Reactive Resume)
+        run: node tests/benchmark.test.mjs
       - name: Theme-Vertrag
         run: node tests/theme.test.mjs
       - name: Baukasten im Browser
         run: node tests/app.test.mjs
+      - name: Dokumente, Versionen, Stelle, Datei
+        run: node tests/flows.test.mjs
       - name: Rundlauf Druck und Import
         run: node tests/roundtrip.test.mjs
+
+      #  Der ATS-Nachweis (docs/ats-proof.md): jedes Theme drucken und von
+      #  unabhängigen Textlesern lesen lassen. Scheitert nur bei einem neuen
+      #  Befund gegenüber dem eingecheckten Stand.
+      - name: Werkzeuge für den ATS-Nachweis
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          pip install --quiet pdfminer.six
+      - name: ATS-Nachweis
+        run: node tools/ats-proof.mjs --check

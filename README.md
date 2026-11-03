@@ -22,7 +22,9 @@ upload, no server. Your data stays on your device.
   Resume, a RickCV backup or plain text. Read locally without an AI model, and shown to you
   before anything changes.
 - **Cover letter included**, laid out to DIN 5008 for German applications.
-- **Nine themes**, or your own: a theme is one CSS file, and you can write it inside the builder.
+- **Thirteen themes**, filtered by need – *for tracking systems*, *long career*, *first job*,
+  *formal*, *stand out*, *easy to read* – or your own: a theme is one CSS file, and you can write
+  it inside the builder.
 - **Detailed styling.** Colours, typefaces, font size, sidebar width, margins, heading sizes,
   spacing. Your choices override the theme, and one button hands the palette back to it.
 - **Real pages.** A4 or US Letter, as many sheets as the content needs, blocks never cut in
@@ -33,7 +35,13 @@ upload, no server. Your data stays on your device.
 - **Optional blocks** for skills, languages, interests, projects, mobility, references and
   links, plus the place and date line German resumes end with.
 - **Honest ATS support.** Tagged PDF, a clean reading order, no hidden text. You can see and
-  edit what an applicant tracking system reads.
+  edit what an applicant tracking system reads, and [`docs/ats-proof.md`](docs/ats-proof.md)
+  shows how independent text extractors read every theme.
+- **Job ad match.** Paste the ad: for each requirement RickCV shows whether your resume covers
+  it, words it differently or misses it, must-have and nice-to-have kept apart. German and
+  English, offline, no AI and deliberately no score.
+- **My documents.** Several applications side by side, a copy per job, a bin for 30 days, and
+  earlier versions — kept automatically before every import and every 15 minutes of work.
 - **Works with your AI.** No model built in, but RickCV writes a ready brief for a chat or an
   agent, and the answer goes back in through the normal import.
 - **German and English** for interface and document. Light and dark mode.
@@ -41,7 +49,11 @@ upload, no server. Your data stays on your device.
 - **Fully keyboard operable.**
 - **Works offline.** Fonts and around 150 icons ship with it. No request ever reaches a
   third party.
-- **Export** as PDF, RickCV backup, `resume.json` (JSON Resume), a shareable link or raw JSON.
+- **Save as a file you own.** One HTML file that shows the application without RickCV and
+  without a network, prints, and opens again as an editable document. In Chromium, Ctrl+S
+  keeps writing to the same file.
+- **Export** as PDF, Word (`.docx`, cover letter to DIN 5008), Markdown, RickCV backup,
+  `resume.json` (JSON Resume), a shareable link or raw JSON.
 
 ![RickCV builder](examples/builder.webp)
 
@@ -53,7 +65,11 @@ upload, no server. Your data stays on your device.
 <img src="themes/previews/rightrail.webp" width="32%">
 </p>
 
-[All nine with pictures](themes/README.md):
+[All thirteen with pictures](themes/README.md). In the builder, a row of needs above the gallery
+filters them (long career, first job, formal, stand out, easy to read). There is no filter for
+applicant tracking systems because there is no theme that fails them: every one, the colourful
+ones included, passes every reader in [`docs/ats-proof.md`](docs/ats-proof.md), and a test
+holds them to it.
 
 | Theme | |
 | --- | --- |
@@ -66,6 +82,10 @@ upload, no server. Your data stays on your device.
 | **Right Rail** | sidebar on the right without fill, career starts at the left edge |
 | **Margin Heads** | section headings sit in the margin beside their section |
 | **Banner** | a coloured band carries the name, skills sit in pills |
+| **Single column** | one column across the page, a slim band for languages and interests, the career as a list |
+| **Large print** | large type, strong contrast, no light grey – also for black-and-white printing |
+| **First job** | generous spacing for little content, skills as pills, the profile set apart |
+| **Academic** | serifs, centred header, small capitals, hanging years; set tightly for long lists |
 
 Any other `.css` file can be dropped onto the builder or picked under **Themes**.
 
@@ -93,13 +113,26 @@ two-column lists (`Go   ●●●●○` becomes a skill rated four of five), ph
 their position, icon fonts, bullets missing from the text layer, and a cover letter before or
 after the resume.
 
+How well, measured field by field against fixed ground truth (`tests/benchmark.test.mjs`):
+
+| Test set | RickCV | Reactive Resume (PDF import without AI) |
+| --- | --- | --- |
+| Reactive Resume's own 18 template PDFs, career entries | 45 / 45 | all, by its own tests |
+| 21 German resumes in eight common layouts ([`tests/fixtures/deutsch/`](tests/fixtures/deutsch/)), career entries | 102 / 102 | 0 / 102 |
+
+Reactive Resume keeps the text of a German resume but files it as loose text blocks: its
+importer knows English section headings only. Read the German numbers with care — RickCV was
+improved on these files after its first reading (60 % and 44 % at first sight); see the folder's
+README.
+
 ## Saving as PDF
 
-Click **Save as PDF**. The first time, RickCV tells you what to set in the print dialog:
+Click **Save as PDF** and choose *Save as PDF* as the destination in the print dialog. Paper
+size, margins and background colours come with the document; the filename follows the
+document title ("Application – Name"). Only if a browser ignores them:
 
 | Setting | Value |
 | --- | --- |
-| Destination | Save as PDF |
 | Paper size | A4 (or Letter) |
 | Margins | None |
 | Background graphics | Enabled |
@@ -108,7 +141,8 @@ Every modern browser works. Chromium gives the most predictable margins, page br
 colours; Firefox produces a usable PDF as well.
 
 Your document is saved in the browser as you type, but only in that browser on that device.
-Use **Export** for a backup or to keep several versions.
+RickCV keeps earlier versions there too (**… → Earlier versions**). For a copy outside the
+browser use **Export → Save as file**.
 
 ## ATS and hidden text
 
@@ -120,6 +154,19 @@ What actually helps: a tagged PDF with a proper reading order, name and contact 
 career, SVG icons that leave no stray words in the extracted text, and the document title as
 PDF title and filename. For very graphic layouts, **Machine readability** adds a *visible*
 plain-text page you can read and edit. The invisible mode still exists, clearly marked.
+
+**The proof, repeatable.** `node tools/ats-proof.mjs` prints every theme in German (A4) and
+English (US Letter) with Chromium and lets independent text extractors read it — `pdftotext` in
+stream order and with layout analysis, pdf.js, and in CI pdfminer.six. It checks that name,
+email and phone come out in one piece, that the name precedes the career, that every station
+keeps its title, dates and employer together without sidebar text in between, and that the file
+is tagged, carries its language and embeds its fonts. The result is in
+[`docs/ats-proof.md`](docs/ats-proof.md); CI fails on any new finding. The run found that
+Chromium wrote all dates of a page before all stations, which simple parsers could not match up —
+fixed for every theme without changing a pixel. Layout analysis (`pdftotext` without `-raw`)
+tore employers away from their station when a short title stood above a much longer line, or a
+heading reached into the text column; the themes are set so that this does not happen. Commercial parsers (Textkernel, used by Personio
+and SAP SuccessFactors; Workday; Greenhouse) are not freely available and are not part of it.
 
 Generative Engine Optimization (GEO) has no proven, stable effect according to a 2026 survey
 of 45 studies, so RickCV does not do it.
@@ -191,6 +238,10 @@ the preview image from the example document.
 | `js/import.js`, `js/import-dialog.js` | JSON Resume, LinkedIn, CSV, text, and the import dialog |
 | `js/pdf-import.js`, `js/docx-import.js`, `js/layout.js` | PDF and Word import |
 | `js/ats.js` | Plain-text version |
+| `js/jobmatch.js` | Job ad against resume |
+| `js/store.js`, `js/library.js` | Documents, versions and bin (IndexedDB) |
+| `js/savefile.js`, `js/doc-assets.js` | Save as a self-contained HTML file; stylesheet and fonts for it |
+| `js/export-docs.js` | Word and Markdown export |
 | `js/ai-help.js` | *Let your AI write it* |
 | `js/themes.js`, `js/theme-data.js` | Theme handling and the bundled themes |
 | `js/icons.js`, `js/icon-data.js`, `js/icon-picker.js`, `js/ui-icons.js` | Icons |
@@ -198,10 +249,12 @@ the preview image from the example document.
 | `themes/` | One CSS file per theme, `CONTRACT.md`, `_starter.css` |
 | `fonts/`, `licenses/` | Typefaces and their licences |
 | `vendor/pdfjs/` | Mozilla's pdf.js, loaded only for PDF imports |
-| `tools/` | Font, icon, example image, link preview and demo generators |
+| `tools/` | Font, icon, example image, link preview and demo generators; `ats-proof.mjs` |
+| `docs/` | The ATS proof, regenerated by `node tools/ats-proof.mjs` |
 
 Every file is a plain script, which is why `index.html` works by double-click. The
-`js/theme-data.js` and `js/icon-data.js` bundles are committed for the same reason.
+`js/theme-data.js`, `js/icon-data.js` and `js/doc-assets.js` bundles are committed for the same
+reason (`tools/build-themes.py`, `tools/build-doc-assets.py`).
 
 Typefaces ship as static 400 and 700 files and ligatures are switched off. Both keep every
 letter as real text in PDFs printed from Firefox.
@@ -218,6 +271,12 @@ node tests/import.test.mjs      # import parsers
 node tests/theme.test.mjs       # theme contract
 node tests/app.test.mjs         # the builder in Chromium: CSP, preview, foreign senders
 node tests/roundtrip.test.mjs   # prints every theme and reads the PDF back in
+node tests/jobmatch.test.mjs    # job ad against resume
+node tests/jobmatch-corpus.mjs  # 60 job ads (DE/EN): recall, must/nice, noise; JOBS_DIR=tests/fixtures/jobs-holdout for the held-out 20
+node tests/export.test.mjs      # Word and Markdown, Word read back in
+node tests/benchmark.test.mjs   # PDF import on Reactive Resume's templates, field by field
+node tests/flows.test.mjs       # documents, versions, job ad, save as file (real time)
+node tools/ats-proof.mjs        # regenerates docs/ats-proof.md
 ```
 
 The browser tests look for Chromium or Chrome in `CHROME`, then `PATH`, then the default

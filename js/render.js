@@ -292,6 +292,15 @@
       body.style.setProperty("--profile-align", style.profileAlign);
     }
 
+    //  Name mittig, Ueberschriften unterstrichen: Schalter im Editor statt
+    //  CSS. Sie stehen als Attribut am <body>; die Regeln dazu liegen in
+    //  styles.css ausserhalb der Ebenen und gewinnen so gegen jedes Theme.
+    [["data-name-align", style.nameAlign], ["data-heading-style", style.headingStyle]]
+      .forEach(function (entry) {
+        if (entry[1] && entry[1] !== "auto") body.setAttribute(entry[0], entry[1]);
+        else body.removeAttribute(entry[0]);
+      });
+
     //  Die Fassung des Vertrags, gegen den dieses Markup geschrieben ist.
     //  Ein Theme darf sich daran festhalten – und spaeter daran merken,
     //  dass es fuer eine aeltere Fassung gedacht war.
@@ -672,7 +681,10 @@
     if (mode === "start") return start;
 
     var endLabel = event.present ? present : formatDate(event.end, format);
-    return start + "<br>&ndash; " + esc(endLabel);
+    //  Das Leerzeichen hinter dem Umbruch ist am Zeilenanfang unsichtbar –
+    //  blendet ein Theme den Umbruch aus ("07/21 – 05/22" in einer Zeile),
+    //  steht es dort, wo es hingehoert.
+    return start + "<br> &ndash; " + esc(endLabel);
   }
 
   function fillTimeline(doc, events, timeline, data) {
@@ -1129,7 +1141,10 @@
 
   function documentTitle(data) {
     var name = String(data.contact.name || "").trim();
-    var kind = I18n.t("doc", "cvTitle", data.locale);
+    //  Mit Anschreiben ist es eine Bewerbung, kein Lebenslauf allein – und
+    //  der Dateiname soll das sagen.
+    var letter = data.settings && data.settings.showCoverLetter;
+    var kind = I18n.t("doc", letter ? "applicationTitle" : "cvTitle", data.locale);
     return name ? kind + " – " + name : kind;
   }
 
@@ -1684,6 +1699,7 @@
   }
 
   global.RickCVRender = {
+    documentTitle: documentTitle,
     CONTRACT: CONTRACT,
     pageHeightPx: function (data) { return pageSize(data).heightPx; },
     resumeSheets: function () { return resumeSheets; },

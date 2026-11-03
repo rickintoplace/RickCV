@@ -88,11 +88,26 @@
     //  weil in der Seitenspalte jede Zeile ein wenig zu breit geraet.
     var rightmost = allowed ? width * 0.72 : width * 0.8;
 
+    //  Wie breit muss die Gasse sein, um als Spaltenrand zu gelten? Ein
+    //  fester Anteil der Seitenbreite war zu grob: ein Theme mit schmalem
+    //  Steg (Terminal: knapp vier Millimeter) fiel durch, und seine
+    //  Seitenspalte landete Zeile fuer Zeile im Werdegang. Gemessen wird
+    //  deshalb in Zeilenhoehen, mit einem Boden fuer sehr grosse Schriften.
+    var heights = items.map(function (item) { return item.h; })
+      .sort(function (a, b) { return a - b; });
+    var middle = heights[Math.floor(heights.length / 2)] || 10;
+    var minGap = Math.max(middle * 0.8, width * 0.012);
+    var line = Math.max(2, middle * 0.5);
+    var inkLeft = Math.min.apply(null, items.map(function (item) { return item.x; }));
+    var inkRight = Math.max.apply(null, items.map(function (item) { return item.x + item.w; }));
+
     var best = null;
     edges.forEach(function (edge) {
       if (edge < width * 0.2 || edge > rightmost) return;
 
-      var left = 0, right = 0, gap = width, through = 0;
+      var through = 0;
+      var crossing = [];
+      var beside = [];
       for (var i = 0; i < items.length; i++) {
         var item = items[i];
         if (item.x < edge && item.x + item.w > edge + 1) {
@@ -104,13 +119,57 @@
           //  Hauptteil ein Stueck nach links haengt. Die Gasse misst so ein
           //  Stueck nicht mit, sonst waere sie null.
           if (isBanner(item)) continue;
+          if (!allowed) { crossing.push(item); continue; }
           if (++through > allowed) return;
           if (Math.min(edge - item.x, item.x + item.w - edge) > item.w * 0.25) return;
           continue;
         }
-        if (item.x + item.w <= edge) left++;
-        else { right++; gap = Math.min(gap, item.x - edge); }
+        beside.push(item);
       }
+
+      //  Gemessene Breiten (PDF): Was die Bahn kreuzt, spricht gegen sie –
+      //  ausser es steht ueber allem anderen. Das ist der Kopf ueber beiden
+      //  Spalten (Name, Kontaktzeile, ein Profil in voller Breite). Mitten
+      //  zwischen den Spalten waere es dagegen der Beweis, dass es keine
+      //  sind – und darunter auch: ein Brief mit Absender rechts und
+      //  Empfaenger links ueber dem Brieftext hat keine zwei Spalten. Was in
+      //  derselben Zeile wie ein kreuzendes Stueck steht, gehoert zum Band.
+      var inBand = function (item) {
+        return crossing.some(function (cross) { return Math.abs(cross.y - item.y) <= line; });
+      };
+      //  Massgeblich ist der Bereich, in dem beide Seiten Text tragen: Ein
+      //  Name links oben ueber der Kontaktzeile steht zwar hoeher als das
+      //  Band, aber noch nicht in einer Spalte.
+      var left = 0, right = 0, gap = width;
+      var span = { left: [-Infinity, Infinity], right: [-Infinity, Infinity] };
+      beside.forEach(function (item) {
+        if (crossing.length && inBand(item)) return;
+        var side = item.x + item.w <= edge ? span.left : span.right;
+        side[0] = Math.max(side[0], item.y);
+        side[1] = Math.min(side[1], item.y);
+        if (side === span.left) left++;
+        else { right++; gap = Math.min(gap, item.x - edge); }
+      });
+      var top = Math.min(span.left[0], span.right[0]);
+      //  Und ein Band reicht ueber die ganze bedruckte Breite. Eine lange
+      //  Mailadresse in der Seitenspalte, die ueber die Gasse ragt, steht
+      //  zwar unter dem Hauptteil, ist aber noch lange keine Fusszeile.
+      var wide = function (cross) {
+        var from = Infinity, to = -Infinity;
+        items.forEach(function (item) {
+          if (Math.abs(item.y - cross.y) > line) return;
+          from = Math.min(from, item.x);
+          to = Math.max(to, item.x + item.w);
+        });
+        return to - from >= (inkRight - inkLeft) * 0.6;
+      };
+      var bands = { above: [] };
+      for (var c = 0; c < crossing.length; c++) {
+        if (!wide(crossing[c])) return;
+        if (crossing[c].y > top + 1) bands.above.push(crossing[c]);
+        else return;
+      }
+
       //  Beide Seiten muessen genug Text tragen, sonst ist es keine Spalte,
       //  sondern ein verirrtes Stueck. Frueher standen hier 15 Prozent je
       //  Seite – eine schmale Seitenspalte mit wenigen, langen Textstuecken
@@ -118,25 +177,31 @@
       //  zeilenweise im Werdegang.
       if (left < 6 || right < 6) return;
       if (left < items.length * 0.05 || right < items.length * 0.05) return;
+      //  Eine Spalte reicht ueber einen guten Teil des Blattes. Drei kurze
+      //  Bloecke nebeneinander (Sprachen | Interessen | Projekte unter dem
+      //  Kopf) sind ein Raster in einer Zeile, keine Seitenspalte – sonst
+      //  stuende der rechte Block im Text erst ganz am Ende.
+      var full = Math.max(span.left[0], span.right[0]) - Math.min(span.left[1], span.right[1]);
+      if (full > 0 && Math.min(span.left[0] - span.left[1], span.right[0] - span.right[1]) < full * 0.25) return;
 
-      if (!best || gap > best.gap) best = { edge: edge, gap: gap };
+      if (!best || gap > best.gap) best = { edge: edge, gap: gap, bands: bands };
     });
-
-    //  Wie breit muss die Gasse sein, um als Spaltenrand zu gelten? Ein
-    //  fester Anteil der Seitenbreite war zu grob: ein Theme mit schmalem
-    //  Steg (Terminal: knapp vier Millimeter) fiel durch, und seine
-    //  Seitenspalte landete Zeile fuer Zeile im Werdegang. Gemessen wird
-    //  deshalb in Zeilenhoehen, mit einem Boden fuer sehr grosse Schriften.
-    var heights = items.map(function (item) { return item.h; })
-      .sort(function (a, b) { return a - b; });
-    var middle = heights[Math.floor(heights.length / 2)] || 10;
-    var minGap = Math.max(middle * 0.8, width * 0.012);
 
     if (!best || best.gap < minGap) return [items];
 
     //  Wo ein Stueck anfaengt, dorthin gehoert es – auch das seltene, das
-    //  ueber die Kante hinausragt.
-    return divide(best.edge);
+    //  ueber die Kante hinausragt. Ein Band ueber oder unter den Spalten
+    //  wird vorher bzw. nachher gelesen, mitsamt den Stuecken, die in
+    //  seinen Zeilen stehen, ohne selbst die Bahn zu kreuzen.
+    var above = best.bands.above;
+    if (!above.length) return divide(best.edge);
+
+    var head = [], body = [];
+    var lowestHead = Math.min.apply(null, above.map(function (item) { return item.y; }));
+    items.forEach(function (item) {
+      (item.y >= lowestHead - line ? head : body).push(item);
+    });
+    return [head].concat(body.length ? splitColumns(body, width, slack) : []);
   }
 
   /* -------------------------------------------------------------- Zeilen */
@@ -202,6 +267,10 @@
       var size = 0;
 
       var pendingSpace = false;
+      //  Wo jede Zelle anfaengt, die ein Tabulator abtrennt: eine
+      //  Ueberschrift im Rand steht mit der ersten Station in einer Zeile,
+      //  und die Station braucht ihren eigenen Einzug.
+      var cells = [];
 
       parts.forEach(function (item) {
         //  Ein Platzhalter traegt nur noch seine Breite bei: kein Text,
@@ -221,7 +290,7 @@
           //  ab einem Viertel Zeichenbreite ist es ein Leerzeichen. Ab dem
           //  Doppelten der Zeilenhoehe ist es keine Luecke mehr, sondern
           //  eine eigene Spalte.
-          if (gap > item.h * 2) text += "\t";
+          if (gap > item.h * 2) { text += "\t"; cells.push({ x: item.x, size: 0, heavy: 0, total: 0 }); }
           //  Ein Stueck, das eine ganze Zeile ist (so kommen sie aus Word),
           //  gehoert nie mitten in ein Wort: zwei davon nebeneinander sind
           //  zwei Rahmen, und dazwischen gehoert ein Leerzeichen – auch
@@ -238,6 +307,11 @@
         pendingSpace = false;
         text += item.str;
         previous = item;
+        if (!cells.length) cells.push({ x: item.x, size: 0, heavy: 0, total: 0 });
+        var cell = cells[cells.length - 1];
+        cell.size = Math.max(cell.size, item.h);
+        cell.total += item.str.length;
+        if (item.bold) cell.heavy += item.str.length;
       });
 
       var cleaned = unspace(text.replace(/[ ]{3,}/g, "  ").trim());
@@ -265,6 +339,9 @@
         bold: total > 0 && heavy / total > 0.6,
         size: size,
         x: first.x,
+        cells: cells.map(function (cell) {
+          return { x: cell.x, size: cell.size, bold: cell.total > 0 && cell.heavy / cell.total > 0.6 };
+        }),
         y: row.y,
         page: page,
       };

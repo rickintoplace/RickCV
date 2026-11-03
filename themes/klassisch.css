@@ -4,6 +4,7 @@
    author:   RickCV
    licence:  CC0-1.0
    contract: 1
+   tags:     serioes
    about:    Serifen, Kapitälchen, Haarlinien. Kein Punkt, kein Kasten,
              keine Farbfläche – die Stationen stehen als Liste mit hängendem
              Datum. Für Bewerbungen, bei denen Zurückhaltung die Botschaft
@@ -60,7 +61,7 @@
   min-height: 0;
   display: grid;
   grid-template-columns: var(--date-column) 1fr;
-  gap: 0 1.4em;
+  gap: 0 0.9em;
   margin: 0;
   padding: 0.28em 0 0.3em;
 }

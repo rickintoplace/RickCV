@@ -4,6 +4,7 @@
    author:   RickCV
    licence:  CC0-1.0
    contract: 1
+   tags:     auffallen
    about:    Ein farbiges Band trägt den Namen über die ganze Breite des
              Hauptteils, Abschnitte tragen Versalien, Kenntnisse stehen als
              Plaketten. Laut, aber geordnet – für Branchen, in denen ein
@@ -125,7 +126,10 @@
 }
 
 .event .date {
-  position: static;
+  /* relative statt static: sieht gleich aus, malt den Zeitraum aber in
+     derselben Ebene wie die Station – sonst steht er im PDF-Text vor
+     allen Stationen (siehe styles.css, "Die Reihenfolge im PDF"). */
+  position: relative;
   left: auto;
   width: auto;
   min-width: 0;

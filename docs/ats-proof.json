@@ -1,0 +1,273 @@
+{
+  "date": "2026-11-03",
+  "chromium": "Chromium 156.0.8078.79 Arch Linux",
+  "poppler": "pdftotext version 26.10.0",
+  "pdfminer": false,
+  "readers": [
+    "pdftotext -raw",
+    "pdftotext",
+    "pdf.js"
+  ],
+  "results": [
+    {
+      "theme": "akademisch",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "akademisch",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "banner",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "banner",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "clean",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "clean",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "dynaline",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "dynaline",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "einspaltig",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "einspaltig",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "einsteiger",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "einsteiger",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "grossdruck",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "grossdruck",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "icons",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "icons",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "klassisch",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "klassisch",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "kompakt",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "kompakt",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "marginheads",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "marginheads",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "rightrail",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "rightrail",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "terminal",
+      "variant": "de-a4",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    },
+    {
+      "theme": "terminal",
+      "variant": "en-letter",
+      "file": [],
+      "readers": {
+        "pdftotext-raw": [],
+        "pdftotext": [],
+        "pdfjs": []
+      }
+    }
+  ]
+}
