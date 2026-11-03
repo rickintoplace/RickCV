@@ -40,7 +40,8 @@ const ads = fs.readdirSync(dir).filter((f) => f.endsWith(".json")).sort()
 
 //  Gross/klein, Umlaute, Akzente, Gendern, Bindestriche egal.
 const spaced = (text) => " " + Match._fold(Match._ungender(text)).replace(/[^a-z0-9+#]+/g, " ").trim() + " ";
-const compactOf = (text) => spaced(text).replace(/ /g, "");
+//  "Deutschkenntnisse" und "Deutsch", "SAP-Erfahrung" und "SAP": dasselbe.
+const compactOf = (text) => spaced(text).replace(/ /g, "").replace(/(kenntnisse|kenntnissen|erfahrung|erfahrungen)$/, "");
 const stemmed = (text) => spaced(text).trim().split(" ").map(Match._stem).join(" ");
 
 function same(expected, label) {
@@ -62,9 +63,14 @@ function measure(ad) {
   result.requirements.forEach((req, r) => req.terms.forEach((t) =>
     occ.push({ label: t.label, level: req.level, group: t.group, req: r })));
 
+  //  "zuverlässig" erwartet, "Zuverlässigkeit" als Eigenschaft geliefert:
+  //  dieselbe Eigenschaft, nur in ihrer Grundform.
+  const softOf = (term) => String(term).split("|").flatMap((variant) => [...Match._soft(variant, "de"), ...Match._soft(variant, "en")]);
   const expect = (list, level) => list.map((term) => {
-    const hits = occ.filter((o) => same(term, o.label));
-    return { term, found: hits.length > 0, levelOk: hits.some((o) => o.level === level),
+    const hits = occ.filter((o) => same(term, o.label) || (o.level === "soft" && softOf(term).includes(o.label)));
+    //  Persoenliche Eigenschaften stehen seit November 2026 in einer eigenen
+    //  Gruppe ("soft") statt als Muss oder Kann – dort sind sie richtig.
+    return { term, found: hits.length > 0, levelOk: hits.some((o) => o.level === level || o.level === "soft"),
              levels: [...new Set(hits.map((o) => o.level))] };
   });
   const must = expect(ad.must, "must");
@@ -177,13 +183,14 @@ console.log("");
 //  Mit --check ist die Messung eine Untergrenze fuer die CI: erreichter
 //  Stand am 3. November 2026. Wer die Erkennung verbessert, hebt sie an.
 if (process.argv.includes("--check")) {
-  const FLOOR = { must: 0.94, nice: 0.95, level: 0.96, never: 0, alternatives: 25 };
+  const FLOOR = { must: 0.95, nice: 0.95, level: 0.96, never: 0, alternatives: 28, noise: 190 };
   const fails = [];
   if (tot.mustF / tot.must < FLOOR.must) fails.push(`Muss ${pct(tot.mustF, tot.must)} < ${FLOOR.must * 100} %`);
   if (tot.niceF / tot.nice < FLOOR.nice) fails.push(`Kann ${pct(tot.niceF, tot.nice)} < ${FLOOR.nice * 100} %`);
   if (tot.lvlOk / tot.lvl < FLOOR.level) fails.push(`Stufe ${pct(tot.lvlOk, tot.lvl)} < ${FLOOR.level * 100} %`);
   if (tot.never > FLOOR.never) fails.push(`${tot.never} verbotene Begriffe als Anforderung`);
   if (tot.altOk < FLOOR.alternatives) fails.push(`Alternativen ${tot.altOk} < ${FLOOR.alternatives}`);
+  if (tot.noiseReq + tot.noiseTask > FLOOR.noise) fails.push(`Rauschen ${tot.noiseReq + tot.noiseTask} > ${FLOOR.noise}`);
   console.log(fails.length ? "FAIL " + fails.join("; ") + "\n" : "alles grün\n");
   process.exit(fails.length ? 1 : 0);
 }

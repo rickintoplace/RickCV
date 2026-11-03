@@ -1,0 +1,145 @@
+{
+  "id": "de-pflege",
+  "lang": "de",
+  "ad": "Pflegefachkraft (m/w/d) in Voll- oder Teilzeit\nSeniorenzentrum Am Lindenpark · Bielefeld\n\nIhre Aufgaben\n- Ganzheitliche Pflege und Betreuung unserer Bewohnerinnen und Bewohner\n- Durchführung der Behandlungspflege nach ärztlicher Anordnung\n- Pflegeplanung und Pflegedokumentation in Vivendi\n- Zusammenarbeit mit Angehörigen, Ärzten und Therapeuten\n\nIhr Profil\n- Abgeschlossene Ausbildung als Pflegefachkraft, Altenpfleger/in oder Gesundheits- und Krankenpfleger/in\n- Freude an der Arbeit mit älteren Menschen\n- Einfühlungsvermögen, Zuverlässigkeit und Teamfähigkeit\n- Erfahrung in der Wundversorgung wünschenswert\n- Führerschein Klasse B von Vorteil\n- Bereitschaft zum Schichtdienst\n\nWir bieten\n- Vergütung nach AVR Diakonie inkl. Jahressonderzahlung\n- 30 Tage Urlaub und betriebliche Altersvorsorge\n- Fort- und Weiterbildungen\n\nFragen beantwortet Ihnen gern Frau Sommer unter 0521 555 210.",
+  "cv": {
+    "contact": {
+      "role": "Altenpflegerin"
+    },
+    "profile": {
+      "show": true,
+      "text": "Examinierte Altenpflegerin mit acht Jahren Erfahrung in der ambulanten und stationären Pflege."
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Altenpflegerin",
+        "company": "Ambulanter Pflegedienst Weser",
+        "place": "Minden",
+        "start": "04/2019",
+        "end": "",
+        "present": true,
+        "list": [
+          "Grund- und Behandlungspflege bei 12 bis 15 Klient:innen pro Tour",
+          "Wundmanagement nach ärztlicher Verordnung",
+          "Pflegedokumentation in Medifox"
+        ]
+      },
+      {
+        "sectionId": "experience",
+        "title": "Altenpflegerin",
+        "company": "Haus Abendsonne",
+        "place": "Minden",
+        "start": "10/2015",
+        "end": "03/2019",
+        "present": false,
+        "list": [
+          "Stationäre Pflege im Schichtdienst",
+          "Praxisanleitung für Auszubildende"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "Ausbildung zur staatlich anerkannten Altenpflegerin",
+        "company": "Fachseminar für Altenpflege",
+        "place": "Minden",
+        "start": "10/2012",
+        "end": "09/2015",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "Realschulabschluss",
+        "company": "Realschule Minden-Mitte",
+        "place": "Minden",
+        "start": "",
+        "end": "2012",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Wundmanagement",
+          "rank": 0
+        },
+        {
+          "name": "Pflegedokumentation",
+          "rank": 0
+        },
+        {
+          "name": "Palliativpflege",
+          "rank": 0
+        },
+        {
+          "name": "Expertenstandards",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": true,
+      "items": [
+        {
+          "name": "Führerschein Klasse B"
+        }
+      ]
+    }
+  },
+  "must": [
+    "Pflegefachkraft|Altenpfleger|Krankenpfleger",
+    "Schichtdienst"
+  ],
+  "nice": [
+    "Wundversorgung",
+    "Führerschein Klasse B"
+  ],
+  "alternatives": [
+    [
+      "Pflegefachkraft",
+      "Altenpfleger"
+    ]
+  ],
+  "soft": [
+    "Einfühlungsvermögen",
+    "Zuverlässigkeit",
+    "Teamfähigkeit"
+  ],
+  "covered": [
+    "Altenpfleger",
+    "Schichtdienst",
+    "Führerschein Klasse B"
+  ],
+  "gaps": [],
+  "degree": [
+    "Altenpfleger"
+  ],
+  "never": [
+    "Menschen",
+    "Freude",
+    "Arbeit",
+    "Lindenpark",
+    "Bielefeld",
+    "Urlaub",
+    "AVR",
+    "Angehörigen",
+    "Ärzten",
+    "Therapeuten",
+    "Bewohnerinnen",
+    "Anordnung"
+  ],
+  "ok": [
+    "Pflegedokumentation"
+  ]
+}

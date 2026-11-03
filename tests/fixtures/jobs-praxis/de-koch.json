@@ -1,0 +1,114 @@
+{
+  "id": "de-koch",
+  "lang": "de",
+  "ad": "Koch / Köchin (m/w/d) für unser Restaurant „Zur Linde\"\n\nDeine Aufgaben:\n• Zubereitung von Speisen à la carte und für Veranstaltungen\n• Warenannahme und Lagerhaltung\n• Einhaltung der Hygienevorschriften\n\nDein Profil:\n• Abgeschlossene Ausbildung als Koch/Köchin\n• Erfahrung in der À-la-carte-Küche\n• Kenntnisse der HACCP-Richtlinien\n• Belastbarkeit und Teamgeist\n• Gesundheitszeugnis\n\nWir bieten:\n• Geregelte Arbeitszeiten, Montag und Dienstag Ruhetag\n• Trinkgeldbeteiligung und Personalessen",
+  "cv": {
+    "contact": {
+      "role": "Koch"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Jungkoch",
+        "company": "Landgasthof Krone",
+        "place": "Heilbronn",
+        "start": "08/2022",
+        "end": "",
+        "present": true,
+        "list": [
+          "Posten Saucier und Entremetier im À-la-carte-Geschäft",
+          "Bankettküche für bis zu 120 Gäste",
+          "Hygienestandards nach HACCP"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "Ausbildung zum Koch",
+        "company": "Hotel Schwanen",
+        "place": "Heilbronn",
+        "start": "09/2019",
+        "end": "07/2022",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "Hauptschulabschluss",
+        "company": "Werkrealschule Heilbronn",
+        "place": "Heilbronn",
+        "start": "",
+        "end": "2019",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "HACCP",
+          "rank": 0
+        },
+        {
+          "name": "Saucenküche",
+          "rank": 0
+        },
+        {
+          "name": "Warenwirtschaft",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Koch",
+    "À-la-carte|A la carte",
+    "HACCP",
+    "Gesundheitszeugnis"
+  ],
+  "nice": [],
+  "soft": [
+    "Belastbarkeit",
+    "Teamfähigkeit"
+  ],
+  "covered": [
+    "Koch",
+    "HACCP",
+    "À-la-carte|A la carte"
+  ],
+  "gaps": [
+    "Gesundheitszeugnis"
+  ],
+  "degree": [
+    "Koch"
+  ],
+  "never": [
+    "Trinkgeldbeteiligung",
+    "Personalessen",
+    "Ruhetag",
+    "Arbeitszeiten",
+    "Veranstaltungen",
+    "Speisen",
+    "Linde",
+    "Montag",
+    "Dienstag"
+  ],
+  "alternatives": [],
+  "ok": []
+}

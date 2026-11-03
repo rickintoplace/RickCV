@@ -37,6 +37,7 @@ jobs:
         run: |
           node tests/jobmatch.test.mjs
           node tests/jobmatch-corpus.mjs --check
+          node tests/jobmatch-praxis.mjs --check
       - name: Export als Word und Markdown
         run: node tests/export.test.mjs
       - name: Prüfstand fremder Vorlagen (Reactive Resume)

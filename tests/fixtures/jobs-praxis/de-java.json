@@ -1,0 +1,141 @@
+{
+  "id": "de-java",
+  "lang": "de",
+  "ad": "Softwareentwickler Java (m/w/d)\nLogistiksoftware · Dortmund oder remote\n\nIhre Aufgaben\n- Weiterentwicklung unserer Lagerverwaltungssoftware\n- Konzeption und Umsetzung von Schnittstellen\n- Code-Reviews und Mitarbeit im Scrum-Team\n\nIhr Profil\n- Abgeschlossenes Studium der Informatik oder eine vergleichbare Qualifikation\n- Mehrjährige Erfahrung in der Entwicklung mit Java und Spring Boot\n- Erfahrung mit SQL-Datenbanken, idealerweise PostgreSQL\n- Kenntnisse in Docker und Kubernetes von Vorteil\n- Sehr gute Deutsch- und gute Englischkenntnisse\n- Analytisches Denkvermögen und Teamfähigkeit\n\nUnser Angebot\n- 30 Tage Urlaub, flexible Arbeitszeiten, bis zu 100 % Homeoffice\n- Firmenfitness und Weiterbildungsbudget",
+  "cv": {
+    "contact": {
+      "role": "Softwareentwickler"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Softwareentwickler Backend",
+        "company": "Cargoline Systems GmbH",
+        "place": "Bochum",
+        "start": "10/2020",
+        "end": "",
+        "present": true,
+        "list": [
+          "Entwicklung von Microservices mit Java 17 und Spring Boot",
+          "Datenbankdesign mit PostgreSQL",
+          "CI/CD mit GitLab und Docker"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "B.Sc. Informatik",
+        "company": "Ruhr-Universität Bochum",
+        "place": "Bochum",
+        "start": "10/2016",
+        "end": "09/2020",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "Abitur",
+        "company": "Gymnasium am Ostring",
+        "place": "Bochum",
+        "start": "",
+        "end": "2016",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Java",
+          "rank": 0
+        },
+        {
+          "name": "Spring Boot",
+          "rank": 0
+        },
+        {
+          "name": "PostgreSQL",
+          "rank": 0
+        },
+        {
+          "name": "Docker",
+          "rank": 0
+        },
+        {
+          "name": "Git",
+          "rank": 0
+        },
+        {
+          "name": "Scrum",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Englisch",
+          "level": "C1",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Informatik",
+    "Java",
+    "Spring",
+    "SQL",
+    "Deutsch",
+    "Englisch"
+  ],
+  "nice": [
+    "PostgreSQL",
+    "Docker",
+    "Kubernetes"
+  ],
+  "soft": [
+    "Analytisches Denken",
+    "Teamfähigkeit"
+  ],
+  "covered": [
+    "Informatik",
+    "Java",
+    "Spring",
+    "PostgreSQL",
+    "Docker",
+    "Deutsch",
+    "Englisch"
+  ],
+  "gaps": [
+    "Kubernetes"
+  ],
+  "degree": [
+    "Informatik"
+  ],
+  "ok": [
+    "Scrum"
+  ],
+  "never": [
+    "Urlaub",
+    "Homeoffice",
+    "Firmenfitness",
+    "Weiterbildungsbudget",
+    "Dortmund",
+    "Lagerverwaltungssoftware",
+    "Arbeitszeiten"
+  ],
+  "alternatives": []
+}

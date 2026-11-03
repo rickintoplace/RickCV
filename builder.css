@@ -2880,6 +2880,7 @@ button.job-term-main:hover {
 }
 
 .job-found .job-term-icon,
+.job-confirmed .job-term-icon,
 .job-alternative .job-term-icon {
   color: var(--ui-accent);
 }
@@ -2896,6 +2897,15 @@ button.job-term-main:hover {
 
 .job-missing {
   border-color: color-mix(in oklab, var(--ui-danger), transparent 55%);
+}
+
+/*  Persoenliches, noch nicht gezeigt: keine Luecke, nur ein offener Punkt. */
+.job-open {
+  border-style: dashed;
+}
+
+.job-open .job-term-icon {
+  color: var(--ui-muted, currentColor);
 }
 
 .job-missing .job-term-icon {

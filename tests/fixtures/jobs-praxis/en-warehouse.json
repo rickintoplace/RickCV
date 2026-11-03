@@ -1,0 +1,102 @@
+{
+  "id": "en-warehouse",
+  "lang": "en",
+  "ad": "Warehouse Associate – Day Shift\nFull-time · $18.50/hr\n\nWhat you'll do:\n- Pick, pack and ship customer orders accurately\n- Load and unload trucks\n- Keep the work area clean and safe\n\nWhat you'll need:\n- High school diploma or GED\n- Ability to lift up to 50 lbs repeatedly\n- Forklift certification is a plus\n- Basic computer skills\n- Must be 18 years or older\n- Reliable and punctual\n\nBenefits: medical, dental, 401(k) with match, paid time off.\nApply today!",
+  "cv": {
+    "contact": {
+      "role": "Warehouse Worker"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Warehouse Worker",
+        "company": "Target Distribution Center",
+        "place": "Columbus, OH",
+        "start": "06/2021",
+        "end": "",
+        "present": true,
+        "list": [
+          "Picked and packed 200+ orders per shift with RF scanners",
+          "Operated pallet jacks"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "High School Diploma",
+        "company": "Westland High School",
+        "place": "Columbus, OH",
+        "start": "",
+        "end": "2021",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "RF scanner",
+          "rank": 0
+        },
+        {
+          "name": "Pallet jack",
+          "rank": 0
+        },
+        {
+          "name": "Inventory counts",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "English",
+          "level": "native",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "High school diploma|GED",
+    "Lift up to 50 lbs|lift",
+    "Computer skills|computer"
+  ],
+  "nice": [
+    "Forklift certification"
+  ],
+  "soft": [
+    "Reliability",
+    "Punctuality"
+  ],
+  "covered": [
+    "High school diploma|GED"
+  ],
+  "gaps": [],
+  "degree": [
+    "High school diploma|GED"
+  ],
+  "ok": [
+    "18 years or older|18 years"
+  ],
+  "never": [
+    "Medical",
+    "Dental",
+    "401(k)",
+    "Paid time off",
+    "Trucks",
+    "Customer orders",
+    "Day Shift",
+    "Apply"
+  ],
+  "alternatives": []
+}

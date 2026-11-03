@@ -1,0 +1,108 @@
+{
+  "id": "en-barista",
+  "lang": "en",
+  "ad": "Barista – Part Time\nBean & Bloom Coffee, Portland\n\nAbout the role\nYou'll craft espresso drinks, keep the bar running during the morning rush and give every guest a warm welcome.\n\nAbout you\n- Previous barista or coffee shop experience preferred\n- Excellent customer service skills\n- Ability to work early mornings and weekends\n- Food handler card (or willingness to obtain one within 30 days)\n\nPerks: free drinks, tips, flexible scheduling.",
+  "cv": {
+    "contact": {
+      "role": "Barista"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Barista",
+        "company": "Stumptown Corner Café",
+        "place": "Portland, OR",
+        "start": "09/2022",
+        "end": "",
+        "present": true,
+        "list": [
+          "Prepared espresso drinks and pour-overs",
+          "Handled cash and card payments",
+          "Opened the store at 5:30 am"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "High School Diploma",
+        "company": "Grant High School",
+        "place": "Portland, OR",
+        "start": "",
+        "end": "2022",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Espresso",
+          "rank": 0
+        },
+        {
+          "name": "Latte Art",
+          "rank": 0
+        },
+        {
+          "name": "Customer service",
+          "rank": 0
+        },
+        {
+          "name": "Square POS",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "English",
+          "level": "native",
+          "percentage": 0
+        },
+        {
+          "name": "Spanish",
+          "level": "conversational",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Customer service",
+    "Food handler"
+  ],
+  "nice": [
+    "Barista|Coffee shop"
+  ],
+  "soft": [],
+  "covered": [
+    "Customer service",
+    "Barista|Coffee shop"
+  ],
+  "gaps": [
+    "Food handler"
+  ],
+  "ok": [
+    "Espresso",
+    "Weekend work"
+  ],
+  "never": [
+    "Tips",
+    "Free drinks",
+    "Flexible scheduling",
+    "Portland",
+    "Guest",
+    "Morning rush"
+  ],
+  "alternatives": [],
+  "degree": []
+}

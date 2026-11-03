@@ -43,10 +43,27 @@ const show = (result) => all(result).map((t) => `${t.label}:${t.level}:${t.statu
 
 /* ------------------------------------------------------------------ */
 console.log("\n— Normalisieren —");
-ok(Match._ungender("Pfleger:in") === "Pfleger", "Pfleger:in → Pfleger", Match._ungender("Pfleger:in"));
-ok(Match._ungender("Erzieher*innen") === "Erzieher", "Erzieher*innen → Erzieher");
-ok(Match._ungender("Kauffrau (m/w/d)").trim() === "Kauffrau", "(m/w/d) fällt weg");
-ok(Match._ungender("Entwickler/-in") === "Entwickler", "Entwickler/-in → Entwickler");
+//  Gendern auf jede Art – in der Anzeige und im Lebenslauf ("Köchin").
+{
+  const genderCases = [
+ ["Pfleger:in","Pfleger"],["Erzieher*innen","Erzieher"],["Kauffrau (m/w/d)","Kaufmann"],["Entwickler/-in","Entwickler"],
+ ["Pfleger_in","Pfleger"],["Pfleger·innen","Pfleger"],["Pfleger•innen","Pfleger"],["Pfleger/innen","Pfleger"],["PflegerInnen","Pfleger"],
+ ["Pfleger(in)","Pfleger"],["Student(inn)en","Studenten"],["Ärzt*in","Arzt"],["Ärzt:innen","Arzt"],["Köch*in","Koch"],["Kolleg*in","Kollege"],
+ ["Kolleg:innen","Kollegen"],["Kund:innen","Kunden"],["Fachärzt:in","Facharzt"],["Ärztinnen und Ärzte","Ärzte"],["Köchin/Koch","Koch"],["Koch/Köchin","Koch"],
+ ["Arzt/Ärztin","Arzt"],["Erzieherin oder Erzieher","Erzieher"],["Lehrer und Lehrerinnen","Lehrer"],["Kauffrau/-mann","Kaufmann"],["Kaufmann/-frau","Kaufmann"],
+ ["Kaufmann / Kauffrau","Kaufmann"],["Mitarbeitende","Mitarbeiter"],["Studierende","Studenten"],["Köchin","Koch"],["Ärztin","Arzt"],["Psychologin","Psychologe"],
+ ["Altenpfleger/in","Altenpfleger"],["Gesundheits- und Krankenpfleger/in","Gesundheits- und Krankenpfleger"],["staatlich anerkannte/r Erzieher/in","staatlich anerkannte Erzieher"],
+ ["Koch (w/m/div)","Koch"],["Koch (d/m/w)","Koch"],["Koch m/w/d","Koch"],["Koch (gn)","Koch"],["Koch (all genders)","Koch"],["Koch (m/f/x)","Koch"],
+ ["SchülerInnenvertretung","Schülervertretung"],["LinkedIn","LinkedIn"],["Berlin","Berlin"],["Termin","Termin"],["Disziplin","Disziplin"],["Medizin","Medizin"],
+ ["Hotelfachfrau","Hotelfachmann"],["Bankkauffrau","Bankkaufmann"],["Kaufleute","Kaufleute"],["Kund*innen","Kunden"],["Mitarbeiter*innen","Mitarbeiter"],
+ ["Anwält*in","Anwalt"],["Rechtsanwältin","Rechtsanwalt"],["Lehrer*in","Lehrer"],["Elektroniker*in","Elektroniker"],["Instagram","Instagram"],["Login","Login"],
+ ["eine/n","eine"],["Ihre/n","Ihre"],["jede*r","jede"],["Verkäufer:in","Verkäufer"],["Bürokauffrau","Bürokaufmann"],["Beamtin","Beamter"],
+ ["Patientinnen und Patienten","Patienten"],["Kollegin","Kollege"],["Kundin","Kunde"],["Pädagog*in","Pädagoge"],["Sozialpädagogin","Sozialpädagoge"],
+];
+  const wrong = genderCases.filter(([given, want]) => Match._ungender(given).replace(/\s+/g, " ").trim() !== want)
+    .map(([given]) => `${given} → ${Match._ungender(given).replace(/\s+/g, " ").trim()}`);
+  ok(!wrong.length, `${genderCases.length} Genderformen auf die Grundform`, wrong.join(" · "));
+}
 ok(Match._fold("Größe") === "groesse", "Umlaute und ß ausgeschrieben");
 ok(Match._language("Wir suchen dich und dein Team für die Station") === "de", "Deutsch erkannt");
 ok(Match._language("We are looking for an engineer to join our team") === "en", "Englisch erkannt");
@@ -189,7 +206,10 @@ const soft = Match.analyse(softAd, resume((s) => {
   s.events = [{ title: "Sachbearbeiterin", company: "Firma", sectionId: "experience",
                 description: ["Finanzbuchhaltung und Mahnwesen"], list: [] }];
 }), []);
-ok(term(soft, "Teamfähigkeit").status === "similar", "Teamarbeit ist „anders formuliert“, kein Treffer", show(soft));
+ok(term(soft, "Kundenbetreuung").status === "similar", "Kundenservice ist „anders formuliert“, kein Treffer", show(soft));
+//  Persoenliche Eigenschaften stehen fuer sich, nicht als Luecke.
+ok(all(soft).some((t) => t.label === "Teamfähigkeit" && t.level === "soft" && t.status === "found"),
+   "Teamfähigkeit ist eine Eigenschaft, „Teamarbeit“ im Profil zeigt sie", show(soft));
 ok(term(soft, "Kundenbetreuung").status === "similar", "Kundenservice ist „anders formuliert“");
 ok(term(soft, "Buchhaltung").status === "found", "Finanzbuchhaltung belegt Buchhaltung");
 ok(term(soft, "Teamfähigkeit").evidence.includes("Team"), "mit Fundstelle", term(soft, "Teamfähigkeit").evidence);
@@ -256,13 +276,13 @@ const sales = Match.analyse(salesAd, resume((s) => {
   s.events = [{ title: "Account Executive", company: "Y", sectionId: "experience",
                 description: ["Vertrieb an Geschäftskunden"], list: [] }];
 }), []);
-ok(term(sales, "Deutsch").status === "found" && term(sales, "Englisch").status === "found",
+ok(term(sales, "German").status === "found" && term(sales, "English").status === "found",
    "German/English belegt durch Deutsch/Englisch", show(sales));
 ok(term(sales, "Salesforce") && term(sales, "HubSpot") && term(sales, "HubSpot").status === "found",
    "HubSpot belegt", show(sales));
 ok(all(sales).some((t) => t.label === "Salesforce" && t.level === "must" && t.status === "alternative"),
    "„HubSpot or Salesforce“: Salesforce erledigt");
-ok(term(sales, "Vertrieb") && ["found", "similar"].includes(term(sales, "Vertrieb").status),
+ok(term(sales, "Sales") && ["found", "similar"].includes(term(sales, "Sales").status),
    "„sales“ findet „Vertrieb“", show(sales));
 
 /* ------------------------------------------------------------------ */

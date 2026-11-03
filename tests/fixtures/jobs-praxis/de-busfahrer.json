@@ -1,0 +1,113 @@
+{
+  "id": "de-busfahrer",
+  "lang": "de",
+  "ad": "Busfahrer (m/w/d) im Linienverkehr – auch für Umsteiger\n\nDeine Aufgaben:\n- Sichere Beförderung unserer Fahrgäste im Stadt- und Regionalverkehr\n- Fahrscheinverkauf und Auskunft\n- Kontrolle des Fahrzeugs vor Fahrtantritt\n\nDeine Qualifikation:\n- Führerschein Klasse D oder die Bereitschaft, ihn mit unserer Unterstützung zu erwerben\n- Mindestens Realschulabschluss oder abgeschlossene Berufsausbildung\n- Kundenorientierung und Freundlichkeit\n- Deutschkenntnisse mindestens auf B2-Niveau\n\nDeine Vorteile:\n- Wir übernehmen die Kosten für den Busführerschein\n- Tarifvertrag TV-N, unbefristete Anstellung",
+  "cv": {
+    "contact": {
+      "role": "Berufskraftfahrer"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Berufskraftfahrer im Nahverkehr",
+        "company": "Spedition Albers",
+        "place": "Oldenburg",
+        "start": "08/2016",
+        "end": "",
+        "present": true,
+        "list": [
+          "Auslieferung im Nahverkehr mit Fahrzeugen bis 40 t",
+          "Kundenkontakt bei der Anlieferung"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "Ausbildung zum Berufskraftfahrer",
+        "company": "Spedition Albers",
+        "place": "Oldenburg",
+        "start": "08/2013",
+        "end": "07/2016",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "Hauptschulabschluss",
+        "company": "Oberschule Ofenerdiek",
+        "place": "Oldenburg",
+        "start": "",
+        "end": "2013",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Modul 95",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": true,
+      "items": [
+        {
+          "name": "Führerschein Klasse CE"
+        }
+      ]
+    }
+  },
+  "must": [
+    "Realschulabschluss",
+    "Deutsch"
+  ],
+  "nice": [],
+  "alternatives": [
+    [
+      "Realschulabschluss",
+      "Berufsausbildung"
+    ]
+  ],
+  "soft": [
+    "Kundenorientierung",
+    "Freundlichkeit"
+  ],
+  "covered": [
+    "Realschulabschluss",
+    "Deutsch"
+  ],
+  "gaps": [
+    "Führerschein Klasse D"
+  ],
+  "degree": [
+    "Realschulabschluss",
+    "Berufsausbildung"
+  ],
+  "ok": [
+    "Führerschein Klasse D"
+  ],
+  "never": [
+    "Umsteiger",
+    "Fahrgäste",
+    "Busführerschein",
+    "TV-N",
+    "Tarifvertrag",
+    "Kosten",
+    "Auskunft",
+    "Fahrtantritt"
+  ]
+}

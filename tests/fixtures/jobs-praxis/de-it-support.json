@@ -1,0 +1,141 @@
+{
+  "id": "de-it-support",
+  "lang": "de",
+  "ad": "IT-Supporter / Systemadministrator (m/w/d) 1st- und 2nd-Level\n\nWas dich erwartet\n• Betreuung von rund 300 Arbeitsplätzen und mobilen Endgeräten\n• Benutzerverwaltung im Active Directory und in Microsoft 365\n• Pflege der Server- und Netzwerkinfrastruktur\n• Dokumentation im Ticketsystem\n\nWas du mitbringst\n• Abgeschlossene Ausbildung als Fachinformatiker für Systemintegration oder ein Studium der Informatik\n• Erfahrung mit Windows Server, Active Directory und Microsoft 365\n• Grundkenntnisse in Netzwerktechnik (TCP/IP, VLAN)\n• ITIL-Zertifizierung wünschenswert\n• Gute Englischkenntnisse\n• Lösungsorientiertes Denken und Kommunikationsstärke\n\nWas wir bieten\n• Mobiles Arbeiten an zwei Tagen pro Woche\n• Weiterbildungsbudget und Zertifizierungen",
+  "cv": {
+    "contact": {
+      "role": "Fachinformatiker für Systemintegration"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "IT-Administrator",
+        "company": "Stadtwerke Kleve",
+        "place": "Kleve",
+        "start": "08/2020",
+        "end": "",
+        "present": true,
+        "list": [
+          "Betreuung von 180 Clients und Windows Server 2019/2022",
+          "Benutzer- und Gruppenverwaltung im Active Directory",
+          "Einführung von Intune und Microsoft 365"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "Ausbildung zum Fachinformatiker für Systemintegration",
+        "company": "Stadtwerke Kleve",
+        "place": "Kleve",
+        "start": "08/2017",
+        "end": "07/2020",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "Abitur",
+        "company": "Konrad-Adenauer-Gymnasium",
+        "place": "Kleve",
+        "start": "",
+        "end": "2017",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Windows Server",
+          "rank": 0
+        },
+        {
+          "name": "Active Directory",
+          "rank": 0
+        },
+        {
+          "name": "Microsoft 365",
+          "rank": 0
+        },
+        {
+          "name": "Intune",
+          "rank": 0
+        },
+        {
+          "name": "PowerShell",
+          "rank": 0
+        },
+        {
+          "name": "VMware",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Englisch",
+          "level": "B2",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Fachinformatiker|Systemintegration|Informatik",
+    "Windows Server",
+    "Active Directory",
+    "Microsoft 365",
+    "Netzwerktechnik|TCP/IP",
+    "Englisch"
+  ],
+  "nice": [
+    "ITIL"
+  ],
+  "alternatives": [
+    [
+      "Fachinformatiker",
+      "Informatik"
+    ]
+  ],
+  "soft": [
+    "Lösungsorientierung",
+    "Kommunikationsstärke"
+  ],
+  "covered": [
+    "Fachinformatiker|Systemintegration",
+    "Windows Server",
+    "Active Directory",
+    "Microsoft 365",
+    "Englisch"
+  ],
+  "gaps": [
+    "ITIL"
+  ],
+  "degree": [
+    "Fachinformatiker|Systemintegration|Informatik"
+  ],
+  "never": [
+    "Arbeitsplätzen",
+    "Endgeräten",
+    "Mobiles Arbeiten",
+    "Weiterbildungsbudget",
+    "Ticketsystem",
+    "Woche"
+  ],
+  "ok": [
+    "VLAN"
+  ]
+}

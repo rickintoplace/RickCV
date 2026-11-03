@@ -1,0 +1,56 @@
+{
+  "id": "de-zugbegleiter",
+  "lang": "de",
+  "ad": "Zugbegleiter (w/m/d) – Quereinstieg mit Qualifizierung\nRegionalverkehr Mitte GmbH · Kassel\n\nDas erwartet dich:\n• Mit Rat und Tat unterstützt du unsere Kund:innen bei Fragen, informierst über Anschlussverbindungen sowie Unregelmäßigkeiten und übernimmst die Fahrscheinkontrolle\n• Du sorgst für Sicherheit im Zug und hilfst mobilitätseingeschränkten Reisenden beim Ein- und Ausstieg\n• Ordnung, Sicherheit und Servicequalität sind uns sehr wichtig – mit dir an Bord fühlen sich in unseren Zügen Alle wohl\n\nDas bringst du mit:\n• Du bringst mindestens einen Hauptschulabschluss mit\n• Du hast gute Deutschkenntnisse, bist kommunikativ, übernimmst gerne Verantwortung und behältst auch in kniffligen Situationen (auf die wir dich vorbereiten) die Ruhe\n• Bereitschaft zum Schichtdienst, auch an Wochenenden und Feiertagen\n• Englischkenntnisse sind von Vorteil\n• Quereinsteiger:innen sind herzlich willkommen\n\nDas bieten wir dir:\n• Eine bezahlte Qualifizierung über drei Monate\n• Tarifliche Vergütung, Zulagen für Nacht- und Sonntagsarbeit\n• Freifahrten im gesamten Verbundgebiet\n\nInteressiert?\nDann freuen wir uns über deine Bewerbung!",
+  "cv": "example",
+  "must": [
+    "Hauptschulabschluss",
+    "Deutsch",
+    "Schichtdienst"
+  ],
+  "nice": [
+    "Englisch"
+  ],
+  "soft": [
+    "Kommunikationsstärke",
+    "Verantwortungsbewusstsein",
+    "Ruhe|Belastbarkeit"
+  ],
+  "covered": [
+    "Hauptschulabschluss",
+    "Deutsch"
+  ],
+  "gaps": [
+    "Schichtdienst"
+  ],
+  "degree": [
+    "Hauptschulabschluss"
+  ],
+  "never": [
+    "Rat",
+    "Tat",
+    "Fragen",
+    "Situationen",
+    "Ordnung",
+    "Sicherheit",
+    "Servicequalität",
+    "Bord",
+    "Zügen",
+    "Alle",
+    "Quereinsteiger",
+    "Interessiert",
+    "Dann",
+    "Bewerbung",
+    "Qualifizierung",
+    "Freifahrten",
+    "Verbundgebiet",
+    "Kassel",
+    "Anschlussverbindungen",
+    "Unregelmäßigkeiten",
+    "Reisenden",
+    "Wochenenden",
+    "Feiertagen"
+  ],
+  "alternatives": [],
+  "ok": []
+}

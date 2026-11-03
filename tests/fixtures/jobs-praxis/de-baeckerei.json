@@ -1,0 +1,119 @@
+{
+  "id": "de-baeckerei",
+  "lang": "de",
+  "ad": "Verkäufer (m/w/d) in Teilzeit – Bäckerei Sonnenkorn, Filiale Altstadt\n\nDeine Aufgaben:\n- Beratung und Verkauf unserer Backwaren\n- Zubereitung von Kaffeespezialitäten und belegten Brötchen\n- Kassieren und Abrechnen\n- Warenpräsentation und Sauberkeit im Laden\n\nDas bringst du mit:\n- Freundliches Auftreten und Spaß am Umgang mit Kunden\n- Erfahrung im Verkauf von Vorteil, aber kein Muss\n- Sicherer Umgang mit der Kasse\n- Belehrung nach §43 IfSG (Gesundheitszeugnis) oder die Bereitschaft, sie zu machen\n- Flexibilität und Bereitschaft zur Arbeit am Wochenende\n\nWas wir dir bieten:\n- Mitarbeiterrabatt und kostenloses Frühstück\n- Ein herzliches Team\n- Pünktliche Bezahlung über Mindestlohn\n\nBewirb dich einfach per WhatsApp oder direkt in der Filiale!",
+  "cv": {
+    "contact": {
+      "role": "Kassiererin"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Kassiererin",
+        "company": "REWE Markt Kowalski",
+        "place": "Gelsenkirchen",
+        "start": "03/2021",
+        "end": "",
+        "present": true,
+        "list": [
+          "Bedienung der Kasse und Kassenabrechnung",
+          "Warenverräumung und Kundenberatung"
+        ]
+      },
+      {
+        "sectionId": "experience",
+        "title": "Aushilfe im Verkauf",
+        "company": "Bäckerei Peters",
+        "place": "Gelsenkirchen",
+        "start": "08/2019",
+        "end": "02/2021",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "Hauptschulabschluss nach Klasse 10",
+        "company": "Gesamtschule Buer",
+        "place": "Gelsenkirchen",
+        "start": "",
+        "end": "2019",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Kassensysteme",
+          "rank": 0
+        },
+        {
+          "name": "Warenpräsentation",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Polnisch",
+          "level": "gut",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Kasse",
+    "Gesundheitszeugnis|IfSG"
+  ],
+  "nice": [
+    "Verkauf"
+  ],
+  "soft": [
+    "Freundlichkeit",
+    "Flexibilität"
+  ],
+  "covered": [
+    "Kasse",
+    "Verkauf"
+  ],
+  "gaps": [
+    "Gesundheitszeugnis|IfSG"
+  ],
+  "never": [
+    "Spaß",
+    "Kunden",
+    "Mitarbeiterrabatt",
+    "Frühstück",
+    "Team",
+    "Mindestlohn",
+    "WhatsApp",
+    "Filiale",
+    "Altstadt",
+    "Auftreten",
+    "Backwaren",
+    "Brötchen",
+    "Kaffeespezialitäten",
+    "Laden",
+    "Sauberkeit"
+  ],
+  "alternatives": [],
+  "ok": [
+    "Wochenendarbeit"
+  ],
+  "degree": []
+}

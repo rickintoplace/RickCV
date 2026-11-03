@@ -1,0 +1,120 @@
+{
+  "id": "de-elektro",
+  "lang": "de",
+  "ad": "Elektroniker für Energie- und Gebäudetechnik (m/w/d)\n\nIhre Aufgaben:\n- Installation und Wartung elektrischer Anlagen in Wohn- und Gewerbeobjekten\n- Fehlersuche und Störungsbeseitigung\n- Montage von PV-Anlagen und Wallboxen\n\nIhr Profil:\n- Abgeschlossene Berufsausbildung als Elektroniker, Elektroinstallateur oder vergleichbar\n- Kenntnisse in KNX von Vorteil\n- Führerschein Klasse B zwingend erforderlich\n- Selbstständige und zuverlässige Arbeitsweise\n- Teamfähigkeit\n\nWir bieten Ihnen:\n- Übertarifliche Bezahlung und Firmenwagen auch zur privaten Nutzung\n- Moderne Werkzeuge und Messgeräte",
+  "cv": {
+    "contact": {
+      "role": "Elektroniker"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Elektroniker",
+        "company": "Elektro Brandt GmbH",
+        "place": "Paderborn",
+        "start": "02/2018",
+        "end": "",
+        "present": true,
+        "list": [
+          "Elektroinstallation in Neubauten und bei Sanierungen",
+          "Inbetriebnahme von Photovoltaikanlagen",
+          "Prüfung nach DGUV V3"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "Ausbildung zum Elektroniker für Energie- und Gebäudetechnik (Gesellenbrief)",
+        "company": "Elektro Brandt GmbH",
+        "place": "Paderborn",
+        "start": "08/2014",
+        "end": "01/2018",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "Qualifizierender Hauptschulabschluss",
+        "company": "Hauptschule Schloß Neuhaus",
+        "place": "Paderborn",
+        "start": "",
+        "end": "2014",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Elektroinstallation",
+          "rank": 0
+        },
+        {
+          "name": "Photovoltaik",
+          "rank": 0
+        },
+        {
+          "name": "DGUV V3",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": true,
+      "items": [
+        {
+          "name": "Führerschein Klasse B"
+        }
+      ]
+    }
+  },
+  "must": [
+    "Elektroniker",
+    "Führerschein Klasse B"
+  ],
+  "nice": [
+    "KNX"
+  ],
+  "alternatives": [
+    [
+      "Elektroniker",
+      "Elektroinstallateur"
+    ]
+  ],
+  "soft": [
+    "Selbstständigkeit|Zuverlässigkeit",
+    "Teamfähigkeit"
+  ],
+  "covered": [
+    "Elektroniker",
+    "Führerschein Klasse B"
+  ],
+  "gaps": [
+    "KNX"
+  ],
+  "degree": [
+    "Elektroniker"
+  ],
+  "never": [
+    "Firmenwagen",
+    "Werkzeuge",
+    "Messgeräte",
+    "Bezahlung",
+    "Wallboxen",
+    "Fehlersuche",
+    "Gewerbeobjekten"
+  ],
+  "ok": []
+}

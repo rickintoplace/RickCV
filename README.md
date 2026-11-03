@@ -38,8 +38,11 @@ upload, no server. Your data stays on your device.
   edit what an applicant tracking system reads, and [`docs/ats-proof.md`](docs/ats-proof.md)
   shows how independent text extractors read every theme.
 - **Job ad match.** Paste the ad: for each requirement RickCV shows whether your resume covers
-  it, words it differently or misses it, must-have and nice-to-have kept apart. German and
-  English, offline, no AI and deliberately no score.
+  it, words it differently or misses it, must-have and nice-to-have kept apart. Degrees are
+  measured on a ladder (Abitur meets "at least a Hauptschulabschluss"), personal qualities stand
+  apart instead of counting as gaps, and *I have this* puts a degree under education, a licence
+  under mobility and a condition like shift work on record – never a degree under skills. German
+  and English, every way of gendering, offline, no AI and deliberately no score.
 - **My documents.** Several applications side by side, a copy per job, a bin for 30 days, and
   earlier versions — kept automatically before every import and every 15 minutes of work.
 - **Works with your AI.** No model built in, but RickCV writes a ready brief for a chat or an
@@ -277,6 +280,7 @@ node tests/app.test.mjs         # the builder in Chromium: CSP, preview, foreign
 node tests/roundtrip.test.mjs   # prints every theme and reads the PDF back in
 node tests/jobmatch.test.mjs    # job ad against resume
 node tests/jobmatch-corpus.mjs  # 60 job ads (DE/EN): recall, must/nice, noise; JOBS_DIR=tests/fixtures/jobs-holdout for the held-out 20
+node tests/jobmatch-praxis.mjs  # 16 job ads with a matching resume: coverage, gaps, degrees, noise
 node tests/export.test.mjs      # Word and Markdown, Word read back in
 node tests/benchmark.test.mjs   # PDF import on Reactive Resume's templates, field by field
 node tests/flows.test.mjs       # documents, versions, job ad, save as file (real time)

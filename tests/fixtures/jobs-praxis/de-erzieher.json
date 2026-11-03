@@ -1,0 +1,123 @@
+{
+  "id": "de-erzieher",
+  "lang": "de",
+  "ad": "Pädagogische Fachkraft / Erzieher (m/w/d) für unsere Kita „Sonnenblume\"\n\nDeine Aufgaben\n- Begleitung und Förderung von Kindern im Alter von 1 bis 6 Jahren\n- Beobachtung und Dokumentation von Entwicklungsprozessen\n- Partnerschaftliche Zusammenarbeit mit Eltern\n\nDas wünschen wir uns\n- Eine abgeschlossene Ausbildung als staatlich anerkannte/r Erzieher/in oder ein Studium der Kindheitspädagogik bzw. Sozialen Arbeit\n- Erweitertes Führungszeugnis (wird vor der Einstellung angefordert)\n- Kenntnisse des Berliner Bildungsprogramms wünschenswert\n- Empathie, Geduld und Humor\n\nDas bieten wir\n- Bezahlung angelehnt an den TV-L Berlin\n- Kleine Gruppen und ein engagiertes Team",
+  "cv": {
+    "contact": {
+      "role": "Staatlich anerkannte Erzieherin"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Erzieherin",
+        "company": "Kita Regenbogen",
+        "place": "Berlin-Pankow",
+        "start": "08/2021",
+        "end": "",
+        "present": true,
+        "list": [
+          "Gruppenleitung in einer altersgemischten Gruppe",
+          "Eingewöhnung nach dem Berliner Modell",
+          "Sprachlerntagebuch und Entwicklungsdokumentation"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "Ausbildung zur staatlich anerkannten Erzieherin",
+        "company": "Fachschule für Sozialpädagogik",
+        "place": "Berlin",
+        "start": "08/2018",
+        "end": "07/2021",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "Fachhochschulreife",
+        "company": "OSZ Sozialwesen",
+        "place": "Berlin",
+        "start": "",
+        "end": "2018",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Berliner Bildungsprogramm",
+          "rank": 0
+        },
+        {
+          "name": "Sprachförderung",
+          "rank": 0
+        },
+        {
+          "name": "Erste Hilfe am Kind",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Englisch",
+          "level": "B1",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Erzieher|Kindheitspädagogik|Soziale Arbeit",
+    "Führungszeugnis"
+  ],
+  "nice": [
+    "Berliner Bildungsprogramm|Bildungsprogramm"
+  ],
+  "alternatives": [
+    [
+      "Erzieher",
+      "Kindheitspädagogik"
+    ]
+  ],
+  "soft": [
+    "Einfühlungsvermögen",
+    "Geduld"
+  ],
+  "covered": [
+    "Erzieher",
+    "Berliner Bildungsprogramm|Bildungsprogramm"
+  ],
+  "gaps": [
+    "Führungszeugnis"
+  ],
+  "degree": [
+    "Erzieher|Kindheitspädagogik|Soziale Arbeit"
+  ],
+  "never": [
+    "Kindern",
+    "Eltern",
+    "Humor",
+    "TV-L",
+    "Gruppen",
+    "Team",
+    "Einstellung",
+    "Sonnenblume",
+    "Kita"
+  ],
+  "ok": []
+}

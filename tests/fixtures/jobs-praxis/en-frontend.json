@@ -1,0 +1,118 @@
+{
+  "id": "en-frontend",
+  "lang": "en",
+  "ad": "Frontend Developer (React)\n\nRequirements\n- Bachelor's degree in Computer Science or equivalent practical experience\n- 3+ years of professional experience with React and TypeScript\n- Experience consuming REST APIs\n- Familiarity with CI/CD pipelines\n- Strong communication skills in English\n\nNice to have\n- Next.js\n- GraphQL\n\nWe offer a remote-first culture, a $2,000 learning budget and stock options.",
+  "cv": {
+    "contact": {
+      "role": "Frontend Developer"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Frontend Developer",
+        "company": "Brightline Health",
+        "place": "Remote",
+        "start": "01/2021",
+        "end": "",
+        "present": true,
+        "list": [
+          "Built a patient portal in React and TypeScript",
+          "Integrated REST APIs",
+          "Set up GitHub Actions pipelines"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "B.Sc. Computer Science",
+        "company": "University of Leeds",
+        "place": "Leeds",
+        "start": "09/2016",
+        "end": "06/2020",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "React",
+          "rank": 0
+        },
+        {
+          "name": "TypeScript",
+          "rank": 0
+        },
+        {
+          "name": "REST",
+          "rank": 0
+        },
+        {
+          "name": "CI/CD",
+          "rank": 0
+        },
+        {
+          "name": "Jest",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "English",
+          "level": "C2",
+          "percentage": 0
+        },
+        {
+          "name": "German",
+          "level": "B1",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Computer Science",
+    "React",
+    "TypeScript",
+    "REST",
+    "CI/CD",
+    "English"
+  ],
+  "nice": [
+    "Next.js",
+    "GraphQL"
+  ],
+  "soft": [
+    "Communication"
+  ],
+  "covered": [
+    "Computer Science",
+    "React",
+    "TypeScript",
+    "REST",
+    "CI/CD",
+    "English"
+  ],
+  "gaps": [],
+  "degree": [
+    "Computer Science"
+  ],
+  "never": [
+    "Remote",
+    "Learning budget",
+    "Stock options",
+    "Culture"
+  ],
+  "alternatives": [],
+  "ok": []
+}

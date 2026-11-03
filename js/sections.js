@@ -1129,8 +1129,12 @@
           //  Die Vorlage steckte frueher in den Einstellungen; der Wert
           //  bleibt gepflegt, damit aeltere Staende weiter passen.
           state.settings.template = entry.slug;
+          //  Steht noch das Beispiel da, bekommt das Theme die Fassung, die
+          //  auf ein Blatt passt (themes/CONTRACT.md, "example: short").
+          var refitted = context.fitExample ? context.fitExample() : false;
           onChange(true);
           refreshSection("theme");
+          if (refitted) ["events", "projects", "mobility"].forEach(refreshSection);
           if (before.css) {
             global.RickCVToast(t("themeSwitchedFromOwn").replace("{name}", entry.name), {
               label: t("undo"),
@@ -1452,6 +1456,7 @@
       if (!Match) return;
       if (!state.job) state.job = { ad: "", dismissed: [] };
       if (!Array.isArray(state.job.dismissed)) state.job.dismissed = [];
+      if (!Array.isArray(state.job.confirmed)) state.job.confirmed = [];
 
       body.appendChild(F.hint(t("jobHint")));
       var field = F.textarea("job.ad", t("jobAd"), 9, t("jobAdPlaceholder"));
@@ -1466,15 +1471,47 @@
         missing: { icon: "✗", key: "jobMissing" },
         alternative: { icon: "✓", key: "jobAlternative" },
         dismissed: { icon: "–", key: "jobDismissed" },
+        confirmed: { icon: "✓", key: "jobConfirmed" },
+        open: { icon: "·", key: "jobOpen" },
       };
 
+      //  "Habe ich" tut, was zur Art des Begriffs passt. Ein Abschluss ist
+      //  keine Kenntnis: "Hauptschulabschluss" unter Kenntnisse waere ein
+      //  Fehler, der in jeder Bewerbung auffaellt.
       function addOwn(term) {
-        var block = term.language ? state.languages : state.skills;
-        var item = term.language ? { name: term.label, percentage: 0, level: "" } : { name: term.label, rank: 0 };
-        block.items.push(item);
-        block.show = true;
+        var kind = term.kind || (term.language ? "language" : "skill");
+        var message = "jobAdded";
+        if (kind === "language") {
+          state.languages.items.push({ name: term.label, percentage: 0, level: "" });
+          state.languages.show = true;
+          message = "jobAddedLanguage";
+        } else if (kind === "licence") {
+          state.mobility.items.push({ name: term.label });
+          state.mobility.show = true;
+          message = "jobAddedLicence";
+        } else if (kind === "degree") {
+          var event = global.RickCVModel.emptyEvent("education");
+          event.title = term.label;
+          state.events.push(event);
+          message = "jobAddedDegree";
+        } else if (kind === "skill") {
+          state.skills.items.push({ name: term.label, rank: 0 });
+          state.skills.show = true;
+        } else {
+          //  Bedingung oder Zertifikat: vermerkt, nicht erfunden.
+          state.job.confirmed = state.job.confirmed.filter(function (entry) { return entry !== term.label; })
+            .concat([term.label]);
+          message = "jobConfirmedToast";
+        }
         onChange(true);
-        global.RickCVToast(t(term.language ? "jobAddedLanguage" : "jobAdded").replace("{term}", term.label));
+        global.RickCVToast(t(message).replace("{term}", term.label));
+        if (kind === "degree") refreshSection("events");
+        paint();
+      }
+
+      function unconfirm(label) {
+        state.job.confirmed = state.job.confirmed.filter(function (entry) { return entry !== label; });
+        onChange(true);
         paint();
       }
 
@@ -1508,8 +1545,10 @@
           node.appendChild(button);
         }
         if (term.status === "missing") {
-          if (!term.cert) action(t("jobHave"), function () { addOwn(term); });
+          action(t("jobHave"), function () { addOwn(term); });
           action(t("jobNotMe"), function () { setDismissed(term.label, true); });
+        } else if (term.status === "confirmed") {
+          action(t("undo"), function () { unconfirm(term.label); });
         } else if (term.status === "similar") {
           action(t("jobNotMe"), function () { setDismissed(term.label, true); });
         } else if (term.status === "dismissed") {
@@ -1522,7 +1561,7 @@
         out.textContent = "";
         var ad = String(state.job.ad || "");
         if (!ad.trim()) return;
-        var result = Match.analyse(ad, state, state.job.dismissed);
+        var result = Match.analyse(ad, state, state.job.dismissed, state.job.confirmed);
 
         if (!result.requirements.length) {
           out.appendChild(F.note(t("jobNothing")));
@@ -1536,7 +1575,8 @@
           req.terms.forEach(function (term) {
             if (term.status === "missing" && req.level === "must") gaps.must++;
             if (term.status === "missing" && req.level === "nice") gaps.nice++;
-            if (term.status === "similar" || term.status === "letter") gaps.similar++;
+            if ((req.level === "must" || req.level === "nice") &&
+                (term.status === "similar" || term.status === "letter")) gaps.similar++;
           });
         });
         var summary = !gaps.must && !gaps.nice && !gaps.similar ? t("jobAllCovered")
@@ -1544,10 +1584,11 @@
             .replace("{similar}", gaps.similar);
         out.appendChild(el("p", "job-summary", summary));
 
-        [["must", "jobLevelMust"], ["nice", "jobLevelNice"], ["task", "jobLevelTask"]].forEach(function (level) {
+        [["must", "jobLevelMust"], ["nice", "jobLevelNice"], ["soft", "jobLevelSoft"], ["task", "jobLevelTask"]].forEach(function (level) {
           var rows = result.requirements.filter(function (req) { return req.level === level[0]; });
           if (!rows.length) return;
           out.appendChild(el("h4", "job-level", t(level[1])));
+          if (level[0] === "soft") out.appendChild(el("p", "hint", t("jobSoftHint")));
           rows.forEach(function (req) {
             var row = el("div", "job-req");
             row.appendChild(el("div", "job-req-text", req.text));

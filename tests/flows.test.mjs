@@ -184,7 +184,7 @@ if (!browser) {
         function (x) { return /Stelle/.test(x.textContent); });
       tab.click(); await wait(300);
       var ad = document.querySelector('textarea[data-path="job.ad"]');
-      ad.value = "Ihr Profil\\n- Kenntnisse in SAP\\n- Erfahrung mit Python";
+      ad.value = "Ihr Profil\\n- Kenntnisse in SAP\\n- Erfahrung mit Python\\n- Abgeschlossenes Masterstudium (Master)\\n- Bereitschaft zum Schichtdienst";
       ad.dispatchEvent(new Event("input", { bubbles: true }));
       await wait(800);
       var terms = function () { return Array.prototype.map.call(document.querySelectorAll(".job-term"), function (x) {
@@ -195,13 +195,29 @@ if (!browser) {
         function (x) { return /Python/.test(x.textContent); });
       python.querySelector(".job-term-action").click();
       await wait(600);
-      var skills = JSON.parse(localStorage.getItem("rickcv.data.v3")).skills.items.map(function (x) { return x.name; });
-      return { before: before, after: terms(), skills: skills };
+      var have = function (label) {
+        var chip = Array.prototype.find.call(document.querySelectorAll(".job-term"),
+          function (x) { return x.querySelector(".job-term-main").textContent.slice(1) === label; });
+        if (chip) chip.querySelector(".job-term-action").click();
+        return !!chip;
+      };
+      var clicked = [have("Master"), have("Schichtdienst")];
+      await wait(600);
+      var doc = JSON.parse(localStorage.getItem("rickcv.data.v3"));
+      var skills = doc.skills.items.map(function (x) { return x.name; });
+      return { before: before, after: terms(), skills: skills, clicked: clicked,
+               education: doc.events.filter(function (e) { return e.sectionId === "education"; }).map(function (e) { return e.title; }),
+               confirmed: doc.job.confirmed };
     })()`);
     ok(job.before.includes("job-missing:SAP") && job.before.includes("job-missing:Python"),
        "die Stellenanzeige wird ausgewertet", JSON.stringify(job.before));
     ok(job.after.includes("job-found:Python") && job.skills.includes("Python"),
        "„Habe ich“ trägt den Begriff unter Kenntnisse ein", JSON.stringify(job));
+    ok(job.clicked[0] && job.education.includes("Master") && !job.skills.includes("Master"),
+       "„Habe ich“ bei einem Abschluss: unter Ausbildung, nie unter Kenntnisse", JSON.stringify(job));
+    ok(job.clicked[1] && job.confirmed.includes("Schichtdienst") && !job.skills.includes("Schichtdienst") &&
+       job.after.includes("job-confirmed:Schichtdienst"),
+       "„Habe ich“ bei einer Bedingung: vermerkt, nicht als Kenntnis", JSON.stringify(job));
 
     const saved = await E(`(async function () { ${helpers}
       var captured = null;
@@ -220,6 +236,40 @@ if (!browser) {
     ok(saved.scripts === 1 && saved.data, "gespeicherte Datei: nur der Datenblock, kein Skript", JSON.stringify(saved));
     ok(saved.fonts, "gespeicherte Datei bringt ihre Schriften mit");
     ok(saved.back === "rickcv:Zweite Fassung", "gespeicherte Datei ergibt wieder das Dokument", saved.back);
+
+    //  Ein Theme mit "example: short" bekommt das kuerzere Beispiel, solange
+    //  das Beispiel unveraendert dasteht – und ein anderes Theme wieder das
+    //  ganze. Eigener Inhalt bleibt, wie er ist.
+    const fitted = await E(`(async function () { ${helpers}
+      menu("Beispiel"); await wait(250);
+      var go = document.querySelector(".rc-dialog-confirm .btn-primary"); if (go) go.click();
+      await wait(900);
+      var tab = Array.prototype.find.call(document.querySelectorAll(".editor-tab"),
+        function (x) { return /Aussehen|Design|Theme/.test(x.textContent); });
+      if (tab) tab.click();
+      await wait(300);
+      var open = document.querySelector('[data-section="theme"] .section-head, [data-section="theme"] summary');
+      var card = function (name) {
+        return Array.prototype.find.call(document.querySelectorAll(".theme-card"),
+          function (x) { return x.querySelector("strong").textContent === name; });
+      };
+      if (!card("Gut lesbar") && open) { open.click(); await wait(300); }
+      var stored = function () { var d = JSON.parse(localStorage.getItem("rickcv.data.v3")); return d.events.length + "/" + d.projects.items.length; };
+      var full = stored();
+      card("Gut lesbar").click(); await wait(600);
+      var short = stored();
+      card("Clean").click(); await wait(600);
+      var back = stored();
+      document.querySelectorAll(".editor-tab")[0].click(); await wait(300);
+      type("Eigene Fassung"); await wait(600);
+      if (tab) tab.click();
+      await wait(300);
+      card("Gut lesbar").click(); await wait(600);
+      return { full: full, short: short, back: back, own: stored() };
+    })()`);
+    ok(fitted.full === "8/2" && fitted.short === "5/0" && fitted.back === "8/2",
+       "„example: short“: das Beispiel passt sich dem Theme an", JSON.stringify(fitted));
+    ok(fitted.own === "8/2", "eigener Inhalt bleibt beim Themewechsel unverändert", JSON.stringify(fitted));
 
     ok(b.errors().length === 0, "keine Skriptfehler", b.errors().join(" | "));
   } finally {

@@ -1,0 +1,89 @@
+{
+  "id": "de-reinigung",
+  "lang": "de",
+  "ad": "Reinigungskraft (m/w/d) auf Minijob-Basis – Büroreinigung am Abend\n\nDeine Aufgaben\n- Unterhaltsreinigung von Büroräumen, Sanitäranlagen und Küchen\n- Entleeren der Papierkörbe\n\nDas solltest du mitbringen\n- Zuverlässigkeit und Pünktlichkeit\n- Gründliche Arbeitsweise\n- Erfahrung in der Gebäudereinigung ist kein Muss\n- Grundkenntnisse der deutschen Sprache\n\nWir bieten\n- 538 € im Monat, feste Arbeitszeiten Mo–Fr ab 18 Uhr\n- Arbeitskleidung wird gestellt",
+  "cv": {
+    "contact": {
+      "role": "Hauswirtschaftshelferin"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Hauswirtschaftshelferin",
+        "company": "Seniorenresidenz Am See",
+        "place": "Leipzig",
+        "start": "01/2022",
+        "end": "",
+        "present": true,
+        "list": [
+          "Reinigung von Bewohnerzimmern und Gemeinschaftsräumen",
+          "Wäscheversorgung"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "Schulabschluss (entspricht Hauptschulabschluss)",
+        "company": "Schule in Izmir, Türkei",
+        "place": "",
+        "start": "",
+        "end": "2009",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": []
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "B1",
+          "percentage": 0
+        },
+        {
+          "name": "Türkisch",
+          "level": "Muttersprache",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Deutsch"
+  ],
+  "nice": [
+    "Gebäudereinigung"
+  ],
+  "soft": [
+    "Zuverlässigkeit",
+    "Pünktlichkeit",
+    "Sorgfalt"
+  ],
+  "covered": [
+    "Deutsch"
+  ],
+  "gaps": [],
+  "never": [
+    "Papierkörbe",
+    "Büroräumen",
+    "Sanitäranlagen",
+    "Küchen",
+    "Arbeitskleidung",
+    "Monat",
+    "Minijob",
+    "Uhr"
+  ],
+  "alternatives": [],
+  "ok": [],
+  "degree": []
+}

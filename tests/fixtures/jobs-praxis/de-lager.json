@@ -1,0 +1,105 @@
+{
+  "id": "de-lager",
+  "lang": "de",
+  "ad": "Lagermitarbeiter / Kommissionierer (m/w/d) – ab sofort\n\nBei uns erwartet dich:\n→ Kommissionierung von Kundenaufträgen mit Handscanner\n→ Be- und Entladen von LKW\n→ Mitarbeit bei der Inventur\n\nWas du mitbringst:\n→ Erste Erfahrung im Lager wünschenswert – Quereinsteiger willkommen!\n→ Staplerschein von Vorteil (oder du machst ihn bei uns)\n→ Körperliche Belastbarkeit\n→ Gute Deutschkenntnisse\n→ Bereitschaft zur Arbeit im 2-Schicht-System (Früh/Spät)\n\nWas wir bieten:\n→ 15,20 € pro Stunde plus Schichtzulagen\n→ Kostenlose Parkplätze und Arbeitskleidung\n\nKlingt gut? Dann ruf uns an: 040 555 8812",
+  "cv": {
+    "contact": {
+      "role": "Kommissionierer"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Kommissionierer",
+        "company": "DHL Supply Chain",
+        "place": "Hamburg",
+        "start": "05/2020",
+        "end": "",
+        "present": true,
+        "list": [
+          "Kommissionierung mit Pick-by-Voice und Handscanner",
+          "Wareneingangskontrolle",
+          "Arbeit im Dreischichtsystem"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "Hauptschulabschluss",
+        "company": "Stadtteilschule Billstedt",
+        "place": "Hamburg",
+        "start": "",
+        "end": "2014",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Staplerschein",
+          "rank": 0
+        },
+        {
+          "name": "Handscanner",
+          "rank": 0
+        },
+        {
+          "name": "SAP EWM (Grundkenntnisse)",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "fließend",
+          "percentage": 0
+        },
+        {
+          "name": "Arabisch",
+          "level": "Muttersprache",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Deutsch",
+    "Schichtdienst|Schicht"
+  ],
+  "nice": [
+    "Lager",
+    "Staplerschein"
+  ],
+  "soft": [
+    "Belastbarkeit"
+  ],
+  "covered": [
+    "Staplerschein",
+    "Deutsch"
+  ],
+  "gaps": [],
+  "never": [
+    "Quereinsteiger",
+    "Parkplätze",
+    "Arbeitskleidung",
+    "Inventur",
+    "LKW",
+    "Früh",
+    "Spät",
+    "Kundenaufträgen",
+    "Klingt"
+  ],
+  "alternatives": [],
+  "ok": [],
+  "degree": []
+}

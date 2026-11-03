@@ -45,21 +45,101 @@
       .replace(/[‐‑‒–—―]/g, "-");
   }
 
-  //  Gendern faellt weg: "Pfleger:in", "Erzieher*innen", "Kauffrau/-mann",
-  //  "(m/w/d)". Gezaehlt wird die Grundform.
+  //  Gendern faellt weg – Anzeigen gendern auf jede erdenkliche Art, und
+  //  Lebenslaeufe stehen oft in der weiblichen Form. Beide werden auf eine
+  //  Grundform gebracht, damit "Köch*in" in der Anzeige und "Köchin" im
+  //  Lebenslauf dasselbe Wort sind. Die Faelle folgen dem, was Werkzeuge wie
+  //  "Binnen-I be gone" und "entgender" abdecken (eigener Code, gleiche
+  //  Liste der Faelle):
+  //    Kennzeichen      (m/w/d), (w/m/div), (d/m/w), m/w/d, (gn), (all genders)
+  //    Zeichen          Pfleger*in, Pfleger:innen, Pfleger_in, Pfleger·in,
+  //                     Pfleger/-in, Pfleger/innen, PflegerInnen, Pfleger(in)
+  //    Umlaut und -e    Ärzt*in → Arzt, Köch:in → Koch, Kolleg*in → Kollege
+  //    Doppelformen     Ärztinnen und Ärzte, Köchin/Koch, Kauffrau/-mann
+  //    Partizipien      Mitarbeitende, Studierende, Teilnehmende, Lehrende
+  //    Weiblich allein  Köchin, Ärztin, Kauffrau, Psychologin (im Lebenslauf)
+  var L = "A-Za-zÄÖÜäöüß";
+  var MARK = "[:*_·•’'·•∗✱⚧|]";
+  var UMLAUT_BASE = [
+    [/ärzt$/i, "arzt"], [/köch$/i, "koch"], [/anwält$/i, "anwalt"], [/bäuer$/i, "bauer"],
+    [/rät$/i, "rat"], [/präsident$/i, "präsident"],
+  ];
+  //  Stamm ohne "-in"/"-innen" → maennliche Grundform: "Ärzt" → "Arzt",
+  //  "Kolleg" → "Kollege", "Psycholog" → "Psychologe", "Kund" → "Kunde".
+  function baseOf(stem) {
+    for (var i = 0; i < UMLAUT_BASE.length; i++) {
+      if (UMLAUT_BASE[i][0].test(stem)) {
+        var fixed = stem.replace(UMLAUT_BASE[i][0], UMLAUT_BASE[i][1]);
+        return /^[A-ZÄÖÜ]/.test(stem) ? fixed.charAt(0).toUpperCase() + fixed.slice(1) : fixed;
+      }
+    }
+    if (/(kolleg|kund|[a-zäöüß]{3,}og)$/i.test(stem)) return stem + "e";
+    if (/beamt$/i.test(stem)) return stem + "er";
+    return stem;
+  }
+  function deumlaut(word) {
+    return String(word).toLowerCase().replace(/ä/g, "a").replace(/ö/g, "o").replace(/ü/g, "u");
+  }
+  //  "Ärztinnen und Ärzte": ist das eine die weibliche Form des anderen?
+  function pairOf(fem, masc) {
+    var f = deumlaut(fem.replace(/in(nen)?$/i, ""));
+    var m = deumlaut(masc);
+    return f === m || f === m.replace(/(en|e|n)$/, "") || f + "e" === m || f + "en" === m;
+  }
+  var PARTICIPLES = {
+    mitarbeitende: "Mitarbeiter", mitarbeitenden: "Mitarbeiter", studierende: "Studenten", studierenden: "Studenten",
+    teilnehmende: "Teilnehmer", teilnehmenden: "Teilnehmer", lehrende: "Lehrer", lehrenden: "Lehrer",
+    beschaeftigte: "Beschäftigte", dozierende: "Dozenten", dozierenden: "Dozenten", forschende: "Forscher",
+    lernende: "Lernende", pflegende: "Pfleger", kundinnen: "Kunden",
+  };
+  //  Woerter, die wie Binnen-I aussehen, aber keins sind.
+  var NOT_BINNEN = /^(LinkedIn|PlugIn|CheckIn|LogIn|SignIn|BuiltIn|DropIn|AddIn|WalkIn)$/;
+
   function ungender(text) {
-    return String(text || "")
-      .replace(/\(\s*[mwdfx]\s*(?:[\/|,]\s*[mwdfx]\s*){1,3}\)/gi, " ")
-      .replace(/\b(m|w|d)\s*\/\s*(m|w|d)\s*\/\s*(m|w|d)\b/gi, " ")
-      .replace(/(\w+)frau\s*\/\s*-?\s*(?:\1)?mann\b/gi, "$1mann")
-      .replace(/(\w+)mann\s*\/\s*-?\s*(?:\1)?frau\b/gi, "$1mann")
-      .replace(/\b(Kund|Kolleg|Patient|Student|Assistent|Praktikant|Absolvent)[:*_·]innen\b/g, "$1en")
-      .replace(/([a-zäöüß])[:*_·]in(nen)?\b/gi, "$1")
-      .replace(/([a-zäöüß])\/(r|n|s)\b/gi, "$1")
-      .replace(/([a-zäöüß])[:*_·](r|n|s)\b/gi, "$1")
-      .replace(/([a-zäöüß])\/-?in(nen)?\b/gi, "$1")
-      .replace(/([a-zäöüß])Innen\b/g, "$1")
-      .replace(/([a-zäöüß])\(in\)/gi, "$1");
+    var out = String(text || "");
+    //  Kennzeichen
+    out = out
+      .replace(/\(\s*(?:[mwdfxi]|div|divers|weiblich|maennlich|männlich)\s*(?:[\/|,.*]\s*(?:[mwdfxi]|div|divers|weiblich|maennlich|männlich)\s*){1,3}\)/gi, " ")
+      .replace(/\(\s*(?:gn|all genders?|alle geschlechter|genderneutral|geschlechtsneutral|m\s*\/\s*w\s*\/\s*x)\s*\)/gi, " ")
+      .replace(/(^|[^A-Za-z])[mwd]\s*\/\s*[mwd]\s*\/\s*[mwdx]\b/gi, "$1 ");
+    //  Doppelformen: "Kauffrau/-mann", "Kaufmann / Kauffrau", "Fachfrau/-mann"
+    out = out
+      .replace(new RegExp("([" + L + "]+)frau\\s*\\/\\s*-?\\s*(?:\\1)?mann\\b", "gi"), "$1mann")
+      .replace(new RegExp("([" + L + "]+)mann\\s*\\/\\s*-?\\s*(?:\\1)?frau\\b", "gi"), "$1mann")
+      .replace(/(kauf|fach)frauen\b/gi, "$1leute")
+      .replace(/(kauf|fach)frau\b/gi, "$1mann");
+    //  "Ärztinnen und Ärzte", "Köchin/Koch", "Erzieherin oder Erzieher" –
+    //  und umgekehrt "Arzt/Ärztin", "Lehrer und Lehrerinnen".
+    out = out.replace(new RegExp("(?<![" + L + "])([" + L + "]+in(?:nen)?)\\s*(?:\\/|\\bund\\b|\\boder\\b|\\bbzw\\.?|&)\\s*(?:(?:der|die|den|dem|des)\\s+)?([" + L + "]+)", "g"),
+      function (all, fem, masc) { return pairOf(fem, masc) ? masc : all; });
+    out = out.replace(new RegExp("(?<![" + L + "])([" + L + "]+)\\s*(?:\\/|\\bund\\b|\\boder\\b|\\bbzw\\.?|&)\\s*(?:(?:der|die|den|dem|des)\\s+)?([" + L + "]+in(?:nen)?)\\b", "g"),
+      function (all, masc, fem) { return pairOf(fem, masc) ? masc : all; });
+    //  Zeichen vor -in/-innen
+    out = out
+      .replace(/\b(Kund|Kolleg|Patient|Student|Assistent|Praktikant|Absolvent|Klient|Interessent|Referent|Dozent)(?:[:*_·•’'\/]-?|·)innen\b/g, "$1en")
+      .replace(new RegExp("([" + L + "]+?)" + MARK + "-?in(nen)?\\b", "g"), function (all, stem, plural) {
+        var base = baseOf(stem);
+        return plural && base !== stem && /e$/.test(base) ? base + "n" : base;
+      })
+      .replace(new RegExp("([" + L + "]+?)\\/-?in(nen)?\\b", "g"), function (all, stem) { return baseOf(stem); })
+      .replace(/([a-zäöüß])\(inn\)en\b/g, "$1en")
+      .replace(/([a-zäöüß])\((?:in|innen)\)/gi, "$1")
+      .replace(/([a-zäöüß])\/(r|n|s|e)\b/gi, "$1")
+      .replace(/([a-zäöüß])[:*_·](r|n|s|e)\b/gi, "$1");
+    //  Binnen-I: "PflegerInnen", "SchülerInnenvertretung"
+    out = out.replace(new RegExp("[" + L + "]+In(?:nen)?[a-zäöüß]*", "g"), function (word) {
+      if (NOT_BINNEN.test(word)) return word;
+      return word.replace(/([a-zäöüß])In(?:nen)?(?=[a-zäöüß]{3,}|$)/, "$1");
+    });
+    //  Partizipien und weibliche Formen ohne Zeichen
+    out = out.replace(new RegExp("[" + L + "]+", "g"), function (word) {
+      var key = deumlaut(word).replace(/ß/g, "ss");
+      if (PARTICIPLES[key]) return PARTICIPLES[key];
+      var fem = word.match(/^(.*?(?:ärzt|köch|anwält|bäuer|kolleg|kund|beamt|[a-zäöüß]{4,}og))in(nen)?$/i);
+      if (fem && !/^(log|login)$/i.test(word)) return baseOf(fem[1]);
+      return word;
+    });
+    return out;
   }
 
   //  Zum Suchen: nur Buchstaben und Ziffern, durch je ein Leerzeichen
@@ -164,8 +244,22 @@
     { label: "Google Analytics", keys: ["google analytics", "ga4"] },
     { label: "Espresso", keys: ["espresso"] },
     { label: "Latte Art", keys: ["latte art"] },
-    { label: "Führungszeugnis", keys: ["fuehrungszeugnis", "erweitertes fuehrungszeugnis"] },
-    { label: "Background check", keys: ["background check", "criminal background check", "dbs check"] },
+    { label: "Führungszeugnis", labelEn: "Criminal record check", keys: ["fuehrungszeugnis", "erweitertes fuehrungszeugnis", "fuehrungszeugnisses", "erweiterten fuehrungszeugnisses"], kind: "condition" },
+    { label: "Background check", keys: ["background check", "criminal background check", "dbs check"], kind: "condition" },
+    { label: "Gesundheitszeugnis", labelEn: "Health certificate", keys: ["gesundheitszeugnis", "belehrung nach 43 ifsg", "43 ifsg", "ifsg", "infektionsschutzgesetz", "infektionsschutzbelehrung"], kind: "condition" },
+    { label: "Food handler card", keys: ["food handler", "food handlers", "food handler card", "food handler s card", "food handler certificate", "food handlers card"], kind: "cert" },
+    { label: "RN license", keys: ["rn license", "rn licence", "registered nurse license", "nursing license"], kind: "cert" },
+    { label: "BLS", keys: ["bls", "basic life support"], kind: "cert" },
+    { label: "ACLS", keys: ["acls", "advanced cardiac life support"], kind: "cert" },
+    { label: "BSN", keys: ["bsn", "bachelor of science in nursing"], kind: "degree" },
+    { label: "KNX", keys: ["knx"] },
+    { label: "Fachinformatiker Systemintegration", keys: ["fachinformatiker fuer systemintegration", "fachinformatiker systemintegration", "fachinformatiker si"] },
+    { label: "Fachinformatiker Anwendungsentwicklung", keys: ["fachinformatiker fuer anwendungsentwicklung", "fachinformatiker anwendungsentwicklung", "fachinformatiker ae"] },
+    { label: "Anlagenmechaniker SHK", keys: ["anlagenmechaniker shk", "anlagenmechaniker fuer sanitaer heizungs und klimatechnik", "anlagenmechaniker sanitaer heizung klima"] },
+    { label: "Gas- und Wasserinstallateur", keys: ["gas und wasserinstallateur", "gas wasserinstallateur"] },
+    { label: "Soziale Arbeit", labelEn: "Social work", keys: ["soziale arbeit", "sozialen arbeit", "sozialpaedagogik", "social work"] },
+    { label: "À-la-carte-Küche", labelEn: "À la carte", keys: ["a la carte", "a la carte kueche", "a la carte geschaeft"] },
+    { label: "Wochenendarbeit", labelEn: "Weekend work", keys: ["wochenendarbeit", "arbeit am wochenende", "wochenenddienst", "wochenenddienste", "weekend work", "work weekends", "early mornings and weekends"], kind: "condition" },
     { label: "Forklift certification", keys: ["forklift certification", "forklift license", "forklift licence", "forklift certified"] },
     { label: "SQL Server", keys: ["sql server", "mssql", "ms sql"] },
     { label: "iOS", keys: ["ios"] },
@@ -180,45 +274,45 @@
     { label: "SolidWorks", keys: ["solidworks"] },
     { label: "Scrum", keys: ["scrum"] },
     { label: "Kanban", keys: ["kanban"] },
-    { label: "Agile Methoden", keys: ["agile methoden", "agile methods", "agil", "agile"] },
+    { label: "Agile Methoden", labelEn: "Agile methods", keys: ["agile methoden", "agile methods", "agil", "agile"] },
     // Zertifikate – nie durch die blosse Faehigkeit belegt
     { label: "PMP", keys: ["pmp"], cert: true },
     { label: "PRINCE2", keys: ["prince2"], cert: true },
     { label: "ITIL", keys: ["itil"], cert: true },
     { label: "Scrum Master", keys: ["scrum master", "psm", "csm"], cert: true },
-    { label: "Führerschein Klasse B", implies: ["Führerschein"], keys: ["fuehrerschein klasse b", "fuehrerschein b", "fahrerlaubnis klasse b", "klasse b", "pkw fuehrerschein"] },
-    { label: "Führerschein Klasse CE", implies: ["Führerschein Klasse C", "Führerschein Klasse B", "Führerschein"], keys: ["fuehrerschein klasse ce", "fuehrerschein ce", "fahrerlaubnis klasse ce", "klasse ce", "klasse c e", "lkw fuehrerschein"] },
-    { label: "Führerschein Klasse C", implies: ["Führerschein Klasse B", "Führerschein"], keys: ["fuehrerschein klasse c", "fahrerlaubnis klasse c", "klasse c", "klasse c1"] },
-    { label: "Führerschein Klasse D", implies: ["Führerschein Klasse B", "Führerschein"], keys: ["fuehrerschein klasse d", "klasse d", "busfuehrerschein"] },
-    { label: "Führerschein", keys: ["fuehrerschein", "fahrerlaubnis", "driving licence", "driver s license", "drivers license", "driver license"] },
-    { label: "Staplerschein", keys: ["staplerschein", "gabelstaplerschein", "flurfoerderzeugschein"] },
+    { label: "Führerschein Klasse B", labelEn: "Driver's license (class B)", kind: "licence", implies: ["Führerschein"], keys: ["fuehrerschein klasse b", "fuehrerschein b", "fahrerlaubnis klasse b", "klasse b", "pkw fuehrerschein"] },
+    { label: "Führerschein Klasse CE", kind: "licence", implies: ["Führerschein Klasse C", "Führerschein Klasse B", "Führerschein"], keys: ["fuehrerschein klasse ce", "fuehrerschein ce", "fahrerlaubnis klasse ce", "klasse ce", "klasse c e", "lkw fuehrerschein"] },
+    { label: "Führerschein Klasse C", kind: "licence", implies: ["Führerschein Klasse B", "Führerschein"], keys: ["fuehrerschein klasse c", "fahrerlaubnis klasse c", "klasse c", "klasse c1"] },
+    { label: "Führerschein Klasse D", kind: "licence", implies: ["Führerschein Klasse B", "Führerschein"], keys: ["fuehrerschein klasse d", "klasse d", "busfuehrerschein"] },
+    { label: "Führerschein", labelEn: "Driver's license", kind: "licence", keys: ["fuehrerschein", "fahrerlaubnis", "driving licence", "driver s license", "drivers license", "driver license"] },
+    { label: "Staplerschein", labelEn: "Forklift license", keys: ["staplerschein", "gabelstaplerschein", "flurfoerderzeugschein"] },
     // Sprachen
-    { label: "Deutsch", keys: ["deutsch", "german", "deutschkenntnisse"], language: true },
-    { label: "Englisch", keys: ["englisch", "english", "englischkenntnisse"], language: true },
-    { label: "Französisch", keys: ["franzoesisch", "french"], language: true },
-    { label: "Spanisch", keys: ["spanisch", "spanish"], language: true },
-    { label: "Italienisch", keys: ["italienisch", "italian"], language: true },
-    { label: "Polnisch", keys: ["polnisch", "polish"], language: true },
-    { label: "Türkisch", keys: ["tuerkisch", "turkish"], language: true },
-    { label: "Russisch", keys: ["russisch", "russian"], language: true },
-    { label: "Arabisch", keys: ["arabisch", "arabic"], language: true },
-    { label: "Niederländisch", keys: ["niederlaendisch", "dutch"], language: true },
+    { label: "Deutsch", labelEn: "German", keys: ["deutsch", "german", "deutschkenntnisse", "deutsche sprache", "deutschen sprache", "deutscher sprache"], language: true },
+    { label: "Englisch", labelEn: "English", keys: ["englisch", "english", "englischkenntnisse", "englische sprache", "englischen sprache"], language: true },
+    { label: "Französisch", labelEn: "French", keys: ["franzoesisch", "french"], language: true },
+    { label: "Spanisch", labelEn: "Spanish", keys: ["spanisch", "spanish"], language: true },
+    { label: "Italienisch", labelEn: "Italian", keys: ["italienisch", "italian"], language: true },
+    { label: "Polnisch", labelEn: "Polish", keys: ["polnisch", "polish"], language: true },
+    { label: "Türkisch", labelEn: "Turkish", keys: ["tuerkisch", "turkish"], language: true },
+    { label: "Russisch", labelEn: "Russian", keys: ["russisch", "russian"], language: true },
+    { label: "Arabisch", labelEn: "Arabic", keys: ["arabisch", "arabic"], language: true },
+    { label: "Niederländisch", labelEn: "Dutch", keys: ["niederlaendisch", "dutch"], language: true },
     // Pflege, Gesundheit, Handwerk – haeufig in deutschen Anzeigen
-    { label: "Pflegefachkraft", keys: ["pflegefachkraft", "pflegefachfrau", "pflegefachmann", "examinierte pflegekraft", "gesundheits und krankenpfleger", "krankenpfleger", "krankenschwester", "registered nurse"] },
-    { label: "Intensivpflege", keys: ["intensivpflege", "intensivstation", "intensive care", "icu"] },
-    { label: "Wundversorgung", keys: ["wundversorgung", "wundmanagement", "wound care"] },
-    { label: "Pflegedokumentation", keys: ["pflegedokumentation"] },
-    { label: "Erste Hilfe", keys: ["erste hilfe", "first aid"] },
-    { label: "Schichtdienst", keys: ["schichtdienst", "schichtarbeit", "wechselschicht", "shift work"] },
+    { label: "Pflegefachkraft", labelEn: "Registered nurse", keys: ["pflegefachkraft", "pflegefachfrau", "pflegefachmann", "examinierte pflegekraft", "gesundheits und krankenpfleger", "krankenpfleger", "krankenschwester", "registered nurse"] },
+    { label: "Intensivpflege", labelEn: "Intensive care", keys: ["intensivpflege", "intensivstation", "intensive care", "icu"] },
+    { label: "Wundversorgung", labelEn: "Wound care", keys: ["wundversorgung", "wundmanagement", "wound care"] },
+    { label: "Pflegedokumentation", labelEn: "Care documentation", keys: ["pflegedokumentation"] },
+    { label: "Erste Hilfe", labelEn: "First aid", keys: ["erste hilfe", "first aid"] },
+    { label: "Schichtdienst", labelEn: "Shift work", kind: "condition", keys: ["schichtdienst", "schichtarbeit", "wechselschicht", "shift work", "schichtsystem", "2 schicht system", "3 schicht system", "zweischichtsystem", "dreischichtsystem", "2 schichtsystem", "3 schichtsystem", "schichtbetrieb", "wechseldienst", "schicht und wechseldienst"] },
     // Wirtschaft
-    { label: "Finanzbuchhaltung", keys: ["finanzbuchhaltung", "fibu", "financial accounting"], implies: ["Buchhaltung"] },
-    { label: "Lohnbuchhaltung", keys: ["lohnbuchhaltung", "lohn und gehaltsabrechnung", "entgeltabrechnung", "payroll"], implies: ["Buchhaltung"] },
-    { label: "Buchhaltung", keys: ["buchhaltung", "bookkeeping", "accounting"] },
+    { label: "Finanzbuchhaltung", labelEn: "Financial accounting", keys: ["finanzbuchhaltung", "fibu", "financial accounting"], implies: ["Buchhaltung"] },
+    { label: "Lohnbuchhaltung", labelEn: "Payroll", keys: ["lohnbuchhaltung", "lohn und gehaltsabrechnung", "entgeltabrechnung", "payroll"], implies: ["Buchhaltung"] },
+    { label: "Buchhaltung", labelEn: "Accounting", keys: ["buchhaltung", "bookkeeping", "accounting"] },
     { label: "Controlling", keys: ["controlling"] },
-    { label: "Vertrieb", keys: ["vertrieb", "sales"] },
+    { label: "Vertrieb", labelEn: "Sales", keys: ["vertrieb", "sales"] },
     { label: "Marketing", keys: ["marketing"] },
     { label: "SEO", keys: ["seo", "suchmaschinenoptimierung", "search engine optimization"] },
-    { label: "Projektmanagement", keys: ["projektmanagement", "project management", "projektleitung"] },
+    { label: "Projektmanagement", labelEn: "Project management", keys: ["projektmanagement", "project management", "projektleitung"] },
   ];
 
   //  Verwandt, aber nicht dasselbe: zaehlt als "anders formuliert", nie als
@@ -252,8 +346,8 @@
   //  Allgemeine Substantive, die in jeder Anzeige stehen und nichts ueber
   //  die Stelle sagen. Ohne diese Liste waere "Erfahrung" die haeufigste
   //  Anforderung jeder Anzeige.
-  var GENERIC = ("erfahrung erfahrungen kenntnis kenntnisse bereich bereichen bereichs aufgabe aufgaben team teams unternehmen firma mitarbeiter mitarbeiterin mitarbeitende kollegen kollegin kolleginnen faehigkeit faehigkeiten arbeit arbeiten jahr jahre jahren stelle position moeglichkeit moeglichkeiten umgang weiterbildung weiterbildungen weiterentwicklung profil bewerbung bewerbungen unterlagen freude spass interesse bereitschaft sinn art weise rahmen zusammenarbeit kunde kunden kundinnen anforderungen anforderung qualifikation qualifikationen voraussetzung voraussetzungen kompetenz kompetenzen know how wissen grundkenntnisse vorkenntnisse niveau level aufgabenbereich taetigkeit taetigkeiten verantwortung schwerpunkt schwerpunkte einsatz arbeitsweise denken handeln persoenlichkeit motivation engagement leidenschaft begeisterung herz ziel ziele zukunft welt menschen mensch tag tage woche monat zeit ort standort hause homeoffice umfeld bereichen vergleichbares vergleichbare abschluss ausbildung studium hochschulstudium berufsausbildung berufserfahrung sprache sprachen wort schrift mindestens sicher sichere sicheren sicherer erstellen planen bauen betreuen pruefen durchfuehren beraten unterstuetzen koordinieren organisieren entwickeln steuern fuehren leiten bearbeiten verwalten erstellung bearbeitung durchfuehrung pruefung abstimmung beteiligung erteilung patient patienten patientin patientinnen bewohner bewohnerin bewohnerinnen kind kinder kindern jugendliche jugendlichen eltern begleitung unterstuetzung durchfuehrung umsetzung mitwirkung betreuung mitarbeit station stationen klasse einrichtung haus abteilung gruppe bereitschaft").split(" ");
-  var GENERIC_EN = ("alabama alaska arizona arkansas california colorado connecticut delaware florida georgia hawaii idaho illinois indiana iowa kansas kentucky louisiana maine maryland massachusetts michigan minnesota mississippi missouri montana nebraska nevada ohio oklahoma oregon pennsylvania tennessee texas utah vermont virginia washington wisconsin wyoming ontario quebec manager expert thrives building production older stand walk clear comfortable core availability nights weekends holidays grades foundation shifts shift lift able ability willingness eligible eligibility applicants applicant role team members member opportunity opportunities day days week weeks hours hour work environment duties duty experience knowledge skill skills ability abilities team teams company work role position environment understanding opportunity candidate candidates degree background familiarity proficiency field level years year requirements requirement qualification qualifications responsibility responsibilities tasks task mindset passion attitude communication customers customer people time things way").split(" ");
+  var GENERIC = ("erfahrung erfahrungen kenntnis kenntnisse bereich bereichen bereichs aufgabe aufgaben team teams unternehmen firma mitarbeiter mitarbeiterin mitarbeitende kollegen kollegin kolleginnen faehigkeit faehigkeiten arbeit arbeiten jahr jahre jahren stelle position moeglichkeit moeglichkeiten umgang weiterbildung weiterbildungen weiterentwicklung profil bewerbung bewerbungen unterlagen freude spass interesse bereitschaft sinn art weise rahmen zusammenarbeit kunde kunden kundinnen anforderungen anforderung qualifikation qualifikationen voraussetzung voraussetzungen kompetenz kompetenzen know how wissen grundkenntnisse vorkenntnisse niveau level aufgabenbereich taetigkeit taetigkeiten verantwortung schwerpunkt schwerpunkte einsatz arbeitsweise denken handeln persoenlichkeit motivation engagement leidenschaft begeisterung herz ziel ziele zukunft welt menschen mensch tag tage woche monat zeit ort standort hause homeoffice umfeld bereichen vergleichbares vergleichbare abschluss ausbildung studium hochschulstudium berufsausbildung berufserfahrung sprache sprachen wort schrift mindestens sicher sichere sicheren sicherer erstellen planen bauen betreuen pruefen durchfuehren beraten unterstuetzen koordinieren organisieren entwickeln steuern fuehren leiten bearbeiten verwalten erstellung bearbeitung durchfuehrung pruefung abstimmung beteiligung erteilung patient patienten patientin patientinnen bewohner bewohnerin bewohnerinnen kind kinder kindern jugendliche jugendlichen eltern begleitung unterstuetzung durchfuehrung umsetzung mitwirkung betreuung mitarbeit station stationen klasse einrichtung haus abteilung gruppe bereitschaft situation situationen ruhe ordnung sicherheit frage fragen rat tat bord zug zuege zuegen alle alles wohl qualitaet servicequalitaet wochenende wochenenden feiertag feiertage feiertagen sonntag sonntage nacht naechte auftreten freude humor spass quereinsteiger quereinsteigerin quereinsteigende quereinstieg umsteiger umsteigerin berufseinsteiger berufseinsteigerin einsteiger wiedereinsteiger schulabgaenger interesse neugier lust herausforderung herausforderungen loesung loesungen vorstellung vorstellungen alltag umgang wert werte vorbereitung reisende reisenden fahrgaeste gaeste gast besucher muss pflicht einstellung frueh spaet grundlagen grundlage wenn dazu dann damit zudem ausserdem ebenso daher erfolgreich erfolgreiche erfolgreichen niveau").split(" ");
+  var GENERIC_EN = ("alabama alaska arizona arkansas california colorado connecticut delaware florida georgia hawaii idaho illinois indiana iowa kansas kentucky louisiana maine maryland massachusetts michigan minnesota mississippi missouri montana nebraska nevada ohio oklahoma oregon pennsylvania tennessee texas utah vermont virginia washington wisconsin wyoming ontario quebec manager expert thrives building production older stand walk clear comfortable core availability nights weekends holidays grades foundation shifts shift lift able ability willingness eligible eligibility applicants applicant role team members member opportunity opportunities day days week weeks hours hour work environment duties duty experience knowledge skill skills ability abilities team teams company work role position environment understanding opportunity candidate candidates degree background familiarity proficiency field level years year requirements requirement qualification qualifications responsibility responsibilities tasks task mindset passion attitude communication customers customer people time things way state states hire apis api pipelines pipeline tools systems platform platforms equivalent practical career changers changers welcome early mornings morning evenings evening nights").split(" ");
 
   function asSet(list) {
     var set = {};
@@ -293,20 +387,25 @@
     { kind: "req", re: /^(ihr|dein|euer)? ?profil$|^who we re looking for|^who we are looking for|^we re looking for|^you are$|^about you$|^the ideal candidate|^(was|das) (sie|du) mitbringen|^(was|das) wir uns (von dir |von ihnen )?wuenschen|^das wuenschen wir uns|^(minimum|basic|required|key)( qualifications| requirements| skills)?$|^requirements?( and qualifications)?$|^what (you ll|you will) bring|^you ll (bring|have|need)|^what you need|^what we expect|^anforderungsprofil|^ihre qualifikationen|^deine skills|^dein rucksack|^das solltest du mitbringen|^das sollten sie mitbringen|^skills and experience|^experience and skills|^qualifications and experience|^(das|was) (bringst|bringen) (du|sie) mit|^(was|das) (du|sie) mit ?bringst|^(was|das) wir (von dir|von ihnen)? ?(erwarten|suchen|uns wuenschen)|^(ihre|deine)? ?(qualifikation(en)?|kenntnisse|kompetenzen|faehigkeiten)$|^anforderung(en|sprofil)?$|^voraussetzung(en)?$|^das zeichnet (dich|sie) aus|^damit ueberzeugst du|^(your )?(profile|requirements|qualifications|skills)$|^what (you|we) (bring|need|re looking for|are looking for|look for)|^who you are|^about you|^must haves?$|^you have$|^you bring/ },
     { kind: "offer", re: /^(wir bieten|was wir (dir|ihnen|euch)? ?bieten|unser angebot|deine vorteile|ihre vorteile|benefits?|what we offer|we offer|our offer|perks|why (join )?(us|[a-z]+)$|why work (with|for)|what s in it for you|compensation|salary|pay and benefits|darauf kannst du dich freuen|das bieten wir|wir bieten dir|wir bieten ihnen|unsere leistungen|das erwartet sie bei uns|das erwartet dich bei uns|deine benefits|ihre benefits|verguetung)/ },
     { kind: "about", re: /^(ueber uns|wer wir sind|das sind wir|unternehmen|about us|who we are|our company|the company|about [a-z]+$|ueber [a-z]+$|unser team|our team|die stelle|zur stelle)/ },
-    { kind: "apply", re: /^(kontakt|ansprechpartner(in)?|bewerbung|so bewirbst du dich|interesse geweckt|klingt gut|bist du interessiert|haben wir (ihr|dein) interesse geweckt|how to apply|apply now|contact)/ },
+    { kind: "apply", re: /^(interessiert|neugierig geworden|kontakt|ansprechpartner(in)?|bewerbung|so bewirbst du dich|interesse geweckt|klingt gut|bist du interessiert|haben wir (ihr|dein) interesse geweckt|how to apply|apply now|contact)/ },
   ];
 
   //  Zeilen, die in keiner Anzeige eine Anforderung sind – wichtig vor
   //  allem ohne Gliederung, wo sonst Urlaub und Ansprechpartner mitzaehlen.
   var OFFER_LINE = /\b(urlaub|urlaubstage|jobrad|jobticket|deutschlandticket|verguetung|gehalt|tarif|tvoed|tv l|tv-l|entgeltgruppe|eg \d|jahressonderzahlung|weihnachtsgeld|altersvorsorge|zusatzversorgung|gleitzeit|homeoffice|mobiles arbeiten|firmenwagen|dienstwagen|zuschuss|zuschuesse|zulage|fitness|kantine|kita|kinderbetreuung|benefits?|salary|compensation|pto|paid time off|401 ?k|dental|vision insurance|health insurance|stock options|equity|holiday|vacation|bonus scheme|remote friendly|relocation|wir bieten|we offer|sie erwartet|freuen sie sich|freu dich|weekly pay|overtime|per hour|hourly|paid training|we (can )?(train|certify) you|we provide|what you get|sign on bonus|tuition|employee discount|uniforms? provided|bezahlte einarbeitung|einarbeitung|wir zahlen|tarifliche|bezahlung|zuschlaege|sonn und feiertag|probezeit|uebernahme|unbefristet|befristet|minijob|\d+ ?% bonus|annual bonus|quarterly incentives|pension|healthcare|cycle to work|bank holidays|days holiday|wochenstunden)\b|\$\s?\d|\d\s?(€|eur|euro)\b|\/hr\b/;
   var CONTACT_LINE = /@|https?:|www\.|\bruf (uns |einfach |gern )*an\b|\bcall us\b|\b(tel|telefon|phone|ansprechpartner|ansprechpartnerin|kontakt|bewerbung (bitte |an |ueber )|bewerben sie sich|bewirb dich|apply (now|online|via|at)|send (your|us)|richten sie|fragen beantwortet|rueckfragen|stellen-?id|referenznummer|kennziffer|bewerbungsfrist|bewerbungsschluss)\b/;
+  //  "Interessiert?", "Dann freuen wir uns über deine Bewerbung!"
+  var APPLY_LINE = /^(interessiert|neugierig|lust bekommen|klingt gut|ueberzeugt|bereit fuer|haben wir dein interesse|bist du dabei)\b[^.]{0,30}\??$|freuen (uns|wir uns) (auf|ueber) (deine|ihre|eure|dich|sie)|\b(dann )?bewirb dich|jetzt bewerben|apply today|apply now|we d love to hear from you|we look forward to (your|hearing)/;
+  //  "Ordnung, Sicherheit und Servicequalität sind uns sehr wichtig" – was
+  //  dem Unternehmen wichtig ist, ist keine Anforderung an eine Person.
+  var VALUES_LINE = /\b(sind|ist) uns (sehr |besonders |enorm |ausgesprochen )?wichtig\b|liegt uns (sehr )?am herzen|fuehlen sich [^.]{0,40}\bwohl\b|wir stehen fuer|we value|we believe/;
   var ABOUT_LINE = /^(wir sind|unser unternehmen|das unternehmen|als (fuehrend|mittelstaendisch|international)|we are|our company|founded in|gegruendet|seit \d{4} )/;
   //  Ohne Gliederung zaehlt nur, was nach Anforderung klingt.
   var REQUIREMENT_CUE = /(erfahrung|kenntnis|ausbildung|studium|abschluss|qualifikation|wichtig|zuverlaessig|sorgfalt|belastbar|teamfaehig|bringst|bringen|mitbringen|erwarten|setzen voraus|voraussetzung|sicher|sicherer|sicheren|sehr gute|gute|fundierte|fuehrerschein|zertifi|bereitschaft|faehigkeit|staerke|denken|kompetenz|beherrsch|verfuegst|verfuegen|hast du|haben sie|required|requirement|experience|knowledge|degree|must|ability|able to|proficien|familiar|skills?|certif|license|licence|you have|you bring|you should|you ll need|you need|should have|fluent|bachelor|master|years|bilingual)/;
 
   var LEGAL = /herkunft|weltanschauung|sexuellen identitaet|bei gleicher eignung|gleichstellung|frauen sind|ausdruecklich erwuenscht|schwerbehindert|without regard|regardless of race|race, (color|colour|religion)|national origin|sexual orientation|gender identity|veteran status|protected (veteran|status|characteristic)|equal employment|eeo\b|we celebrate diversity|reasonable accommodation|schwerbehindert|gleichgestellt|agg\b|allgemeinen gleichbehandlung|equal opportunit|regardless of|unabhaengig von (geschlecht|alter|herkunft)|diversity|vielfalt/;
-  var NEGATED = /\b(keine|kein|ohne)\b[^.]{0,40}\b(vorkenntnisse|kenntnisse|erfahrung|ausbildung)\b|\b(nicht|keine) (erforderlich|notwendig|noetig|voraussetzung)|\bno\b[^.]{0,40}\b(experience|knowledge|degree|diploma|background|certification|license|licence)\b[^.]{0,20}\b(required|needed|necessary)\b|\bno (prior |previous )?(experience|knowledge)\b|\b(not|no) (required|necessary|needed)\b|\b(isn t|is not|aren t|are not|won t be) (needed|required|necessary|a must)\b|\b(ist|sind) (nicht|kein) (noetig|erforderlich|notwendig|zwingend|muss)\b|\bnicht (noetig|erforderlich|notwendig)\b|\bnot (a )?(requirement|must)\b/;
-  var NICE = /\b(wuenschenswert|von vorteil|vorteilhaft|idealerweise|ideal ?erweise|gerne|gern|optional|ein plus|pluspunkt|nice to have|a plus|bonus|preferred|preferably|ideally|beneficial|desirable|advantageous|an asset|an advantage|is helpful|would be great|nice if|encouraged to apply|wuerden wir uns freuen|waere schoen|schadet nicht|ist hilfreich|hilfreich)\b/;
+  var NEGATED = /\b(keine|kein|ohne)\s+(wochenendarbeit|wochenenddienste?|schichtdienst|schichtarbeit|nachtschicht(en)?|nachtdienste?|ueberstunden|winterdienst)\b|\b(keine|kein|ohne)\b[^.]{0,40}\b(vorkenntnisse|kenntnisse|erfahrung|ausbildung)\b|\b(nicht|keine) (erforderlich|notwendig|noetig|voraussetzung)|\bno\b[^.]{0,40}\b(experience|knowledge|degree|diploma|background|certification|license|licence)\b[^.]{0,20}\b(required|needed|necessary)\b|\bno (prior |previous )?(experience|knowledge)\b|\b(not|no) (required|necessary|needed)\b|\b(isn t|is not|aren t|are not|won t be) (needed|required|necessary|a must)\b|\b(ist|sind) (nicht|kein) (noetig|erforderlich|notwendig|zwingend)\b|\bnicht (noetig|erforderlich|notwendig)\b|\bnot (a )?(requirement|must)\b/;
+  var NICE = /\b(wuenschenswert|von vorteil|vorteilhaft|idealerweise|ideal ?erweise|gern(e)? gesehen|gerne auch|gern auch|optional|ein plus|pluspunkt|nice to have|a plus|bonus|preferred|preferably|ideally|beneficial|desirable|advantageous|an asset|an advantage|is helpful|would be great|nice if|encouraged to apply|wuerden wir uns freuen|waere schoen|schadet nicht|ist hilfreich|hilfreich|kein muss|keine pflicht|nicht zwingend|not required but)\b/;
   var MUST = /\b(zwingend|voraussetzung|erforderlich|setzen wir voraus|unbedingt|unabdingbar|required|must|mandatory|essential|a must)\b/;
 
   //  Wo die festen Muster nichts finden, entscheiden Stichwoerter – eine
@@ -327,7 +426,9 @@
   //  entscheiden – "Erfahrung mit SAP wuenschenswert" ist eine Anforderung.
   function headingKind(line, shaped) {
     var value = spaced(stripDecor(line)).trim().replace(/\s+/g, " ");
-    if (!value || value.split(" ").length > 8) return null;
+    //  Mit Doppelpunkt darf eine Ueberschrift laenger sein: "You'll be a
+    //  great fit if you have:" sind zehn Woerter.
+    if (!value || value.split(" ").length > (shaped ? 10 : 8)) return null;
     for (var i = 0; i < HEADINGS.length; i++) {
       if (HEADINGS[i].re.test(value)) return HEADINGS[i].kind;
     }
@@ -375,7 +476,18 @@
       //  Ein Absatz Fliesstext wird in Saetze geteilt: "von Vorteil" im
       //  zweiten Satz gilt nicht fuer den ersten.
       if (line.length > 80 && /[.;!?]\s+[A-ZÄÖÜ]/.test(line)) {
+        //  Nicht nach einer Abkuerzung: "bzw. Zahnarzthelferin", "z. B.
+        //  Kauffrau", "(B. A.", "Dipl.-Ing.", "ca. 20".
+        var pieces = [];
         line.split(/(?<=[.;!?])\s+(?=[A-ZÄÖÜ])/).forEach(function (part) {
+          var last = pieces[pieces.length - 1];
+          if (last && /(?:^|[\s(\/-])(?:bzw|z|b|u|a|d|h|o|s|ca|inkl|ggf|evtl|bspw|vgl|usw|etc|nr|dr|dipl|ing|prof|abs|str|sog|max|min|mind|ggfs|zzgl|insb|i\.?\s?d\.?\s?r|u\.?\s?a|z\.?\s?b|[A-Z])\.$/i.test(last)) {
+            pieces[pieces.length - 1] = last + " " + part;
+          } else {
+            pieces.push(part);
+          }
+        });
+        pieces.forEach(function (part) {
           if (part.trim()) out.push(part.trim());
         });
       } else {
@@ -428,9 +540,21 @@
   /* ---------------------------------------------------- Begriffe finden */
 
   //  Fuer jede Lexikon-Zeile die Suchform ihrer Schluessel, einmal.
+  //  kind: was "Habe ich" damit tut – eine Kenntnis kommt unter Kenntnisse,
+  //  eine Sprache unter Sprachen, ein Fuehrerschein unter Mobilitaet. Ein
+  //  Abschluss, ein Zertifikat oder eine Bedingung (Schichtdienst,
+  //  Fuehrungszeugnis) ist keine Kenntnis und landet nie dort.
+  function kindOf(entry) {
+    if (entry.kind) return entry.kind;
+    if (entry.cert) return "cert";
+    if (entry.language) return "language";
+    return "skill";
+  }
+
   var LEX = LEXICON.map(function (entry) {
     return {
-      label: entry.label, cert: !!entry.cert, language: !!entry.language,
+      label: entry.label, labelEn: entry.labelEn || "", kind: kindOf(entry),
+      cert: !!entry.cert || entry.kind === "cert", language: !!entry.language,
       keys: (entry.keys || []).map(function (key) { return spaced(key).trim(); }).filter(Boolean),
       cs: entry.cs || [], implies: entry.implies || [],
     };
@@ -453,6 +577,148 @@
       if (at !== -1) return { at: at, length: entry.keys[k].length, spacedHit: true };
     }
     return null;
+  }
+
+  /* --------------------------------------------- Persoenliches, Abschluesse */
+
+  //  Persoenliche Eigenschaften. Ein Lebenslauf belegt sie selten mit einem
+  //  Wort – "kommunikativ" als fehlende Kenntnis zu melden hilft niemandem.
+  //  Sie stehen fuer sich, ohne Luecke, mit dem Rat, sie im Anschreiben zu
+  //  zeigen. re: auf dem gefalteten Text (klein, Umlaute ausgeschrieben).
+  var SOFT = [
+    { label: "Kommunikationsstärke", en: "Communication", re: /kommunikativ|kommunikationsstaerke|kommunikationsstark|kommunikationsfaehig|kommunikationsgeschick|kommunikationskompetenz|communication skills|communicative|\bcommunication\b/ },
+    { label: "Teamfähigkeit", en: "Teamwork", re: /teamfaehig|teamgeist|teamplayer|team player|teamorientiert|teamwork|teamarbeit|im team arbeit|arbeitest gerne im team|arbeiten gerne im team|work(s|ing)? well (in|with) (a )?team/ },
+    { label: "Zuverlässigkeit", en: "Reliability", re: /zuverlaessig|verlaesslich|\breliab(le|ility)\b|dependab(le|ility)/ },
+    { label: "Pünktlichkeit", en: "Punctuality", re: /puenktlich|\bpunctual/ },
+    { label: "Belastbarkeit", en: "Resilience", re: /belastbar|stressresisten|die ruhe (bewahr|behaelt|behaeltst|behalten)|behaeltst [^.]{0,60}die ruhe|behaelt [^.]{0,60}die ruhe|kuehlen kopf|ruhe bewahren|under pressure|resilien|fast paced environment/ },
+    { label: "Verantwortungsbewusstsein", en: "Responsibility", re: /verantwortungsbewusst|verantwortung (uebernimmst|uebernehmen|zu uebernehmen)|(uebernimmst|uebernehmen) (gerne |gern )?verantwortung|take ownership|sense of responsibility/ },
+    { label: "Selbstständigkeit", en: "Independence", re: /selbststaendig|eigenverantwortlich|eigeninitiative|self motivated|self starter|work(s|ing)? independently/ },
+    { label: "Sorgfalt", en: "Attention to detail", re: /sorgfalt|sorgfaeltig|gruendlich|genauigkeit|attention to detail|detail oriented|meticulous/ },
+    { label: "Strukturierte Arbeitsweise", en: "Organisation", re: /strukturiert|organisationstalent|organisationsfaehig|organisiert|\borgani[sz]ed\b|organi[sz]ational skills/ },
+    { label: "Freundlichkeit", en: "Friendliness", re: /freundlich|\bfriendly\b|warm welcome|positive attitude/ },
+    { label: "Kundenorientierung", en: "Customer focus", re: /kundenorientier|serviceorientier|customer focus|customer oriented|service minded/ },
+    { label: "Flexibilität", en: "Flexibility", re: /flexibilitaet|\bflexibel\b|\bflexible\b(?! (scheduling|hours|working|arbeitszeit))/ },
+    { label: "Einfühlungsvermögen", en: "Empathy", re: /einfuehlungsvermoegen|empathie|empathisch|empathy|empathetic|einfuehlsam/ },
+    { label: "Geduld", en: "Patience", re: /geduld|\bpatience\b/ },
+    { label: "Lösungsorientierung", en: "Problem solving", re: /loesungsorientiert|problem solving|problemloesung/ },
+    { label: "Analytisches Denken", en: "Analytical thinking", re: /analytisch|analytical/ },
+    { label: "Lernbereitschaft", en: "Willingness to learn", re: /lernbereit|lernbereitschaft|eager to learn|willingness to learn|wissbegier/ },
+    { label: "Durchsetzungsvermögen", en: "Assertiveness", re: /durchsetzungsvermoegen|durchsetzungsstark|assertive/ },
+    { label: "Konfliktfähigkeit", en: "Conflict resolution", re: /konfliktfaehig|konfliktloesung|conflict resolution/ },
+    { label: "Engagement", en: "Motivation", re: /\bmotiviert|\bengagiert|\bmotivated\b|hohe einsatzbereitschaft/ },
+    { label: "Höflichkeit", en: "Courtesy", re: /hoeflich|\bcourteous/ },
+    { label: "Hilfsbereitschaft", en: "Helpfulness", re: /hilfsbereit/ },
+  ];
+
+  function softIn(line, lang) {
+    var folded = fold(ungender(line)).replace(/[^a-z0-9+#]+/g, " ");
+    var out = [];
+    SOFT.forEach(function (entry) {
+      if (entry.re.test(folded)) out.push(lang === "en" ? entry.en : entry.label);
+    });
+    return out;
+  }
+
+  //  Die Woerter, an denen eine Eigenschaft hing, sind danach verbraucht –
+  //  sonst kaeme "Teamfähigkeit" ein zweites Mal als Kenntnis herein.
+  var SOFT_WORDS = /\b(kommunikativ\w*|kommunikations\w*|team(faehig|geist|player|orientiert|work|arbeit)\w*|zuverlaessig\w*|verlaesslich\w*|puenktlich\w*|belastbar\w*|stressresisten\w*|verantwortungsbewusst\w*|selbststaendig\w*|eigenverantwortlich\w*|eigeninitiative|sorgfalt\w*|sorgfaeltig\w*|gruendlich\w*|genauigkeit|strukturiert\w*|organisationstalent|organisiert\w*|freundlich\w*|kundenorientier\w*|serviceorientier\w*|flexib\w*|einfuehlungsvermoegen|empathi\w*|einfuehlsam\w*|geduld\w*|loesungsorientier\w*|analytisch\w*|lernbereit\w*|durchsetzungs\w*|konfliktfaehig\w*|motiviert\w*|engagiert\w*|hoeflich\w*|hilfsbereit\w*|ruhe|humor|denkvermoegen|arbeitsweise|teamwork|reliab\w*|punctual\w*|communication|empath\w*|patience|independen\w*|friendly|motivated)\b/g;
+
+  //  Abschluesse. Schulabschluesse und akademische Grade stehen auf einer
+  //  Leiter: wer Abitur hat, hat "mindestens einen Hauptschulabschluss".
+  //  voc: eine abgeschlossene Berufsausbildung (ohne Fach). field: ein
+  //  Fach, das im Lebenslauf stehen muss ("kaufmaennische Ausbildung").
+  var DEGREES = [
+    { label: "Fachhochschulreife", re: /fachhochschulreife|fachgebundene[nrs]? hochschulreife/, level: 3 },
+    { label: "Fachabitur", re: /fachabitur/, level: 3 },
+    { label: "Abitur", re: /\babitur\b|allgemeine[nrs]? hochschulreife|\bhochschulreife\b|\bmatura\b/, level: 4 },
+    { label: "Hauptschulabschluss", re: /hauptschulabschluss|\bhauptschule\b|berufsbildungsreife|\bberufsreife\b|erste[nrs]? (allgemeinbildende[nrs]? )?schulabschluss/, level: 1 },
+    { label: "Realschulabschluss", re: /realschulabschluss|\brealschule\b/, level: 2 },
+    { label: "Mittlere Reife", re: /mittlere[nrs]? reife/, level: 2 },
+    { label: "Mittlerer Schulabschluss", re: /mittlere[nrs]? schulabschluss|\bmsa\b|fachoberschulreife|sekundarabschluss i\b/, level: 2 },
+    { label: "Schulabschluss", re: /\bschulabschluss\b/, level: 1 },
+    { label: "High school diploma", re: /high school (diploma|degree|education|graduate)|\bged\b|high school equivalen/, level: 2 },
+    { label: "Hochschulabschluss", en: "University degree", re: /hochschulabschluss|universitaetsabschluss|akademische[nrs]? abschluss|abgeschlossene[nrs]? (hochschul|fachhochschul|universitaets)?studium\b(?! (der|des|im|in|als))|college degree|university degree/, level: 5 },
+    { label: "Bachelor", re: /\bbachelor/, level: 5 },
+    { label: "Master", re: /\bmaster\b(?! ?(of )?(the )?(scrum|craft))|\bmaster s\b|\bmba\b/, level: 6 },
+    { label: "Promotion", en: "PhD", re: /abgeschlossene[nrs]? promotion|\bphd\b|\bph d\b|doktorgrad|\bpromoviert/, level: 7 },
+    { label: "Kaufmännische Ausbildung", re: /kaufmaennische[nrs]? (berufs)?ausbildung/, voc: true, field: /kauf(mann|frau|leute)|kaufmaennisch/ },
+    { label: "Abgeschlossene Berufsausbildung", en: "Completed vocational training", re: /abgeschlossene[nrs]? (berufs)?ausbildung\b(?! (als|zum|zur|im|in|zu))|\bberufsabschluss\b|abgeschlossene[nrs]? lehre\b|gesellenbrief|gesellenpruefung|completed apprenticeship|vocational qualification/, voc: true },
+  ];
+
+  //  Was der Lebenslauf an Abschluessen hat: die hoechste Stufe der Leiter,
+  //  ob eine Ausbildung abgeschlossen ist, und woran man es sieht.
+  var UNFINISHED = /angefangen|abgebrochen|ohne abschluss|nicht abgeschlossen|unfinished|incomplete|in progress|laufend|ongoing/;
+  var COMPLETED_VOC = /ausbildung|gesellenbrief|gesellenpruefung|ausgebildet|\blehre\b|facharbeiter|apprenticeship|staatlich anerkannt|staatlich gepruef|examen|examiniert/;
+
+  function degreesOf(state) {
+    var found = { level: 0, voc: false, text: "", path: null, vocText: "", vocPath: null, titles: "" };
+    (state && state.events || []).forEach(function (event, index) {
+      var text = fold(ungender([event.title, event.company].concat(event.description || []).join(" ")))
+        .replace(/[^a-z0-9+#]+/g, " ");
+      if (UNFINISHED.test(text)) return;
+      var title = String(event.title || "");
+      DEGREES.forEach(function (entry) {
+        if (!entry.level || !entry.re.test(text)) return;
+        //  Ein Studium belegt den Schulabschluss, der es moeglich machte.
+        if (entry.level > found.level) {
+          found.level = entry.level;
+          found.text = title;
+          found.path = "events." + index;
+        }
+      });
+      if (event.sectionId === "education" && !event.present && COMPLETED_VOC.test(text)) {
+        if (!found.voc) { found.voc = true; found.vocText = title; found.vocPath = "events." + index; }
+        found.titles += " " + text;
+        //  Eine abgeschlossene Ausbildung setzt einen Schulabschluss voraus.
+        if (found.level < 1) { found.level = 1; found.text = found.text || title; found.path = found.path || "events." + index; }
+      }
+    });
+    return found;
+  }
+
+  //  Abschluesse in einer Zeile der Anzeige.
+  function degreesIn(line, lang) {
+    var folded = fold(ungender(line)).replace(/[^a-z0-9+#]+/g, " ");
+    var out = [];
+    var lowestSchool = null;
+    DEGREES.forEach(function (entry) {
+      if (!entry.re.test(folded)) return;
+      //  "Fachhochschulreife" ist nicht zusaetzlich "Abitur".
+      if (out.some(function (other) { return other.entry.level && entry.level && entry.label === "Abitur" && other.entry.level === 3; })) return;
+      if (entry.label === "Schulabschluss" && out.some(function (other) { return other.entry.level && other.entry.level <= 4; })) return;
+      if (entry.label === "Abgeschlossene Berufsausbildung" && out.some(function (other) { return other.entry.label === "Kaufmännische Ausbildung"; })) return;
+      if (entry.label === "Bachelor" && out.some(function (other) { return other.entry.label === "Master"; })) return;
+      out.push({ entry: entry, label: lang === "en" && entry.en ? entry.en : entry.label });
+    });
+    return out;
+  }
+
+  function degreeStatus(entry, cv) {
+    if (entry.field) {
+      if (cv.voc && entry.field.test(cv.titles)) return { status: "found", path: cv.vocPath, evidence: cv.vocText };
+      return null;
+    }
+    if (entry.voc) return cv.voc ? { status: "found", path: cv.vocPath, evidence: cv.vocText } : null;
+    if (cv.level >= entry.level) return { status: "found", path: cv.path, evidence: cv.text };
+    return null;
+  }
+
+  //  Bedingungen, die als Wortgruppe kommen: "Ability to lift up to 50 lbs",
+  //  "Must be 18 years or older", "Mindestalter 18 Jahre".
+  var CONDITIONS = [
+    { re: /\blift (up to )?(\d+) ?(lbs|pounds|kg)\b/, label: function (m) { return "Lift up to " + m[2] + " " + m[3]; } },
+    { re: /\b(be )?(18|21) (years|yrs)( of age| old)? or older\b|\bat least (18|21) years/, label: function (m) { return (m[2] || m[5]) + " years or older"; } },
+    { re: /\bmindestalter (18|21)|\bmindestens (18|21) jahre alt|\bvolljaehrig/, label: function (m) { return "Mindestalter " + (m[1] || m[2] || "18"); } },
+  ];
+
+  function conditionsIn(line) {
+    var folded = fold(ungender(line)).replace(/[^a-z0-9+#]+/g, " ");
+    var out = [];
+    CONDITIONS.forEach(function (entry) {
+      var match = folded.match(entry.re);
+      if (match) out.push(entry.label(match));
+    });
+    return out;
   }
 
   //  Zusammengesetzte Woerter mit einem Anhaengsel, das nichts zur Sache
@@ -489,12 +755,16 @@
   }
 
   //  Muster, die in fast jeder Anzeige das Eigentliche einleiten.
+  //  degree: was dahinter steht, ist ein Abschluss ("Ausbildung als
+  //  Elektroniker", "Studium der Informatik", "degree in Computer Science")
+  //  und darf bis zum Satzende reichen – mit Kommas und "oder" dazwischen
+  //  ("als Pflegefachkraft, Altenpfleger/in oder Krankenpfleger/in").
   var PATTERNS = [
-    /\b(?:kenntnisse|erfahrung(?:en)?|know-how|erfahrungen|kompetenz(?:en)?)\s+(?:in|im|mit|bei|als|auf dem gebiet|im bereich|im umgang mit)\s+(?:de[rmns]?\s+|einem?\s+)?([^,.;()]+)/i,
-    /\b(?:ausbildung|weiterbildung|qualifikation|abschluss)\s+(?:als|zum|zur|im|in|zum\/zur)\s+([^,.;()]+)/i,
-    /\b(?:studium|hochschulstudium|bachelor|master|diplom)\s+(?:der|des|im|in|im bereich|im fach|der fachrichtung)?\s*([^,.;()]+)/i,
-    /\b(?:experience|expertise|proficiency|familiarity|background|knowledge)\s+(?:with|in|of|using)\s+([^,.;()]+)/i,
-    /\b(?:degree|bachelor'?s?|master'?s?)\s+(?:in|of)\s+([^,.;()]+)/i,
+    { re: /\b(?:kenntnisse|erfahrung(?:en)?|know-how|erfahrungen|kompetenz(?:en)?)\s+(?:in|im|mit|bei|als|auf dem gebiet|im bereich|im umgang mit)\s+(?:de[rmns]?\s+|einem?\s+)?([^,.;()]+)/i },
+    { re: /\b(?:berufsausbildung|ausbildung|weiterbildung|qualifikation|abschluss|berufsabschluss|umschulung)(?:,?\s*(?:z\.?\s?b\.?|zum beispiel|etwa|beispielsweise|bevorzugt|vorzugsweise|idealerweise|gerne|gern))?\s+(?:als|zum|zur|im|in|zum\/zur)\s+([^.;()]+)/i, degree: true },
+    { re: /\b(?:studium|hochschulstudium|bachelor|master|diplom)\s+(?:der|des|im|in|im bereich|im fach|der fachrichtung)\s*([^.;()]+)/i, degree: true },
+    { re: /\b(?:experience|expertise|proficiency|familiarity|background|knowledge)\s+(?:with|in|of|using)\s+([^,.;()]+)/i },
+    { re: /\b(?:degree|bachelor'?s?|master'?s?|diploma)\s+(?:degree\s+)?(?:in|of)\s+([^.;()]+)/i, degree: true },
   ];
 
   //  Was nach einem Muster steht, endet am naechsten Satzzeichen – oder an
@@ -598,6 +868,18 @@
     return out;
   }
 
+  //  Ist ein Begriff schon ein Abschluss oder eine Eigenschaft? Dann kommt
+  //  er nicht noch einmal als Kenntnis herein ("Hauptschulabschluss",
+  //  "Teamfähigkeit", "Bachelor's degree").
+  var SOFT_WORD = new RegExp("^(?:" + SOFT_WORDS.source.replace(/^\\b\(|\)\\b$/g, "") + ")$");
+  function special(term) {
+    var key = spaced(term).trim();
+    if (DEGREES.some(function (entry) { return entry.re.test(key); })) return true;
+    if (/^(bachelor|master|degree|diploma|abschluss|studium|ausbildung)( s)?( degree)?$/.test(key)) return true;
+    if (/^(a|b|c)[12]( niveau| level)?$/.test(key)) return true;
+    return key.split(" ").some(function (word) { return SOFT_WORD.test(word); });
+  }
+
   function extractTerms(line, lang, level, lexiconOnly) {
     var found = [];
     var lineSpaced = spaced(line);
@@ -624,14 +906,15 @@
       });
     }).forEach(function (one) {
       var entry = one.entry;
-      add(entry.label, entry.keys.slice(), { at: one.hit.at, lex: entry, cert: entry.cert, language: entry.language });
+      add(lang === "en" && entry.labelEn ? entry.labelEn : entry.label, entry.keys.slice(),
+          { at: one.hit.at, lex: entry, cert: entry.cert, language: entry.language, kind: entry.kind });
     });
 
     //  Was schon ein Lexikon-Eintrag ist, kommt nicht ein zweites Mal ueber
     //  Muster oder Substantive herein: "Deutschkenntnisse" ist Deutsch.
     function covered(term) {
       var key = spaced(cleanTerm(term)).trim();
-      if (!key) return true;
+      if (!key || special(term)) return true;
       return found.some(function (entry) {
         if (!entry.lex) return false;
         var words = entry.keys.concat([spaced(entry.label).trim()]);
@@ -641,11 +924,28 @@
       });
     }
 
-    PATTERNS.forEach(function (re) {
-      var match = re.exec(line);
+    var degreeText = [];
+    PATTERNS.forEach(function (pattern) {
+      if (lexiconOnly) return;
+      //  "bzw." und "z. B." beenden keinen Satz.
+      var match = pattern.re.exec(ungender(line).replace(/\bbzw\./gi, "bzw").replace(/\bz\.\s?b\./gi, "zB"));
       if (!match) return;
-      trimPhrase(match[1]).split(/\s*(?:,|\/|\bund\b|\boder\b|\band\b|\bor\b|\bbzw\.?)\s*/).forEach(function (part) {
-        var term = cleanTerm(part.split(/\s+/).slice(0, 4).join(" "));
+      var phrase = pattern.degree ? match[1].split(/\s+(?:sowie|as well as|und (?:erfahrung|kenntnisse)|and (?:experience|knowledge))\b/i)[0]
+        : trimPhrase(match[1]);
+      if (pattern.degree) degreeText.push(spaced(phrase));
+      //  "Ausbildung als A, B oder C": eine Auswahl, alle in einer Gruppe.
+      var choice = pattern.degree && /\s(oder|bzw\.?|or)\s/i.test(phrase) ? {} : null;
+      //  "Sanitär-, Heizungs- und Klimatechnik": vor dem Komma oder "und"
+      //  steht ein Ergaenzungsstrich – dort wird nicht getrennt.
+      phrase.split(/\s*(?:(?<!-),|\/|(?<!-\s?)\bund\b|(?<!-\s?)\boder\b|\band\b|\bor\b|\bbzw\.?|\bz\.? ?b\.?|\bzB\b)\s*/).forEach(function (part) {
+        //  "staatlich anerkannte Erzieher", "ein Studium der Kindheitspädagogik":
+        //  vorn steht, was den Abschluss beschreibt, nicht der Abschluss.
+        if (pattern.degree) {
+          part = part.replace(/^\s*(?:ein(?:e[nmrs]?)?\s+)?(?:studium\s+(?:der|des|im|in)\s+|ausbildung\s+(?:als|zum|zur)\s+)?/i, "");
+          if (lang === "de") part = part.replace(/^(?:[a-zäöüß][\wäöüß-]*\s+)+(?=[A-ZÄÖÜ])/, "");
+          part = part.replace(/\b(?:oder )?(?:vergleichbar\w*|equivalent|similar|related)\b.*$/i, "");
+        }
+        var term = cleanTerm(part.split(/\s+/).slice(0, pattern.degree ? 8 : 4).join(" "));
         //  Fuellwoerter nur am Rand weg: "Fachkraft für Lagerlogistik"
         //  behaelt sein "für".
         var words = term.split(" ");
@@ -655,7 +955,8 @@
         //  Im Deutschen ist ein Substantiv gross; ein klein geschriebenes
         //  Wort hinter "Erfahrung in" ist meist schon der Rest des Satzes.
         if (lang === "de" && !/^[A-ZÄÖÜ0-9]/.test(words[0])) return;
-        add(words.join(" "), [spaced(words.join(" ")).trim()], { at: lineSpaced.indexOf(spaced(words[0]).trim()) });
+        add(words.join(" "), [spaced(words.join(" ")).trim()],
+            { at: lineSpaced.indexOf(spaced(words[0]).trim()), kind: pattern.degree ? "degree" : undefined, choice: choice });
       });
     });
 
@@ -664,7 +965,8 @@
     acronyms(line).forEach(function (term) {
       //  In Saetzen ohne Anforderungsmerkmal nur laengere Kuerzel: DNS, VLAN,
       //  HACCP – kein "FL" aus "Tampa, FL".
-      if (covered(term) || (lexiconOnly && term.replace(/[^A-Z]/g, "").length < 3)) return;
+      //  Bei Aufgaben gar keine: "Be- und Entladen von LKW" verlangt nichts.
+      if (level === "task" || covered(term) || (lexiconOnly && term.replace(/[^A-Z]/g, "").length < 3)) return;
       add(term, [spaced(term).trim()], { at: lineSpaced.indexOf(" " + spaced(term).trim() + " "), acronym: true });
     });
     if (lexiconOnly) return groupAlternatives();
@@ -683,6 +985,20 @@
     (lang === "de" ? nounsDe(line) : namesEn(line)).forEach(function (term) {
       if (covered(term)) return;
       add(term, [spaced(term).trim()], { at: lineSpaced.indexOf(" " + spaced(term).trim() + " ") });
+    });
+
+    //  Ein Begriff aus dem Lexikon in "Ausbildung als Pflegefachkraft" ist
+    //  der Abschluss, nicht die Taetigkeit.
+    var choices = degreeText.filter(function (text) { return /\s(oder|bzw|or)\s/.test(text); });
+    found.forEach(function (term) {
+      if (term.language || term.kind === "licence") return;
+      var keys = [spaced(term.label)].concat((term.keys || []).map(function (k) { return " " + k + " "; }));
+      if (degreeText.some(function (text) {
+        return keys.some(function (key) { return text.indexOf(key) !== -1; });
+      })) term.kind = "degree";
+      if (term.kind === "degree" && choices.some(function (text) {
+        return keys.some(function (key) { return text.indexOf(key) !== -1; });
+      })) term.choice = true;
     });
 
     //  "React oder Vue", "Python bzw. R", "Excel/Google Sheets": eine Gruppe,
@@ -753,6 +1069,13 @@
         if (anchor === null) anchor = term.group;
         term.group = anchor;
       });
+    }
+
+    //  Abschluesse aus "als A, B oder C" sind eine Auswahl.
+    var chosen = found.filter(function (term) { return term.choice; });
+    if (chosen.length > 1) {
+      var first = Math.min.apply(null, chosen.map(function (term) { return term.group; }));
+      chosen.forEach(function (term) { term.group = first; });
     }
 
     //  Gruppen durchnummerieren, damit Luecken nicht stoeren.
@@ -900,8 +1223,25 @@
 
   /* ---------------------------------------------------------- Auswerten */
 
-  function analyse(adText, state, dismissed) {
+  //  Steht eine Eigenschaft schon im Lebenslauf (Profil, Kenntnisse,
+  //  Anschreiben)? Dann ein Haken; sonst bleibt sie offen, ohne Luecke.
+  function softStatus(label, parts) {
+    var entry = SOFT.filter(function (one) { return one.label === label || one.en === label; })[0];
+    if (!entry) return null;
+    var best = null;
+    parts.forEach(function (part) {
+      if (best && best.status === "found") return;
+      if (entry.re.test(fold(ungender(part.text)).replace(/[^a-z0-9+#]+/g, " "))) {
+        best = { status: part.kind === "letter" ? "letter" : "found", path: part.path, evidence: snippet(part.text, "") };
+      }
+    });
+    return best;
+  }
+
+  function analyse(adText, state, dismissed, confirmed) {
     var lang = language(adText);
+    var cvDegrees = degreesOf(state);
+    var sure = asSet((confirmed || []).map(function (label) { return compact(label); }));
     var sections = segment(adText);
     var structured = sections.some(function (section) {
       return section.kind === "req" || section.kind === "tasks" || section.kind === "nice" || section.kind === "unknown";
@@ -948,24 +1288,97 @@
         //  Eine Lohnangabe in Klammern hinter einer Anforderung ("Bilingual
         //  English/Spanish (+$1.50/hr)") macht die Zeile nicht zum Angebot.
         var bare = folded.replace(/\([^)]*\)/g, " ");
-        if (OFFER_LINE.test(bare) || CONTACT_LINE.test(bare) || ABOUT_LINE.test(folded)) return;
+        var plain = spaced(line).trim();
+        if (OFFER_LINE.test(bare) || CONTACT_LINE.test(bare) || ABOUT_LINE.test(folded) || APPLY_LINE.test(plain)) return;
         //  Ohne Gliederung: Saetze ohne Anforderungsmerkmal sind Taetigkeiten.
         var cue = !byCue || REQUIREMENT_CUE.test(folded);
         var level = section.kind === "tasks" || !cue ? "task" : section.kind === "nice" ? "nice" : "must";
         if (NICE.test(folded)) level = "nice";
         else if (MUST.test(folded) && level !== "task") level = "must";
-        var terms = extractTerms(line, lang, level, !cue).map(function (term) {
-          var at = locate(term, parts);
-          var status = gone[compact(term.label)] ? "dismissed" : at ? at.status : "missing";
-          //  Ein Zertifikat belegt nur das Zertifikat selbst, nie ein
-          //  verwandtes Wort.
-          if (term.cert && status === "similar") status = "missing";
+        //  Persoenliche Eigenschaften stehen fuer sich – nicht bei Aufgaben,
+        //  dort beschreiben sie die Arbeit, nicht die Person.
+        if (level !== "task") {
+          var soft = softIn(line, lang).filter(function (label) {
+            return !requirements.some(function (req) {
+              return req.level === "soft" && req.terms.some(function (term) { return term.label === label; });
+            });
+          });
+          if (soft.length) {
+            requirements.push({ text: line, level: "soft", terms: soft.map(function (label) {
+              var at = softStatus(label, parts);
+              return { label: label, group: 0, status: at ? at.status : "open", kind: "soft",
+                       path: at ? at.path : null, evidence: at ? at.evidence : "", language: false, cert: false };
+            }) });
+          }
+        }
+        //  Was dem Unternehmen wichtig ist, verlangt nichts von der Person.
+        if (VALUES_LINE.test(plain)) return;
+
+        function finish(term, at, status) {
+          if (gone[compact(term.label)]) status = "dismissed";
+          else if (status === "missing" && sure[compact(term.label)]) status = "confirmed";
           return {
             label: term.label, group: term.group, status: status,
             path: at ? at.path : null, evidence: at ? at.evidence : "",
-            language: !!term.language, cert: !!term.cert,
+            language: !!term.language, cert: !!term.cert || term.kind === "cert",
+            kind: term.kind || (term.language ? "language" : term.cert ? "cert" : "skill"),
           };
-        });
+        }
+
+        //  Abschluesse: gemessen an dem, was der Lebenslauf hat – wer Abitur
+        //  hat, hat "mindestens einen Hauptschulabschluss".
+        var special = [];
+        if (level !== "task") {
+          var degrees = degreesIn(line, lang);
+          var together = degrees.length > 1 && /\s(oder|or|bzw)\s/.test(spaced(line));
+          degrees.forEach(function (one, index) {
+            var at = degreeStatus(one.entry, cvDegrees);
+            special.push(finish({ label: one.label, group: 1000 + (together ? 0 : index), kind: "degree" },
+              at, at ? at.status : "missing"));
+          });
+          conditionsIn(line).forEach(function (label, index) {
+            var term = { label: label, keys: [spaced(label).trim()], group: 2000 + index, kind: "condition" };
+            var at = locate(term, parts);
+            special.push(finish(term, at, at ? at.status : "missing"));
+          });
+        }
+
+        //  Unter "Deine Aufgaben" wird alles gesucht und nur gezeigt, was der
+        //  Lebenslauf hat. Ein Satz ohne Anforderungsmerkmal in einer Anzeige
+        //  ohne Gliederung: nur, was das Lexikon sicher kennt.
+        var taskSection = section.kind === "tasks";
+        var terms = special.concat(extractTerms(line, lang, level, !cue && !taskSection).filter(function (term) {
+          //  Eine Bedingung als Wortgruppe ist schon da ("Lift up to 50 lbs").
+          return !special.some(function (one) { return spaced(one.label).indexOf(spaced(term.label)) !== -1; });
+        }).map(function (term) {
+          var at = locate(term, parts);
+          var status = at ? at.status : "missing";
+          //  Ein Zertifikat belegt nur das Zertifikat selbst, nie ein
+          //  verwandtes Wort.
+          if ((term.cert || term.kind === "cert") && status === "similar") status = "missing";
+          //  Ein Abschluss mit Fach ("Ausbildung als Elektroniker"): steht
+          //  das Fach in einer abgeschlossenen Ausbildung, ist er erfuellt.
+          return finish(term, at, status);
+        }).filter(function (term) {
+          //  Bei Aufgaben zaehlt nur, was der Lebenslauf schon zeigt
+          //  ("Elternarbeit ✓"). Was fehlt, lernt man im Job – als Luecke
+          //  waere es nur Rauschen ("Rat", "Tat", "Fragen").
+          return !taskSection || term.status === "found" || term.status === "similar";
+        }));
+        //  "Bachelor's degree in Computer Science": das Fach sagt mehr als
+        //  die Stufe; die Stufe allein kaeme als zweite Forderung daher.
+        var withField = terms.some(function (term) { return term.kind === "degree" && term.group < 1000; });
+        if (withField) {
+          terms = terms.filter(function (term) {
+            return !(term.group >= 1000 && term.group < 2000 && /^(Bachelor|Master|Hochschulabschluss|University degree)$/.test(term.label));
+          });
+        }
+        //  "kaufmännische Ausbildung, z. B. als Kauffrau für Büromanagement":
+        //  das Beispiel ist eine Moeglichkeit, keine zweite Forderung.
+        if (/\b(z\.? ?b\.?|zum beispiel|beispielsweise|e\.g\.|such as)\s/i.test(line) &&
+            terms.some(function (term) { return term.group >= 1000 && term.group < 2000; })) {
+          terms.forEach(function (term) { if (term.kind === "degree") term.group = 1000; });
+        }
         if (!terms.length) return;
         //  In einer Gruppe "A oder B" genuegt einer: dann gilt die ganze
         //  Gruppe als belegt.
@@ -985,7 +1398,7 @@
       });
     });
 
-    var counts = { must: {}, nice: {}, task: {} };
+    var counts = { must: {}, nice: {}, task: {}, soft: {} };
     requirements.forEach(function (req) {
       req.terms.forEach(function (term) {
         var bucket = counts[req.level];
@@ -1010,6 +1423,6 @@
     titleOf: titleOf,
     // fuer die Tests
     _fold: fold, _ungender: ungender, _segment: segment, _extract: extractTerms,
-    _language: language, _stem: stem,
+    _language: language, _stem: stem, _soft: softIn,
   };
 })(typeof window !== "undefined" ? window : this);

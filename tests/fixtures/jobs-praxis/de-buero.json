@@ -1,0 +1,135 @@
+{
+  "id": "de-buero",
+  "lang": "de",
+  "ad": "Kaufmann / Kauffrau für Büromanagement (m/w/d)\nMüller Haustechnik GmbH, Ulm – unbefristet, Vollzeit\n\nDeine Aufgaben\n• Allgemeine Büro- und Verwaltungsaufgaben\n• Rechnungsprüfung und vorbereitende Buchhaltung\n• Terminkoordination für unsere Monteure\n• Erste Anlaufstelle für Kundenanfragen am Telefon\n\nDein Profil\n• Erfolgreich abgeschlossene kaufmännische Ausbildung, z. B. als Kauffrau/-mann für Büromanagement\n• Mindestens 2 Jahre Berufserfahrung in der Sachbearbeitung\n• Sicherer Umgang mit MS Office, insbesondere Excel und Outlook\n• Kenntnisse in DATEV oder SAP von Vorteil\n• Sehr gute Deutschkenntnisse in Wort und Schrift\n• Strukturierte und selbstständige Arbeitsweise\n\nWir bieten\n• 30 Tage Urlaub, Gleitzeit\n• JobRad und Zuschuss zur betrieblichen Altersvorsorge\n\nBitte senden Sie Ihre Unterlagen an bewerbung@mueller-haustechnik.example",
+  "cv": {
+    "contact": {
+      "role": "Kauffrau für Bürokommunikation"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Sachbearbeiterin Auftragsabwicklung",
+        "company": "Hartmann Sanitär KG",
+        "place": "Neu-Ulm",
+        "start": "08/2019",
+        "end": "",
+        "present": true,
+        "list": [
+          "Auftragserfassung und Rechnungsstellung in SAP",
+          "Terminplanung für den Kundendienst",
+          "Bearbeitung von Reklamationen"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "Ausbildung zur Kauffrau für Bürokommunikation",
+        "company": "Hartmann Sanitär KG",
+        "place": "Neu-Ulm",
+        "start": "09/2016",
+        "end": "07/2019",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "Mittlere Reife",
+        "company": "Realschule Neu-Ulm",
+        "place": "Neu-Ulm",
+        "start": "",
+        "end": "2016",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Excel",
+          "rank": 0
+        },
+        {
+          "name": "Word",
+          "rank": 0
+        },
+        {
+          "name": "Outlook",
+          "rank": 0
+        },
+        {
+          "name": "SAP",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Englisch",
+          "level": "B1",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "kaufmännische Ausbildung|Kauffrau für Büromanagement|Büromanagement",
+    "Sachbearbeitung",
+    "MS Office",
+    "Excel",
+    "Outlook",
+    "Deutsch"
+  ],
+  "nice": [
+    "DATEV",
+    "SAP"
+  ],
+  "alternatives": [
+    [
+      "DATEV",
+      "SAP"
+    ]
+  ],
+  "soft": [
+    "Strukturierte Arbeitsweise|Selbstständigkeit"
+  ],
+  "covered": [
+    "Excel",
+    "Outlook",
+    "Deutsch",
+    "SAP",
+    "kaufmännische Ausbildung|Kauffrau für Büromanagement|Büromanagement"
+  ],
+  "gaps": [],
+  "degree": [
+    "kaufmännische Ausbildung|Kauffrau für Büromanagement|Büromanagement"
+  ],
+  "never": [
+    "Urlaub",
+    "Gleitzeit",
+    "JobRad",
+    "Monteure",
+    "Telefon",
+    "Ulm",
+    "Kundenanfragen",
+    "Unterlagen",
+    "Wort",
+    "Schrift"
+  ],
+  "ok": [
+    "Buchhaltung"
+  ]
+}
