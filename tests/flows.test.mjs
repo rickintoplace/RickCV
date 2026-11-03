@@ -95,9 +95,20 @@ async function open(browser) {
   };
   const close = async () => {
     try { await send("Browser.close"); } catch { /* schon zu */ }
-    chrome.kill();
+    //  Erst warten, bis Chrome wirklich weg ist: sonst schreibt es noch ins
+    //  Profil, waehrend es geloescht wird (ENOTEMPTY in der CI). Das
+    //  Aufraeumen darf den Testlauf nicht kippen.
+    if (chrome.exitCode === null) {
+      const gone = new Promise((done) => chrome.once("exit", done));
+      chrome.kill();
+      await Promise.race([gone, sleep(5000)]);
+    }
     server.close();
-    fs.rmSync(profile, { recursive: true, force: true });
+    try {
+      fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+    } catch (error) {
+      console.log(`  (Profil ${profile} nicht entfernt: ${error.code})`);
+    }
   };
   const errors = () => events.filter((e) => e.method === "Runtime.exceptionThrown")
     .map((e) => JSON.stringify(e.params.exceptionDetails).slice(0, 200));
