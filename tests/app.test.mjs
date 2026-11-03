@@ -255,7 +255,11 @@ if (!browser) {
       r.english = d.querySelector('[data-section="person"] input').value;
 
       //  Etwas Eigenes, dann "Neu": ein Dialog des Baukastens, kein Kasten
-      //  des Browsers.
+      //  des Browsers. Das gilt ohne Bibliothek; mit ihr legt "Neu" ein
+      //  zweites Dokument an (tests/flows.test.mjs). Ob IndexedDB hier in
+      //  virtueller Zeit bereit wird, haengt am Browser – lokal nein, im CI
+      //  ja. Deshalb wird der Weg ohne Bibliothek hier fest gewaehlt.
+      if (w.RickCVLibrary) w.RickCVLibrary.ready = function () { return false; };
       var name = d.querySelector('[data-section="person"] input');
       name.value = "Nora"; name.dispatchEvent(new w.Event("input", { bubbles: true }));
       d.getElementById("btn-more").click();
