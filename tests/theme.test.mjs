@@ -83,12 +83,6 @@ ok(Object.keys(box.RickCVThemeData).length === files.length,
 //  im ATS-Nachweis (docs/ats-proof.json) bei jedem Leser und in jeder
 //  Fassung ohne Befund sein, und der Nachweis muss mit pdfminer.six
 //  entstanden sein.
-//
-//  Noch nicht so weit: die vier Themes, deren Zeitraum am rechten Rand oder
-//  jenseits der Zeitleiste steht. pdfminer.six liest ihn dort als eigene
-//  Spalte. Die Liste ist ehrlich und muss schrumpfen – besteht ein Theme
-//  darauf, scheitert der Test, bis es hier gestrichen ist.
-const NOT_YET = ["banner", "clean", "dynaline", "icons"];
 console.log("\n— Tags der Galerie —");
 {
   const known = Themes.tags("de").map((tag) => tag.id);
@@ -107,10 +101,6 @@ console.log("\n— Tags der Galerie —");
     const rows = proof.results.filter((row) => row.theme === entry.slug);
     const clean = rows.length > 0 && rows.every((row) => !row.file.length &&
       Object.values(row.readers).every((problems) => !problems.length));
-    if (NOT_YET.includes(entry.slug)) {
-      ok(!clean, `${entry.slug}: steht noch auf der Liste NOT_YET`, "besteht jetzt – aus NOT_YET streichen");
-      continue;
-    }
     ok(clean, `${entry.slug}: im ATS-Nachweis ohne Befund`,
        rows.length ? JSON.stringify(rows.map((row) => row.readers)) : "nicht im Nachweis – tools/ats-proof.mjs laufen lassen");
   }

@@ -24,7 +24,7 @@ A coloured band carries the name across the main column, sections wear small cap
 
 ## Clean
 
-A calm baseline: timeline along the edge, dates on the right, nothing else. RickCV's original layout.
+A calm baseline: a fine mark at the edge, dates, title and employer on one line, nothing else. RickCV's original layout.
 
 ![Clean](previews/clean.webp)
 

@@ -163,3 +163,24 @@
   font-size: 1em;
   font-weight: 650;
 }
+
+/*  Der Zeitraum steht vor dem Titel, in seiner Zeile und rechts vom
+    Streifen; was darunter folgt, beginnt an derselben Kante. Am rechten
+    Rand lasen Textleser mit Layoutanalyse (pdfminer.six, die Grundlage
+    vieler Python-Parser) alle Zeitraeume als eigene Spalte, getrennt von
+    ihren Stationen (tools/ats-proof.mjs).  */
+.event .date {
+  float: left;
+  /*  Der Einzug des Inhalts (0.8em) in der kleineren Schrift des Datums.  */
+  margin: 0 0.6em 0 calc(0.8em / 0.82);
+  white-space: nowrap;
+  text-align: left;
+}
+
+.event .date br {
+  display: none;
+}
+
+.content h3 {
+  display: inline;
+}

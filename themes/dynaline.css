@@ -104,7 +104,7 @@
     Textspalte hinein, las pdftotext eine lange letzte Zeile darueber als
     eigenen Strang, weit weg von ihrer Station (tools/ats-proof.mjs).  */
 [data-column="main"] [data-block="section"] > .resume_title {
-  margin-left: 2.75cm;
+  margin-left: 1.1cm;
 }
 
 /*  Titel und Arbeitgeber in einer Zeile: "A-levels – St Cuthbert's School".
@@ -130,9 +130,76 @@
     ungefaehr dort, wo der Text der Stationen beginnt – und es bleibt Platz
     fuer zwei Spalten.  */
 [data-column="main"] [data-block="skills"] > .resume_title {
-  margin-left: 2.75cm;
+  margin-left: 1.1cm;
 }
 
 [data-column="main"] [data-block]:not([data-block="section"]):not([data-block="skills"]):not([data-block="namerole"]):not([data-block="photo"]):not([data-block="contact"]) {
-  padding-left: 2.75cm;
+  padding-left: 1.1cm;
+}
+
+/*  Der Zeitraum steht in der Karte vor dem Titel, in seiner Zeile; was
+    darunter folgt, beginnt an derselben Kante. Links der Achse lasen
+    Textleser mit Layoutanalyse (pdfminer.six, die Grundlage vieler
+    Python-Parser) alle Zeitraeume als eigene Spalte, getrennt von ihren
+    Stationen (tools/ats-proof.mjs). Achse, Punkte und die Abstaende nach
+    der Dauer bleiben.
+
+    Die Karte zeichnet jetzt .event::before statt .content: der Zeitraum
+    steht in ihrer Flaeche und muss im PDF vor dem Titel gemalt werden –
+    ein Kasten mit eigenem Hintergrund, der danach kommt, deckte ihn zu.
+    42px: Punkt (30px) und Abstand bis zur Karte, wie zuvor.  */
+[data-template] {
+  .event {
+    display: block;
+    width: auto;
+  }
+  .event::before {
+    content: "";
+    position: absolute;
+    left: 42px;
+    top: 0;
+    bottom: 0;
+    width: calc(9.9cm + 20px);
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 0;
+  }
+  .dot {
+    position: absolute;
+    left: 0;
+    top: -6px;
+  }
+  .date {
+    position: relative;
+    float: left;
+    left: auto;
+    width: auto;
+    display: block;
+    /*  Kante der Karte plus ihr Innenabstand.  */
+    margin: 2px 0.5em 0 52px;
+    white-space: nowrap;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    color: #5a5a5a;
+  }
+  .date br {
+    display: none;
+  }
+  .event .content {
+    margin-left: 42px;
+    left: 0;
+    width: 9.9cm;
+    background-color: transparent;
+    box-shadow: none;
+  }
+  /*  Der Verbinder vom Punkt endet an der Kante der Karte.  */
+  .event::after {
+    width: 8px;
+  }
+  /*  Links der Achse ist kein Zeitraum mehr: Achse und Karten ruecken an
+      den Rand des Hauptteils, die Karten werden um diesen Platz breiter.  */
+  .timeline {
+    left: -1.8cm;
+  }
 }

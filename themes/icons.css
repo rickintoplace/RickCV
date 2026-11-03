@@ -133,3 +133,61 @@
 }
 
 }
+
+/*  Der Zeitraum steht vor dem Titel, in seiner Zeile; was darunter folgt,
+    beginnt an derselben Kante. Am rechten Rand lasen Textleser mit
+    Layoutanalyse (pdfminer.six, die Grundlage vieler Python-Parser) alle
+    Zeitraeume als eigene Spalte, getrennt von ihren Stationen
+    (tools/ats-proof.mjs). Symbol und Zeitleiste bleiben, wo sie waren; der
+    Text bekommt die Breite, die vorher die Datumsspalte rechts belegte.  */
+[data-template] {
+  .event {
+    display: block;
+    min-height: 0;
+    width: calc(25.5em + 3cm - 30px);
+  }
+  .event::after {
+    display: none;
+  }
+  .event .dot {
+    position: absolute;
+    left: -2.9cm;
+    top: -2px;
+  }
+  .event .date {
+    position: relative;
+    float: left;
+    left: calc(30px - 3cm);
+    right: auto;
+    width: auto;
+    display: block;
+    /*  10px: der Innenabstand des Inhalts, an dessen Kante der Text steht.  */
+    margin: 0 0.5em 0 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    color: #5a5a5a;
+  }
+  .event .date br {
+    display: none;
+  }
+  .event .content {
+    left: calc(30px - 3cm);
+    min-width: 0;
+    /*  Sonst deckt der Kasten den Zeitraum zu, der in seiner Flaeche steht. */
+    background-color: transparent;
+  }
+  /*  Arbeitgeber und Ort in derselben Zeile. Stand ein kurzer Titel
+      ("Abitur") allein ueber einer langen Arbeitgeberzeile, riss
+      pdftotext beide auseinander und las die Seitenspalte dazwischen.  */
+  .event .content h3,
+  .event .content h3 + p {
+    display: inline;
+  }
+  .event .content h3 + p::before {
+    content: " – ";
+  }
+  .event .content h3 + p + * {
+    margin-top: 0.15em;
+  }
+}
