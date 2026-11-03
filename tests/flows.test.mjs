@@ -184,7 +184,7 @@ if (!browser) {
         function (x) { return /Stelle/.test(x.textContent); });
       tab.click(); await wait(300);
       var ad = document.querySelector('textarea[data-path="job.ad"]');
-      ad.value = "Ihr Profil\\n- Kenntnisse in SAP\\n- Erfahrung mit Python\\n- Abgeschlossenes Masterstudium (Master)\\n- Bereitschaft zum Schichtdienst";
+      ad.value = "Ihr Profil\\n- Kenntnisse in SAP\\n- Erfahrung mit Python\\n- Abgeschlossenes Masterstudium\\n- Bereitschaft zum Schichtdienst";
       ad.dispatchEvent(new Event("input", { bubbles: true }));
       await wait(800);
       var terms = function () { return Array.prototype.map.call(document.querySelectorAll(".job-term"), function (x) {
@@ -201,7 +201,7 @@ if (!browser) {
         if (chip) chip.querySelector(".job-term-action").click();
         return !!chip;
       };
-      var clicked = [have("Master"), have("Schichtdienst")];
+      var clicked = [have("Masterstudium"), have("Schichtdienst")];
       await wait(600);
       var doc = JSON.parse(localStorage.getItem("rickcv.data.v3"));
       var skills = doc.skills.items.map(function (x) { return x.name; });
@@ -213,7 +213,7 @@ if (!browser) {
        "die Stellenanzeige wird ausgewertet", JSON.stringify(job.before));
     ok(job.after.includes("job-found:Python") && job.skills.includes("Python"),
        "„Habe ich“ trägt den Begriff unter Kenntnisse ein", JSON.stringify(job));
-    ok(job.clicked[0] && job.education.includes("Master") && !job.skills.includes("Master"),
+    ok(job.clicked[0] && job.education.includes("Masterstudium") && !job.skills.includes("Masterstudium"),
        "„Habe ich“ bei einem Abschluss: unter Ausbildung, nie unter Kenntnisse", JSON.stringify(job));
     ok(job.clicked[1] && job.confirmed.includes("Schichtdienst") && !job.skills.includes("Schichtdienst") &&
        job.after.includes("job-confirmed:Schichtdienst"),

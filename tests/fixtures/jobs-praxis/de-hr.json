@@ -1,0 +1,129 @@
+{
+  "id": "de-hr",
+  "lang": "de",
+  "ad": "HR Business Partner (w/m/d)\nMittelständischer Maschinenbauer · Raum Stuttgart\n\nIhre Aufgaben\n• Beratung der Führungskräfte in allen personalrelevanten Fragen\n• Begleitung von Veränderungsprozessen und Restrukturierungen\n• Zusammenarbeit mit dem Betriebsrat\n\nIhr Profil\nSie verfügen über ein abgeschlossenes Studium der Wirtschafts-, Sozial- oder Rechtswissenschaften mit Schwerpunkt Personal oder eine vergleichbare Qualifikation. Sie bringen mehrjährige Berufserfahrung im Personalwesen mit, idealerweise in einem international tätigen Unternehmen. Fundierte Kenntnisse im Arbeitsrecht sowie im Betriebsverfassungsgesetz setzen wir voraus. Sie überzeugen durch Ihr sicheres Auftreten, Ihre Beratungskompetenz und Ihr Fingerspitzengefühl – auch in schwierigen Gesprächen. Ein sicherer Umgang mit SAP HCM und MS Office rundet Ihr Profil ab. Verhandlungssichere Englischkenntnisse sind von Vorteil.\n\nUnser Angebot\nAttraktive Vergütung, Firmenwagen, betriebliche Altersvorsorge.",
+  "cv": {
+    "contact": {
+      "role": "HR Generalistin"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "HR Generalistin",
+        "company": "Bosch Rexroth AG",
+        "place": "Lohr am Main",
+        "start": "05/2019",
+        "end": "",
+        "present": true,
+        "list": [
+          "Betreuung von 600 Mitarbeitenden in Produktion und Verwaltung",
+          "Arbeitsrechtliche Beratung der Führungskräfte",
+          "Verhandlungen mit dem Betriebsrat",
+          "Personaladministration in SAP HCM"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "B.A. Betriebswirtschaftslehre, Schwerpunkt Personal",
+        "company": "Hochschule Pforzheim",
+        "place": "Pforzheim",
+        "start": "10/2015",
+        "end": "03/2019",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Arbeitsrecht",
+          "rank": 0
+        },
+        {
+          "name": "SAP HCM",
+          "rank": 0
+        },
+        {
+          "name": "MS Office",
+          "rank": 0
+        },
+        {
+          "name": "Betriebsverfassungsgesetz",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Englisch",
+          "level": "C1",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Wirtschaftswissenschaften|Rechtswissenschaften|Sozialwissenschaften|Hochschulabschluss",
+    "Personalwesen",
+    "Arbeitsrecht",
+    "Betriebsverfassungsgesetz"
+  ],
+  "nice": [
+    "Englisch",
+    "SAP HCM|SAP",
+    "MS Office"
+  ],
+  "soft": [
+    "Fingerspitzengefühl|Einfühlungsvermögen",
+    "Sicheres Auftreten"
+  ],
+  "covered": [
+    "Arbeitsrecht",
+    "SAP",
+    "MS Office",
+    "Englisch",
+    "Betriebsverfassungsgesetz"
+  ],
+  "gaps": [],
+  "ok": [
+    "Personal",
+    "Sozialwissenschaften",
+    "Beratungskompetenz|Beratung"
+  ],
+  "never": [
+    "Gesprächen",
+    "Profil",
+    "Unternehmen",
+    "Schwerpunkt",
+    "Vergütung",
+    "Firmenwagen",
+    "Führungskräfte",
+    "Stuttgart",
+    "Fragen"
+  ],
+  "alternatives": [
+    [
+      "Wirtschaftswissenschaften",
+      "Sozialwissenschaften",
+      "Rechtswissenschaften"
+    ]
+  ],
+  "degree": [
+    "Wirtschaftswissenschaften|Rechtswissenschaften|Sozialwissenschaften"
+  ]
+}

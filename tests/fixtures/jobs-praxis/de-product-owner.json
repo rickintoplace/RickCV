@@ -1,0 +1,143 @@
+{
+  "id": "de-product-owner",
+  "lang": "de",
+  "ad": "Product Owner (m/w/d) E-Commerce – remote oder Hamburg\n\nDarauf kannst du dich freuen\nAls Product Owner verantwortest du unseren Checkout und arbeitest eng mit zwei Entwicklungsteams zusammen. Du schärfst die Produktvision, pflegst das Backlog und misst, was wirkt.\n\nDas bringst du mit\nDu bringst mehrjährige Erfahrung als Product Owner oder Produktmanager:in mit und kennst agile Methoden wie Scrum und Kanban aus der Praxis. Du denkst in Nutzerbedürfnissen und Geschäftsmodellen, priorisierst mutig und behältst dabei das große Ganze im Blick. Mit Jira und Confluence gehst du sicher um. Du kommunizierst klar und auf Augenhöhe – mit Entwicklung, Design und Management. Erfahrung mit A/B-Tests und Webanalyse (z. B. Google Analytics) ist ein Plus.\n\nWas wir bieten\nRemote-first, 1.500 € Weiterbildungsbudget, Urlaubsgeld.",
+  "cv": {
+    "contact": {
+      "role": "Product Owner"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Product Owner Checkout",
+        "company": "Modehaus Online GmbH",
+        "place": "Hamburg",
+        "start": "01/2021",
+        "end": "",
+        "present": true,
+        "list": [
+          "Verantwortung für Warenkorb und Checkout, zwei Scrum-Teams",
+          "A/B-Tests mit Optimizely, Auswertung in Google Analytics",
+          "Backlog-Pflege in Jira, Dokumentation in Confluence"
+        ]
+      },
+      {
+        "sectionId": "experience",
+        "title": "Junior Produktmanager",
+        "company": "Reiseportal AG",
+        "place": "Hamburg",
+        "start": "04/2018",
+        "end": "12/2020",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "B.A. Medienmanagement",
+        "company": "Hochschule Hamburg",
+        "place": "Hamburg",
+        "start": "10/2014",
+        "end": "03/2018",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Scrum (PSM I)",
+          "rank": 0
+        },
+        {
+          "name": "Jira",
+          "rank": 0
+        },
+        {
+          "name": "Confluence",
+          "rank": 0
+        },
+        {
+          "name": "Google Analytics",
+          "rank": 0
+        },
+        {
+          "name": "A/B-Testing",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Englisch",
+          "level": "C1",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Product Owner|Produktmanager|Produktmanagement",
+    "Agile Methoden|Scrum",
+    "Kanban",
+    "Jira",
+    "Confluence"
+  ],
+  "nice": [
+    "A/B-Tests|A/B-Testing",
+    "Webanalyse|Google Analytics"
+  ],
+  "alternatives": [
+    [
+      "Product Owner",
+      "Produktmanager"
+    ]
+  ],
+  "soft": [
+    "Kommunikationsstärke"
+  ],
+  "covered": [
+    "Product Owner",
+    "Scrum",
+    "Jira",
+    "Confluence",
+    "Google Analytics"
+  ],
+  "gaps": [
+    "Kanban"
+  ],
+  "ok": [
+    "Nutzerbedürfnisse",
+    "Geschäftsmodelle",
+    "Backlog",
+    "Checkout"
+  ],
+  "never": [
+    "Ganze",
+    "Blick",
+    "Augenhöhe",
+    "Praxis",
+    "Entwicklung",
+    "Design",
+    "Management",
+    "Plus",
+    "Produktvision",
+    "Weiterbildungsbudget",
+    "Urlaubsgeld",
+    "Hamburg"
+  ],
+  "degree": []
+}

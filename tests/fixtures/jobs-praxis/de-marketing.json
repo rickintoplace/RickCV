@@ -1,0 +1,145 @@
+{
+  "id": "de-marketing",
+  "lang": "de",
+  "ad": "Online Marketing Manager (m/w/d)\n\nDas erwartet dich\nDu planst und steuerst unsere Kampagnen auf Google und Meta, optimierst Landingpages und berichtest an die Geschäftsführung.\n\nDas bringst du mit\nDu hast ein abgeschlossenes Studium im Bereich Marketing, Kommunikation oder eine vergleichbare Ausbildung und mindestens drei Jahre Erfahrung im Performance Marketing. Du kennst dich bestens mit Google Ads, Meta Ads und SEO aus und triffst Entscheidungen auf Basis von Daten. Mit Tools wie Google Analytics 4, Looker Studio und HubSpot arbeitest du routiniert. Du hast ein Auge für Design und schreibst Texte, die wirken. Kenntnisse in HTML und Erfahrung mit Content-Management-Systemen wie WordPress sind ein Plus.\n\nBenefits\nHybrides Arbeiten, Hund im Büro erlaubt, 28 Tage Urlaub.",
+  "cv": {
+    "contact": {
+      "role": "Online Marketing Manager"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Online Marketing Manager",
+        "company": "Gartenwelt24 GmbH",
+        "place": "Münster",
+        "start": "02/2021",
+        "end": "",
+        "present": true,
+        "list": [
+          "Steuerung von Google-Ads- und Meta-Ads-Kampagnen mit 40.000 € Monatsbudget",
+          "SEO für 3.000 Produktseiten",
+          "Reporting in Looker Studio auf Basis von GA4"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "B.A. Kommunikationsmanagement",
+        "company": "FH Münster",
+        "place": "Münster",
+        "start": "10/2016",
+        "end": "09/2020",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Google Ads",
+          "rank": 0
+        },
+        {
+          "name": "Meta Ads",
+          "rank": 0
+        },
+        {
+          "name": "SEO",
+          "rank": 0
+        },
+        {
+          "name": "Google Analytics 4",
+          "rank": 0
+        },
+        {
+          "name": "Looker Studio",
+          "rank": 0
+        },
+        {
+          "name": "WordPress",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Englisch",
+          "level": "B2",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Marketing|Kommunikation|Hochschulabschluss",
+    "Performance Marketing",
+    "Google Ads",
+    "Meta Ads",
+    "SEO",
+    "Google Analytics",
+    "Looker Studio",
+    "HubSpot"
+  ],
+  "nice": [
+    "HTML",
+    "WordPress|Content-Management"
+  ],
+  "covered": [
+    "Kommunikation",
+    "Google Ads",
+    "Meta Ads",
+    "SEO",
+    "Google Analytics",
+    "Looker Studio",
+    "WordPress"
+  ],
+  "gaps": [
+    "HubSpot",
+    "HTML"
+  ],
+  "degree": [
+    "Marketing|Kommunikation"
+  ],
+  "ok": [
+    "Content-Management-Systeme",
+    "Copywriting|Texte"
+  ],
+  "never": [
+    "Entscheidungen",
+    "Basis",
+    "Daten",
+    "Tools",
+    "Auge",
+    "Design",
+    "Plus",
+    "Jahre",
+    "Kampagnen",
+    "Landingpages",
+    "Geschäftsführung",
+    "Hund",
+    "Büro",
+    "Urlaub",
+    "Bereich"
+  ],
+  "alternatives": [
+    [
+      "Marketing",
+      "Kommunikation"
+    ]
+  ],
+  "soft": []
+}

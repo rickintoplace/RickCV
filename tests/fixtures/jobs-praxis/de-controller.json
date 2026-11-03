@@ -1,0 +1,122 @@
+{
+  "id": "de-controller",
+  "lang": "de",
+  "ad": "Controller (m/w/d) in Vollzeit\n\nIhre Aufgaben\n• Erstellung von Monats- und Quartalsberichten\n• Unterstützung bei der Budgetplanung und Forecasts\n• Ad-hoc-Analysen für die Geschäftsführung\n\nWas Sie mitbringen\nSie haben Ihr Studium der Betriebswirtschaftslehre mit Schwerpunkt Controlling oder Finanzen erfolgreich abgeschlossen. Sie verfügen über mindestens drei Jahre Berufserfahrung im Controlling, gerne in einem produzierenden Unternehmen. Ihre ausgeprägten Excel-Kenntnisse und Erfahrung mit SAP CO zeichnen Sie aus; Kenntnisse in Power BI sind wünschenswert. Sie arbeiten strukturiert, behalten auch bei hoher Arbeitslast den Überblick und haben ein Gespür für Zahlen und Zusammenhänge.\n\nWir bieten\nGleitzeit, Jobrad, Kantine.",
+  "cv": {
+    "contact": {
+      "role": "Junior Controllerin"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Junior Controllerin",
+        "company": "Kunststoffwerk Lahn GmbH",
+        "place": "Gießen",
+        "start": "07/2021",
+        "end": "",
+        "present": true,
+        "list": [
+          "Monatsabschluss und Kostenstellenberichte in SAP CO",
+          "Budgetplanung mit Excel",
+          "Dashboards in Power BI"
+        ]
+      },
+      {
+        "sectionId": "education",
+        "title": "B.Sc. Betriebswirtschaftslehre, Schwerpunkt Controlling",
+        "company": "Justus-Liebig-Universität",
+        "place": "Gießen",
+        "start": "10/2017",
+        "end": "06/2021",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Excel",
+          "rank": 0
+        },
+        {
+          "name": "SAP CO",
+          "rank": 0
+        },
+        {
+          "name": "Power BI",
+          "rank": 0
+        },
+        {
+          "name": "Controlling",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Englisch",
+          "level": "B2",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Betriebswirtschaftslehre|BWL",
+    "Controlling",
+    "Excel",
+    "SAP CO|SAP"
+  ],
+  "nice": [
+    "Power BI"
+  ],
+  "soft": [
+    "Strukturierte Arbeitsweise",
+    "Belastbarkeit",
+    "Zahlenaffinität"
+  ],
+  "covered": [
+    "Betriebswirtschaftslehre",
+    "Controlling",
+    "Excel",
+    "SAP",
+    "Power BI"
+  ],
+  "gaps": [],
+  "degree": [
+    "Betriebswirtschaftslehre|BWL"
+  ],
+  "ok": [
+    "Finanzen",
+    "Zahlenverständnis|Zahlen"
+  ],
+  "never": [
+    "Arbeitslast",
+    "Überblick",
+    "Gespür",
+    "Zusammenhänge",
+    "Unternehmen",
+    "Gleitzeit",
+    "Jobrad",
+    "Kantine",
+    "Geschäftsführung",
+    "Jahre",
+    "Schwerpunkt"
+  ],
+  "alternatives": []
+}

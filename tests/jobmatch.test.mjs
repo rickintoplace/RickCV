@@ -327,5 +327,67 @@ ok(Date.now() - started < 1500, "400 Zeilen in unter 1,5 s", (Date.now() - start
 ok(Match.titleOf("Pflegefachkraft (m/w/d)\nKlinikum") === "Pflegefachkraft", "Titel ohne (m/w/d)",
    Match.titleOf("Pflegefachkraft (m/w/d)\nKlinikum"));
 
+/* ------------------------------------------------------------------ */
+console.log("\n— Abschlüsse auf einer Leiter —");
+{
+  //  [Satz in der Anzeige, Abschluss im Lebenslauf, erfüllt?]
+  const ladder = [
+    ["Du bringst mindestens einen Hauptschulabschluss mit", "Abitur", true],
+    ["Mindestens Hauptschulabschluss", "Allgemeine Hochschulreife", true],
+    ["Mittlere Reife oder höher", "Hauptschulabschluss", false],
+    ["Realschulabschluss", "Mittlerer Schulabschluss (MSA)", true],
+    ["Mittlerer Schulabschluss", "Fachoberschulreife", true],
+    ["Fachhochschulreife", "Matura", true],
+    ["Abitur", "Fachabitur", false],
+    ["Abitur oder Fachabitur", "Fachabitur", true],
+    ["Allgemeine Hochschulreife", "Maturität (Gymnasium Bern)", true],
+    ["Hochschulreife", "A-Levels", true],
+    ["Abgeschlossenes Studium mit technischer oder betriebswirtschaftlicher Ausrichtung", "M.Sc. Wirtschaftsinformatik", true],
+    ["Abgeschlossenes Studium", "B.A. Soziale Arbeit", true],
+    ["Abgeschlossenes Studium", "Diplom-Kaufmann", true],
+    ["Abgeschlossenes Studium", "Dipl.-Ing. (FH) Maschinenbau", true],
+    ["Master oder vergleichbarer Abschluss", "Dipl.-Ing. Elektrotechnik", true],
+    ["Master", "Bachelor of Science Informatik", false],
+    ["Master", "Magister Artium Germanistik", true],
+    ["Master", "Zweites Staatsexamen Jura", true],
+    ["Abgeschlossene Promotion", "Dr. rer. nat. Chemie", true],
+    ["Abgeschlossene Promotion", "Master of Science Chemie", false],
+    ["Promotion in Physik", "PhD in Physics", true],
+    ["Habilitation", "Promotion (Dr. phil.)", false],
+    ["Abgeschlossenes Hochschulstudium oder vergleichbare Qualifikation", "Industriemeister Metall (IHK), Meisterbrief", true],
+    ["Abgeschlossenes Hochschulstudium", "Industriemeister Metall (IHK), Meisterbrief", false],
+    ["Abgeschlossene Berufsausbildung", "Gesellenbrief Tischler", true],
+    ["Abgeschlossene Berufsausbildung", "Lehrabschluss Einzelhandel (Österreich)", true],
+    ["Abgeschlossene Berufsausbildung", "Angefangene Ausbildung zum Koch", false],
+    ["Abgeschlossenes Studium", "Studium der Informatik (läuft)", false],
+    ["High school diploma or GED", "GED", true],
+    ["Bachelor's degree required", "Associate Degree in Nursing", false],
+    ["Bachelor's degree required", "MBA", true],
+    ["Allgemeine Hochschulreife", "Reifeprüfung (Österreich)", true],
+    ["Abitur", "International Baccalaureate (IB Diploma)", true],
+    ["Hochschulzugangsberechtigung", "Abitur", true],
+    ["Fachhochschulreife", "Berufsmaturität (Schweiz)", true],
+    ["Mittlere Reife", "Erweiterter Sekundarabschluss I", true],
+    ["Hauptschulabschluss", "Berufsbildungsreife", true],
+    ["Mittlere Reife", "Berufsbildungsreife", false],
+    ["Master", "Diplom-Ingenieur (TU)", true],
+    ["Master", "Diplom (FH) Sozialwesen", false],
+    ["Abgeschlossene Promotion", "Habilitation (venia legendi)", true],
+    ["Habilitation", "Habilitation in Neuerer Geschichte", true],
+    ["Zweites Staatsexamen oder Master of Education", "Master of Education", true],
+    ["MSc or PhD in Statistics", "M.Sc. Statistik", true],
+  ];
+  const wrong = ladder.filter(([ad, cv, met]) => {
+    const result = Match.analyse("Dein Profil\n- " + ad, resume((s) => {
+      s.events = [{ title: cv, company: "", sectionId: "education", description: [], list: [],
+                    present: /läuft/.test(cv) }];
+    }), []);
+    const degree = all(result).filter((t) => t.kind === "degree");
+    const ok = degree.length > 0 && degree.some((t) => t.status === "found" || t.status === "alternative");
+    return ok !== met;
+  }).map(([ad, cv, met]) => `„${ad}“ mit „${cv}“ sollte ${met ? "" : "nicht "}erfüllt sein`);
+  ok(!wrong.length, `${ladder.length} Paare aus Anzeige und Lebenslauf`, wrong.join(" · "));
+}
+
 console.log(fails ? `\n${fails} Fehler\n` : "\nalles grün\n");
 process.exit(fails ? 1 : 0);

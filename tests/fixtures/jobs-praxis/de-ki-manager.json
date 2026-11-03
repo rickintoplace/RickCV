@@ -1,0 +1,185 @@
+{
+  "id": "de-ki-manager",
+  "lang": "de",
+  "ad": "KI-Manager / AI Lead (m/w/d)\nStadtwerke Rheinland · Köln · Vollzeit\n\nDeine Mission\nDu hilfst uns, aus Ideen tragfähige Lösungen zu machen: von der strategischen Einordnung über Use-Case-Bewertung und Prototyping bis zur Einführung, Weiterentwicklung und sicheren Nutzung im Betrieb. Dabei arbeitest du an der Schnittstelle von IT, Fachbereichen, Data Science, Informationssicherheit, Datenschutz und Governance.\n\nDas zeichnet dich aus\nDu besitzt ein gutes Verständnis von KI- und GenAI-Grundlagen. Du kennst moderne KI-Technologien und kannst deren Potenziale für Geschäftsprozesse bewerten. Du verstehst Geschäftsprozesse und übersetzt die Bedürfnisse der Anwender in konkrete, umsetzbare Lösungen. Du moderierst souverän auf allen Ebenen, beherrschst ein sicheres Stakeholder-Management und kannst komplexe technische, rechtliche sowie organisatorische Themen für jeden verständlich strukturieren. Deine analytische Stärke nutzt du für kluge Chancen-Risiko-Abwägungen. Dabei agierst du stets verantwortungsbewusst im Umgang mit Daten, KI-Risiken und Veränderungsprozessen. Du brennst für neue Innovationen, verlierst dabei aber nie den realistischen Blick für Wirtschaftlichkeit und Governance aus den Augen.\n\nDas bringst du mit\n• Abgeschlossenes Studium mit technischer oder betriebswirtschaftlicher Ausrichtung oder vergleichbare Qualifikationen\n• Erfahrung mit KI- und GenAI-Anwendungen\n• Ein gutes Verständnis für Softwareentwicklung, IT-Architektur, Datenflüsse, Schnittstellen und produktiven IT-Betrieb\n• Im Optimalfall Erfahrung im Projektmanagement oder als Product Owner\n• Sehr gute Deutsch- und gute Englischkenntnisse\n\nDas bieten wir\n• Tarifvertrag TV-V, 30 Tage Urlaub, mobiles Arbeiten\n• Ein Team, das Lust auf Neues hat",
+  "cv": {
+    "contact": {
+      "role": "Data & AI Consultant"
+    },
+    "profile": {
+      "show": true,
+      "text": ""
+    },
+    "events": [
+      {
+        "sectionId": "experience",
+        "title": "Data & AI Consultant",
+        "company": "Netzwerk Digital GmbH",
+        "place": "Düsseldorf",
+        "start": "03/2021",
+        "end": "",
+        "present": true,
+        "list": [
+          "Einführung eines GenAI-Assistenten (Azure OpenAI) für den Kundenservice",
+          "Bewertung von KI-Use-Cases mit Fachbereichen",
+          "Stakeholder-Management bis zur Geschäftsführung",
+          "Projektleitung für drei Datenplattform-Projekte"
+        ]
+      },
+      {
+        "sectionId": "experience",
+        "title": "Werkstudent Business Intelligence",
+        "company": "Rheinmetall",
+        "place": "Düsseldorf",
+        "start": "10/2018",
+        "end": "02/2021",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "M.Sc. Wirtschaftsinformatik",
+        "company": "Universität zu Köln",
+        "place": "Köln",
+        "start": "10/2018",
+        "end": "09/2020",
+        "present": false
+      },
+      {
+        "sectionId": "education",
+        "title": "B.Sc. Wirtschaftsinformatik",
+        "company": "Universität zu Köln",
+        "place": "Köln",
+        "start": "10/2015",
+        "end": "09/2018",
+        "present": false
+      }
+    ],
+    "skills": {
+      "show": true,
+      "items": [
+        {
+          "name": "Python",
+          "rank": 0
+        },
+        {
+          "name": "SQL",
+          "rank": 0
+        },
+        {
+          "name": "Azure OpenAI",
+          "rank": 0
+        },
+        {
+          "name": "Prompt Engineering",
+          "rank": 0
+        },
+        {
+          "name": "Prozessanalyse",
+          "rank": 0
+        },
+        {
+          "name": "Power BI",
+          "rank": 0
+        }
+      ]
+    },
+    "languages": {
+      "show": true,
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache",
+          "percentage": 0
+        },
+        {
+          "name": "Englisch",
+          "level": "C1",
+          "percentage": 0
+        }
+      ]
+    },
+    "mobility": {
+      "show": false,
+      "items": []
+    }
+  },
+  "must": [
+    "Hochschulabschluss",
+    "KI",
+    "GenAI",
+    "Softwareentwicklung",
+    "IT-Architektur",
+    "Deutsch",
+    "Englisch"
+  ],
+  "nice": [
+    "Projektmanagement",
+    "Product Owner"
+  ],
+  "soft": [
+    "Analytisches Denken",
+    "Verantwortungsbewusstsein"
+  ],
+  "covered": [
+    "Hochschulabschluss",
+    "KI",
+    "GenAI",
+    "Deutsch",
+    "Englisch",
+    "Projektmanagement"
+  ],
+  "gaps": [
+    "IT-Architektur"
+  ],
+  "degree": [
+    "Hochschulabschluss"
+  ],
+  "ok": [
+    "Stakeholder-Management",
+    "Geschäftsprozesse",
+    "Datenflüsse",
+    "Schnittstellen",
+    "IT-Betrieb",
+    "Governance",
+    "Wirtschaftlichkeit",
+    "Data Science",
+    "Informationssicherheit",
+    "Datenschutz",
+    "Prototyping",
+    "Use Case",
+    "Veränderungsprozesse|Change Management",
+    "Moderation"
+  ],
+  "never": [
+    "Verständnis",
+    "Ebenen",
+    "Themen",
+    "Stärke",
+    "Dabei",
+    "Innovationen",
+    "Blick",
+    "Augen",
+    "Bedürfnisse",
+    "Anwender",
+    "Potenziale",
+    "Ideen",
+    "Einordnung",
+    "Einführung",
+    "Nutzung",
+    "Ausrichtung",
+    "Lösungen",
+    "Daten",
+    "Fachbereichen",
+    "Optimalfall",
+    "Chancen",
+    "Abwägungen",
+    "Mission",
+    "Weiterentwicklung",
+    "Qualifikationen",
+    "Grundlagen",
+    "Anwendungen",
+    "Technologien",
+    "Risiken"
+  ],
+  "alternatives": []
+}
