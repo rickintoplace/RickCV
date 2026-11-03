@@ -163,6 +163,35 @@ ok(ts.events[0].list.length === 2, "Aufzählungszeichen werden zur Liste");
 ok(ts.skills.items.length === 4 && ts.languages.items.length === 2, "Kenntnisse und Sprachen");
 ok(txt.warnings.includes("draft"), "Entwurf ist als solcher gekennzeichnet");
 
+//  "Zeitraum Titel – Einrichtung, Ort" in einer Zeile, wie tabellarische
+//  Themes es setzen – auch umbrochen hinter dem Komma, mitten im Ortsnamen
+//  ("Bad" / "Wimpeln") und mit dem Strich am Zeilenende.
+{
+  const dashed = Imp.apply(base(), Imp.parseText([
+    "Max Mustermann", "max.mustermann@example.com", "",
+    "Berufserfahrung",
+    "07/2021 – 10/2021 Ferienspaß – Spaß AG, Frankfurt",
+    "Bildungsfahrt mit ein bisschen Freizeit",
+    "05/2023 – heute Soziale Leistungen – Bundesagentur für Arbeit,",
+    "Frankfurt",
+    "Größtenteils als Empfänger",
+    "11/2013 – 09/2015 Angefangene Ausbildung zum Tierpfleger – Zoolino, Bad",
+    "Wimpeln",
+    "Tierpflege im Kontaktbereich",
+    "09/2021 – 05/2023 Nachhaltigkeitsprojekt im Naturschutz –",
+    "Krombacher, Kreuztal-Krombach",
+  ].join("\n"), "lebenslauf.txt"), "replace");
+  const got = dashed.events.map((e) => [e.title, e.company, e.place].join(" | "));
+  ok(JSON.stringify(got) === JSON.stringify([
+    "Ferienspaß | Spaß AG | Frankfurt",
+    "Soziale Leistungen | Bundesagentur für Arbeit | Frankfurt",
+    "Angefangene Ausbildung zum Tierpfleger | Zoolino | Bad Wimpeln",
+    "Nachhaltigkeitsprojekt im Naturschutz | Krombacher | Kreuztal-Krombach",
+  ]), "Titel – Einrichtung, Ort in einer Zeile, auch umbrochen", JSON.stringify(got));
+  ok(dashed.events[1].description.join(" ") === "Größtenteils als Empfänger",
+     "der umbrochene Ort wird nicht zur Beschreibung", JSON.stringify(dashed.events[1].description));
+}
+
 console.log("\n— LinkedIn-Export —");
 const zip = fs.readFileSync(fixture("linkedin-export.zip"));
 const zipFile = {

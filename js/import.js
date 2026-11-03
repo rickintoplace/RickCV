@@ -2438,6 +2438,21 @@
       }
 
       if (isStationSection(current)) {
+        //  Der Rest eines umbrochenen Orts: "… – BUNDESAGENTUR FÜR ARBEIT," /
+        //  "Frankfurt" oder "… – ZOOLINO, Bad" / "Wimpeln". Allein waere die
+        //  Zeile der Titel der naechsten Station.
+        //  Steht vorn noch das Ende des Zeitraums ("– heute<TAB>Frankfurt"),
+        //  nimmt die Fortsetzung weiter unten den Ort mit.
+        if (event && event.placeNext && !carriesDate(line) && !CONTINUES.test(line)) {
+          event.placeNext = false;
+          var placeRest = clean(line);
+          var placeJoined = event.place ? event.place + " " + placeRest : placeRest;
+          if (placeRest.length <= 32 && placeLike(placeJoined)) {
+            event.place = placeJoined;
+            return;
+          }
+        }
+
         //  "seit 04/2021 Teamleiterin" – das Wort davor sagt nur, dass die
         //  Station noch laeuft. Ohne diese Regel faellt die Zeile durch alle
         //  Muster, und ihr Inhalt haengt sich an die Station darunter.
@@ -2472,7 +2487,10 @@
           event.end = event.present ? "" : normDate(range[2]);
           var rest = clean(line.replace(range[0], "").replace(/^[|–—,\t-]\s*/, "")
             .replace(/\s*[|–—,-]\s*$/, ""));
+          event.commaEnd = /,\s*$/.test(line);
           if (rest) assignStationLine(event, rest);
+          event.commaEnd = false;
+          openPlace(event, line);
           return;
         }
 
@@ -2518,6 +2536,7 @@
           startEvent(row, line);
           event.start = normDate(leading[1]);
           assignStationLine(event, leading[2]);
+          openPlace(event, line);
           return;
         }
 
@@ -3027,6 +3046,9 @@
     //  "Staatsangehörigkeit<TAB>deutsch") ist kein Name und keine Rolle.
     var candidates = [];
     for (var n = 0; n < Math.min(rows.length, 14) && candidates.length < 3; n++) {
+      //  Nach der ersten Ueberschrift kommt keine Rolle mehr – sonst wird
+      //  ohne Berufsbezeichnung im Kopf eine Zeile des Werdegangs dazu.
+      if (candidates.length && headingOf(rows[n].text)) break;
       if (/\t|:/.test(rows[n].text)) continue;
       if (usable(rows[n], 3)) candidates.push({ text: rows[n].text, index: n });
     }
@@ -3203,6 +3225,19 @@
 
   var DANGLING = /(?:\s(?:und|oder|sowie|f(?:ue|ü)r|der|die|des|im|in|zur|zum|&|and|or|of|for)|-)$/i;
 
+  //  Ein Ort, der nicht zu Ende ist: "Bad", "Frankfurt am", "St.".
+  var PLACE_OPEN = /(?:^|\s)(?:bad|sankt|st\.|neu|alt|gro(?:ß|ss)|klein|hohen|bergisch|schw(?:ä|ae)bisch|am|an|im|ob|bei|upon|on|new|los|san|santa|den|la|le)$/i;
+
+  //  Endet die Kopfzeile einer Station mit einem Komma hinter dem
+  //  Arbeitgeber oder mitten in einem Ortsnamen, kommt der Ort in der
+  //  naechsten Zeile.
+  function openPlace(event, line) {
+    if (!event || !event.company) return;
+    if ((!event.place && /,\s*$/.test(line)) || (event.place && PLACE_OPEN.test(event.place))) {
+      event.placeNext = true;
+    }
+  }
+
   function assignStationLine(event, line) {
     var raw = String(line);
     var value = clean(line).replace(/\t+/g, " ");
@@ -3279,7 +3314,8 @@
       var pair = value.match(/^(.{3,60}?)\s+[–—-]\s+(.{2,80})$/);
       var located = pair && pair[2].match(/^(.{2,60}),\s+([^,]{2,32})$/);
       if (pair && !orgLike(pair[1]) &&
-          (orgLike(pair[2]) || (located && placeLike(located[2]) && !/[|·]/.test(pair[2])))) {
+          (orgLike(pair[2]) || event.commaEnd || /,$/.test(pair[2]) ||
+           (located && placeLike(located[2]) && !/[|·]/.test(pair[2])))) {
         event.title = clean(pair[1]);
         if (located && placeLike(located[2])) {
           event.company = clean(located[1]);
