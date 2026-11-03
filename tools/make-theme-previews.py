@@ -49,7 +49,9 @@ PAGE = """<!DOCTYPE html><html lang="%(locale)s"><head><meta charset="utf-8">
 <script src="js/themes.js"></script><script src="js/model.js"></script>
 <script src="js/ats.js"></script><script src="js/render.js"></script>
 <script>
-  var data = RickCVModel.createExample("%(locale)s");
+  //  Dasselbe Beispiel, das der Baukasten zu diesem Theme zeigt
+  //  ("example: short" im Kopf des Themes).
+  var data = RickCVModel.createExample("%(locale)s", RickCVThemes.exampleFor({ slug: "%(slug)s" }));
   data.settings.showCoverLetter = false;
   data.languages.show = true;
   data.theme = { slug: "%(slug)s", name: "", css: "", source: "builtin" };

@@ -296,6 +296,41 @@
     return stable(Model.migrate(current)) === stable(Model.migrate(Model.createExample(locale)));
   }
 
+  //  Inhaltlich noch das Beispiel – in welcher Fassung? Theme, Farben und
+  //  Einstellungen zaehlen dabei nicht: wer sich durch die Themes klickt,
+  //  hat am Beispiel nichts geaendert. undefined, wenn es eigener Inhalt ist.
+  var EXAMPLE_CONTENT = ["contact", "profile", "events", "skills", "languages", "interests",
+    "projects", "mobility", "references", "footers", "coverLetter", "photo"];
+
+  function contentOf(doc) {
+    var migrated = Model.migrate(doc);
+    return stable(EXAMPLE_CONTENT.map(function (key) { return migrated[key]; }));
+  }
+
+  function exampleVariant(locale) {
+    var mine = contentOf(JSON.parse(snapshot()));
+    return ["", "short"].filter(function (variant) {
+      return contentOf(Model.createExample(locale, variant)) === mine;
+    })[0];
+  }
+
+  function wantedExample() {
+    var Themes = global.RickCVThemes;
+    return Themes && Themes.exampleFor ? Themes.exampleFor(state.theme) : "";
+  }
+
+  //  Ein Theme mit grosser Schrift oder viel Luft ("example: short") bekommt
+  //  das kuerzere Beispiel – sonst steht ein Rest auf einem sonst leeren
+  //  zweiten Blatt. Nur, solange noch genau das Beispiel dasteht.
+  function fitExample() {
+    var have = exampleVariant(state.locale);
+    var want = wantedExample();
+    if (have === undefined || have === want) return false;
+    var next = Model.createExample(state.locale, want);
+    EXAMPLE_CONTENT.forEach(function (key) { state[key] = next[key]; });
+    return true;
+  }
+
   /* ---------------------------------------------------------- Startkarte */
 
   var welcome = null;
@@ -572,6 +607,7 @@
       rebuildEditor: buildEditor,
       onLocaleChange: switchLocale,
       reveal: revealPath,
+      fitExample: fitExample,
     };
   }
 
@@ -584,6 +620,15 @@
     //  nichts, wenn es ausgetauscht wird.
     if (committedLocale !== state.locale && isExample(committedLocale)) {
       replaceState(Model.createExample(state.locale));
+      return;
+    }
+    //  Dasselbe, wenn nur Theme oder Farben gewechselt haben: das Beispiel
+    //  kommt in der neuen Sprache, Aussehen und Einstellungen bleiben.
+    if (committedLocale !== state.locale && exampleVariant(committedLocale) !== undefined) {
+      var next = Model.createExample(state.locale, wantedExample());
+      EXAMPLE_CONTENT.forEach(function (key) { state[key] = next[key]; });
+      state.settings.place = next.settings.place;
+      replaceState(state);
       return;
     }
 

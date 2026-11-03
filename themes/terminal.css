@@ -3,6 +3,7 @@
    author:   RickCV
    licence:  CC0-1.0
    contract: 1
+   example:  short
    tags:     auffallen
    about:    Feste Schrittweite, kantige Kanten, dunkle Seitenspalte. Die
              Stationen stehen an einer Randlinie wie Code in einem Editor,
@@ -16,7 +17,9 @@
   /*  Der Profiltext liest sich hier linksbündig besser als zentriert.  */
   --profile-align: left;
   --accent-color: #1f7a4d;
-  --sidebar-color: #10201a;
+  /*  Fast schwarz, mit einem Hauch der Akzentfarbe – waehlt jemand eine
+      andere, faerbt sich die Spalte mit.  */
+  --sidebar-color: color-mix(in oklab, var(--accent-color), #0b0f0d 86%);
   --sidebar-font-color: #d8e6df;
   --font-color: #1c2320;
   font-family: ui-monospace, "SFMono-Regular", "IBM Plex Mono", "Cascadia Mono", Menlo, monospace;

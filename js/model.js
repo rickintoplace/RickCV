@@ -247,8 +247,10 @@
       //  Die Stellenanzeige, auf die sich dieses Dokument bewirbt
       //  (js/jobmatch.js). Sie gehoert zum Dokument: jede Kopie in der
       //  Bibliothek hat ihre eigene Stelle. "dismissed": Begriffe, die die
-      //  Person als "trifft nicht zu" ausgeblendet hat.
-      job: { ad: "", dismissed: [] },
+      //  Person als "trifft nicht zu" ausgeblendet hat, "confirmed": was sie
+      //  als vorhanden bestaetigt hat, ohne dass es eine Kenntnis waere
+      //  (Schichtdienst, Fuehrungszeugnis, ein Zertifikat).
+      job: { ad: "", dismissed: [], confirmed: [] },
 
       coverLetter: {
         recipient: "",
@@ -528,7 +530,11 @@
     },
   };
 
-  function createExample(locale) {
+  //  variant "short": fuer Themes, die mit grosser Schrift oder viel Luft
+  //  setzen ("example: short" im Kopf des Themes). Ohne Ehrenamt, Projekte
+  //  und Mobilitaet passt das Beispiel dort auf ein Blatt, statt ein paar
+  //  Zeilen auf ein sonst leeres zweites zu schieben.
+  function createExample(locale, variant) {
     var data = createBase(locale || "de");
     var ex = (locale || "de") === "en" ? EXAMPLE_EN : EXAMPLE_DE;
 
@@ -551,6 +557,13 @@
       return Object.assign(emptyEvent(event.sectionId), event);
     });
     Object.assign(data.coverLetter, ex.coverLetter);
+    if (variant === "short") {
+      data.events = data.events.filter(function (event) { return event.sectionId !== "volunteer"; });
+      data.mobility.items = [];
+      data.mobility.show = false;
+      data.projects.items = [];
+      data.projects.show = false;
+    }
     return data;
   }
 

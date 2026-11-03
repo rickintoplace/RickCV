@@ -44,6 +44,12 @@ look. Add `name-en:` and `about-en:` if you want an English name and
 description next to a German one; the gallery shows whichever fits the
 interface language.
 
+`example: short` is for themes with large type or a lot of air: someone who
+picks the theme while the untouched example is on screen gets the example
+without volunteering, projects and mobility, so it fits on one sheet instead of
+pushing a few lines onto an otherwise empty second one. The theme previews use
+the same example.
+
 ## On the `<body>`
 
 | Hook | Meaning |

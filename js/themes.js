@@ -69,7 +69,7 @@
   function parseMeta(css) {
     var meta = {
       name: "", name_en: "", author: "", licence: "", about: "", about_en: "",
-      contract: 0, defaults: "", tags: "",
+      contract: 0, defaults: "", tags: "", example: "",
     };
     var head = String(css).match(/\/\*[\s\S]*?@rickcv-theme([\s\S]*?)\*\//);
     if (!head) return meta;
@@ -89,6 +89,9 @@
     });
 
     meta.contract = Number(meta.contract) || 0;
+    //  "example: short": das Beispiel ohne Ehrenamt, Projekte und
+    //  Mobilitaet, fuer Themes mit grosser Schrift oder viel Luft.
+    meta.example = /^short$/i.test(meta.example) ? "short" : "";
     //  Nur Tags aus der festen Liste: die Galerie filtert danach, und ein
     //  Tippfehler soll kein eigenes, leeres Filterfeld ergeben.
     meta.tags = String(meta.tags || "").toLowerCase().split(/[\s,;]+/).filter(function (tag, index, all) {
@@ -211,8 +214,16 @@
         about: (english && meta.about_en) || meta.about,
         contract: meta.contract,
         tags: meta.tags,
+        example: meta.example,
       };
     }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+  }
+
+  //  Welche Fassung des Beispiels zu einem Theme passt ("" oder "short").
+  function exampleFor(theme) {
+    if (!theme) return "";
+    var css = theme.css || (theme.slug ? data()[theme.slug] : "") || "";
+    return parseMeta(css).example;
   }
 
   function source(slug) {
@@ -483,6 +494,7 @@
     sanitize: sanitize,
     parseMeta: parseMeta,
     builtin: builtin,
+    exampleFor: exampleFor,
     source: source,
     hooks: hooks,
     tags: tags,

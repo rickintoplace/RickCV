@@ -290,7 +290,9 @@
       sie die Farbe der Seitenspalte – die ist hier durchsichtig.  */
   color: var(--background-color);
   font-size: 0.78em;
-  line-height: 1.5;
+  /*  So hoch wie der Balken (1em seiner Schrift = 1.25em dieser): die Stufe
+      steht mittig darin.  */
+  line-height: calc(1em / 0.78);
   padding-left: 0.35em;
 }
 
