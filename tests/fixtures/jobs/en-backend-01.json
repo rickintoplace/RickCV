@@ -1,0 +1,29 @@
+{
+  "id": "en-backend-01",
+  "lang": "en",
+  "ad": "Backend Engineer (Python/Django)\nFieldnote Health · Austin, TX or Remote (US)\n\nAbout us\nFieldnote builds scheduling software for community health clinics.\n\nWhat you'll do\n- Build and maintain APIs in Python and Django\n- Design database schemas in PostgreSQL\n- Ship features end-to-end with product and design\n\nWhat we're looking for\n- 3+ years of professional experience with Python\n- Solid experience with Django and Django REST Framework\n- Strong PostgreSQL skills, including query optimization\n- Experience designing REST APIs\n- Comfortable with Docker and Git\n- Experience with Celery, AWS or GraphQL is a plus\n\nBenefits\n- Salary range $135,000 - $160,000 plus equity\n- Medical, dental and vision health insurance\n- 401(k) with 4% match\n- Unlimited PTO and 16 weeks paid parental leave\n- $1,000 home office stipend\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.\n\nHow to apply\nSend your resume to Priya Raman, jobs@fieldnote.example",
+  "must": [
+    "Python",
+    "Django",
+    "PostgreSQL",
+    "REST",
+    "Docker",
+    "Git"
+  ],
+  "nice": [
+    "Celery",
+    "AWS",
+    "GraphQL"
+  ],
+  "never": [
+    "401(k)",
+    "health insurance",
+    "PTO",
+    "equity",
+    "Austin",
+    "remote",
+    "stipend",
+    "Fieldnote",
+    "parental leave"
+  ]
+}

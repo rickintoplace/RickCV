@@ -1,0 +1,33 @@
+{
+  "id": "en-mech-01",
+  "lang": "en",
+  "ad": "Mechanical Design Engineer – Automation\nBadger Automation Systems · Milwaukee, WI\n\nResponsibilities\n- Design custom automated assembly equipment from concept to installation\n- Create 3D models and detailed drawings in SolidWorks\n- Work closely with controls engineers on PLC-based machine logic\n- Support build, debug and customer acceptance\n\nRequired\n- Bachelor's degree in Mechanical Engineering\n- 3+ years designing industrial machinery\n- Proficiency in SolidWorks\n- Working knowledge of GD&T (ASME Y14.5)\n- Understanding of PLC-controlled systems (Allen-Bradley or Siemens)\n- Strong design for manufacturing mindset\n\nPreferred\n- FEA experience\n- Exposure to Siemens TIA Portal\n- Six Sigma Green Belt\n\nBenefits: profit sharing, 401(k), medical/dental, 3 weeks PTO, tuition reimbursement, relocation assistance.\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.",
+  "must": [
+    "Mechanical engineering",
+    "SolidWorks",
+    "GD&T",
+    "PLC",
+    "Design for manufacturing"
+  ],
+  "nice": [
+    "FEA",
+    "Siemens TIA Portal",
+    "Six Sigma"
+  ],
+  "never": [
+    "401(k)",
+    "PTO",
+    "Milwaukee",
+    "relocation",
+    "Badger",
+    "profit sharing",
+    "tuition",
+    "medical"
+  ],
+  "alternatives": [
+    [
+      "Allen-Bradley",
+      "Siemens"
+    ]
+  ]
+}

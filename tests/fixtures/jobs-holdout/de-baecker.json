@@ -1,0 +1,29 @@
+{
+  "id": "de-baecker",
+  "lang": "de",
+  "ad": "Bäcker (m/w/d) in Vollzeit\n\nBackhaus Kornfeld GmbH – Ihr Handwerksbäcker in Freiburg seit 1952\n\nIhre Aufgaben:\n- Herstellung von Brot, Brötchen und Feingebäck nach traditionellen Rezepturen\n- Bedienung von Etagenofen und Teigteilmaschine\n- Führen von Teigen mit Sauerteig und langer Teigführung\n- Einhaltung der HACCP-Richtlinien und Hygienevorschriften\n\nIhr Profil:\n- Abgeschlossene Ausbildung als Bäcker (m/w/d)\n- Erfahrung mit Sauerteig\n- Bereitschaft zur Nachtarbeit (Arbeitsbeginn 2:00 Uhr)\n- Gültiges Gesundheitszeugnis nach § 43 IfSG\n- Zuverlässigkeit und Teamfähigkeit\n- Wünschenswert: Erfahrung in der Konditorei oder Meisterbrief\n\nWir bieten:\n- Nachtzuschläge steuerfrei\n- 30 Tage Urlaub\n- Mitarbeiterrabatt\n- Betriebliche Altersvorsorge\n\nGehalt: 2.900 – 3.300 € brutto monatlich\n\nBewerbung bitte an jobs@kornfeld-backhaus.de",
+  "must": [
+    "Ausbildung als Bäcker",
+    "Sauerteig",
+    "Nachtarbeit",
+    "Gesundheitszeugnis",
+    "HACCP",
+    "Zuverlässigkeit",
+    "Teamfähigkeit"
+  ],
+  "nice": [
+    "Konditorei",
+    "Meisterbrief"
+  ],
+  "never": [
+    "Nachtzuschläge",
+    "Urlaub",
+    "Mitarbeiterrabatt",
+    "Altersvorsorge",
+    "Freiburg",
+    "Kornfeld",
+    "Vollzeit",
+    "Gehalt",
+    "brutto"
+  ]
+}

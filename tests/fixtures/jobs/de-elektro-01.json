@@ -1,0 +1,33 @@
+{
+  "id": "de-elektro-01",
+  "lang": "de",
+  "ad": "Elektroniker für Energie- und Gebäudetechnik (gn) – Kundendienst und Neubau\nElektro Brückner GmbH & Co. KG · Kassel · Vollzeit\n\nDeine Aufgaben\n• Elektroinstallation in Neubau, Sanierung und Gewerbeobjekten\n• Prüfung ortsveränderlicher und ortsfester Betriebsmittel nach DGUV V3\n• Fehlersuche und Instandsetzung im Kundendienst\n• Montage von Wallboxen und Zählerschränken\n\nDein Profil\n• Abgeschlossene Ausbildung als Elektroniker für Energie- und Gebäudetechnik oder Elektroinstallateur\n• Berufserfahrung in der Elektroinstallation\n• Führerschein Klasse B (zwingend)\n• Erfahrung mit KNX, Photovoltaik oder SPS-Programmierung wünschenswert\n• Zuverlässigkeit und ein gepflegtes Auftreten beim Kunden\n\nWir bieten\n• Firmenwagen auch zur privaten Nutzung\n• Tariflohn nach Elektrohandwerk Hessen plus Weihnachtsgeld\n• 30 Tage Urlaub\n• Hochwertiges Werkzeug und Arbeitskleidung\n• Weiterbildung zum Meister wird gefördert\n\nBewerbung bitte an Herrn Tobias Brückner, info@elektro-brueckner.example, 0561 555 2210",
+  "must": [
+    "Elektroniker für Energie- und Gebäudetechnik",
+    "Führerschein Klasse B",
+    "Elektroinstallation",
+    "Zuverlässigkeit"
+  ],
+  "nice": [
+    "KNX",
+    "Photovoltaik",
+    "SPS"
+  ],
+  "never": [
+    "Firmenwagen",
+    "Tariflohn",
+    "Urlaub",
+    "Werkzeug",
+    "Arbeitskleidung",
+    "Kassel",
+    "Meisterbetrieb",
+    "Brückner",
+    "Weihnachtsgeld"
+  ],
+  "alternatives": [
+    [
+      "Elektroniker für Energie- und Gebäudetechnik",
+      "Elektroinstallateur"
+    ]
+  ]
+}

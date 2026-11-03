@@ -1,0 +1,27 @@
+{
+  "id": "de-support-01",
+  "lang": "de",
+  "ad": "IT-Support / First- & Second-Level (m/w/d)\nOWL Systemhaus GmbH · Bielefeld\n\nIhre Aufgaben\n- Annahme und Bearbeitung von Tickets im First- und Second-Level-Support\n- Administration von Windows-Clients und -Servern\n- Benutzerverwaltung im Active Directory\n- Vor-Ort-Einsätze bei Kunden in OWL\n\nIhr Profil\n- Abgeschlossene Ausbildung als Fachinformatiker für Systemintegration oder vergleichbare Qualifikation\n- Sehr gute Kenntnisse in Windows 10/11 und Windows Server\n- Erfahrung mit Active Directory und Gruppenrichtlinien\n- Grundlagen der Netzwerktechnik (TCP/IP, DNS, DHCP, VLAN)\n- Führerschein Klasse B zwingend\n- ITIL-Zertifizierung, Erfahrung mit Microsoft 365 oder VMware wünschenswert\n\nWir bieten\n- Firmenwagen und Diensthandy\n- 28 Tage Urlaub\n- Rufbereitschaft mit Zulage (freiwillig)\n- Obstkorb, Getränke, Teamevents\n\nIhr Ansprechpartner: Herr Dirk Wessel, jobs@owl-systemhaus.example, 0521 555 9090",
+  "must": [
+    "Fachinformatiker Systemintegration",
+    "Windows",
+    "Active Directory",
+    "Netzwerktechnik",
+    "Führerschein Klasse B"
+  ],
+  "nice": [
+    "ITIL",
+    "Microsoft 365",
+    "VMware"
+  ],
+  "never": [
+    "Firmenwagen",
+    "Urlaub",
+    "Rufbereitschaft",
+    "Zulage",
+    "Bielefeld",
+    "Systemhaus",
+    "Diensthandy",
+    "Obstkorb"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "id": "en-data-02",
+  "lang": "en",
+  "ad": "Business Intelligence Analyst\nHarborview Retail Group · Chicago, IL (Hybrid)\n\nHarborview operates 140 home goods stores across the Midwest.\n\nKey Responsibilities:\n* Build and maintain dashboards in Tableau or Power BI for merchandising and store operations\n* Write SQL to pull and transform data from our data warehouse\n* Partner with category managers on weekly performance reviews\n\nQualifications:\n* Bachelor's degree in Business, Economics, Information Systems or related field\n* 2+ years of experience in a BI or analytics role\n* Advanced SQL\n* Hands-on experience with Tableau or Power BI\n* Advanced Excel (pivot tables, lookups)\n* Strong data visualization and storytelling skills\n\nPreferred Qualifications:\n* Experience with Snowflake\n* Python for analysis\n* Familiarity with Google Analytics\n\nCompensation and Benefits:\n* $78,000 - $92,000 annual salary plus bonus\n* Medical, dental, vision; 401(k) match\n* 15 days PTO, tuition reimbursement\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.",
+  "must": [
+    "SQL",
+    "Tableau",
+    "Power BI",
+    "Excel",
+    "Data visualization"
+  ],
+  "nice": [
+    "Snowflake",
+    "Python",
+    "Google Analytics"
+  ],
+  "never": [
+    "401(k)",
+    "PTO",
+    "Chicago",
+    "tuition reimbursement",
+    "Medical",
+    "bonus",
+    "Harborview",
+    "hybrid"
+  ],
+  "alternatives": [
+    [
+      "Tableau",
+      "Power BI"
+    ]
+  ]
+}

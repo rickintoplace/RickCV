@@ -1,0 +1,28 @@
+{
+  "id": "en-ux-01",
+  "lang": "en",
+  "ad": "Product Designer (UX)\nBrightpath Learning · Remote-first, team hub in Lisbon\n\nYour role\nYou'll own the end-to-end design of our mobile learning app for teenagers.\n\nWhat you'll do\n- Run user research and usability tests with students and teachers\n- Turn insights into flows, wireframes and high-fidelity prototypes\n- Contribute to and maintain our design system\n\nWhat we're looking for\n- 3+ years of experience in UX design for digital products\n- Expert in Figma, including auto layout and components\n- Experience planning and conducting user research\n- Strong prototyping skills\n- A portfolio that shows your process, not just final screens\n- No degree required – we care about your work\n- Knowledge of accessibility guidelines and basic HTML/CSS is a plus\n- Experience with design systems is a bonus\n\nBenefits\n- Fully remote, two team offsites per year\n- €1,200 home office stipend, equity for every employee\n- Wellbeing allowance\n\nWe welcome applicants of every background, identity and ability.\nSend your portfolio link to design-jobs@brightpath.example",
+  "must": [
+    "UX design",
+    "Figma",
+    "User research",
+    "Prototyping",
+    "Portfolio"
+  ],
+  "nice": [
+    "Accessibility",
+    "HTML",
+    "CSS",
+    "Design systems"
+  ],
+  "never": [
+    "Remote",
+    "stipend",
+    "equity",
+    "Lisbon",
+    "offsites",
+    "Wellbeing",
+    "Brightpath",
+    "degree"
+  ]
+}

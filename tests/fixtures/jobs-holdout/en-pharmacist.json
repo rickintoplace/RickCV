@@ -1,0 +1,40 @@
+{
+  "id": "en-pharmacist",
+  "lang": "en",
+  "ad": "Staff Pharmacist – Full-Time\nBrightwater Community Pharmacy · Duluth, MN · $62–$68/hour\n\nAbout the role\nBrightwater is an independent, employee-owned pharmacy serving the Duluth area for 40 years. As Staff Pharmacist you will verify prescriptions, counsel patients, administer immunizations and supervise two pharmacy technicians.\n\nRequirements\n- Doctor of Pharmacy (PharmD) or B.S. in Pharmacy from an ACPE-accredited program\n- Active, unrestricted Minnesota pharmacist license (or eligibility to obtain within 60 days)\n- CPR certification\n- Immunization certification (APhA or equivalent)\n- Strong attention to detail and communication skills\n\nPreferred\n- Experience with PioneerRx or a comparable pharmacy management system\n- Medication therapy management (MTM) experience\n- Spanish or Hmong a plus\n\nBenefits\nMedical, dental and vision insurance; 401(k) with 5% match; paid CE allowance; no overnight shifts.\n\nBrightwater Community Pharmacy is an Equal Opportunity Employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.",
+  "must": [
+    "PharmD|Doctor of Pharmacy",
+    "B.S. in Pharmacy",
+    "ACPE",
+    "pharmacist license",
+    "CPR",
+    "Immunization certification",
+    "attention to detail",
+    "communication skills"
+  ],
+  "nice": [
+    "PioneerRx",
+    "MTM|Medication therapy management",
+    "Spanish",
+    "Hmong"
+  ],
+  "never": [
+    "401(k)",
+    "dental",
+    "vision",
+    "Duluth",
+    "Brightwater",
+    "employee-owned",
+    "overnight shifts",
+    "religion",
+    "veteran",
+    "Equal Opportunity",
+    "technicians"
+  ],
+  "alternatives": [
+    [
+      "PharmD|Doctor of Pharmacy",
+      "B.S. in Pharmacy"
+    ]
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "de-hotelfach",
+  "lang": "de",
+  "ad": "Hotelfachfrau / Hotelfachmann (m/w/d) Rezeption – Seehotel Wiesenthal ****S, Tegernsee\n\nWarum zu uns?\n» Unterkunft im Mitarbeiterhaus möglich\n» Kostenfreie Nutzung des Spa-Bereichs\n» Familien- und Freundesrate in allen Partnerhotels\n» 5-Tage-Woche, Dienstplan vier Wochen im Voraus\n\nIhre Rolle\nAls Gastgeber*in an der Rezeption begleiten Sie unsere Gäste vom Check-in bis zum Check-out, bearbeiten Reservierungen und Beschwerden und arbeiten eng mit Housekeeping und Concierge zusammen.\n\nWir suchen Sie, wenn …\n… Sie eine abgeschlossene Ausbildung als Hotelfachfrau/-mann oder Hotelkaufmann/-frau mitbringen,\n… Sie bereits in der gehobenen Hotellerie gearbeitet haben,\n… Sie ein Property-Management-System wie Opera, Protel oder Mews sicher bedienen,\n… Englisch verhandlungssicher für Sie selbstverständlich ist (zwingend),\n… Sie Spät- und Wochenenddienste nicht scheuen.\n\nFranzösisch oder Italienisch sind von Vorteil, ebenso Erfahrung mit Upselling.\n\nGehalt: ab 3.100 € brutto zzgl. Trinkgeld und Servicepauschale.",
+  "must": [
+    "Hotelfachfrau|Hotelfachmann",
+    "Hotelkaufmann",
+    "Hotellerie",
+    "Opera",
+    "Protel",
+    "Mews",
+    "Englisch",
+    "Spät- und Wochenenddienste"
+  ],
+  "nice": [
+    "Französisch",
+    "Italienisch",
+    "Upselling"
+  ],
+  "never": [
+    "Mitarbeiterhaus",
+    "Spa",
+    "Trinkgeld",
+    "Servicepauschale",
+    "Tegernsee",
+    "Wiesenthal",
+    "Partnerhotels",
+    "Housekeeping",
+    "Concierge",
+    "5-Tage-Woche"
+  ],
+  "alternatives": [
+    [
+      "Hotelfachfrau|Hotelfachmann",
+      "Hotelkaufmann"
+    ],
+    [
+      "Opera",
+      "Protel",
+      "Mews"
+    ]
+  ]
+}

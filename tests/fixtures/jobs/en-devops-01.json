@@ -1,0 +1,34 @@
+{
+  "id": "en-devops-01",
+  "lang": "en",
+  "ad": "Site Reliability Engineer – Platform Team\nCloudnest GmbH · Berlin or Remote (EU time zones)\n\nWhat you'll do\n• Operate our multi-tenant k8s clusters on AWS (EKS)\n• Codify infrastructure with Terraform and Helm\n• Improve our CI/CD pipelines (GitHub Actions, Argo CD)\n• Participate in our on-call rotation (one week in six)\n\nWhat you bring\n• 4+ years in SRE, DevOps or platform engineering\n• Production experience with Kubernetes and Terraform\n• In-depth knowledge of AWS networking and IAM\n• Strong Linux fundamentals\n• Experience building CI/CD pipelines\n• Scripting in Python or Bash\n• Go experience, Prometheus/Grafana or a CKA certification are a bonus\n\nPerks\n• €80k–€100k plus stock options\n• On-call bonus and €2,000 conference budget\n• Relocation support to Berlin, Urban Sports Club / Gym membership\n\nCloudnest is an equal opportunity employer.\nApply via careers@cloudnest.example",
+  "must": [
+    "Kubernetes",
+    "Terraform",
+    "AWS",
+    "Linux",
+    "CI/CD",
+    "Python"
+  ],
+  "nice": [
+    "Go",
+    "Prometheus",
+    "CKA"
+  ],
+  "never": [
+    "remote",
+    "stock options",
+    "on-call bonus",
+    "Berlin",
+    "relocation",
+    "Gym",
+    "Cloudnest",
+    "conference budget"
+  ],
+  "alternatives": [
+    [
+      "Python",
+      "Bash"
+    ]
+  ]
+}

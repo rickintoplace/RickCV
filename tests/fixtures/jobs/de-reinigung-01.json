@@ -1,0 +1,24 @@
+{
+  "id": "de-reinigung-01",
+  "lang": "de",
+  "ad": "Reinigungskraft (m/w/d) für Büroobjekte – Minijob oder Teilzeit\nGlanzwerk Gebäudeservice GmbH, Chemnitz\n\nWir suchen ab sofort Reinigungskräfte für die Unterhaltsreinigung in Büros im Chemnitzer Zentrum. Arbeitszeit montags bis freitags von 17 bis 20 Uhr. Keine Vorkenntnisse nötig, eine Einarbeitung ist selbstverständlich. Erfahrung in der Gebäudereinigung ist nicht erforderlich.\nWichtig sind uns Zuverlässigkeit und Sorgfalt sowie Grundkenntnisse in Deutsch, damit Sie Reinigungspläne lesen können. Ein Führerschein Klasse B ist von Vorteil, weil wir mehrere Objekte betreuen.\nWir zahlen Tariflohn Gebäudereinigung (Lohngruppe 1), stellen Arbeitskleidung, erstatten Fahrtkosten zwischen den Objekten und gewähren anteilig Urlaub.\nRufen Sie einfach an: Objektleiterin Frau Petra Schöne, 0371 555 1212.",
+  "must": [
+    "Zuverlässigkeit",
+    "Sorgfalt",
+    "Deutsch"
+  ],
+  "nice": [
+    "Führerschein Klasse B"
+  ],
+  "never": [
+    "Vorkenntnisse",
+    "Gebäudereinigung",
+    "Minijob",
+    "Arbeitskleidung",
+    "Urlaub",
+    "Chemnitz",
+    "Glanzwerk",
+    "Fahrtkosten",
+    "Tariflohn"
+  ]
+}

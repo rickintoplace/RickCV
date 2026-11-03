@@ -1,0 +1,39 @@
+{
+  "id": "de-it-01",
+  "lang": "de",
+  "ad": "Softwareentwickler Java (m/w/d)\nHanse Versicherung AG · Hamburg · Hybrid\n\nDeine Aufgaben\n- Weiterentwicklung unserer Bestandsführungssysteme mit Java und Spring Boot\n- Entwurf und Implementierung von REST-Schnittstellen\n- Code Reviews und Pair Programming im agilen Team\n\nWas du mitbringst\n- Abgeschlossenes Studium der Informatik oder eine vergleichbare Qualifikation (z. B. Fachinformatiker Anwendungsentwicklung)\n- Mehrjährige Erfahrung mit Java (ab Version 17) und Spring Boot\n- Gute SQL-Kenntnisse (Oracle oder PostgreSQL)\n- Erfahrung mit REST-APIs und Git\n- Sehr gute Deutschkenntnisse (mindestens C1), da unsere Fachbereiche deutschsprachig arbeiten\n- Erfahrung mit Kubernetes und Kafka ist ein Plus, Angular-Kenntnisse wären schön\n\nWas wir bieten\n- Bis zu 80 % Homeoffice\n- 30 Tage Urlaub, 24.12. und 31.12. frei\n- 2.000 € Weiterbildungsbudget pro Jahr\n- BahnCard 100 oder Deutschlandticket, betriebliche Altersvorsorge\n- Notebook und Arbeitsplatz nach Wahl\n\nWir freuen uns auf Bewerbungen unabhängig von Geschlecht, Herkunft, Religion, Alter, Behinderung oder sexueller Identität.\nFragen an Thore Matthiesen, IT-Recruiting: it-jobs@hanse-vers.example",
+  "must": [
+    "Informatik",
+    "Java",
+    "Spring Boot",
+    "SQL",
+    "REST",
+    "Git",
+    "Deutsch"
+  ],
+  "nice": [
+    "Kubernetes",
+    "Kafka",
+    "Angular"
+  ],
+  "never": [
+    "Homeoffice",
+    "Urlaub",
+    "Weiterbildungsbudget",
+    "Bahncard",
+    "Hamburg",
+    "Hanseversicherung",
+    "Altersvorsorge",
+    "Notebook"
+  ],
+  "alternatives": [
+    [
+      "Informatik",
+      "Fachinformatiker Anwendungsentwicklung"
+    ],
+    [
+      "Oracle",
+      "PostgreSQL"
+    ]
+  ]
+}

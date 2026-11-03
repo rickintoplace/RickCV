@@ -1,0 +1,32 @@
+{
+  "id": "de-bau-01",
+  "lang": "de",
+  "ad": "Bauleiter / Bauingenieur (m/w/d) Hochbau\nIngenieurbüro Lange & Söhne · Leipzig\n\nIhre Aufgaben\n- Objektüberwachung (LPH 8 HOAI) für öffentliche Bauvorhaben\n- Koordination der Gewerke und Terminplanung\n- Aufmaß, Rechnungsprüfung und Nachtragsmanagement nach VOB\n\nIhr Profil\n- Abgeschlossenes Studium des Bauingenieurwesens oder der Architektur\n- Mehrjährige Erfahrung in der Bauleitung im Hochbau\n- Sichere Kenntnisse der HOAI und der VOB\n- Führerschein Klasse B\n- Kenntnisse in AVA-Software (z. B. California) und Revit von Vorteil\n\nWir bieten\n- Dienstwagen und Smartphone\n- 30 Tage Urlaub, Vergütung in Anlehnung an Tarif Bau\n- Betriebliche Altersvorsorge\n- Regelmäßige Teamfeiern\n\nBewerbungen an Dipl.-Ing. Peter Lange, bewerbung@lange-soehne.example",
+  "must": [
+    "Bauingenieurwesen",
+    "Bauleitung",
+    "HOAI",
+    "VOB",
+    "Führerschein Klasse B"
+  ],
+  "nice": [
+    "AVA",
+    "Revit"
+  ],
+  "never": [
+    "Dienstwagen",
+    "Urlaub",
+    "Tarif",
+    "Altersvorsorge",
+    "Leipzig",
+    "Ingenieurbüro",
+    "Smartphone",
+    "Teamfeiern"
+  ],
+  "alternatives": [
+    [
+      "Bauingenieurwesen",
+      "Architektur"
+    ]
+  ]
+}

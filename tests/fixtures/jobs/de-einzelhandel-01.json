@@ -1,0 +1,24 @@
+{
+  "id": "de-einzelhandel-01",
+  "lang": "de",
+  "ad": "Verkäufer:in (m/w/d) in Teilzeit – Bio-Supermarkt\nGrünkern Naturkost GmbH · Filiale Freiburg-Wiehre\n\nDeine Aufgaben\n- Beratung unserer Kund:innen an der Frischetheke und im Markt\n- Kassieren und Kassenabrechnung\n- Warenverräumung und Pflege der Warenpräsentation\n\nDas bringst du mit\n- Erfahrung im Verkauf, idealerweise im Lebensmitteleinzelhandel\n- Kassiererfahrung\n- Ausgeprägte Kundenorientierung und Freundlichkeit\n- Bereitschaft zur Samstagsarbeit\n- Eine Ausbildung als Kauffrau/Kaufmann im Einzelhandel ist von Vorteil\n- Erfahrung mit einem Warenwirtschaftssystem gern gesehen\n\nDas bieten wir dir\n- Vergütung nach Tarif des Einzelhandels Baden-Württemberg\n- 20 % Personalrabatt auf das gesamte Sortiment\n- 36 Tage Urlaub (bei 6-Tage-Woche)\n- Monatliche Gutscheine im Wert von 50 €\n\nWir freuen uns über alle Bewerbungen – unabhängig von Alter, Herkunft oder Geschlecht.\nFilialleitung Frau Nadine Asal, freiburg@gruenkern.example",
+  "must": [
+    "Verkauf",
+    "Kassiererfahrung",
+    "Kundenorientierung",
+    "Samstagsarbeit"
+  ],
+  "nice": [
+    "Kaufmann im Einzelhandel",
+    "Warenwirtschaftssystem"
+  ],
+  "never": [
+    "Personalrabatt",
+    "Urlaub",
+    "Tarif",
+    "Freiburg",
+    "Grünkern",
+    "Gutscheine",
+    "Teilzeit"
+  ]
+}

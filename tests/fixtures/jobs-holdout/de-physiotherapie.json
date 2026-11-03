@@ -1,0 +1,30 @@
+{
+  "id": "de-physiotherapie",
+  "lang": "de",
+  "ad": "🚀 Wir suchen dich: Physiotherapeut:in (Vollzeit/Teilzeit) für unsere Praxis in Leipzig-Plagwitz!\n\nBei Bewegungsraum Leipzig behandeln wir orthopädische, chirurgische und neurologische Patient:innen – mit Zeit statt Fließband.\n\n👉 Was du mitbringst:\n✅ Staatliche Anerkennung als Physiotherapeut:in\n✅ Zertifikat Manuelle Therapie (MT)\n✅ Freude an Hausbesuchen – Führerschein Klasse B ist daher Pflicht\n✅ Kommunikationsstärke und Empathie\n✅ Bonus: KG-Gerät, Lymphdrainage (MLD) oder Bobath\n\n👉 Was wir dir bieten:\n💶 4.000 € brutto bei Vollzeit + Umsatzbeteiligung\n📚 2.000 € Fortbildungsbudget pro Jahr + 5 Fortbildungstage\n🚲 JobRad\n⏰ 30-Minuten-Takt\n🌱 Kein Wochenenddienst\n\nBerufsanfänger:innen sind ausdrücklich willkommen!\n\n📩 Schick uns einfach eine kurze Nachricht – kein Anschreiben nötig. #Physiotherapie #Leipzig #Jobs",
+  "must": [
+    "Physiotherapeut",
+    "Staatliche Anerkennung",
+    "Manuelle Therapie|MT",
+    "Hausbesuche",
+    "Führerschein Klasse B",
+    "Kommunikationsstärke",
+    "Empathie"
+  ],
+  "nice": [
+    "KG-Gerät",
+    "Lymphdrainage|MLD",
+    "Bobath"
+  ],
+  "never": [
+    "JobRad",
+    "Fortbildungsbudget",
+    "Umsatzbeteiligung",
+    "Wochenenddienst",
+    "Anschreiben",
+    "Leipzig",
+    "Bewegungsraum",
+    "Berufsanfänger",
+    "Fließband"
+  ]
+}

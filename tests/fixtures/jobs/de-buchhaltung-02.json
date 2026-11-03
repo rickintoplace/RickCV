@@ -1,0 +1,33 @@
+{
+  "id": "de-buchhaltung-02",
+  "lang": "de",
+  "ad": "Senior Accountant / Bilanzbuchhalter (m/w/d) mit SAP FI/CO\nRheinMain Industrieholding AG · Frankfurt am Main\n\nIhre Verantwortung\n• Erstellung von Monats-, Quartals- und Jahresabschlüssen nach HGB und IFRS\n• Anlagenbuchhaltung und Intercompany-Abstimmungen\n• Betreuung der Wirtschaftsprüfung\n• Mitarbeit an der Weiterentwicklung von SAP S/4HANA\n\nIhre Qualifikationen\n• Abgeschlossenes Studium der Wirtschaftswissenschaften oder Weiterbildung zum Bilanzbuchhalter (IHK)\n• Mehrjährige Berufserfahrung im Rechnungswesen eines Industrieunternehmens\n• Fundierte Kenntnisse in HGB und IFRS\n• Sehr gute SAP FI/CO-Kenntnisse\n• Verhandlungssicheres Englisch\n• Sehr gute Excel-Kenntnisse\n• Erfahrung mit Konzernabschlüssen und Power BI von Vorteil\n\nWir bieten\n• Attraktives Gehalt plus Bonus\n• Drei Tage Homeoffice pro Woche\n• 30 Tage Urlaub, betriebliche Altersvorsorge\n• Kantine und Zuschuss zur Kinderbetreuung\n\nDie RheinMain Industrieholding fördert Vielfalt und begrüßt alle Bewerbungen.\nKontakt: Talent Acquisition, Frau Johanna Weiß, jobs@rheinmain-holding.example",
+  "must": [
+    "Bilanzbuchhalter",
+    "SAP FI/CO",
+    "HGB",
+    "IFRS",
+    "Englisch",
+    "Excel"
+  ],
+  "nice": [
+    "Konzernabschluss",
+    "Power BI"
+  ],
+  "never": [
+    "Bonus",
+    "Homeoffice",
+    "Urlaub",
+    "Kantine",
+    "Frankfurt",
+    "Altersvorsorge",
+    "Kinderbetreuung",
+    "Rheinmain"
+  ],
+  "alternatives": [
+    [
+      "Wirtschaftswissenschaften",
+      "Bilanzbuchhalter"
+    ]
+  ]
+}

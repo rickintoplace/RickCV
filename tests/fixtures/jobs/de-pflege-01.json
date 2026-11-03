@@ -1,0 +1,29 @@
+{
+  "id": "de-pflege-01",
+  "lang": "de",
+  "ad": "Pflegefachkraft (m/w/d) für die stationäre Altenpflege\nSeniorenzentrum Am Lindenhof gGmbH · Kassel · Vollzeit/Teilzeit · unbefristet\n\nÜber uns\nDas Seniorenzentrum Am Lindenhof betreut 120 Bewohnerinnen und Bewohner in vier Wohnbereichen. Wir sind Teil der Diakonie Hessen.\n\nIhre Aufgaben\n- Grund- und Behandlungspflege nach ärztlicher Anordnung\n- Erstellung und Evaluation von Pflegeplanungen\n- Pflegedokumentation in Vivendi PD\n- Medikamentenmanagement und Wundversorgung\n- Anleitung von Pflegehilfskräften und Auszubildenden\n\nIhr Profil\n- Abgeschlossene dreijährige Ausbildung als Pflegefachfrau/-mann, Altenpfleger:in oder Gesundheits- und Krankenpfleger:in\n- Bereitschaft zum Schichtdienst inkl. Wochenenddienste\n- Gute Deutschkenntnisse (mind. B2)\n- Erfahrung mit dem Strukturmodell (SIS) wünschenswert\n- Weiterbildung zur Praxisanleitung von Vorteil\n- Empathie und Teamfähigkeit\n\nWir bieten\n- Vergütung nach AVR Diakonie inkl. Jahressonderzahlung\n- 30 Tage Urlaub\n- Betriebliche Altersvorsorge (KZVK)\n- JobRad und Zuschuss zum Deutschlandticket\n- Verlässliche Dienstpläne mit Wunschfrei-Buch\n\nSchwerbehinderte Menschen werden bei gleicher Eignung bevorzugt berücksichtigt.\n\nKontakt\nFrau Sabine Örtel, Pflegedienstleitung\nTelefon 0561 555 0192\nbewerbung@lindenhof-kassel.example",
+  "must": [
+    "Pflegefachkraft",
+    "Schichtdienst",
+    "Deutsch",
+    "Empathie",
+    "Teamfähigkeit"
+  ],
+  "nice": [
+    "Strukturmodell",
+    "Praxisanleitung"
+  ],
+  "never": [
+    "Urlaub",
+    "AVR Diakonie",
+    "Jahressonderzahlung",
+    "Altersvorsorge",
+    "JobRad",
+    "Deutschlandticket",
+    "Dienstpläne",
+    "Kassel",
+    "Lindenhof",
+    "Schwerbehinderte",
+    "Wunschfrei"
+  ]
+}

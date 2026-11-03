@@ -1,0 +1,31 @@
+{
+  "id": "de-gaertner",
+  "lang": "de",
+  "ad": "Gärtner/-in GaLaBau gesucht! Familienbetrieb Grünwerk Albrecht (14 MA) im Raum Ulm sucht ab sofort Gärtner/-in, Fachrichtung Garten- und Landschaftsbau, gern mit Erfahrung in Pflasterarbeiten, Natursteinmauern und Pflanzenkenntnis. Führerschein BE notwendig (Anhänger!), Maschinenschein/Baggerschein wäre super. Zuverlässig, körperlich fit und teamfähig solltest du sein. Keine Wochenendarbeit, kein Winterdienst. Wir zahlen übertariflich, Arbeitskleidung wird gestellt, Fahrt vom Sammelpunkt im Firmenbus. Kontakt: 0731 555 98 12.",
+  "must": [
+    "Gärtner",
+    "Garten- und Landschaftsbau|GaLaBau",
+    "Führerschein BE",
+    "zuverlässig",
+    "körperlich fit",
+    "teamfähig"
+  ],
+  "nice": [
+    "Pflasterarbeiten",
+    "Natursteinmauern",
+    "Pflanzenkenntnis",
+    "Baggerschein|Maschinenschein"
+  ],
+  "never": [
+    "Wochenendarbeit",
+    "Winterdienst",
+    "Arbeitskleidung",
+    "Firmenbus",
+    "Ulm",
+    "Grünwerk",
+    "Albrecht",
+    "übertariflich",
+    "Anhänger",
+    "Familienbetrieb"
+  ]
+}

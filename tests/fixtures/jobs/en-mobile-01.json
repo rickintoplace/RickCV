@@ -1,0 +1,27 @@
+{
+  "id": "en-mobile-01",
+  "lang": "en",
+  "ad": "iOS Engineer\nTidewave ApS · Copenhagen (hybrid) or remote in EU\n\nWhat you'll be doing\n- Building new features for our sailing navigation app in Swift and SwiftUI\n- Improving performance and offline support\n- Reviewing code and shaping our mobile architecture\n\nWhat we're looking for\n- 3+ years building native iOS apps with Swift\n- Production experience with SwiftUI\n- Good understanding of Xcode, Instruments and Git\n- Experience with Kotlin (we also ship Android) is a plus\n- Familiarity with Combine and App Store release processes is a bonus\n\nWhat we offer\n- Equity, 6 weeks vacation, pension\n- Free lunch in the office, visa support for non-EU candidates\n- 24 weeks paid parental leave\n\nTidewave is committed to diversity and inclusion.\nWrite to Mads at jobs@tidewave.example",
+  "must": [
+    "Swift",
+    "SwiftUI",
+    "iOS",
+    "Xcode",
+    "Git"
+  ],
+  "nice": [
+    "Kotlin",
+    "Combine",
+    "App Store"
+  ],
+  "never": [
+    "equity",
+    "remote",
+    "Copenhagen",
+    "pension",
+    "lunch",
+    "Tidewave",
+    "visa",
+    "parental leave"
+  ]
+}

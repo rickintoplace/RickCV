@@ -1,0 +1,30 @@
+{
+  "id": "de-ausbildung-01",
+  "lang": "de",
+  "ad": "Ausbildung zum Industriemechaniker (m/w/d) – Start 1. September 2027\nMainfranken Lager- und Antriebstechnik GmbH · Schweinfurt\n\nWas dich in der Ausbildung erwartet\n- Dreieinhalb Jahre Ausbildung in unserer eigenen Lehrwerkstatt\n- Drehen, Fräsen, Bohren – konventionell und an CNC-Maschinen\n- Montage und Instandhaltung von Produktionsanlagen\n- Berufsschule in Schweinfurt im Blockunterricht\n\nWas du mitbringst\n- Guter Realschulabschluss oder Mittlere Reife\n- Gute Noten in Mathematik und Physik\n- Handwerkliches Geschick und technisches Interesse\n- Ein Praktikum im Metallbereich ist von Vorteil\n\nWas wir dir bieten\n- Ausbildungsvergütung nach Tarif Metall- und Elektroindustrie (1. Jahr: 1.150 €)\n- 30 Tage Urlaub\n- Eigenes Werkzeug und Arbeitskleidung\n- Azubi-Ausflüge und Fahrtkostenzuschuss\n- Gute Chancen auf Übernahme\n\nBewirb dich bis 31. Januar bei unserer Ausbildungsleiterin Frau Katja Rösch, ausbildung@mlat.example",
+  "must": [
+    "Realschulabschluss",
+    "Mathematik",
+    "Physik",
+    "Handwerkliches Geschick"
+  ],
+  "nice": [
+    "Praktikum"
+  ],
+  "never": [
+    "Ausbildungsvergütung",
+    "Urlaub",
+    "Übernahme",
+    "Werkzeug",
+    "Azubi-Ausflüge",
+    "Schweinfurt",
+    "Lager- und Antriebstechnik",
+    "Fahrtkostenzuschuss"
+  ],
+  "alternatives": [
+    [
+      "Realschulabschluss",
+      "Mittlere Reife"
+    ]
+  ]
+}

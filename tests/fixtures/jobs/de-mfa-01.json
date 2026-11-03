@@ -1,0 +1,33 @@
+{
+  "id": "de-mfa-01",
+  "lang": "de",
+  "ad": "Medizinische Fachangestellte (MFA) in Voll- oder Teilzeit\nHausarztpraxis Dr. med. Engel & Kollegen, Würzburg-Zellerau\n\nWir sind eine hausärztliche Gemeinschaftspraxis mit drei Ärztinnen und einem Team aus acht MFA.\n\nDeine Aufgaben\n- Empfang, Terminvergabe und Patientenkoordination\n- Blutentnahmen, EKG, Lungenfunktion und Impfungen\n- Assistenz bei Untersuchungen\n- Quartalsabrechnung nach EBM und GOÄ\n\nDas wünschen wir uns\n- Abgeschlossene Ausbildung als Medizinische Fachangestellte (m/w/d) oder Arzthelferin\n- Routine bei Blutentnahme und EKG\n- Sicherer Umgang mit einer Praxissoftware\n- Freundlichkeit und Ruhe auch im vollen Wartezimmer\n- Kenntnisse in medatixx sowie im Impfmanagement von Vorteil\n- Erfahrung in der Abrechnung (EBM/GOÄ) wünschenswert\n\nDas bieten wir\n- Mittwochnachmittag und Freitagnachmittag frei\n- 30 Tage Urlaub, Weihnachtsgeld\n- Bezahlte Fortbildung (z. B. VERAH, NäPa)\n- Zuschuss zur Kinderbetreuung\n\nBewerbungen gern per Mail an praxis@dr-engel-wuerzburg.example oder persönlich an der Anmeldung.",
+  "must": [
+    "Medizinische Fachangestellte",
+    "Blutentnahme",
+    "EKG",
+    "Praxissoftware",
+    "Freundlichkeit"
+  ],
+  "nice": [
+    "Medatixx",
+    "Impfmanagement",
+    "Abrechnung"
+  ],
+  "never": [
+    "Urlaub",
+    "Fortbildung",
+    "Weihnachtsgeld",
+    "Kinderbetreuung",
+    "Würzburg",
+    "Hausarztpraxis",
+    "Dr. Engel",
+    "Mittwochnachmittag"
+  ],
+  "alternatives": [
+    [
+      "Medizinische Fachangestellte",
+      "Arzthelferin"
+    ]
+  ]
+}

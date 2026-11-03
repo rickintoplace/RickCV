@@ -1,0 +1,28 @@
+{
+  "id": "en-nurse-01",
+  "lang": "en",
+  "ad": "Registered Nurse (RN) – Telemetry, Nights\nSt. Agnes Medical Center · Phoenix, AZ · Full time\n\n$15,000 sign-on bonus for experienced RNs!\n\nJob Summary\nProvide direct patient care on a 32-bed telemetry unit, three 12-hour night shifts per week.\n\nRequirements\n- Current Arizona RN license or multistate compact license (required)\n- BLS and ACLS certification from the American Heart Association\n- Minimum 1 year of acute care experience, telemetry preferred\n- Ability to work night shifts and every third weekend\n\nPreferred\n- BSN\n- PALS\n- Experience with Epic EHR\n\nWe Offer\n- Shift differentials for nights and weekends\n- 403(b) with employer match, generous PTO\n- Tuition reimbursement and on-site childcare\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.\nContact: Nurse Recruiter Maria Lopez, nursing.jobs@stagnes.example",
+  "must": [
+    "RN license",
+    "BLS",
+    "ACLS",
+    "Acute care",
+    "Night shifts"
+  ],
+  "nice": [
+    "Telemetry",
+    "BSN",
+    "PALS",
+    "Epic"
+  ],
+  "never": [
+    "sign-on bonus",
+    "tuition",
+    "403(b)",
+    "PTO",
+    "Phoenix",
+    "St. Agnes",
+    "differentials",
+    "childcare"
+  ]
+}

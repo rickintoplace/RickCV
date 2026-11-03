@@ -1,0 +1,77 @@
+{
+ "id": "koch",
+ "name": "Lukas Brandt",
+ "role": "Küchenchef",
+ "street": "Am Markt 5",
+ "city": "79098 Freiburg im Breisgau",
+ "email": "lukas.brandt@example.net",
+ "phone": "0761 445566",
+ "experience": [
+  {
+   "title": "Küchenchef",
+   "org": "Hotel Schwarzwaldblick",
+   "place": "Titisee-Neustadt",
+   "start": "03/2021",
+   "end": "",
+   "present": true,
+   "bullets": [
+    "Leitung einer Brigade mit 9 Köchinnen und Köchen",
+    "Einführung eines saisonalen Menükonzepts"
+   ]
+  },
+  {
+   "title": "Sous-Chef",
+   "org": "Restaurant Kornhaus",
+   "place": "Freiburg im Breisgau",
+   "start": "06/2016",
+   "end": "02/2021",
+   "present": false,
+   "bullets": [
+    "Warenwirtschaft und HACCP-Dokumentation"
+   ]
+  },
+  {
+   "title": "Jungkoch",
+   "org": "Gasthaus Zur Linde",
+   "place": "Emmendingen",
+   "start": "09/2013",
+   "end": "05/2016",
+   "present": false,
+   "bullets": []
+  }
+ ],
+ "education": [
+  {
+   "title": "Küchenmeister (IHK)",
+   "org": "IHK Südlicher Oberrhein",
+   "place": "Freiburg im Breisgau",
+   "start": "09/2018",
+   "end": "07/2019",
+   "present": false
+  },
+  {
+   "title": "Ausbildung zum Koch",
+   "org": "Gasthaus Zur Linde",
+   "place": "Emmendingen",
+   "start": "08/2010",
+   "end": "07/2013",
+   "present": false
+  }
+ ],
+ "skills": [
+  "HACCP",
+  "Menüplanung",
+  "Warenwirtschaft",
+  "Personalführung"
+ ],
+ "languages": [
+  [
+   "Deutsch",
+   "Muttersprache"
+  ],
+  [
+   "Französisch",
+   "B1"
+  ]
+ ]
+}

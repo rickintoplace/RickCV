@@ -1,0 +1,84 @@
+{
+ "id": "buero",
+ "name": "Dr. Johanna Weiß-Becker",
+ "role": "Referentin Controlling",
+ "street": "Kaiserstraße 77",
+ "city": "60329 Frankfurt am Main",
+ "email": "johanna.weiss-becker@example.com",
+ "phone": "+49 (0)69 123 45 67",
+ "birth": "30.01.1985 in Mainz",
+ "experience": [
+  {
+   "title": "Referentin Controlling",
+   "org": "Rhein-Main Versicherung AG",
+   "place": "Frankfurt am Main",
+   "start": "07/2019",
+   "end": "",
+   "present": true,
+   "bullets": [
+    "Aufbau eines Kennzahlensystems mit Power BI",
+    "Budgetplanung für drei Geschäftsbereiche"
+   ]
+  },
+  {
+   "title": "Wissenschaftliche Mitarbeiterin",
+   "org": "Goethe-Universität",
+   "place": "Frankfurt am Main",
+   "start": "10/2014",
+   "end": "06/2019",
+   "present": false,
+   "bullets": [
+    "Lehre im Fach Kostenrechnung",
+    "Promotion zur Steuerung öffentlicher Unternehmen"
+   ]
+  },
+  {
+   "title": "Werkstudentin Finanzbuchhaltung",
+   "org": "Mainzer Stadtwerke AG",
+   "place": "Mainz",
+   "start": "04/2011",
+   "end": "09/2014",
+   "present": false,
+   "bullets": []
+  }
+ ],
+ "education": [
+  {
+   "title": "Promotion (Dr. rer. pol.)",
+   "org": "Goethe-Universität",
+   "place": "Frankfurt am Main",
+   "start": "10/2014",
+   "end": "06/2019",
+   "present": false
+  },
+  {
+   "title": "Master of Science Betriebswirtschaftslehre",
+   "org": "Johannes Gutenberg-Universität",
+   "place": "Mainz",
+   "start": "10/2011",
+   "end": "09/2014",
+   "present": false
+  }
+ ],
+ "skills": [
+  "SAP FI/CO",
+  "Power BI",
+  "Excel (VBA)",
+  "DATEV",
+  "Kostenrechnung"
+ ],
+ "languages": [
+  [
+   "Deutsch",
+   "Muttersprache"
+  ],
+  [
+   "Englisch",
+   "verhandlungssicher"
+  ],
+  [
+   "Französisch",
+   "B2"
+  ]
+ ]
+}

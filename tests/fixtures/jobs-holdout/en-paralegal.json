@@ -1,0 +1,39 @@
+{
+  "id": "en-paralegal",
+  "lang": "en",
+  "ad": "We are a twelve-partner law firm in Leeds with a busy residential conveyancing department, and we are looking for a paralegal to join the team on a permanent basis. You will manage a caseload of sale and purchase files from instruction to completion under the supervision of a solicitor, carry out searches, raise enquiries, prepare completion statements and liaise with estate agents, lenders and HM Land Registry. You must have at least two years' experience in residential conveyancing and be confident using a case management system; we use Proclaim, but experience with LEAP or Osprey is equally welcome. A law degree, LPC or CILEx qualification would be an advantage but is not essential. Excellent written English, strong organisational skills and the ability to work to tight deadlines are essential. Salary £26,000–£30,000 depending on experience, 25 days' holiday plus bank holidays, hybrid working after probation, and a free parking space in the city centre. Hartley Brooke LLP is authorised and regulated by the Solicitors Regulation Authority. No agencies please.",
+  "must": [
+    "residential conveyancing|conveyancing",
+    "case management system",
+    "Proclaim",
+    "LEAP",
+    "Osprey",
+    "written English",
+    "organisational skills",
+    "deadlines"
+  ],
+  "nice": [
+    "law degree",
+    "LPC",
+    "CILEx"
+  ],
+  "never": [
+    "holiday",
+    "hybrid working",
+    "parking",
+    "Leeds",
+    "Hartley Brooke",
+    "Solicitors Regulation Authority",
+    "agencies",
+    "solicitor",
+    "estate agents",
+    "probation"
+  ],
+  "alternatives": [
+    [
+      "Proclaim",
+      "LEAP",
+      "Osprey"
+    ]
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "de-lager-02",
+  "lang": "de",
+  "ad": "Kommissionierer (m/w/d) gesucht – Quereinsteiger willkommen!\nFür unseren Kunden, ein Lebensmittel-Zentrallager in Bremen-Hemelingen, suchen wir ab sofort Kommissionierer in Vollzeit. Du stellst Bestellungen mit dem Handscanner zusammen, packst Paletten und hältst deinen Arbeitsbereich sauber. Keine Vorkenntnisse erforderlich, ein Staplerschein ist nicht notwendig, wir lernen dich an.\nWas du brauchst: ausreichende Deutschkenntnisse, damit du Arbeitsanweisungen verstehst, Zuverlässigkeit und Schichtbereitschaft (Früh-, Spät- und Nachtschicht). Körperliche Fitness ist wichtig, da du viel stehst und hebst.\nWir zahlen 15,50 € pro Stunde plus Nachtzuschläge, wöchentliche Abschlagszahlung auf Wunsch (Wochenlohn), Fahrtkostenzuschuss und stellen Arbeitskleidung. Nach der Probezeit ist eine Übernahme beim Kunden möglich.\nLogwerk Personal GmbH, Niederlassung Bremen, Tel. 0421 555 6060, WhatsApp-Bewerbung möglich.",
+  "must": [
+    "Deutsch",
+    "Zuverlässigkeit",
+    "Schichtbereitschaft"
+  ],
+  "nice": [],
+  "never": [
+    "Staplerschein",
+    "Vorkenntnisse",
+    "Wochenlohn",
+    "Fahrtkosten",
+    "Arbeitskleidung",
+    "Bremen",
+    "Logwerk",
+    "Probezeit",
+    "Übernahme"
+  ]
+}

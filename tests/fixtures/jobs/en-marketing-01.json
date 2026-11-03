@@ -1,0 +1,33 @@
+{
+  "id": "en-marketing-01",
+  "lang": "en",
+  "ad": "SEO Specialist\nMaplebox Commerce · Toronto, ON (Remote within Canada)\n\nAbout the job\nWe're growing organic traffic for our 12 e-commerce brands and need a hands-on SEO Specialist.\n\nYou will\n• Run keyword research and on-page optimization\n• Conduct technical SEO audits and work with developers on fixes\n• Report on organic performance in Google Analytics 4\n\nYou have\n• 3+ years of SEO experience, ideally in e-commerce\n• Expert knowledge of Google Analytics and Google Search Console\n• Experience with content marketing and briefing writers\n• Working knowledge of HTML\n• Experience with Ahrefs or Semrush preferred\n• WordPress experience is a plus\n\nWhy Maplebox\n• Flexible hours, remote within Canada\n• 4 weeks PTO, health and dental, RRSP matching\n• $750 home office stipend\n\nMaplebox welcomes applications from people with disabilities. Accommodations are available on request.",
+  "must": [
+    "SEO",
+    "Google Analytics",
+    "Google Search Console",
+    "Content marketing",
+    "HTML"
+  ],
+  "nice": [
+    "Ahrefs",
+    "Semrush",
+    "WordPress"
+  ],
+  "never": [
+    "remote",
+    "PTO",
+    "Toronto",
+    "health",
+    "RRSP",
+    "Maplebox",
+    "stipend",
+    "Flexible hours"
+  ],
+  "alternatives": [
+    [
+      "Ahrefs",
+      "Semrush"
+    ]
+  ]
+}

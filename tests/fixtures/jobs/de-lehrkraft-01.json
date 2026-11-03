@@ -1,0 +1,30 @@
+{
+  "id": "de-lehrkraft-01",
+  "lang": "de",
+  "ad": "Lehrkraft für Mathematik und Physik (m/w/d) – Sekundarstufe I und II\nFreie Montessori-Gesamtschule Potsdam\n\nWir sind eine staatlich anerkannte Ersatzschule mit 450 Schülerinnen und Schülern, gebundener Ganztag, Schulhund inklusive.\n\nIhre Aufgaben:\n- Unterricht in Mathematik und Physik in den Jahrgängen 7 bis 13\n- Begleitung von Lerngruppen in der Freiarbeit\n- Mitarbeit an der Schulentwicklung\n\nIhr Profil:\n- Lehramtsbefähigung für Mathematik und Physik (Zweites Staatsexamen) oder ein fachwissenschaftlicher Master mit der Bereitschaft zum Seiteneinstieg\n- Freude an reformpädagogischen Ansätzen\n- Eine weitere Fakultas, insbesondere Informatik, ist wünschenswert\n- Erfahrung an einer Ganztagsschule von Vorteil\n\nWir bieten:\n- Vergütung angelehnt an TV-L (bis E13)\n- Kleine Klassen und ein engagiertes Kollegium\n- Dienst-Tablet, Fortbildungsbudget\n\nEine Verbeamtung ist an unserer Schule nicht möglich.\nBewerbungen an die Schulleitung, Herrn Dr. Felix Arndt, schulleitung@montessori-potsdam.example",
+  "must": [
+    "Lehramtsbefähigung",
+    "Mathematik",
+    "Physik",
+    "Zweites Staatsexamen"
+  ],
+  "nice": [
+    "Informatik",
+    "Ganztagsschule"
+  ],
+  "never": [
+    "TV-L",
+    "E13",
+    "Verbeamtung",
+    "Tablet",
+    "Potsdam",
+    "Montessori",
+    "Schulhund"
+  ],
+  "alternatives": [
+    [
+      "Zweites Staatsexamen",
+      "Master"
+    ]
+  ]
+}

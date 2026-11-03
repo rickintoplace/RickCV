@@ -1,0 +1,25 @@
+{
+  "id": "en-cs-01",
+  "lang": "en",
+  "ad": "Customer Support Representative – Work From Home (Florida residents)\nBrightline Insurance Services · Tampa, FL\n\nHelp policyholders with billing questions, coverage changes and claims status via phone, chat and email.\n\nWho we're looking for:\n- Customer service experience in a call center environment is preferred, but no experience is required\n- Typing speed of at least 35 WPM\n- Basic computer skills and comfort navigating multiple systems\n- Clear and empathetic communication skills\n- Quiet home workspace and high-speed internet\n- Bilingual English/Spanish candidates encouraged to apply (+$1.50/hr)\n- Zendesk experience is a plus\n\nPerks:\n- $18/hr plus quarterly incentives\n- Paid training, health insurance, 401(k), PTO accrual from day one\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.",
+  "must": [
+    "Typing",
+    "Computer skills",
+    "Communication skills"
+  ],
+  "nice": [
+    "Customer service",
+    "Bilingual",
+    "Spanish|Spanisch",
+    "Zendesk"
+  ],
+  "never": [
+    "work from home",
+    "paid training",
+    "PTO",
+    "health",
+    "Tampa",
+    "Brightline",
+    "401(k)"
+  ]
+}

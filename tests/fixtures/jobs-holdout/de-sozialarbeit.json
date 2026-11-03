@@ -1,0 +1,32 @@
+{
+  "id": "de-sozialarbeit",
+  "lang": "de",
+  "ad": "Sozialarbeiter*in / Sozialpädagog*in (B.A.) für die Schulsozialarbeit – 30 Wochenstunden, befristet bis 31.07.2028\n\nDer Kinder- und Jugendhilfe Nordstadt e. V. ist anerkannter Träger der freien Jugendhilfe in Kassel. Ab dem nächsten Schulhalbjahr suchen wir für eine Gesamtschule eine engagierte Fachkraft, die Schüler*innen in Konfliktsituationen begleitet, Eltern berät, Gruppenangebote entwickelt und mit Jugendamt und Lehrkräften kooperiert; Voraussetzung sind ein abgeschlossenes Studium der Sozialen Arbeit (B.A. Soziale Arbeit oder Diplom) und die staatliche Anerkennung, Kenntnisse des SGB VIII und des Kinderschutzauftrags nach § 8a, Erfahrung in der Arbeit mit Jugendlichen, Methodenkompetenz in Gesprächsführung sowie die Vorlage eines erweiterten Führungszeugnisses. Systemische Beratung, eine Zusatzqualifikation in Mediation sowie Türkisch- oder Arabischkenntnisse sind hilfreich. Ein Führerschein ist nicht erforderlich, die Schule liegt direkt an der Tramhaltestelle. Die Vergütung erfolgt in Anlehnung an TVöD SuE S 11b; dazu kommen 30 Tage Urlaub, Supervision und ein Deutschlandticket-Zuschuss. Schwerbehinderte Bewerber*innen werden bei gleicher Eignung bevorzugt.",
+  "must": [
+    "B.A. Soziale Arbeit|Soziale Arbeit",
+    "staatliche Anerkennung",
+    "SGB VIII",
+    "Kinderschutz",
+    "Arbeit mit Jugendlichen",
+    "Gesprächsführung",
+    "Führungszeugnis"
+  ],
+  "nice": [
+    "Systemische Beratung",
+    "Mediation",
+    "Türkisch",
+    "Arabisch"
+  ],
+  "never": [
+    "Führerschein",
+    "Urlaub",
+    "Supervision",
+    "Deutschlandticket",
+    "TVöD",
+    "Kassel",
+    "Nordstadt",
+    "befristet",
+    "Tramhaltestelle",
+    "Schwerbehinderte"
+  ]
+}

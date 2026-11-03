@@ -1,0 +1,31 @@
+{
+  "id": "en-barista",
+  "lang": "en",
+  "ad": "Barista wanted – Little Fern Coffee, Fitzroy (Melbourne)\n\nWe're a small specialty café roasting our own beans and we need another barista for weekday mornings (Mon–Fri, 6:30am–2:30pm, casual with 30+ hrs a week). You'll be dialling in espresso each morning, pulling consistently great shots on our La Marzocco Linea, steaming milk for latte art and keeping the line moving when the 8am rush hits. At least one year of barista experience in a busy café is a must, and you should know your way around milk alternatives (oat, almond, soy) and basic grinder adjustment. A current RSA isn't needed – we don't serve alcohol – but a Food Safety Handler certificate is required, and you must have full working rights in Australia. Experience with pour-over or batch brew is a bonus, as is any latte art competition history. We pay $33.50/hr casual rate plus tips, free coffee on shift and a staff discount on beans. Little Fern is an equal opportunity employer and welcomes applicants from all backgrounds, including Aboriginal and Torres Strait Islander people.",
+  "must": [
+    "barista experience",
+    "espresso",
+    "latte art",
+    "milk alternatives",
+    "grinder adjustment",
+    "Food Safety Handler",
+    "working rights"
+  ],
+  "nice": [
+    "pour-over",
+    "batch brew"
+  ],
+  "never": [
+    "RSA",
+    "alcohol",
+    "tips",
+    "free coffee",
+    "staff discount",
+    "Fitzroy",
+    "Melbourne",
+    "Little Fern",
+    "La Marzocco",
+    "Aboriginal",
+    "casual rate"
+  ]
+}

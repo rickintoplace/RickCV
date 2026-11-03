@@ -1,0 +1,27 @@
+{
+  "id": "de-sicherheit-01",
+  "lang": "de",
+  "ad": "Sicherheitsmitarbeiter (m/w/d) Objektschutz – Messe Köln\nRheinwacht Sicherheitsdienste GmbH · Köln-Deutz · Vollzeit, Teilzeit oder Minijob\n\nIhre Aufgaben\n- Zugangs- und Ausweiskontrollen\n- Streifengänge auf dem Messegelände\n- Bedienung der Gefahrenmeldeanlagen und Alarmverfolgung\n\nIhr Profil\n- Erfolgreich abgelegte Sachkundeprüfung nach § 34a GewO (die Unterrichtung nach § 34a reicht nicht aus)\n- Einwandfreies Führungszeugnis\n- Gute Deutschkenntnisse in Wort und Schrift (mindestens B1)\n- Zuverlässigkeit, Pünktlichkeit und gepflegtes Erscheinungsbild\n- Bereitschaft zum Schichtdienst, auch an Wochenenden und Feiertagen\n- Ersthelfer- oder Brandschutzhelfer-Ausbildung sowie Führerschein Klasse B sind wünschenswert\n\nWir bieten\n- Tariflohn nach BDSW NRW plus Zuschläge\n- Gestellte Dienstkleidung\n- 26 Tage Urlaub\n- Unbefristete Übernahme nach der Probezeit\n\nKontakt: Einsatzleitung, Herr Ali Kaya, 0221 555 3434, bewerbung@rheinwacht.example",
+  "must": [
+    "Sachkundeprüfung nach § 34a GewO",
+    "Führungszeugnis",
+    "Deutsch",
+    "Zuverlässigkeit",
+    "Schichtdienst"
+  ],
+  "nice": [
+    "Ersthelfer|Erste Hilfe",
+    "Brandschutzhelfer",
+    "Führerschein Klasse B"
+  ],
+  "never": [
+    "Zuschläge",
+    "Dienstkleidung",
+    "Urlaub",
+    "Tariflohn",
+    "Köln",
+    "Messe",
+    "Objektschutz",
+    "Übernahme"
+  ]
+}

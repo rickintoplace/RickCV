@@ -1,0 +1,36 @@
+{
+  "id": "en-hr-01",
+  "lang": "en",
+  "ad": "HR Coordinator\nMeridian Health Partners · Raleigh, NC (Hybrid)\n\nWe are seeking an HR Coordinator to support recruiting and onboarding for our growing network of clinics.\n\nWhat You'll Do\n- Coordinate interviews and candidate communication for recruiting\n- Manage onboarding paperwork and new hire orientation\n- Maintain employee records in Workday\n- Answer employee questions on benefits and policies\n\nWhat You Need\n- 1-3 years of experience in human resources or recruiting\n- Experience with Workday or another HRIS\n- Ability to handle sensitive information with confidentiality\n- Bachelor's degree in Human Resources, Business or related field preferred\n- SHRM-CP or PHR certification is a plus\n\nBenefits\n- Medical, dental, vision; 401(k) match\n- 18 days PTO and 9 paid holidays\n- Hybrid schedule, tuition assistance\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.",
+  "must": [
+    "Human resources",
+    "Recruiting",
+    "Workday",
+    "HRIS",
+    "Confidentiality"
+  ],
+  "nice": [
+    "SHRM-CP",
+    "PHR"
+  ],
+  "never": [
+    "401(k)",
+    "PTO",
+    "Raleigh",
+    "hybrid",
+    "Tuition",
+    "Meridian",
+    "medical",
+    "holidays"
+  ],
+  "alternatives": [
+    [
+      "Workday",
+      "HRIS"
+    ],
+    [
+      "SHRM-CP",
+      "PHR"
+    ]
+  ]
+}

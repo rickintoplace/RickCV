@@ -1,0 +1,29 @@
+{
+  "id": "en-pm-01",
+  "lang": "en",
+  "ad": "Project Manager – Commercial Construction\nSummit Ridge Builders · Denver, CO\n\nPosition Summary\nSummit Ridge is seeking an experienced Project Manager to lead commercial construction projects from preconstruction through closeout.\n\nResponsibilities\n- Manage project schedules, budgets and subcontractor contracts\n- Lead weekly owner-architect-contractor meetings\n- Track change orders and RFIs\n\nRequired Qualifications\n- 5+ years of project management experience in commercial construction\n- PMP certification required\n- Proficiency in MS Project and Procore\n- Proven budget management on projects over $10M\n- Excellent stakeholder management\n- Valid driver's license\n\nPreferred\n- Bachelor's in Construction Management or Civil Engineering\n- Familiarity with Agile or PRINCE2\n\nBenefits\n- Company vehicle and fuel card\n- Annual bonus, 401(k) with match, health insurance\n- 20 days PTO, relocation assistance\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.",
+  "must": [
+    "Project management",
+    "PMP",
+    "MS Project",
+    "Procore",
+    "Budget management",
+    "Stakeholder management",
+    "Driver's license|Führerschein Klasse B"
+  ],
+  "nice": [
+    "Construction",
+    "Agile",
+    "PRINCE2"
+  ],
+  "never": [
+    "401(k)",
+    "company vehicle",
+    "PTO",
+    "Denver",
+    "bonus",
+    "Summit",
+    "health",
+    "relocation"
+  ]
+}

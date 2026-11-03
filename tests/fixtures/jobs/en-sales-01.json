@@ -1,0 +1,27 @@
+{
+  "id": "en-sales-01",
+  "lang": "en",
+  "ad": "Account Executive – Mid-Market (DACH)\nQuotient Software · Dublin or Remote (Ireland/Germany)\n\nThe Role\nOwn the full sales cycle for mid-market customers in Germany, Austria and Switzerland.\n\nWhat you'll do\n- Generate and qualify pipeline through outbound prospecting\n- Run discovery calls and product demos\n- Negotiate and close new business\n\nWhat you'll bring\n- 3+ years of closing experience in B2B sales, ideally SaaS\n- Track record of hitting quota\n- Hands-on experience with Salesforce\n- Strong negotiation skills\n- Fluent English; native-level German is preferred\n- Experience with MEDDIC or HubSpot is a nice bonus\n\nBenefits\n- OTE €120k (50/50 split), uncapped commission, equity\n- 25 days holiday, remote-friendly, latest MacBook laptop\n\nQuotient is an equal opportunity employer and values diversity.",
+  "must": [
+    "B2B sales",
+    "SaaS",
+    "Salesforce",
+    "Negotiation",
+    "English|Englisch"
+  ],
+  "nice": [
+    "German|Deutsch",
+    "MEDDIC",
+    "HubSpot"
+  ],
+  "never": [
+    "OTE",
+    "commission",
+    "equity",
+    "Dublin",
+    "remote",
+    "laptop",
+    "Quotient",
+    "holiday"
+  ]
+}

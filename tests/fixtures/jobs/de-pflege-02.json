@@ -1,0 +1,28 @@
+{
+  "id": "de-pflege-02",
+  "lang": "de",
+  "ad": "Gesundheits- und Krankenpfleger:in für unsere Intensivstation gesucht\nDas St. Marien-Hospital in Münster sucht zum nächstmöglichen Zeitpunkt eine engagierte Pflegekraft für die interdisziplinäre Intensivstation mit 18 Betten. Sie versorgen beatmete Patientinnen und Patienten, wirken bei Notfällen mit und arbeiten eng mit dem ärztlichen Dienst zusammen.\nSie bringen eine abgeschlossene Ausbildung als Pflegefachkraft mit, idealerweise mit der Fachweiterbildung Intensiv- und Anästhesiepflege. Erfahrung in der Intensivpflege setzen wir voraus, ebenso die Bereitschaft zum Drei-Schicht-System. Kenntnisse im Umgang mit Beatmungsgeräten und ein sicherer Umgang mit einem PDMS (z. B. ICM) sind wünschenswert.\nWir zahlen nach TV-KAH, bieten eine Intensivzulage, 31 Urlaubstage, eine eigene Kita mit Belegplätzen und Zuschüsse zum Fitnessstudio.\nWir freuen uns über Bewerbungen von Menschen jeder Herkunft, Religion und sexuellen Identität. Schwerbehinderte Bewerber:innen werden bei gleicher Eignung bevorzugt.\nIhre Bewerbung richten Sie bitte an Pflegedirektor Jan Brömmel, karriere@st-marien-muenster.example, Tel. 0251 555 3310.",
+  "must": [
+    "Pflegefachkraft",
+    "Intensivpflege",
+    "Drei-Schicht-System"
+  ],
+  "nice": [
+    "Fachweiterbildung Intensiv- und Anästhesiepflege",
+    "Beatmungsgeräte",
+    "PDMS"
+  ],
+  "never": [
+    "TV-KAH",
+    "Intensivzulage",
+    "Urlaubstage",
+    "Kita",
+    "Fitnessstudio",
+    "Münster",
+    "Marien-Hospital",
+    "Herkunft",
+    "Religion",
+    "Schwerbehinderte",
+    "Identität"
+  ]
+}

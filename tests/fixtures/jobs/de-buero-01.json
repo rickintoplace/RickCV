@@ -1,0 +1,27 @@
+{
+  "id": "de-buero-01",
+  "lang": "de",
+  "ad": "Kaufmann/-frau für Büromanagement (m/w/d) – Assistenz der Geschäftsführung\nBöhm Immobilienverwaltung GmbH · Nürnberg · Vollzeit, unbefristet\n\nIhre Aufgaben\n- Allgemeine Büroorganisation und Terminkoordination\n- Korrespondenz mit Eigentümern, Mietern und Handwerkern\n- Vorbereitung der Eigentümerversammlungen\n- Erfassung von Rechnungen und Vorbereitung der Buchhaltung\n\nIhr Profil\n- Abgeschlossene kaufmännische Ausbildung, idealerweise als Kaufmann/-frau für Büromanagement\n- Sicherer Umgang mit MS Office, insbesondere Excel und Word\n- Sehr gute Deutschkenntnisse in Wort und Schrift\n- Organisationstalent und eine strukturierte Arbeitsweise\n- DATEV-Kenntnisse von Vorteil\n- Englischkenntnisse wünschenswert\n\nWir bieten\n- Gleitzeit und ein Tag Homeoffice pro Woche\n- 30 Tage Urlaub\n- Jobticket für den VGN\n- Kaffee, Obst und regelmäßige Firmenfeiern\n\nSenden Sie Ihre Bewerbung bitte an Herrn Klaus Böhm, bewerbung@boehm-immo.example.",
+  "must": [
+    "Kaufmann für Büromanagement",
+    "MS Office",
+    "Excel",
+    "Deutsch",
+    "Organisationstalent"
+  ],
+  "nice": [
+    "DATEV",
+    "Englisch"
+  ],
+  "never": [
+    "Homeoffice",
+    "Gleitzeit",
+    "Urlaub",
+    "Kaffee",
+    "Obst",
+    "Nürnberg",
+    "Böhm",
+    "Firmenfeiern",
+    "Jobticket"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "de-shk-01",
+  "lang": "de",
+  "ad": "Anlagenmechaniker SHK (m/w/d) – Schwerpunkt Kundendienst Heizung\nHeizungsbau Kühne GmbH, Leipzig\n\nWas dich erwartet\n- Wartung und Instandsetzung von Gas-, Öl- und Pelletheizungen\n- Inbetriebnahme von Wärmepumpen und Hybridanlagen\n- Fehlerdiagnose beim Kunden vor Ort\n\nWas du mitbringst\n- Abgeschlossene Ausbildung als Anlagenmechaniker/-in für Sanitär-, Heizungs- und Klimatechnik oder Gas- und Wasserinstallateur\n- Erfahrung in der Heizungstechnik und im Kundendienst\n- Führerschein Klasse B ist Voraussetzung\n- Erfahrung mit Wärmepumpen oder Kenntnisse in der Kältetechnik (Sachkunde Kategorie I) sind ein Plus\n- Gerne auch Quereinsteiger mit Erfahrung als Kundendienstmonteur\n\nWas wir bieten\n- Eigenes Servicefahrzeug und Tablet\n- 30 Tage Urlaub\n- Bereitschaftszulage und Überstundenvergütung\n- Betriebliche Altersvorsorge\n\nAnsprechpartner: Herr Uwe Kühne, 0341 555 8812, jobs@kuehne-heizung.example",
+  "must": [
+    "Anlagenmechaniker SHK",
+    "Führerschein Klasse B",
+    "Heizungstechnik",
+    "Kundendienst"
+  ],
+  "nice": [
+    "Wärmepumpen",
+    "Kältetechnik",
+    "Kundendienstmonteur"
+  ],
+  "never": [
+    "Servicefahrzeug",
+    "Tablet",
+    "Urlaub",
+    "Bereitschaftszulage",
+    "Leipzig",
+    "Heizungsbau Kühne",
+    "Zulage",
+    "Altersvorsorge"
+  ],
+  "alternatives": [
+    [
+      "Anlagenmechaniker SHK",
+      "Gas- und Wasserinstallateur"
+    ]
+  ]
+}

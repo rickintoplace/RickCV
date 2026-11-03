@@ -1,0 +1,28 @@
+{
+  "id": "de-marketing-01",
+  "lang": "de",
+  "ad": "Online Marketing Manager (m/w/d) – Schwerpunkt SEO\nRöstwerk Kaffeerösterei GmbH · Köln oder remote\n\nYour mission\n- Du verantwortest die SEO-Strategie für unseren Onlineshop (Shopify)\n- Keyword-Recherche, Content-Briefings und technische SEO-Audits\n- Reporting der KPIs an die Geschäftsführung\n\nWhat you bring\n- Mindestens 3 Jahre Erfahrung im Online-Marketing\n- Fundierte Kenntnisse in SEO (OnPage und OffPage)\n- Sicherer Umgang mit Google Analytics 4 und der Google Search Console\n- Deutsch auf Muttersprachniveau, gute Englischkenntnisse\n- Erfahrung mit SEA bzw. Google Ads ist ein Plus\n- Grundkenntnisse in WordPress und HTML wünschenswert\n\nBenefits\n- 100 % remote möglich, Büro in Köln-Ehrenfeld\n- 30 Tage Urlaub + 4 Wochen Workation im Jahr\n- 1.000 € Weiterbildungsbudget\n- Equipment nach Wahl, Kaffee natürlich unbegrenzt\n- Regelmäßige Team-Events\n\nWir leben Vielfalt und freuen uns auf Bewerbungen von allen Menschen.\nFragen? Schreib an Lisa Brandt, jobs@roestwerk.example",
+  "must": [
+    "Online-Marketing",
+    "SEO",
+    "Google Analytics",
+    "Deutsch",
+    "Englisch"
+  ],
+  "nice": [
+    "SEA",
+    "Google Ads",
+    "WordPress",
+    "HTML"
+  ],
+  "never": [
+    "Remote",
+    "Urlaub",
+    "Workation",
+    "Budget",
+    "Köln",
+    "Kaffeerösterei",
+    "Equipment",
+    "Team-Events"
+  ]
+}

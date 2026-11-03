@@ -1,0 +1,31 @@
+{
+  "id": "en-electrician-apprentice",
+  "lang": "en",
+  "ad": "⚡ We're hiring: Apprentice Electrician (Level 3) ⚡\n\nSpark & Wire Electrical Ltd, Bristol 📍\n\nWant a real trade with no student debt? Join our 4-year Level 3 Installation & Maintenance Electrician apprenticeship. You'll work alongside our qualified electricians on domestic rewires, new builds and commercial fit-outs, and spend one day a week at City of Bristol College.\n\n👉 What we're looking for:\n✅ GCSEs (grade 4/C or above) in Maths and English – or equivalent\n✅ Genuine interest in electrical work\n✅ Good with your hands and comfortable working at height\n✅ Reliable, punctual, and willing to learn\n✅ Full UK driving licence or working towards one (preferred)\n\n👉 Not required: any previous experience or tools – we supply everything.\n\n👉 What you get:\n💷 £8.50/hr in year 1 rising every year\n🎓 College fees fully covered\n🧰 Free starter tool kit + PPE\n🚐 Travel to site in company van\n\nApplications close 28 February. Under-18s and career changers both welcome! #apprenticeship #electrician #Bristol",
+  "must": [
+    "GCSE",
+    "Maths",
+    "English",
+    "electrical work",
+    "good with your hands",
+    "working at height",
+    "reliable",
+    "punctual",
+    "willing to learn"
+  ],
+  "nice": [
+    "UK driving licence|driving licence"
+  ],
+  "never": [
+    "previous experience",
+    "tool kit",
+    "PPE",
+    "college fees",
+    "company van",
+    "Bristol",
+    "Spark & Wire",
+    "student debt",
+    "career changers",
+    "Under-18s"
+  ]
+}

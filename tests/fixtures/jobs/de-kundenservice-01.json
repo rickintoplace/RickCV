@@ -1,0 +1,34 @@
+{
+  "id": "de-kundenservice-01",
+  "lang": "de",
+  "ad": "Kundenberater (m/w/d) im telefonischen Kundenservice – auch Quereinsteiger\nTalkwerk Telekommunikation GmbH · Erfurt · Homeoffice nach Einarbeitung\n\nDas erwartet dich\n- Beratung unserer Kundinnen und Kunden zu Tarifen, Rechnungen und Störungen per Telefon und Chat\n- Erfassung von Anliegen im Ticketsystem\n- Vertragsänderungen und Kündigungsrückgewinnung\n\nDas bringst du mit\n- Erste Erfahrung im Kundenservice oder Verkauf – Vorkenntnisse sind aber kein Muss\n- Sehr gute Deutschkenntnisse in Wort und Schrift\n- Sichere PC-Kenntnisse\n- Kommunikationsstärke und Geduld, auch wenn es mal hitzig wird\n- Zusätzliche Sprachkenntnisse in Türkisch oder Polnisch sind ein Plus\n- Erfahrung mit Zendesk ist gern gesehen\n\nDas bieten wir\n- Festanstellung ab dem ersten Tag\n- Bezahlte Schulung (4 Wochen)\n- Monatliche Prämien\n- 28 Tage Urlaub, frisches Obst\n\nWir freuen uns auf jede Bewerbung – unabhängig von Alter, Herkunft oder Lebenslauf.\nBewerbung per WhatsApp oder an jobs@talkwerk.example",
+  "must": [
+    "Kundenservice",
+    "Deutsch",
+    "PC-Kenntnisse",
+    "Kommunikationsstärke",
+    "Geduld"
+  ],
+  "nice": [
+    "Türkisch",
+    "Polnisch",
+    "Zendesk"
+  ],
+  "never": [
+    "Homeoffice",
+    "Urlaub",
+    "Prämien",
+    "Obst",
+    "Erfurt",
+    "Telekommunikation",
+    "Schulung",
+    "Festanstellung",
+    "Vorkenntnisse"
+  ],
+  "alternatives": [
+    [
+      "Türkisch",
+      "Polnisch"
+    ]
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "de-tierpflege",
+  "lang": "de",
+  "ad": "Tierpfleger/in für unser Raubtierrevier gesucht\n\nDer Tierpark Hellwald sucht zum 1. März eine Tierpflegerin / einen Tierpfleger für das Revier Großkatzen und Bären. Du übernimmst Fütterung, Reinigung der Gehege, Beschäftigung (Enrichment) und Beobachtung der Tiere und arbeitest eng mit unserer Tierärztin zusammen. Das bringst du mit: eine abgeschlossene Ausbildung als Tierpfleger/in, Fachrichtung Zoo, körperliche Belastbarkeit, Bereitschaft zu Wochenend- und Feiertagsdiensten und Spaß an kommentierten Fütterungen vor Publikum. Erfahrung mit Raubtieren oder im geschützten Kontakt ist ein Plus, ebenso ein Sachkundenachweis nach § 11 TierSchG. Wir zahlen nach TVöD, Entgeltgruppe 6, bieten eine Jahressonderzahlung, freien Eintritt für deine Familie und einen Parkplatz direkt am Personaleingang. Der Tierpark Hellwald ist ein Eigenbetrieb der Stadt Rheinbach.",
+  "must": [
+    "Ausbildung als Tierpfleger",
+    "Fachrichtung Zoo",
+    "Belastbarkeit",
+    "Wochenend- und Feiertagsdienste",
+    "Fütterungen vor Publikum"
+  ],
+  "nice": [
+    "Raubtiere",
+    "Sachkundenachweis"
+  ],
+  "never": [
+    "TVöD",
+    "Entgeltgruppe",
+    "Jahressonderzahlung",
+    "Eintritt",
+    "Parkplatz",
+    "Hellwald",
+    "Rheinbach",
+    "Tierärztin",
+    "Familie"
+  ]
+}
