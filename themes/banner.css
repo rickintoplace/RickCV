@@ -44,7 +44,7 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-size: 0.78em;
-  opacity: 0.9;
+  color: color-mix(in srgb, currentColor 90%, transparent);
 }
 
 /*  Auf Folgeblättern wiederholt sich der Kopf kleiner – das Band soll

@@ -785,7 +785,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   text-align: right;
   font-size: 0.85em;
   line-height: 1.3;
-  opacity: 0.85;
+  color: color-mix(in srgb, currentColor 85%, transparent);
   margin: -3px 0 5px;
 }
 
@@ -888,14 +888,14 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
     die Links daneben. */
 .resume-footer-date {
   font-size: 0.85em;
-  opacity: 0.8;
+  color: color-mix(in srgb, currentColor 80%, transparent);
   margin-top: 0.35em;
 }
 
 .resume-page-number {
   font-size: 0.8em;
   text-align: right;
-  opacity: 0.65;
+  color: color-mix(in srgb, currentColor 65%, transparent);
   margin-top: 0.6em;
 }
 
@@ -1119,7 +1119,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   bottom: calc(var(--bottom-margin) * 0.4);
   text-align: right;
   font-size: 0.8em;
-  opacity: 0.65;
+  color: color-mix(in srgb, currentColor 65%, transparent);
 }
 
 .cover-letter-header {
@@ -1287,7 +1287,7 @@ body.pages-fixed .resume_wrapper {
 }
 
 .resume-footer-intro {
-  opacity: 0.8;
+  color: color-mix(in srgb, currentColor 80%, transparent);
 }
 
 .resume-footer-links {

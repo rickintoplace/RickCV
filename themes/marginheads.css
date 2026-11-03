@@ -83,7 +83,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 0.78em;
-  opacity: 0.75;
+  color: color-mix(in srgb, currentColor 75%, transparent);
 }
 
 /*  Flache Liste im Lesebereich: Datum über dem Titel, damit die schmale
@@ -131,7 +131,7 @@
   margin: 0 0.55em 0 0;
   font-variant-numeric: tabular-nums;
   font-size: 0.82em;
-  opacity: 0.65;
+  color: color-mix(in srgb, currentColor 65%, transparent);
 }
 
 /*  Anfang und Ende in einer Zeile vor dem Titel.  */
