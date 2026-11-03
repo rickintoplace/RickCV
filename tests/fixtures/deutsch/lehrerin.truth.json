@@ -1,0 +1,72 @@
+{
+ "id": "lehrerin",
+ "name": "Anna-Lena Schäfer",
+ "role": "Grundschullehrerin",
+ "street": "Rosenweg 18",
+ "city": "01067 Dresden",
+ "email": "al.schaefer@example.de",
+ "phone": "+49 351 7788990",
+ "experience": [
+  {
+   "title": "Lehrerin für Deutsch und Mathematik",
+   "org": "Grundschule am Elbufer",
+   "place": "Dresden",
+   "start": "08/2019",
+   "end": "",
+   "present": true,
+   "bullets": [
+    "Klassenleitung einer dritten Klasse",
+    "Koordination der Leseförderung"
+   ]
+  },
+  {
+   "title": "Referendarin",
+   "org": "Grundschule Pieschen",
+   "place": "Dresden",
+   "start": "02/2018",
+   "end": "07/2019",
+   "present": false,
+   "bullets": [
+    "Unterricht in Deutsch, Mathematik und Sachunterricht"
+   ]
+  }
+ ],
+ "education": [
+  {
+   "title": "Zweites Staatsexamen Lehramt an Grundschulen",
+   "org": "Landesamt für Schule und Bildung",
+   "place": "Dresden",
+   "start": "02/2018",
+   "end": "07/2019",
+   "present": false
+  },
+  {
+   "title": "Studium Lehramt an Grundschulen",
+   "org": "Technische Universität Dresden",
+   "place": "Dresden",
+   "start": "10/2013",
+   "end": "09/2017",
+   "present": false
+  }
+ ],
+ "skills": [
+  "Leseförderung",
+  "Inklusion",
+  "Elternarbeit",
+  "Smartboard"
+ ],
+ "languages": [
+  [
+   "Deutsch",
+   "Muttersprache"
+  ],
+  [
+   "Englisch",
+   "C1"
+  ],
+  [
+   "Tschechisch",
+   "A2"
+  ]
+ ]
+}

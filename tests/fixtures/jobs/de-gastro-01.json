@@ -1,0 +1,25 @@
+{
+  "id": "de-gastro-01",
+  "lang": "de",
+  "ad": "Koch / Köchin (m/w/d) für unser Restaurant – Saison 2027\nHotel & Restaurant Strandhaus Kampen · Sylt\n\nDeine Aufgaben\n- Zubereitung regionaler Gerichte à la carte und im Bankett\n- Vor- und Nachbereitung deines Postens\n- Einhaltung der Hygienevorschriften nach HACCP\n- Warenannahme und Kontrolle\n\nDein Profil\n- Abgeschlossene Ausbildung als Koch/Köchin\n- Sicherer Umgang mit HACCP\n- Belastbarkeit auch in der Hochsaison\n- Teamfähigkeit und Humor\n- Gesundheitszeugnis (Belehrung nach § 43 IfSG) – kann auch nach Zusage nachgereicht werden\n- Englischkenntnisse von Vorteil\n\nWir bieten\n- Saisonvertrag von März bis Oktober mit Option auf Verlängerung\n- Personalzimmer direkt am Haus\n- Personalessen und Beteiligung am Trinkgeld\n- Keine geteilten Dienste\n- 26 Tage Urlaub anteilig\n\nKüchenchef Arne Petersen freut sich auf deine Nachricht: kueche@strandhaus-kampen.example",
+  "must": [
+    "Koch",
+    "HACCP",
+    "Belastbarkeit",
+    "Teamfähigkeit"
+  ],
+  "nice": [
+    "Gesundheitszeugnis",
+    "Englisch"
+  ],
+  "never": [
+    "Trinkgeld",
+    "Personalessen",
+    "geteilte Dienste",
+    "Urlaub",
+    "Sylt",
+    "Strandhaus",
+    "Personalzimmer",
+    "Saisonvertrag"
+  ]
+}

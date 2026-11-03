@@ -9,6 +9,10 @@
 
   var F = global.RickCVFields;
   var Model = global.RickCVModel;
+
+  //  Der gewaehlte Filter der Theme-Galerie. Er gehoert zur Sitzung, nicht
+  //  zum Dokument, und ueberlebt so das Neuzeichnen des Abschnitts.
+  var themeFilter = "";
   var Ats = global.RickCVAts;
 
   function build(context) {
@@ -773,6 +777,16 @@
       body.appendChild(F.hint(t("fontSizeHint")));
       body.appendChild(F.range("style.pageBottom", t("pageBottom"), 0, 2, 0.1, " cm"));
       body.appendChild(F.hint(t("pageBottomHint")));
+      body.appendChild(F.select("style.nameAlign", t("nameAlign"), [
+        { value: "auto", label: t("nameAlignTheme") },
+        { value: "left", label: t("nameAlignLeft") },
+        { value: "center", label: t("nameAlignCenter") },
+      ]));
+      body.appendChild(F.select("style.headingStyle", t("headingStyle"), [
+        { value: "auto", label: t("headingStyleTheme") },
+        { value: "underline", label: t("headingStyleUnderline") },
+        { value: "caps", label: t("headingStyleCaps") },
+      ]));
 
       // --- Symbolstil ---
       var iconBlock = el("details", "sub-block");
@@ -1046,40 +1060,88 @@
       if (!Themes) return;
 
       var locale = state.locale || "de";
-      var theme = state.theme || (state.theme = { slug: "clean", name: "", css: "", source: "" });
+      var theme = state.theme || (state.theme = { slug: "clean", name: "", css: "", source: "", extra: "" });
+      if (typeof theme.extra !== "string") theme.extra = "";
 
       body.appendChild(F.hint(t("themeHint")));
 
       /* -- Mitgelieferte ------------------------------------------------- */
 
+      //  Wofuer suche ich ein Theme? Ein Klick auf ein Beduerfnis zeigt nur
+      //  die passenden; noch ein Klick zeigt wieder alle.
+      var all = Themes.builtin(locale);
+      var used = Themes.tags(locale).filter(function (tag) {
+        return all.some(function (entry) { return (entry.tags || []).indexOf(tag.id) !== -1; });
+      });
+      if (themeFilter && !used.some(function (tag) { return tag.id === themeFilter; })) themeFilter = "";
+      var filters = el("div", "theme-filters");
+      filters.setAttribute("role", "group");
+      filters.setAttribute("aria-label", t("themeFilterLabel"));
+      var filterHint = el("p", "hint theme-filter-hint");
+      [{ id: "", label: t("themeFilterAll"), hint: t("themeFilterAllHint") }].concat(used).forEach(function (tag) {
+        var chip = el("button", "theme-filter", tag.label);
+        chip.type = "button";
+        chip.setAttribute("aria-pressed", String(themeFilter === tag.id));
+        if (themeFilter === tag.id) filterHint.textContent = tag.hint;
+        chip.addEventListener("click", function () {
+          themeFilter = themeFilter === tag.id ? "" : tag.id;
+          refreshSection("theme");
+        });
+        filters.appendChild(chip);
+      });
+      body.appendChild(filters);
+      if (filterHint.textContent) body.appendChild(filterHint);
+
       var gallery = el("div", "theme-gallery");
-      Themes.builtin(locale).forEach(function (entry) {
+      all.filter(function (entry) {
+        return !themeFilter || (entry.tags || []).indexOf(themeFilter) !== -1;
+      }).forEach(function (entry) {
         var card = el("button", "theme-card");
         card.type = "button";
         if (!theme.css && theme.slug === entry.slug) card.classList.add("active");
 
-        //  Ein Bild sagt hier mehr als der beste Satz. Die Beschreibung
-        //  bleibt trotzdem im Dokument stehen – für Vorlesesoftware, für
-        //  die Suche und für den Fall, dass das Bild fehlt.
+        //  Ein Bild sagt hier mehr als der beste Satz – aber auf 100 Pixeln
+        //  sehen sich vier Themes zum Verwechseln aehnlich. Die eine Zeile
+        //  darunter sagt, worin sie sich unterscheiden; als Tooltip sah sie
+        //  auf dem Telefon niemand.
         var shot = el("img", "theme-shot");
-        shot.src = "themes/previews/" + entry.slug + ".webp";
-        shot.alt = entry.name + (entry.about ? " – " + entry.about : "");
+        //  Die deutsche Oberflaeche zeigt das deutsche Beispiel. Fehlt das
+        //  Bild (ein neues Theme aus einem Beitrag), tut es das englische.
+        var shotBase = "themes/previews/" + entry.slug;
+        shot.src = shotBase + (locale === "de" ? ".de.webp" : ".webp");
+        shot.alt = "";
         shot.loading = "lazy";
-        shot.addEventListener("error", function () { shot.hidden = true; });
+        shot.addEventListener("error", function () {
+          if (/\.de\.webp$/.test(shot.src)) shot.src = shotBase + ".webp";
+          else shot.hidden = true;
+        });
         card.appendChild(shot);
 
         card.appendChild(el("strong", null, entry.name));
-        if (entry.about) {
-          card.title = entry.about;
-          card.appendChild(el("small", "visually-hidden", entry.about));
-        }
+        if (entry.about) card.appendChild(el("small", "theme-about", entry.about));
         card.addEventListener("click", function () {
-          state.theme = { slug: entry.slug, name: entry.name, css: "", source: "builtin" };
+          //  Ein eigenes, ganzes Theme geht beim Wechsel verloren. Das soll
+          //  niemand erst merken, wenn er es sucht: der Hinweis sagt es und
+          //  bringt es mit einem Klick zurueck.
+          var before = JSON.parse(JSON.stringify(state.theme));
+          state.theme = { slug: entry.slug, name: entry.name, css: "", source: "builtin",
+                          extra: before.extra || "" };
           //  Die Vorlage steckte frueher in den Einstellungen; der Wert
           //  bleibt gepflegt, damit aeltere Staende weiter passen.
           state.settings.template = entry.slug;
           onChange(true);
           refreshSection("theme");
+          if (before.css) {
+            global.RickCVToast(t("themeSwitchedFromOwn").replace("{name}", entry.name), {
+              label: t("undo"),
+              run: function () {
+                state.theme = before;
+                state.settings.template = "custom";
+                onChange(true);
+                refreshSection("theme");
+              },
+            });
+          }
         });
         gallery.appendChild(card);
       });
@@ -1092,21 +1154,154 @@
       body.appendChild(F.color("style.accentColor", t("accentColor"), true));
       body.appendChild(F.hint(t("themeColorHint")));
 
-      /* -- Werkstatt ----------------------------------------------------- */
+      //  Was ein Editor schnell mit sich bringt: der Cursor im CSS-Feld und
+      //  ein Text, der etwas einfuegt. Beide Werkstaetten nutzen das.
+      function inserter(area) {
+        return function (text) {
+          var start = area.selectionStart;
+          var value = area.value;
+          var before = value.slice(0, start);
+          var gap = before && !/\n\n$/.test(before) ? (/\n$/.test(before) ? "\n" : "\n\n") : "";
+          area.value = before + gap + text + value.slice(area.selectionEnd);
+          area.selectionStart = area.selectionEnd = start + gap.length + text.length;
+          area.focus();
+          //  Denselben Weg nehmen wie beim Tippen: Zustand, Vorschau, Verlauf.
+          area.dispatchEvent(new Event("input", { bubbles: true }));
+        };
+      }
+
+      //  Fehler mit Zeilennummer, direkt unter dem Feld. Neu geprueft wird
+      //  beim Tippen, mit etwas Abstand.
+      function linted(area, holder) {
+        function paint() {
+          holder.textContent = "";
+          Themes.lint(area.value).slice(0, 5).forEach(function (problem) {
+            var message = t(problem.key).replace("{prop}", problem.prop || "")
+              .replace("{value}", problem.value || "");
+            holder.appendChild(F.note(t("themeCssError").replace("{line}", problem.line)
+              .replace("{message}", message), "warn"));
+          });
+        }
+        var timer = null;
+        area.addEventListener("input", function () {
+          clearTimeout(timer);
+          timer = setTimeout(paint, 400);
+        });
+        paint();
+      }
+
+      function editorFor(path, label, rows) {
+        var editor = F.textarea(path, label, rows);
+        var area = editor.querySelector("textarea");
+        area.className = "theme-editor";
+        area.spellcheck = false;
+        //  Umbrechen statt abschneiden: auf dem Telefon war sonst die Haelfte
+        //  jeder Regel unsichtbar.
+        area.wrap = "soft";
+        return { node: editor, area: area };
+      }
+
+      function hookList(insert) {
+        var reference = el("details", "sub-block");
+        reference.appendChild(el("summary", null, t("themeHooks")));
+        var refBody = el("div", "sub-block-body");
+        refBody.appendChild(F.hint(t("themeHooksHint")));
+
+        Themes.hooks(locale).forEach(function (group) {
+          refBody.appendChild(el("div", "theme-hook-title", group.title));
+          var list = el("div", "theme-hooks");
+          group.items.forEach(function (item) {
+            var chip = el("button", "theme-hook");
+            chip.type = "button";
+            chip.title = item.about;
+            //  Erst, was es ist; der Selektor steht klein darunter.
+            chip.appendChild(el("strong", null, item.about));
+            chip.appendChild(el("code", null, item.sel));
+            chip.addEventListener("click", function () {
+              insert(item.sel.indexOf("--") === 0
+                ? "body {\n  " + item.sel + ": ;\n}\n"
+                : item.sel + " {\n  \n}\n");
+            });
+            list.appendChild(chip);
+          });
+          refBody.appendChild(list);
+        });
+
+        reference.appendChild(refBody);
+        return reference;
+      }
+
+      /* -- Eigene Anpassungen (Zutaten + Ergaenzungen) ------------------- */
+
+      var own = el("details", "sub-block");
+      own.open = !!theme.extra.trim();
+      own.appendChild(el("summary", null, t("themeWorkshop")));
+      var ownBody = el("div", "sub-block-body");
+      own.appendChild(ownBody);
+      body.appendChild(own);
+
+      ownBody.appendChild(F.hint(t("themeWorkshopHint")));
+
+      var extra = editorFor("theme.extra", t("themeExtra"), 8);
+      var insertExtra = inserter(extra.area);
+
+      ownBody.appendChild(el("div", "theme-hook-title", t("themeRecipes")));
+      var recipes = el("div", "theme-recipes");
+      Themes.recipes(locale).forEach(function (recipe) {
+        var chip = el("button", "btn btn-small theme-recipe", "+ " + recipe.label);
+        chip.type = "button";
+        //  Schon drin? Dann nicht ein zweites Mal.
+        if (theme.extra.indexOf("/* " + recipe.label + " */") !== -1) {
+          chip.disabled = true;
+          chip.classList.add("used");
+        }
+        chip.addEventListener("click", function () {
+          own.open = true;
+          extra.area.selectionStart = extra.area.selectionEnd = extra.area.value.length;
+          insertExtra(recipe.css);
+          chip.disabled = true;
+          chip.classList.add("used");
+        });
+        recipes.appendChild(chip);
+      });
+      ownBody.appendChild(recipes);
+
+      ownBody.appendChild(extra.node);
+      ownBody.appendChild(F.hint(t("themeExtraHint")));
+      var extraErrors = el("div", "theme-errors");
+      ownBody.appendChild(extraErrors);
+      linted(extra.area, extraErrors);
+
+      if (theme.extra.trim()) {
+        var clear = el("button", "btn btn-small btn-danger-ghost", t("themeExtraClear"));
+        clear.type = "button";
+        clear.addEventListener("click", function () {
+          state.theme.extra = "";
+          onChange(true);
+          refreshSection("theme");
+        });
+        ownBody.appendChild(clear);
+      }
+      ownBody.appendChild(hookList(insertExtra));
+
+      /* -- Ein ganz eigenes Theme (fuer Fortgeschrittene) ---------------- */
 
       var workshop = el("details", "sub-block");
       workshop.open = !!theme.css;
-      workshop.appendChild(el("summary", null, t("themeWorkshop")));
+      workshop.appendChild(el("summary", null, t("themeAdvanced")));
       var shop = el("div", "sub-block-body");
       workshop.appendChild(shop);
       body.appendChild(workshop);
 
-      shop.appendChild(F.hint(t("themeWorkshopHint")));
+      shop.appendChild(F.hint(t("themeAdvancedHint")));
 
       var actions = el("div", "theme-actions");
 
       function useCss(css, name, note) {
-        state.theme = { slug: "", name: name || t("themeMine"), css: css, source: "workshop" };
+        state.theme = { slug: "", name: name || t("themeMine"), css: css, source: "workshop",
+                        extra: state.theme.extra || "",
+                        //  Wohin "Verwerfen" zurueckfuehrt.
+                        base: state.theme.slug || state.theme.base || "clean" };
         state.settings.template = "custom";
         onChange(true);
         refreshSection("theme");
@@ -1151,17 +1346,21 @@
       actions.appendChild(loadBtn);
       actions.appendChild(file);
 
+      function slugName() {
+        return (theme.name || "theme").toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "theme";
+      }
+
       if (theme.css) {
         var save = el("button", "btn", t("themeSave"));
         save.type = "button";
         save.addEventListener("click", function () {
-          var name = (theme.name || "theme").toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "theme";
-          var blob = new Blob([theme.css], { type: "text/css" });
+          var blob = new Blob([theme.css + (theme.extra.trim() ? "\n\n" + theme.extra : "")],
+                              { type: "text/css" });
           var url = URL.createObjectURL(blob);
           var link = el("a");
           link.href = url;
-          link.download = name + ".css";
+          link.download = slugName() + ".css";
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -1175,10 +1374,8 @@
         var share = el("button", "btn", t("themeShare"));
         share.type = "button";
         share.addEventListener("click", function () {
-          var name = (theme.name || "theme").toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "theme";
           var target = "https://github.com/rickintoplace/RickCV/new/main" +
-            "?filename=themes/" + encodeURIComponent(name + ".css") +
+            "?filename=themes/" + encodeURIComponent(slugName() + ".css") +
             "&value=" + encodeURIComponent(theme.css);
           //  Sehr lange Themes passen nicht in eine Adresse; dann bleibt der
           //  gewoehnliche Weg mit der heruntergeladenen Datei.
@@ -1190,13 +1387,29 @@
         });
         actions.appendChild(share);
 
+        //  Verwerfen fuehrt zurueck zu dem Theme, von dem es ausging – nicht
+        //  pauschal zu Clean.
         var drop = el("button", "btn btn-danger-ghost", t("themeDiscard"));
         drop.type = "button";
         drop.addEventListener("click", function () {
-          state.theme = { slug: "clean", name: "", css: "", source: "builtin" };
-          state.settings.template = "clean";
+          var before = JSON.parse(JSON.stringify(state.theme));
+          var back = Themes.builtin(locale).filter(function (entry) {
+            return entry.slug === (before.base || "clean");
+          })[0] || Themes.builtin(locale)[0];
+          state.theme = { slug: back.slug, name: back.name, css: "", source: "builtin",
+                          extra: before.extra || "" };
+          state.settings.template = back.slug;
           onChange(true);
           refreshSection("theme");
+          global.RickCVToast(t("themeSwitchedFromOwn").replace("{name}", back.name), {
+            label: t("undo"),
+            run: function () {
+              state.theme = before;
+              state.settings.template = "custom";
+              onChange(true);
+              refreshSection("theme");
+            },
+          });
         });
         actions.appendChild(drop);
       }
@@ -1205,16 +1418,12 @@
 
       if (!theme.css) return;
 
-      /* -- Der Editor ---------------------------------------------------- */
+      /* -- Der Editor fuer das ganze Theme ------------------------------- */
 
       shop.appendChild(F.text("theme.name", t("themeName")));
 
-      var editor = F.textarea("theme.css", t("themeCss"), 16);
-      var area = editor.querySelector("textarea");
-      area.className = "theme-editor";
-      area.spellcheck = false;
-      area.wrap = "off";
-      shop.appendChild(editor);
+      var whole = editorFor("theme.css", t("themeCss"), 16);
+      shop.appendChild(whole.node);
 
       //  Was die Pruefung entfernt hat, steht direkt darunter – sonst
       //  sucht man den Fehler in der eigenen Regel.
@@ -1226,47 +1435,141 @@
       checked.notes.forEach(function (key) {
         if (NOTES[key]) shop.appendChild(F.note(t(NOTES[key])));
       });
+      var wholeErrors = el("div", "theme-errors");
+      shop.appendChild(wholeErrors);
+      linted(whole.area, wholeErrors);
 
-      /* -- Haken zum Einsetzen ------------------------------------------- */
+      shop.appendChild(hookList(inserter(whole.area)));
+      shop.appendChild(F.hint(t("themeShareHint")));
+    }
 
-      function insert(text) {
-        var start = area.selectionStart;
-        var value = area.value;
-        area.value = value.slice(0, start) + text + value.slice(area.selectionEnd);
-        area.selectionStart = area.selectionEnd = start + text.length;
-        area.focus();
-        //  Denselben Weg nehmen wie beim Tippen: Zustand, Vorschau, Verlauf.
-        area.dispatchEvent(new Event("input", { bubbles: true }));
+    /* ------------------------------------------------------- Stellenanzeige */
+
+    //  Die Anzeige hinein, darunter pro Anforderung: belegt, anders
+    //  formuliert, fehlt. Keine Punktzahl (js/jobmatch.js sagt, warum).
+    function buildJob(body) {
+      var Match = global.RickCVJobMatch;
+      if (!Match) return;
+      if (!state.job) state.job = { ad: "", dismissed: [] };
+      if (!Array.isArray(state.job.dismissed)) state.job.dismissed = [];
+
+      body.appendChild(F.hint(t("jobHint")));
+      var field = F.textarea("job.ad", t("jobAd"), 9, t("jobAdPlaceholder"));
+      body.appendChild(field);
+      var out = el("div", "job-result");
+      body.appendChild(out);
+
+      var STATUS = {
+        found: { icon: "✓", key: "jobFound" },
+        similar: { icon: "≈", key: "jobSimilar" },
+        letter: { icon: "✉", key: "jobLetter" },
+        missing: { icon: "✗", key: "jobMissing" },
+        alternative: { icon: "✓", key: "jobAlternative" },
+        dismissed: { icon: "–", key: "jobDismissed" },
+      };
+
+      function addOwn(term) {
+        var block = term.language ? state.languages : state.skills;
+        var item = term.language ? { name: term.label, percentage: 0, level: "" } : { name: term.label, rank: 0 };
+        block.items.push(item);
+        block.show = true;
+        onChange(true);
+        global.RickCVToast(t(term.language ? "jobAddedLanguage" : "jobAdded").replace("{term}", term.label));
+        paint();
       }
 
-      var reference = el("details", "sub-block");
-      reference.appendChild(el("summary", null, t("themeHooks")));
-      var refBody = el("div", "sub-block-body");
-      refBody.appendChild(F.hint(t("themeHooksHint")));
+      function setDismissed(label, on) {
+        var list = state.job.dismissed.filter(function (entry) { return entry !== label; });
+        if (on) list.push(label);
+        state.job.dismissed = list;
+        onChange(true);
+        paint();
+      }
 
-      Themes.hooks(locale).forEach(function (group) {
-        refBody.appendChild(el("div", "theme-hook-title", group.title));
-        var list = el("div", "theme-hooks");
-        group.items.forEach(function (item) {
-          var chip = el("button", "theme-hook");
-          chip.type = "button";
-          chip.title = item.about;
-          chip.appendChild(el("code", null, item.sel));
-          chip.appendChild(el("small", null, item.about));
-          chip.addEventListener("click", function () {
-            insert(item.sel.indexOf("--") === 0
-              ? "  " + item.sel + ": ;\n"
-              : "\n" + item.sel + " {\n  \n}\n");
+      function chip(term) {
+        var info = STATUS[term.status] || STATUS.missing;
+        var node = el("span", "job-term job-" + term.status);
+        var main = el(term.path ? "button" : "span", "job-term-main");
+        if (term.path) main.type = "button";
+        main.appendChild(el("span", "job-term-icon", info.icon));
+        main.appendChild(el("span", null, term.label));
+        var tip = t(info.key) + (term.evidence ? " – „" + term.evidence + "“" : "");
+        main.title = tip;
+        main.setAttribute("aria-label", term.label + ": " + tip);
+        if (term.path) {
+          main.addEventListener("click", function () { if (context.reveal) context.reveal(term.path); });
+        }
+        node.appendChild(main);
+
+        function action(label, run) {
+          var button = el("button", "job-term-action", label);
+          button.type = "button";
+          button.addEventListener("click", run);
+          node.appendChild(button);
+        }
+        if (term.status === "missing") {
+          if (!term.cert) action(t("jobHave"), function () { addOwn(term); });
+          action(t("jobNotMe"), function () { setDismissed(term.label, true); });
+        } else if (term.status === "similar") {
+          action(t("jobNotMe"), function () { setDismissed(term.label, true); });
+        } else if (term.status === "dismissed") {
+          action(t("jobShow"), function () { setDismissed(term.label, false); });
+        }
+        return node;
+      }
+
+      function paint() {
+        out.textContent = "";
+        var ad = String(state.job.ad || "");
+        if (!ad.trim()) return;
+        var result = Match.analyse(ad, state, state.job.dismissed);
+
+        if (!result.requirements.length) {
+          out.appendChild(F.note(t("jobNothing")));
+          return;
+        }
+        if (!result.structured) out.appendChild(F.note(t("jobUnstructured")));
+
+        //  Oben die Luecken, gezaehlt – nicht als Prozent.
+        var gaps = { must: 0, nice: 0, similar: 0 };
+        result.requirements.forEach(function (req) {
+          req.terms.forEach(function (term) {
+            if (term.status === "missing" && req.level === "must") gaps.must++;
+            if (term.status === "missing" && req.level === "nice") gaps.nice++;
+            if (term.status === "similar" || term.status === "letter") gaps.similar++;
           });
-          list.appendChild(chip);
         });
-        refBody.appendChild(list);
+        var summary = !gaps.must && !gaps.nice && !gaps.similar ? t("jobAllCovered")
+          : t("jobGaps").replace("{must}", gaps.must).replace("{nice}", gaps.nice)
+            .replace("{similar}", gaps.similar);
+        out.appendChild(el("p", "job-summary", summary));
+
+        [["must", "jobLevelMust"], ["nice", "jobLevelNice"], ["task", "jobLevelTask"]].forEach(function (level) {
+          var rows = result.requirements.filter(function (req) { return req.level === level[0]; });
+          if (!rows.length) return;
+          out.appendChild(el("h4", "job-level", t(level[1])));
+          rows.forEach(function (req) {
+            var row = el("div", "job-req");
+            row.appendChild(el("div", "job-req-text", req.text));
+            var terms = el("div", "job-terms");
+            req.terms.forEach(function (term) { terms.appendChild(chip(term)); });
+            row.appendChild(terms);
+            out.appendChild(row);
+          });
+        });
+
+        if (result.skipped.length) {
+          out.appendChild(el("p", "hint", t("jobSkipped").replace("{list}", result.skipped.join(", "))));
+        }
+        out.appendChild(el("p", "hint", t("jobNoScore")));
+      }
+
+      var timer = null;
+      field.querySelector("textarea").addEventListener("input", function () {
+        clearTimeout(timer);
+        timer = setTimeout(paint, 350);
       });
-
-      reference.appendChild(refBody);
-      shop.appendChild(reference);
-
-      shop.appendChild(F.hint(t("themeShareHint")));
+      paint();
     }
 
     /* ------------------------------------------------------------- Register */
@@ -1326,6 +1629,7 @@
       { id: "theme", group: "design", icon: "shapes", title: t("secTheme"), open: true,
         build: buildTheme },
       { id: "design", group: "design", icon: "palette", title: t("secDesign"), build: buildDesign },
+      { id: "job", group: "job", plain: true, title: t("secJob"), build: buildJob },
       { id: "options", group: "settings", icon: "settings", title: t("secOptions"), open: true,
         build: buildOptions },
       { id: "ats", group: "settings", icon: "type", title: t("secAts"), build: buildAts },

@@ -1,0 +1,24 @@
+{
+  "id": "en-warehouse-01",
+  "lang": "en",
+  "ad": "Warehouse Associate – $19.50/hr – Weekly Pay!\nParcelway Fulfillment · Columbus, OH\n\nNow hiring for all shifts! No experience necessary – we provide paid training.\n\nAs a Warehouse Associate you will pick, pack and ship customer orders using RF scanners, load and unload trucks, and keep your work area safe and clean.\n\nWhat you need:\n- Must be 18 years or older\n- Able to lift up to 50 lbs repeatedly and stand for 10-hour shifts\n- Must pass a background check and drug screen\n- No high school diploma required\n- Forklift certification is a plus (we can certify you)\n\nWhat you get:\n- $19.50/hr, +$2/hr on nights, weekly pay\n- Overtime available\n- Benefits from day one, PTO, employee discount\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.\nApply in 5 minutes at the link below or text JOBS to 555-0177.",
+  "must": [
+    "Lift 50 lbs",
+    "Background check",
+    "Drug screen"
+  ],
+  "nice": [
+    "Forklift certification"
+  ],
+  "never": [
+    "experience",
+    "high school diploma",
+    "weekly pay",
+    "overtime",
+    "PTO",
+    "Columbus",
+    "Parcelway",
+    "employee discount",
+    "Benefits"
+  ]
+}

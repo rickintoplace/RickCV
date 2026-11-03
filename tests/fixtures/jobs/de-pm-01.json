@@ -1,0 +1,33 @@
+{
+  "id": "de-pm-01",
+  "lang": "de",
+  "ad": "IT-Projektleiter (m/w/d) Digitalisierung im Gesundheitswesen\nMedicon Beratungshaus GmbH · München / Remote\n\nDeine Rolle\nDu leitest Projekte zur Einführung von Krankenhausinformationssystemen bei unseren Kunden.\n\nDeine Aufgaben\n- Planung, Steuerung und Controlling von IT-Projekten bis 2 Mio. €\n- Führung interdisziplinärer Projektteams\n- Stakeholdermanagement auf Ebene der Klinikleitung\n\nDas bringst du mit\n- Mindestens 5 Jahre Erfahrung im Projektmanagement\n- PRINCE2- oder PMP-Zertifizierung\n- Ausgeprägtes Stakeholdermanagement\n- Verhandlungssicheres Deutsch (C2) und sehr gutes Englisch (C1)\n- Erfahrung mit SAFe, Jira oder Scrum ist ein Plus\n- Reisebereitschaft von ca. 30 %\n\nWir bieten\n- Homeoffice nach Wahl, Bahncard 100 oder Dienstwagen\n- 30 Tage Urlaub, Sabbatical-Option\n- Erfolgsbonus\n\nKontakt: Carla Neumann, careers@medicon-beratung.example",
+  "must": [
+    "Projektmanagement",
+    "PRINCE2",
+    "Stakeholdermanagement",
+    "Deutsch",
+    "Englisch"
+  ],
+  "nice": [
+    "SAFe",
+    "Jira",
+    "Scrum"
+  ],
+  "never": [
+    "Homeoffice",
+    "Urlaub",
+    "Bahncard",
+    "Dienstwagen",
+    "München",
+    "Beratungshaus",
+    "Bonus",
+    "Sabbatical"
+  ],
+  "alternatives": [
+    [
+      "PRINCE2",
+      "PMP"
+    ]
+  ]
+}

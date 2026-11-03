@@ -1,0 +1,26 @@
+{
+  "id": "en-dotnet-01",
+  "lang": "en",
+  "ad": "We're Bramwell Logistics Software, a Manchester-based team of 40 building route-planning tools for UK hauliers, and we're hiring a mid-level .NET developer to join our core platform squad.\nDay to day you'll write C# on .NET 8, design schemas and queries in SQL Server, and deploy services to Azure. You should have at least three years of commercial C# experience, be comfortable with Entity Framework Core and have shipped something to Azure in production. If you've used Angular or Azure DevOps pipelines, that's a plus, but we'll teach you what you need.\nWe pay £55k to £68k, plus a 10% bonus, 28 days holiday plus bank holidays, a 5% pension contribution, private healthcare and a Cycle to Work scheme. You can work remote up to four days a week.\nBramwell is an equal opportunity employer. Send a CV or GitHub link to Sam Okafor at careers@bramwell-ls.example.",
+  "must": [
+    "C#",
+    ".NET",
+    "SQL Server",
+    "Azure",
+    "Entity Framework"
+  ],
+  "nice": [
+    "Angular",
+    "Azure DevOps"
+  ],
+  "never": [
+    "remote",
+    "bonus",
+    "Manchester",
+    "pension",
+    "holiday",
+    "Bramwell",
+    "private healthcare",
+    "Cycle"
+  ]
+}

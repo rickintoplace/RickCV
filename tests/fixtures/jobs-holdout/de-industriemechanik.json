@@ -1,0 +1,32 @@
+{
+  "id": "de-industriemechanik",
+  "lang": "de",
+  "ad": "Industriemechaniker (gn) Instandhaltung – Schichtbetrieb\n\nÜber uns\nDie Vetter Antriebstechnik GmbH fertigt mit 640 Beschäftigten Getriebe für Windkraftanlagen. Für unser Werk in Schweinfurt suchen wir Verstärkung im Team Instandhaltung.\n\nDeine Aufgaben\n• Wartung, Inspektion und Instandsetzung unserer CNC-Bearbeitungszentren und Förderanlagen\n• Fehlersuche an hydraulischen und pneumatischen Systemen\n• Durchführung von Umbauten und Optimierungen nach Zeichnung\n• Dokumentation im Instandhaltungssystem SAP PM\n\nDein Profil\n• Abgeschlossene Berufsausbildung als Industriemechaniker (gn) oder vergleichbare Qualifikation im Metallbereich\n• Gute Kenntnisse in Hydraulik und Pneumatik\n• Bereitschaft zur Arbeit im 3-Schicht-System ist zwingend erforderlich\n• Sicheres Lesen technischer Zeichnungen\n• Staplerschein von Vorteil\n• Grundkenntnisse in Siemens S7 und SAP PM wünschenswert\n• Gute Deutschkenntnisse in Wort und Schrift\n\nWas wir bieten\nTarifvertrag der IG Metall, Schichtzulagen, Kantine, Werksarzt, Weihnachtsgeld, 35-Stunden-Woche.\n\n(gn) = geschlechtsneutral. Wir freuen uns über Bewerbungen unabhängig von Geschlecht, Nationalität, ethnischer und sozialer Herkunft, Religion, Behinderung, Alter sowie sexueller Orientierung und Identität.",
+  "must": [
+    "Industriemechaniker",
+    "Instandhaltung",
+    "Hydraulik",
+    "Pneumatik",
+    "3-Schicht-System|Schichtbetrieb",
+    "Lesen technischer Zeichnungen",
+    "Deutschkenntnisse"
+  ],
+  "nice": [
+    "Staplerschein",
+    "Siemens S7",
+    "SAP PM"
+  ],
+  "never": [
+    "IG Metall",
+    "Schichtzulagen",
+    "Kantine",
+    "Weihnachtsgeld",
+    "Werksarzt",
+    "Schweinfurt",
+    "Vetter",
+    "Windkraftanlagen",
+    "Religion",
+    "Nationalität",
+    "geschlechtsneutral"
+  ]
+}

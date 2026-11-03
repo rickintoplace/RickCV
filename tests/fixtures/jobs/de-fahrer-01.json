@@ -1,0 +1,27 @@
+{
+  "id": "de-fahrer-01",
+  "lang": "de",
+  "ad": "Berufskraftfahrer CE (m/w/d) im Nahverkehr – Tankwagen\nSpedition Hollmann & Co. KG · Dortmund\n\nDeine Aufgaben:\n• Belieferung von Tankstellen und Gewerbekunden im Ruhrgebiet\n• Be- und Entladen nach Gefahrgutvorschriften\n• Fahrzeugkontrolle und Dokumentation\n\nDeine Qualifikation:\n• Führerschein Klasse CE (früher Klasse 2)\n• Eintragung der Schlüsselzahl 95 (Modul 95 / Weiterbildung nach BKrFQG)\n• Gültige Fahrerkarte\n• ADR-Schein inkl. Tank – zwingend erforderlich\n• Ausreichende Deutschkenntnisse für Lieferpapiere und Kundenkontakt\n• Erfahrung mit Ladekran oder Staplerschein von Vorteil\n\nWir bieten:\n• Jedes Wochenende zu Hause, keine Übernachtungen\n• Neufahrzeuge mit Vollausstattung\n• Spesen und Tankkarte\n• 30 Tage Urlaub, Weihnachtsgeld\n\nRuf an bei Disponent Sven Hollmann, 0231 555 4477, oder schreib an fahrer@hollmann-spedition.example",
+  "must": [
+    "Führerschein Klasse CE",
+    "Modul 95",
+    "Fahrerkarte",
+    "ADR",
+    "Deutsch"
+  ],
+  "nice": [
+    "Ladekran",
+    "Staplerschein"
+  ],
+  "never": [
+    "Spesen",
+    "Urlaub",
+    "Wochenende zu Hause",
+    "Neufahrzeuge",
+    "Dortmund",
+    "Spedition",
+    "Tankkarte",
+    "Weihnachtsgeld",
+    "Nahverkehr"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "en-driver-01",
+  "lang": "en",
+  "ad": "CDL-A Tanker Driver – Home Daily – $1,800+/week\nGulfstar Fuel Transport · Houston, TX\n\nHaul fuel to retail stations in the Greater Houston area. Home every day, Monday–Friday schedule available.\n\nRequirements:\n• Valid Class A CDL with at least 1 year of verifiable experience\n• Hazmat and Tanker endorsements (or ability to obtain within 30 days)\n• Current DOT medical card\n• Clean driving record: no more than 2 moving violations in 3 years\n• Must pass DOT drug screen\n• TWIC card a plus\n\nBenefits:\n• $5,000 sign-on bonus\n• Paid weekly, 401(k) with match, PTO\n• Medical, dental and vision benefits\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.\nCall our recruiting team at 555-0144 or apply online.",
+  "must": [
+    "CDL Class A",
+    "Hazmat endorsement",
+    "Tanker endorsement",
+    "DOT medical card",
+    "Clean driving record"
+  ],
+  "nice": [
+    "TWIC"
+  ],
+  "never": [
+    "home daily",
+    "sign-on bonus",
+    "401(k)",
+    "PTO",
+    "Houston",
+    "Gulfstar",
+    "Paid weekly",
+    "benefits"
+  ]
+}

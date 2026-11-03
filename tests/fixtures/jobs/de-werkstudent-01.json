@@ -1,0 +1,36 @@
+{
+  "id": "de-werkstudent-01",
+  "lang": "de",
+  "ad": "Werkstudent (m/w/d) Business Analytics – 15 bis 20 Std./Woche\nRidely Mobility GmbH · München\n\nWhat you'll do\n- Unterstützung bei der Auswertung von Buchungs- und Nutzungsdaten\n- Erstellung von Reportings in Excel und Tableau\n- Mitarbeit an Ad-hoc-Analysen für das Management\n\nWhat you bring\n- Eingeschriebene/r Student/in der Wirtschaftswissenschaften, Wirtschaftsinformatik oder eines vergleichbaren Studiengangs\n- Sehr gute Excel-Kenntnisse (Pivot, SVERWEIS)\n- Gute Englisch- und Deutschkenntnisse\n- Erste Erfahrung mit Python oder SQL ist ein Plus\n- Tableau-Kenntnisse wünschenswert\n\nWhat we offer\n- 17 € Stundenlohn\n- Flexible Arbeitszeiten, Homeoffice möglich\n- Möglichkeit zur Abschlussarbeit und spätere Übernahme\n- Getränke und gemeinsames Mittagessen am Freitag\n\nBewirb dich mit Lebenslauf und Immatrikulationsbescheinigung bei Jonas Huber: talent@ridely.example",
+  "must": [
+    "Student*in",
+    "Excel",
+    "Englisch",
+    "Deutsch"
+  ],
+  "nice": [
+    "Python",
+    "SQL",
+    "Tableau"
+  ],
+  "never": [
+    "Stundenlohn",
+    "flexible Arbeitszeiten",
+    "Homeoffice",
+    "Abschlussarbeit",
+    "München",
+    "Mobilitätsstartup",
+    "Getränke",
+    "Übernahme"
+  ],
+  "alternatives": [
+    [
+      "Wirtschaftswissenschaften",
+      "Wirtschaftsinformatik"
+    ],
+    [
+      "Python",
+      "SQL"
+    ]
+  ]
+}

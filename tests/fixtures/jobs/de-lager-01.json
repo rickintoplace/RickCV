@@ -1,0 +1,31 @@
+{
+  "id": "de-lager-01",
+  "lang": "de",
+  "ad": "Fachkraft für Lagerlogistik / Lagerist (m/w/d) im 2-Schicht-System\nNORDLOG Kontraktlogistik GmbH · Hamburg-Billbrook\n\nIhre Aufgaben:\n• Warenannahme, Einlagerung und Kommissionierung\n• Bedienung von Gabelstaplern und Schubmaststaplern\n• Verladung und Ladungssicherung\n• Bestandskontrolle und Inventur\n\nIhr Profil:\n• Abgeschlossene Ausbildung als Fachkraft für Lagerlogistik oder Fachlagerist\n• Gültiger Staplerschein (Flurförderzeugschein) zwingend erforderlich\n• Erfahrung mit einem Lagerverwaltungssystem\n• Bereitschaft zum Schichtdienst (Früh/Spät)\n• SAP-Kenntnisse sowie Erfahrung mit Handscannern sind von Vorteil\n\nWir bieten:\n• Tarifvertrag mit Schichtzulage\n• 30 Tage Urlaub\n• Kantine und kostenlose Parkplätze\n• Mitarbeiterrabatte\n\nBitte bewerben Sie sich online oder bei Frau Petersen: personal@nordlog.example",
+  "must": [
+    "Fachkraft für Lagerlogistik",
+    "Staplerschein",
+    "Lagerverwaltungssystem",
+    "Schichtdienst"
+  ],
+  "nice": [
+    "SAP",
+    "Handscanner"
+  ],
+  "never": [
+    "Schichtzulage",
+    "Urlaub",
+    "Kantine",
+    "Parkplätze",
+    "Hamburg",
+    "Nordlog",
+    "Mitarbeiterrabatte",
+    "Tarifvertrag"
+  ],
+  "alternatives": [
+    [
+      "Fachkraft für Lagerlogistik",
+      "Fachlagerist"
+    ]
+  ]
+}

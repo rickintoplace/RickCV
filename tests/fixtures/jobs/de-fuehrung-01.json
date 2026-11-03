@@ -1,0 +1,34 @@
+{
+  "id": "de-fuehrung-01",
+  "lang": "de",
+  "ad": "Teamleiter Logistik (m/w/d) – Schichtleitung Warenausgang\nVersandzentrum Nordhessen der Textilhandel Seidel GmbH · Kassel-Lohfelden\n\nIhre Aufgaben\n- Disziplinarische und fachliche Führung von 35 Mitarbeitenden je Schicht\n- Personaleinsatzplanung und Steuerung der Tagesleistung\n- Kontinuierliche Verbesserung der Prozesse im Warenausgang\n- Einhaltung von Arbeitssicherheit und Qualitätsstandards\n\nIhr Profil\n- Abgeschlossene Ausbildung oder Studium im Bereich Logistik, z. B. Logistikmeister oder Betriebswirt Logistik\n- Mindestens 3 Jahre Führungserfahrung in der Logistik\n- Erfahrung mit Lean Management\n- Sicherer Umgang mit SAP (EWM oder WM)\n- Sehr gute Deutschkenntnisse, Englisch von Vorteil\n- Kenntnisse in Six Sigma oder REFA wünschenswert\n- Bereitschaft zum Zwei-Schicht-Betrieb\n\nWir bieten\n- Firmenwagen ab Stufe Teamleitung\n- Leistungsbonus, 30 Tage Urlaub\n- Betriebliche Altersvorsorge und Gesundheitsmanagement\n- Subventionierte Kantine\n\nIhr Kontakt: Personalabteilung, Herr Benedikt Seidel, karriere@seidel-textil.example",
+  "must": [
+    "Führungserfahrung",
+    "Logistik",
+    "Lean Management",
+    "SAP",
+    "Deutsch",
+    "Zwei-Schicht-Betrieb"
+  ],
+  "nice": [
+    "Six Sigma",
+    "Englisch",
+    "REFA"
+  ],
+  "never": [
+    "Firmenwagen",
+    "Bonus",
+    "Urlaub",
+    "Altersvorsorge",
+    "Kassel",
+    "Kantine",
+    "Versandzentrum",
+    "Gesundheitsmanagement"
+  ],
+  "alternatives": [
+    [
+      "Logistikmeister",
+      "Betriebswirt Logistik"
+    ]
+  ]
+}

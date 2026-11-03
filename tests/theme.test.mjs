@@ -75,6 +75,60 @@ ok(Object.keys(box.RickCVThemeData).length === files.length,
    "Bündel enthält genau die Dateien aus themes/",
    Object.keys(box.RickCVThemeData).join(","));
 
+//  "Als Datei speichern" nimmt Stylesheet und Schriften aus js/doc-assets.js.
+//  Passt das Bündel nicht zu styles.css, sähe eine gespeicherte Datei anders
+//  aus als die Vorschau.
+//  Die Tags der Galerie. Einen Tag "fuer Bewerbungssysteme" gibt es nicht,
+//  weil es keine schlechten Themes geben soll: jedes eingebaute Theme soll
+//  im ATS-Nachweis (docs/ats-proof.json) bei jedem Leser und in jeder
+//  Fassung ohne Befund sein, und der Nachweis muss mit pdfminer.six
+//  entstanden sein.
+console.log("\n— Tags der Galerie —");
+{
+  const known = Themes.tags("de").map((tag) => tag.id);
+  ok(known.length >= 4 && known.length <= 8, "eine überschaubare Zahl von Tags", known.join(","));
+  ok(Themes.tags("en").every((tag) => tag.label && tag.hint), "jeder Tag hat Name und Erklärung auf Englisch");
+  const meta = Themes.parseMeta("/* @rickcv-theme\n   name: X\n   contract: 1\n   tags: lesbar, quatsch, viel, lesbar\n*/");
+  ok(meta.tags.join(",") === "lesbar,viel", "unbekannte und doppelte Tags fallen weg", meta.tags.join(","));
+  const builtin = Themes.builtin("de");
+  for (const tag of known) {
+    ok(builtin.some((entry) => entry.tags.includes(tag)), `Tag „${tag}“ hat mindestens ein Theme`);
+  }
+  const proof = JSON.parse(fs.readFileSync(path.join(root, "docs", "ats-proof.json"), "utf8"));
+  ok(!known.includes("ats"), "kein Tag „für Bewerbungssysteme“ – das gilt für alle");
+  ok(proof.pdfminer === true, "der Nachweis ist mit pdfminer.six entstanden (pip install pdfminer.six)");
+  for (const entry of builtin) {
+    const rows = proof.results.filter((row) => row.theme === entry.slug);
+    const clean = rows.length > 0 && rows.every((row) => !row.file.length &&
+      Object.values(row.readers).every((problems) => !problems.length));
+    ok(clean, `${entry.slug}: im ATS-Nachweis ohne Befund`,
+       rows.length ? JSON.stringify(rows.map((row) => row.readers)) : "nicht im Nachweis – tools/ats-proof.mjs laufen lassen");
+  }
+}
+
+console.log("\n— Bündel für gespeicherte Dateien —");
+{
+  const assets = sandbox(["js/doc-assets.js"]).RickCVDocAssets;
+  ok(assets && assets.styles === fs.readFileSync(path.join(root, "styles.css"), "utf8"),
+     "js/doc-assets.js enthält das aktuelle styles.css", "tools/build-doc-assets.py erneut laufen lassen");
+  const faces = (fs.readFileSync(path.join(root, "fonts/fonts.css"), "utf8").match(/@font-face/g) || []).length;
+  ok(assets && assets.fonts.length === faces, "alle Schriftschnitte im Bündel", assets && assets.fonts.length);
+  ok(assets && Object.keys(assets.images).length === 3, "die Bilder des Beispiels im Bündel");
+}
+
+console.log("\n— Prüfung eigener CSS —");
+{
+  //  CSS.supports gibt es in Node nicht; ohne bleibt die Prüfung bei
+  //  Klammern und Kommentaren, und genau die werden hier geprüft.
+  const lint = (css) => Themes.lint(css).map((p) => p.key + "@" + p.line).join(",");
+  ok(lint(".a { color: red }\n.b { margin: 0 }") === "", "gültiges CSS ohne Meldung", lint(".a { color: red }"));
+  ok(lint(".a {\n  color: red;\n\n.b { margin: 0 }\n") === "themeErrOpen@1", "fehlende } mit Zeile", lint(".a {\n  color: red;\n\n.b { margin: 0 }\n"));
+  ok(lint(".a { color: red } }") === "themeErrClose@1", "} zu viel");
+  ok(lint("/* offen\n.a { }") === "themeErrComment@1", "offener Kommentar");
+  ok(lint('.a::before { content: "}" }') === "", "Klammer in Anführungszeichen zählt nicht");
+  ok(lint("@media print {\n  .a { color: red }\n}") === "", "verschachtelte @-Regel");
+}
+
 console.log("\n— Entschärfung —");
 const nasty = [
   '@import url("https://example.invalid/x.css");',

@@ -1,0 +1,43 @@
+{
+  "id": "en-social-media-manager",
+  "lang": "en",
+  "ad": "Social Media Manager — Outdoor Apparel (Hybrid, Portland, OR)\n\nTimberline Thread Co. is looking for a Social Media Manager to own our Instagram, TikTok, Pinterest and YouTube channels (combined 1.2M followers), plan the content calendar, brief creators and report on performance to the Head of Brand. The ideal candidate has 3–5 years of experience managing brand social channels, a portfolio of short-form video work, hands-on experience with Sprout Social, Later or Hootsuite, solid copywriting skills, a working knowledge of Meta Ads Manager and paid social budgets, and the ability to turn analytics into clear recommendations. Experience with influencer marketing and basic Adobe Premiere Pro or CapCut editing is preferred; photography skills and a love of the outdoors are a plus. This is not a graphic design role — Figma or Illustrator skills are not needed, as we have an in-house design team.\n\nCompensation: $78,000–$92,000 base + annual bonus. Benefits include 20 days PTO, a $500 annual gear allowance, and 401(k).\n\nTimberline Thread Co. is an equal opportunity employer. Applicants must be authorized to work in the U.S.; we are unable to sponsor visas for this position.",
+  "must": [
+    "Instagram",
+    "TikTok",
+    "short-form video",
+    "Sprout Social",
+    "Later",
+    "Hootsuite",
+    "copywriting",
+    "Meta Ads Manager",
+    "paid social",
+    "analytics"
+  ],
+  "nice": [
+    "influencer marketing",
+    "Adobe Premiere Pro|Premiere Pro",
+    "CapCut",
+    "photography"
+  ],
+  "never": [
+    "Figma",
+    "Illustrator",
+    "graphic design",
+    "PTO",
+    "401(k)",
+    "gear allowance",
+    "bonus",
+    "Portland",
+    "Timberline",
+    "visas",
+    "followers"
+  ],
+  "alternatives": [
+    [
+      "Sprout Social",
+      "Later",
+      "Hootsuite"
+    ]
+  ]
+}

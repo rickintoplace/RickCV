@@ -1,0 +1,33 @@
+{
+  "id": "en-accounting-01",
+  "lang": "en",
+  "ad": "Staff Accountant\nKestrel Biotech, Inc. · Boston, MA (hybrid)\n\nResponsibilities\n- Prepare monthly journal entries and accruals\n- Perform account reconciliation for cash, prepaid and fixed assets\n- Support the month-end and year-end close and audit\n\nRequirements\n- Bachelor's degree in Accounting or Finance\n- 2-4 years of accounting experience, public accounting a plus\n- Working knowledge of US GAAP\n- Experience with account reconciliations\n- Advanced Excel skills\n- Experience with an ERP system\n\nPreferred\n- CPA or CPA candidate\n- NetSuite experience\n- Exposure to SOX controls\n\nWhat we offer\n- Hybrid schedule (3 days on-site)\n- Annual bonus, 401(k) match, tuition reimbursement\n- 20 days PTO, wellness stipend\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.",
+  "must": [
+    "Accounting|Buchhaltung",
+    "GAAP",
+    "Account reconciliation",
+    "Excel",
+    "ERP"
+  ],
+  "nice": [
+    "CPA",
+    "NetSuite",
+    "SOX"
+  ],
+  "never": [
+    "401(k)",
+    "hybrid",
+    "PTO",
+    "Boston",
+    "bonus",
+    "Tuition",
+    "Kestrel",
+    "wellness"
+  ],
+  "alternatives": [
+    [
+      "Accounting|Buchhaltung",
+      "Finance"
+    ]
+  ]
+}

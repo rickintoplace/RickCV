@@ -1,0 +1,84 @@
+{
+ "id": "pflege",
+ "name": "Sabine Krüger",
+ "role": "Gesundheits- und Krankenpflegerin",
+ "street": "Lindenallee 12",
+ "city": "04109 Leipzig",
+ "email": "sabine.krueger@example.de",
+ "phone": "0341 2233445",
+ "birth": "14.05.1988 in Halle (Saale)",
+ "experience": [
+  {
+   "title": "Stationsleitung Intensivstation",
+   "org": "Universitätsklinikum Leipzig",
+   "place": "Leipzig",
+   "start": "04/2020",
+   "end": "",
+   "present": true,
+   "bullets": [
+    "Führung eines Teams von 24 Pflegekräften",
+    "Einführung der digitalen Pflegedokumentation"
+   ]
+  },
+  {
+   "title": "Gesundheits- und Krankenpflegerin",
+   "org": "Klinikum St. Georg",
+   "place": "Leipzig",
+   "start": "09/2012",
+   "end": "03/2020",
+   "present": false,
+   "bullets": [
+    "Pflege auf der internistischen Intensivstation",
+    "Praxisanleitung für Auszubildende"
+   ]
+  },
+  {
+   "title": "Pflegehelferin",
+   "org": "Seniorenzentrum Am Park",
+   "place": "Halle (Saale)",
+   "start": "08/2008",
+   "end": "08/2009",
+   "present": false,
+   "bullets": []
+  }
+ ],
+ "education": [
+  {
+   "title": "Weiterbildung Intensiv- und Anästhesiepflege",
+   "org": "Bildungszentrum Leipzig",
+   "place": "Leipzig",
+   "start": "10/2015",
+   "end": "09/2017",
+   "present": false
+  },
+  {
+   "title": "Ausbildung Gesundheits- und Krankenpflege",
+   "org": "Medizinische Berufsfachschule",
+   "place": "Halle (Saale)",
+   "start": "09/2009",
+   "end": "08/2012",
+   "present": false
+  }
+ ],
+ "skills": [
+  "Wundmanagement",
+  "Beatmungspflege",
+  "SAP IS-H",
+  "MS Office",
+  "Praxisanleitung"
+ ],
+ "languages": [
+  [
+   "Deutsch",
+   "Muttersprache"
+  ],
+  [
+   "Englisch",
+   "B1"
+  ],
+  [
+   "Polnisch",
+   "A2"
+  ]
+ ]
+}

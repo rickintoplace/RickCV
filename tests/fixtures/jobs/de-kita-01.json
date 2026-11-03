@@ -1,0 +1,37 @@
+{
+  "id": "de-kita-01",
+  "lang": "de",
+  "ad": "Erzieher*in (m/w/d) für unsere Kita „Kleine Strolche“ – 30 bis 39 Std./Woche\nKita-Verbund Nordstadt e. V., Hannover-List\n\nDas erwartet dich\n• Bildung, Erziehung und Betreuung von Kindern im Alter von 1 bis 6 Jahren in offener Arbeit\n• Beobachtung und Dokumentation nach dem Niedersächsischen Orientierungsplan\n• Gestaltung von Eingewöhnungen nach dem Berliner Modell\n• Vertrauensvolle Zusammenarbeit mit Eltern und Fachdiensten\n\nDas bringst du mit\n• Abschluss als staatlich anerkannte*r Erzieher*in, Sozialpädagog*in oder Kindheitspädagog*in (B.A.)\n• Freude an der Arbeit mit Kindern und ein wertschätzendes Bild vom Kind\n• Erfahrung in der Krippenarbeit ist von Vorteil\n• Kenntnisse in Gebärdenunterstützter Kommunikation (GuK) wünschenswert\n• Erweitertes Führungszeugnis (wird vor Einstellung angefordert)\n• Nachweis über den Masernschutz nach § 20 IfSG\n\nDarauf kannst du dich freuen\n• Bezahlung angelehnt an TVöD SuE (S8a) plus Kita-Zulage\n• 30 Tage Urlaub, 24.12. und 31.12. frei\n• 3 Fortbildungstage im Jahr, regelmäßige Supervision\n• Zuschuss zum Deutschlandticket Job\n\nWir begrüßen Bewerbungen unabhängig von Geschlecht, Nationalität, ethnischer und sozialer Herkunft, Religion, Behinderung, Alter sowie sexueller Orientierung.\n\nSo bewirbst du dich\nSchick deine Unterlagen bis 15.12. an Leitung Mira Kaczmarek: jobs@kleine-strolche.example",
+  "must": [
+    "Erzieher*in",
+    "Sozialpädagog*in",
+    "Kindheitspädagog*in",
+    "Führungszeugnis",
+    "Masernschutz"
+  ],
+  "nice": [
+    "Krippenarbeit",
+    "Gebärdenunterstützte Kommunikation"
+  ],
+  "never": [
+    "TVöD",
+    "S8a",
+    "Kita-Zulage",
+    "Urlaub",
+    "Fortbildungstage",
+    "Supervision",
+    "Deutschlandticket",
+    "Hannover",
+    "Kleine Strolche",
+    "Nationalität",
+    "Religion",
+    "Orientierung"
+  ],
+  "alternatives": [
+    [
+      "Erzieher*in",
+      "Sozialpädagog*in",
+      "Kindheitspädagog*in"
+    ]
+  ]
+}

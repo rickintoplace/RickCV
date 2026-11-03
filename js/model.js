@@ -158,6 +158,10 @@
         titleGap: 5,           // Abstand unter den Ueberschriften des Hauptteils
         //  "auto" laesst dem Theme die Entscheidung; alles andere ueberstimmt es.
         profileAlign: "auto",
+        //  Zwei Wuensche, fuer die man sonst CSS schreiben muesste. "auto"
+        //  laesst dem Theme die Entscheidung.
+        nameAlign: "auto",
+        headingStyle: "auto",
         iconSet: "lucide", // Vorgabe fuer neue Symbole
         //  Strichstaerke auf der Lucide-Skala (1 = fein, 3 = fett). Material
         //  Symbols wird ueber seine wght-Achse darauf abgebildet, damit beide
@@ -226,7 +230,10 @@
       //  Name da – dann wirken spaetere Verbesserungen auch auf alte
       //  Dokumente. Ein eigenes reist als CSS im Dokument mit, damit ein
       //  Export vollstaendig ist und cv.html ohne Baukasten gleich aussieht.
-      theme: { slug: "clean", name: "", css: "", source: "" },
+      //  extra: eigene Ergaenzungen, die ueber dem Theme liegen – ueber
+      //  einem mitgelieferten wie ueber einem eigenen. Sie bleiben bei einem
+      //  Wechsel des Themes stehen.
+      theme: { slug: "clean", name: "", css: "", source: "", extra: "" },
 
       ats: {
         //  "off"      – nichts einbetten (Vorgabe)
@@ -236,6 +243,12 @@
         custom: false, // true = der Nutzer pflegt den Text selbst
         text: "",
       },
+
+      //  Die Stellenanzeige, auf die sich dieses Dokument bewirbt
+      //  (js/jobmatch.js). Sie gehoert zum Dokument: jede Kopie in der
+      //  Bibliothek hat ihre eigene Stelle. "dismissed": Begriffe, die die
+      //  Person als "trifft nicht zu" ausgeblendet hat.
+      job: { ad: "", dismissed: [] },
 
       coverLetter: {
         recipient: "",
@@ -637,6 +650,8 @@
     "settings.page2.sidebar": ["keep", "none"],
     "style.sidebarMode": ["light", "dark", "custom"],
     "style.profileAlign": ["auto", "left", "center", "justify"],
+    "style.nameAlign": ["auto", "left", "center"],
+    "style.headingStyle": ["auto", "underline", "caps"],
     "style.iconSet": ["lucide", "material"],
     "style.iconColor": ["accent", "text", "custom"],
     "style.iconBg": ["none", "circle", "rounded"],
@@ -994,7 +1009,7 @@
       data.theme = {
         slug: typeof data.settings.template === "string" && data.settings.template
           ? data.settings.template : "clean",
-        name: "", css: "", source: "",
+        name: "", css: "", source: "", extra: "",
       };
     }
 

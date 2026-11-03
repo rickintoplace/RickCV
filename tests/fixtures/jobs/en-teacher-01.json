@@ -1,0 +1,27 @@
+{
+  "id": "en-teacher-01",
+  "lang": "en",
+  "ad": "Middle School Math Teacher (Grades 6–8) – 2027/28 School Year\nRiverside Independent School District · Houston, TX\n\nRiverside ISD serves 18,000 students across 24 campuses. Salary starts at $62,000 with a $3,000 signing bonus for math teachers.\n\nThe teacher will plan and deliver standards-aligned mathematics instruction, assess student progress and communicate regularly with families.\n\nQualifications\n- Bachelor's degree from an accredited university\n- Valid Texas teaching certification in Mathematics (Grades 4–8 or 7–12)\n- Strong classroom management skills\n- Must pass a criminal background check and fingerprinting\n- Master's degree preferred\n- Bilingual (Spanish) or Special Education certification highly desirable\n\nBenefits include TRS pension, health insurance, summers off and a $1,500 technology stipend.\n\nRiverside ISD does not discriminate on the basis of race, religion, color, national origin, sex, disability or age.",
+  "must": [
+    "Teaching certification",
+    "Mathematics",
+    "Bachelor's degree",
+    "Classroom management",
+    "Background check"
+  ],
+  "nice": [
+    "Master's degree",
+    "Spanish|Spanisch",
+    "Special education"
+  ],
+  "never": [
+    "pension",
+    "summer",
+    "Houston",
+    "health",
+    "stipend",
+    "Riverside",
+    "signing bonus",
+    "salary"
+  ]
+}

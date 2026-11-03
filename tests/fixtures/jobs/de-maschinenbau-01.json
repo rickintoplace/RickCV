@@ -1,0 +1,33 @@
+{
+  "id": "de-maschinenbau-01",
+  "lang": "de",
+  "ad": "Konstrukteur Maschinenbau (m/w/d) – Sondermaschinenbau\nKrämer Anlagentechnik GmbH · Augsburg\n\nIhre Aufgaben\n- Konstruktion von Baugruppen und Anlagen für die Lebensmittelindustrie in 3D-CAD\n- Erstellung von Fertigungszeichnungen und Stücklisten\n- Abstimmung mit Fertigung, Montage und Kunden\n\nIhr Profil\n- Abgeschlossenes Studium des Maschinenbaus (Bachelor oder Dipl.-Ing.) oder staatlich geprüfter Techniker Maschinenbau\n- Mindestens 3 Jahre Erfahrung in der Konstruktion\n- Sehr gute Kenntnisse in SolidWorks\n- Sicher im Erstellen technischer Zeichnungen nach DIN/ISO\n- Gute Englischkenntnisse\n- Erfahrung mit SAP PLM, FEM-Berechnungen oder Schweißkonstruktionen ist von Vorteil\n\nUnser Angebot\n- Tarifbindung IG Metall inkl. Urlaubs- und Weihnachtsgeld\n- 30 Tage Urlaub und Gleitzeit\n- Kantine und E-Bike-Leasing\n\nBewerbungen bitte an Frau Simone Krämer, karriere@kraemer-anlagen.example",
+  "must": [
+    "Maschinenbau",
+    "SolidWorks",
+    "Konstruktion",
+    "Technische Zeichnung",
+    "Englisch"
+  ],
+  "nice": [
+    "SAP PLM",
+    "FEM",
+    "Schweißkonstruktion"
+  ],
+  "never": [
+    "Gleitzeit",
+    "Urlaub",
+    "Kantine",
+    "E-Bike",
+    "Augsburg",
+    "IG Metall",
+    "Weihnachtsgeld",
+    "Krämer"
+  ],
+  "alternatives": [
+    [
+      "Maschinenbau",
+      "Techniker Maschinenbau"
+    ]
+  ]
+}

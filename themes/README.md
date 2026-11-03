@@ -6,6 +6,14 @@ inside the builder itself: Themes → Workshop, type, watch, download the file.
 
 These pictures are made by `python3 tools/make-theme-previews.py`.
 
+## Academic
+
+For research and teaching: serifs, a centred header, headings in small capitals and hanging years. Set tightly for long lists of positions, talks and publications.
+
+![Academic](previews/akademisch.webp)
+
+`themes/akademisch.css`
+
 ## Banner
 
 A coloured band carries the name across the main column, sections wear small capitals, skills sit in pills. Loud but orderly – for fields where a résumé may stand out.
@@ -16,7 +24,7 @@ A coloured band carries the name across the main column, sections wear small cap
 
 ## Clean
 
-A calm baseline: timeline along the edge, dates on the right, nothing else. RickCV's original layout.
+A calm baseline: a fine mark at the edge, dates, title and employer on one line, nothing else. RickCV's original layout.
 
 ![Clean](previews/clean.webp)
 
@@ -29,6 +37,30 @@ The timeline becomes the axis: stations sit on one continuous line, and how long
 ![Dynaline](previews/dynaline.webp)
 
 `themes/dynaline.css`
+
+## Single column
+
+One column across the full width: name and contact on top, then the profile, a slim band with languages and interests, then the career as a calm list. The same order for a person and for an applicant tracking system.
+
+![Single column](previews/einspaltig.webp)
+
+`themes/einspaltig.css`
+
+## First job
+
+For a first résumé: generous spacing, the name in colour, skills as pills, the profile set apart. Little content looks tidy here rather than lost – for school leavers, apprentices and students.
+
+![First job](previews/einsteiger.webp)
+
+`themes/einsteiger.css`
+
+## Large print
+
+Large type, strong contrast, no light grey, no small capitals. For everyone who would rather read a résumé without glasses – and for copiers, fax machines and black-and-white printing.
+
+![Large print](previews/grossdruck.webp)
+
+`themes/grossdruck.css`
 
 ## Icons
 

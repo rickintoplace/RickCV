@@ -1,0 +1,24 @@
+{
+  "id": "de-heilerziehung-01",
+  "lang": "de",
+  "ad": "Heilerziehungspfleger (m/w/d) – Wohngruppe für Erwachsene mit Autismus\nLebenshilfe Ostwestfalen gGmbH | Bielefeld-Sennestadt | Teilzeit 75 %\n\nIhre Aufgaben:\n- Assistenz im Alltag und bei der Tagesstruktur der Bewohner*innen\n- Förderplanung und Dokumentation in Connext Vivendi\n- Begleitung zu Arztterminen und Freizeitaktivitäten\n\nWas Sie mitbringen:\n- Ausbildung als Heilerziehungspfleger*in oder vergleichbare pädagogische Fachkraft\n- Führerschein Klasse B\n- Bereitschaft zu Nachtbereitschaften und Wochenenddiensten\n- Belastbarkeit und Geduld\n- Kenntnisse in Unterstützter Kommunikation oder dem TEACCH-Ansatz sind von Vorteil\n\nWas wir Ihnen bieten:\n- Vergütung nach AVR Caritas inkl. Kinderzulage\n- 30 Tage Urlaub plus zwei Regenerationstage\n- Dienstwagen für Fahrten mit Bewohnern\n- Regelmäßige Supervision und Teamtage\n\nWir freuen uns besonders über Bewerbungen von Menschen mit Behinderung.\n\nAnsprechpartnerin: Frau Lea Fromme, Bereichsleitung, 0521 555 7740, l.fromme@lebenshilfe-owl.example",
+  "must": [
+    "Heilerziehungspfleger",
+    "Führerschein Klasse B",
+    "Nachtbereitschaft",
+    "Belastbarkeit"
+  ],
+  "nice": [
+    "Unterstützte Kommunikation",
+    "TEACCH"
+  ],
+  "never": [
+    "AVR Caritas",
+    "Kinderzulage",
+    "Urlaub",
+    "Dienstwagen",
+    "Bielefeld",
+    "Lebenshilfe",
+    "Supervision"
+  ]
+}

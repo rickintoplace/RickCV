@@ -360,8 +360,38 @@
     } else if (message.type === "rickcv:print") {
       window.focus();
       window.print();
+    } else if (message.type === "rickcv:snapshot") {
+      tell({ type: "rickcv:snapshot", id: message.id, html: snapshot(), families: families() });
     }
   });
+
+  /*  "Als Datei speichern": das Dokument, wie es dasteht – ohne Skripte,
+   *  ohne die Umrandung zum Bearbeiten, ohne Verweise auf Dateien neben
+   *  cv.html. Stylesheet und Schriften setzt der Baukasten ein (js/savefile.js).
+   *  Gelesen wird hier im Rahmen, weil der Baukasten unter file:// nicht in
+   *  ihn hineinsehen darf.
+   */
+  function snapshot() {
+    var root = document.documentElement.cloneNode(true);
+    Array.prototype.forEach.call(
+      root.querySelectorAll("script, link[rel='stylesheet'], meta[http-equiv], .rickcv-edit-frame, .rickcv-edit-button"),
+      function (node) { node.parentNode.removeChild(node); });
+    Array.prototype.forEach.call(root.querySelectorAll("[data-edit]"), function (node) {
+      node.removeAttribute("data-edit");
+    });
+    return root.outerHTML;
+  }
+
+  //  Welche Schriften das Dokument wirklich benutzt: nur die kommen in die
+  //  Datei, nicht alle siebenunddreissig Schnitte.
+  function families() {
+    var seen = {};
+    Array.prototype.forEach.call(document.querySelectorAll(".document *"), function (node) {
+      var family = getComputedStyle(node).fontFamily.split(",")[0].replace(/["']/g, "").trim();
+      if (family) seen[family] = true;
+    });
+    return Object.keys(seen);
+  }
 
   // Direktaufruf: gespeicherten Stand oder Beispiel zeigen.
   var initial = null;

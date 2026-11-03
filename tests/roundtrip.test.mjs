@@ -110,6 +110,8 @@ if (!chrome || !hasPdfjs) {
   const slugs = fs.readdirSync(path.join(root, "themes"))
     .filter((name) => name.endsWith(".css") && !name.startsWith("_"))
     .map((name) => name.replace(/\.css$/, ""))
+    //  ONLY=dynaline,kompakt prueft nur diese; DUMP=1 zeigt, was gelesen wurde.
+    .filter((slug) => !process.env.ONLY || process.env.ONLY.split(",").includes(slug))
     .sort();
 
   const server = serve();
@@ -155,6 +157,12 @@ if (!chrome || !hasPdfjs) {
         box.RickCVPdf.extract(file, (error, value) => (error ? rej(error) : res(value))));
       const parsed = box.RickCVImport.parseText(data.text, "aus-pdf.txt", data.lines, data.images);
       const got = box.RickCVImport.apply(box.RickCVModel.createBase("de"), parsed, "replace");
+
+      if (process.env.DUMP === "2") console.log(data.text);
+      if (process.env.DUMP) {
+        console.log(got.events.map((event) =>
+          `  ${event.start}-${event.end || (event.present ? "heute" : "")} | ${event.title} | ${event.company} | ${event.place}`).join("\n"));
+      }
 
       const trouble = [];
       const tight = (value) => String(value || "").toUpperCase().replace(/\s+/g, "");

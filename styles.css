@@ -276,6 +276,20 @@ a {
   min-height: calc(2lh + 4px);
 }
 
+/*  Die Reihenfolge im PDF. Chromium schreibt Text in der Reihenfolge in
+    die Datei, in der es malt – erst alles ohne z-index, danach, was einen
+    traegt. Der Kasten einer Station hat z-index 1 (er liegt ueber der
+    Zeitleiste); Zeitraum und Ueberschriften hatten keinen. Im Datenstrom
+    standen deshalb erst alle Zeitraeume und Ueberschriften einer Seite und
+    dann alle Stationen, und ein einfacher Parser konnte keinen Zeitraum
+    seiner Station zuordnen (gefunden von tools/ats-proof.mjs). In derselben
+    Ebene wie die Kaesten wird alles in der Reihenfolge des Dokuments
+    gemalt; die Linien der Zeitleiste bleiben darunter. */
+.event .date,
+.resume_title {
+  z-index: 1;
+}
+
 .event-company {
   font-variant: small-caps;
   }
@@ -771,7 +785,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   text-align: right;
   font-size: 0.85em;
   line-height: 1.3;
-  opacity: 0.85;
+  color: color-mix(in srgb, currentColor 85%, transparent);
   margin: -3px 0 5px;
 }
 
@@ -874,14 +888,14 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
     die Links daneben. */
 .resume-footer-date {
   font-size: 0.85em;
-  opacity: 0.8;
+  color: color-mix(in srgb, currentColor 80%, transparent);
   margin-top: 0.35em;
 }
 
 .resume-page-number {
   font-size: 0.8em;
   text-align: right;
-  opacity: 0.65;
+  color: color-mix(in srgb, currentColor 65%, transparent);
   margin-top: 0.6em;
 }
 
@@ -1105,7 +1119,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
   bottom: calc(var(--bottom-margin) * 0.4);
   text-align: right;
   font-size: 0.8em;
-  opacity: 0.65;
+  color: color-mix(in srgb, currentColor 65%, transparent);
 }
 
 .cover-letter-header {
@@ -1273,7 +1287,7 @@ body.pages-fixed .resume_wrapper {
 }
 
 .resume-footer-intro {
-  opacity: 0.8;
+  color: color-mix(in srgb, currentColor 80%, transparent);
 }
 
 .resume-footer-links {
@@ -1472,4 +1486,37 @@ body.pages-fixed .resume_wrapper {
   font-size: 0.95em;
   color: color-mix(in oklab, var(--font-color), white 25%);
 }
+}
+
+/*  Schalter aus dem Editor (Design → Name ausrichten, Ueberschriften).
+    Sie stehen bewusst ausserhalb jeder Ebene: ungeschichtete Regeln
+    gewinnen gegen @layer theme, also gegen jedes Theme, ohne !important.
+    Wer den Schalter auf "Wie im Theme" laesst, bekommt keine dieser Regeln. */
+body[data-name-align="center"] [data-block="namerole"],
+body[data-name-align="center"] [data-block="namerole"] h1,
+body[data-name-align="center"] [data-block="namerole"] .role {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body[data-name-align="left"] [data-block="namerole"],
+body[data-name-align="left"] [data-block="namerole"] h1,
+body[data-name-align="left"] [data-block="namerole"] .role {
+  text-align: left;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+body[data-heading-style="underline"] [data-column="main"] .resume_title {
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+body[data-heading-style="caps"] [data-column="main"] .resume_title {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }

@@ -1,0 +1,33 @@
+{
+  "id": "de-it-02",
+  "lang": "de",
+  "ad": "Frontend Developer (m/w/d) React / TypeScript\nPixelwerk Digital GmbH · Berlin-Kreuzberg oder remote innerhalb Deutschlands\n\nAbout the role\nDu baust mit uns Webanwendungen für öffentliche Auftraggeber – barrierefrei, schnell und wartbar.\n\nResponsibilities\n- Entwicklung von Komponenten mit React und TypeScript\n- Umsetzung von Designs aus Figma in sauberes HTML und CSS\n- Sicherstellung der Barrierefreiheit nach WCAG 2.1 / BITV 2.0\n\nRequirements\n- Mindestens 2 Jahre Berufserfahrung mit React und TypeScript\n- Sehr gute Kenntnisse in HTML und CSS\n- Erfahrung mit Barrierefreiheit (WCAG)\n- Erfahrung mit Next.js oder Storybook von Vorteil\n- Du arbeitest gern mit Figma\n\nBenefits\n- Gehaltsband 58.000–72.000 € je nach Erfahrung\n- Remote-first, MacBook Pro\n- 30 Tage Urlaub, 4 Wochen Workation\n- Hundefreundliches Büro\n\nBewirb dich bei Emre Yıldız: jobs@pixelwerk.example",
+  "must": [
+    "React",
+    "TypeScript",
+    "HTML",
+    "CSS",
+    "Barrierefreiheit"
+  ],
+  "nice": [
+    "Next.js",
+    "Storybook",
+    "Figma"
+  ],
+  "never": [
+    "Remote",
+    "Urlaub",
+    "MacBook",
+    "Workation",
+    "Berlin",
+    "Gehaltsband",
+    "Pixelwerk",
+    "Hundefreundlich"
+  ],
+  "alternatives": [
+    [
+      "Next.js",
+      "Storybook"
+    ]
+  ]
+}

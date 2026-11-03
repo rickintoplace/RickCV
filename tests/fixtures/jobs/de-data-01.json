@@ -1,0 +1,39 @@
+{
+  "id": "de-data-01",
+  "lang": "de",
+  "ad": "Data Analyst (m/w/d) Vertriebscontrolling\nDrogeriemarkt-Kette FrischWerk GmbH & Co. KG, Zentrale Düsseldorf\n\nWas dich erwartet\n• Aufbau und Pflege von Dashboards in Power BI für Vertrieb und Einkauf\n• Ad-hoc-Analysen zu Absatz, Sortiment und Preisen\n• Datenmodellierung und Datenqualität im Data Warehouse\n\nWas du mitbringst\n• Abgeschlossenes Studium der Wirtschaftsinformatik, Statistik, Mathematik oder vergleichbar\n• Sehr gute SQL-Kenntnisse\n• Mehrjährige Erfahrung mit Power BI (DAX, Power Query)\n• Sehr gute Excel-Kenntnisse\n• Fundiertes Wissen in Statistik\n• Verhandlungssicheres Deutsch und gutes Englisch\n• Kenntnisse in Python oder R sowie Erfahrung mit Azure sind wünschenswert\n\nWas wir bieten\n• 3 Tage Homeoffice pro Woche\n• 30 Tage Urlaub, Jobrad, betriebliche Altersvorsorge\n• Jahresbonus, Belegplätze in der Betriebskita\n• 20 % Mitarbeiterrabatt\n\nKontakt: Recruiting-Team, Frau Lina Pohl, karriere@frischwerk.example",
+  "must": [
+    "SQL",
+    "Power BI",
+    "Excel",
+    "Statistik",
+    "Deutsch",
+    "Englisch"
+  ],
+  "nice": [
+    "Python",
+    "R",
+    "Azure"
+  ],
+  "never": [
+    "Homeoffice",
+    "Urlaub",
+    "Jobrad",
+    "Bonus",
+    "Düsseldorf",
+    "Altersvorsorge",
+    "Kita",
+    "Drogeriemarkt"
+  ],
+  "alternatives": [
+    [
+      "Python",
+      "R"
+    ],
+    [
+      "Wirtschaftsinformatik",
+      "Statistik",
+      "Mathematik"
+    ]
+  ]
+}

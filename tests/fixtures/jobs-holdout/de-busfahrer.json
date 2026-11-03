@@ -1,0 +1,31 @@
+{
+  "id": "de-busfahrer",
+  "lang": "de",
+  "ad": "Busfahrer (m/w/d) im Linienverkehr – ab 19,80 €/Std.\n\nDie Regionalverkehr Oberland GmbH bringt täglich 40.000 Fahrgäste ans Ziel – zwischen Weilheim, Murnau und Garmisch-Partenkirchen.\n\nWas du mitbringen musst\nFührerschein Klasse D (oder DE), gültige Fahrerkarte und Eintragung der Schlüsselzahl 95 (Berufskraftfahrerqualifikation). Dazu ein einwandfreies Führungszeugnis, Deutschkenntnisse mindestens auf B1-Niveau und ein freundlicher, serviceorientierter Umgang mit Fahrgästen. Bereitschaft zu Schichtdienst, auch am Wochenende.\n\nWas nicht zwingend nötig ist\nOrtskenntnisse und Erfahrung im Linienverkehr – wir arbeiten dich vier Wochen lang ein. Erfahrung mit Elektrobussen ist schön, aber kein Muss.\n\nWas du bekommst\nTarifliche Bezahlung nach TV-N Bayern, Zuschläge für Sonn- und Feiertage, Dienstplan zwei Monate im Voraus, kostenlose Nutzung aller Linien, Dienstkleidung.\n\nRuf einfach an: 0881 555 210 (Frau Kerschbaumer) – Bewerbung in 5 Minuten, ohne Lebenslauf.",
+  "must": [
+    "Führerschein Klasse D|Klasse D",
+    "Fahrerkarte",
+    "Schlüsselzahl 95|Berufskraftfahrerqualifikation",
+    "Führungszeugnis",
+    "Deutschkenntnisse",
+    "B1",
+    "serviceorientiert",
+    "Schichtdienst"
+  ],
+  "nice": [
+    "Elektrobusse"
+  ],
+  "never": [
+    "Ortskenntnisse",
+    "Linienverkehr",
+    "TV-N",
+    "Zuschläge",
+    "Dienstkleidung",
+    "Dienstplan",
+    "Weilheim",
+    "Murnau",
+    "Garmisch-Partenkirchen",
+    "Kerschbaumer",
+    "Lebenslauf"
+  ]
+}

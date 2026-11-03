@@ -1,0 +1,23 @@
+{
+  "id": "en-retail-01",
+  "lang": "en",
+  "ad": "Sales Associate (Part-Time)\nNorthwind Outdoor Supply · Seattle, WA – Capitol Hill store\n\nWhat you'll do: greet customers, help them find the right gear, run the register and keep the sales floor looking great.\n\nYou'll be a great fit if you have:\n- A passion for customer service\n- Experience with cash handling and POS systems\n- Availability on weekends and holidays\n- Prior retail experience preferred, but not required\n- Bilingual in Spanish is a plus\n\nPerks: 40% employee discount, flexible scheduling, paid time off for part-timers, 401(k) after 90 days.\n\nNorthwind is proud to be an equal opportunity employer. No degree needed – just bring your enthusiasm.\nApply in store or at jobs@northwind-outdoor.example",
+  "must": [
+    "Customer service",
+    "Cash handling",
+    "Weekend availability"
+  ],
+  "nice": [
+    "Retail experience",
+    "Spanish|Spanisch"
+  ],
+  "never": [
+    "employee discount",
+    "flexible scheduling",
+    "Seattle",
+    "Northwind",
+    "401(k)",
+    "paid time off",
+    "degree"
+  ]
+}

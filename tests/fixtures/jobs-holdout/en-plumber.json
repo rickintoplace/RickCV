@@ -1,0 +1,34 @@
+{
+  "id": "en-plumber",
+  "lang": "en",
+  "ad": "PLUMBER – SERVICE & REPAIR (JOURNEYMAN)\nReyes & Sons Plumbing — Phoenix, AZ — $32–$42/hr DOE + on-call pay\n\nWHAT YOU'LL DO\nResidential service calls: water heaters, leak detection, drain cleaning, repiping, fixture installs. Average 4–6 calls per day out of a stocked company van.\n\nWHAT YOU NEED\n• Valid Arizona journeyman plumber license (ROC) or equivalent\n• 3+ years of residential service experience\n• Valid driver's license and clean driving record (MVR checked)\n• Must pass a background check and drug screen\n• Able to lift 75 lbs and work in attics and crawl spaces\n• Own basic hand tools\n\nNICE TO HAVE\n• Tankless water heater experience (Navien, Rinnai)\n• Backflow prevention certification\n• Bilingual English/Spanish\n\nWHAT YOU GET\nTake-home truck, paid weekly, health insurance, paid holidays, tool allowance. No commission pressure — we pay hourly.\n\nReyes & Sons is a drug-free workplace and an equal opportunity employer.",
+  "must": [
+    "journeyman plumber license|journeyman",
+    "residential service",
+    "driver's license",
+    "clean driving record",
+    "background check",
+    "drug screen",
+    "lift 75 lbs",
+    "hand tools"
+  ],
+  "nice": [
+    "tankless water heater",
+    "Navien",
+    "Rinnai",
+    "Backflow prevention certification|Backflow",
+    "Spanish|Bilingual"
+  ],
+  "never": [
+    "truck",
+    "health insurance",
+    "tool allowance",
+    "commission",
+    "Phoenix",
+    "Reyes",
+    "drug-free workplace",
+    "paid weekly",
+    "on-call pay",
+    "company van"
+  ]
+}

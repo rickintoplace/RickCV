@@ -1,0 +1,43 @@
+{
+  "id": "en-warehouse-supervisor",
+  "lang": "en",
+  "ad": "Warehouse Supervisor (2nd Shift) | Columbus, OH | $24–$28/hr + shift differential\n\nNorthgate Distribution is hiring a Warehouse Supervisor for our 300,000 sq ft e-commerce fulfillment center. You'll lead a team of 25–40 associates across receiving, picking, packing and shipping, run shift start-up meetings, track productivity against KPIs and make sure every order leaves on time.\n\nQualifications: 2+ years of supervisory experience in a warehouse or distribution environment; working knowledge of a warehouse management system (Manhattan, Blue Yonder or SAP EWM); intermediate Excel (pivot tables, VLOOKUP); OSHA safety standards; forklift certification or ability to obtain within 30 days; available Monday–Friday 2:30pm–11:00pm with overtime as needed. No degree required. Lean / Six Sigma Yellow Belt, OSHA 30 or bilingual English/Spanish are a plus.\n\nPerks: weekly pay, medical/dental/vision from day one, 401(k) match, tuition reimbursement, on-site gym.\n\nNorthgate Distribution is an Equal Opportunity Employer, including disability and veterans.",
+  "must": [
+    "supervisory experience",
+    "warehouse management system",
+    "Manhattan",
+    "Blue Yonder",
+    "SAP EWM",
+    "Excel",
+    "VLOOKUP",
+    "OSHA",
+    "forklift certification",
+    "overtime"
+  ],
+  "nice": [
+    "Lean",
+    "Six Sigma",
+    "Yellow Belt",
+    "OSHA 30",
+    "Spanish|bilingual"
+  ],
+  "never": [
+    "degree",
+    "weekly pay",
+    "dental",
+    "401(k)",
+    "tuition reimbursement",
+    "gym",
+    "Columbus",
+    "Northgate",
+    "veterans",
+    "shift differential"
+  ],
+  "alternatives": [
+    [
+      "Manhattan",
+      "Blue Yonder",
+      "SAP EWM"
+    ]
+  ]
+}

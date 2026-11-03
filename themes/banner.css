@@ -4,6 +4,7 @@
    author:   RickCV
    licence:  CC0-1.0
    contract: 1
+   tags:     auffallen
    about:    Ein farbiges Band trägt den Namen über die ganze Breite des
              Hauptteils, Abschnitte tragen Versalien, Kenntnisse stehen als
              Plaketten. Laut, aber geordnet – für Branchen, in denen ein
@@ -43,7 +44,7 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-size: 0.78em;
-  opacity: 0.9;
+  color: color-mix(in srgb, currentColor 90%, transparent);
 }
 
 /*  Auf Folgeblättern wiederholt sich der Kopf kleiner – das Band soll
@@ -125,7 +126,10 @@
 }
 
 .event .date {
-  position: static;
+  /* relative statt static: sieht gleich aus, malt den Zeitraum aber in
+     derselben Ebene wie die Station – sonst steht er im PDF-Text vor
+     allen Stationen (siehe styles.css, "Die Reihenfolge im PDF"). */
+  position: relative;
   left: auto;
   width: auto;
   min-width: 0;
@@ -158,4 +162,25 @@
 .content h3 {
   font-size: 1em;
   font-weight: 650;
+}
+
+/*  Der Zeitraum steht vor dem Titel, in seiner Zeile und rechts vom
+    Streifen; was darunter folgt, beginnt an derselben Kante. Am rechten
+    Rand lasen Textleser mit Layoutanalyse (pdfminer.six, die Grundlage
+    vieler Python-Parser) alle Zeitraeume als eigene Spalte, getrennt von
+    ihren Stationen (tools/ats-proof.mjs).  */
+.event .date {
+  float: left;
+  /*  Der Einzug des Inhalts (0.8em) in der kleineren Schrift des Datums.  */
+  margin: 0 0.6em 0 calc(0.8em / 0.82);
+  white-space: nowrap;
+  text-align: left;
+}
+
+.event .date br {
+  display: none;
+}
+
+.content h3 {
+  display: inline;
 }

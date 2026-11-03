@@ -4,6 +4,7 @@
    author:   RickCV
    licence:  CC0-1.0
    contract: 1
+   tags:     serioes, viel
    about:    Die Überschriften stehen im Rand neben ihrem Abschnitt statt
              darüber. Das schafft eine ruhige Lesespalte und spart je
              Abschnitt eine Zeile – nach dem Vorbild der Lebensläufe
@@ -29,7 +30,7 @@
 [data-column="main"] [data-block="references"] {
   display: grid;
   grid-template-columns: 7.5em 1fr;
-  gap: 0 1.4em;
+  gap: 0 0.9em;
   align-items: start;
   padding: 0.5em 0;
 }
@@ -41,6 +42,12 @@
   grid-column: 1;
   margin: 0;
   padding-top: 0.25em;
+  /*  Eine Zeile tiefer als der Titel der ersten Station: auf derselben
+      Grundlinie fasste pdftotext die Titelzeilen aller Abschnitte zu einem
+      eigenen Strang zusammen und riss sie von Arbeitgeber und Ort los
+      (tools/ats-proof.mjs). Neben der zweiten Zeile ist die Zuordnung so
+      eindeutig wie vorher.  */
+  margin-top: 1.1em;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-align: right;
@@ -76,7 +83,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 0.78em;
-  opacity: 0.75;
+  color: color-mix(in srgb, currentColor 75%, transparent);
 }
 
 /*  Flache Liste im Lesebereich: Datum über dem Titel, damit die schmale
@@ -109,16 +116,27 @@
 }
 
 .event .date {
-  position: static;
+  /* relative statt static: sieht gleich aus, malt den Zeitraum aber in
+     derselben Ebene wie die Station – sonst steht er im PDF-Text vor
+     allen Stationen (siehe styles.css, "Die Reihenfolge im PDF"). */
+  position: relative;
   left: auto;
   width: auto;
   min-width: 0;
   display: block;
-  float: right;
-  margin-left: 1em;
+  /*  Vor dem Titel statt am rechten Rand: dort stand bei kurzen Titeln
+      eine halbe Zeile Leere dazwischen, und Textleser lasen die Daten als
+      eigene Spalte, getrennt von ihrer Station (tools/ats-proof.mjs).  */
+  float: left;
+  margin: 0 0.55em 0 0;
   font-variant-numeric: tabular-nums;
   font-size: 0.82em;
-  opacity: 0.65;
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}
+
+/*  Anfang und Ende in einer Zeile vor dem Titel.  */
+.event .date br {
+  display: none;
 }
 
 .event .content {

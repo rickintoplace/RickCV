@@ -1,0 +1,32 @@
+{
+  "id": "en-security-01",
+  "lang": "en",
+  "ad": "Unarmed Security Officer – Casino & Hotel\nSentinel Protective Services · Las Vegas, NV\n\nPatrol assigned areas, monitor CCTV, respond to incidents and write clear daily activity reports.\n\nRequirements\n- Active Nevada PILB security guard license (guard card)\n- High school diploma or GED\n- Must pass background check and drug test\n- Strong report writing skills\n- Ability to stand and walk for an 8-hour shift\n- Availability for nights, weekends and holidays\n\nPreferred\n- CPR and first aid certification\n- Prior military or law enforcement experience\n\nWe offer weekly pay, free uniforms, paid overtime, health benefits after 60 days and PTO.\n\nSentinel is an equal opportunity employer, including disability and veterans.",
+  "must": [
+    "Security guard license",
+    "High school diploma",
+    "Background check",
+    "Report writing"
+  ],
+  "nice": [
+    "CPR",
+    "First aid|Erste Hilfe",
+    "Military experience"
+  ],
+  "never": [
+    "weekly pay",
+    "uniforms",
+    "PTO",
+    "Las Vegas",
+    "Sentinel",
+    "overtime",
+    "Health",
+    "casino"
+  ],
+  "alternatives": [
+    [
+      "High school diploma",
+      "GED"
+    ]
+  ]
+}

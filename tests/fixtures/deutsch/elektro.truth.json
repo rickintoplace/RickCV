@@ -1,0 +1,83 @@
+{
+ "id": "elektro",
+ "name": "Mehmet Yılmaz",
+ "role": "Elektroniker für Betriebstechnik",
+ "street": "Hafenstraße 3a",
+ "city": "28217 Bremen",
+ "email": "m.yilmaz@example.org",
+ "phone": "+49 421 9876543",
+ "birth": "02.11.1993 in Bremen",
+ "experience": [
+  {
+   "title": "Servicetechniker",
+   "org": "Nordwerk Anlagenbau GmbH",
+   "place": "Bremen",
+   "start": "01/2021",
+   "end": "",
+   "present": true,
+   "bullets": [
+    "Wartung und Instandsetzung von SPS-gesteuerten Anlagen",
+    "Fehlersuche an Siemens S7 und TIA Portal"
+   ]
+  },
+  {
+   "title": "Elektroniker für Betriebstechnik",
+   "org": "Weserstahl AG",
+   "place": "Bremen",
+   "start": "02/2016",
+   "end": "12/2020",
+   "present": false,
+   "bullets": [
+    "Instandhaltung im Dreischichtbetrieb",
+    "Prüfung ortsveränderlicher Geräte nach DGUV V3"
+   ]
+  }
+ ],
+ "education": [
+  {
+   "title": "Staatlich geprüfter Techniker Elektrotechnik",
+   "org": "Technikerschule Bremen",
+   "place": "Bremen",
+   "start": "08/2018",
+   "end": "07/2020",
+   "present": false
+  },
+  {
+   "title": "Ausbildung Elektroniker für Betriebstechnik",
+   "org": "Weserstahl AG",
+   "place": "Bremen",
+   "start": "08/2012",
+   "end": "01/2016",
+   "present": false
+  },
+  {
+   "title": "Mittlere Reife",
+   "org": "Oberschule Findorff",
+   "place": "Bremen",
+   "start": "08/2006",
+   "end": "07/2012",
+   "present": false
+  }
+ ],
+ "skills": [
+  "SPS-Programmierung",
+  "Siemens S7",
+  "TIA Portal",
+  "Schaltschrankbau",
+  "Führerschein Klasse B"
+ ],
+ "languages": [
+  [
+   "Deutsch",
+   "Muttersprache"
+  ],
+  [
+   "Türkisch",
+   "Muttersprache"
+  ],
+  [
+   "Englisch",
+   "B2"
+  ]
+ ]
+}

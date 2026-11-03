@@ -1,0 +1,47 @@
+{
+  "id": "en-data-engineer",
+  "lang": "en",
+  "ad": "Senior Data Engineer (f/m/x) – Remote within EU\n\nKelpie Analytics GmbH | Berlin or remote (CET ±2h) | €75,000–€92,000 + VSOP\n\nWho we are\nKelpie helps 300+ mid-sized retailers forecast demand. Our platform ingests ~2 TB of POS and inventory data per day.\n\nYour mission\n- Design, build and own batch and streaming pipelines\n- Model our warehouse in dbt and keep data quality high\n- Work with data scientists to productionise feature pipelines\n\nWhat you bring\n- 5+ years in data engineering or a similar role\n- Strong Python and SQL\n- Hands-on experience with Apache Spark or Flink\n- Production experience with Airflow (or Dagster/Prefect)\n- dbt and a cloud data warehouse (Snowflake or BigQuery)\n- Fluent English; German is not required\n- BSc in Computer Science or equivalent practical experience\n\nPreferred\n- Kafka\n- Terraform and AWS\n- Experience with data contracts or data mesh is a plus\n\nWhat we offer\n30 vacation days, €1,500 learning budget, Urban Sports Club, home office equipment, two team off-sites per year.\n\nWe welcome applications from people of all backgrounds. Kelpie Analytics is committed to equal opportunities regardless of gender, origin, religion, disability, age or sexual identity.",
+  "must": [
+    "Python",
+    "SQL",
+    "Spark|Apache Spark",
+    "Flink",
+    "Airflow",
+    "dbt",
+    "Snowflake",
+    "BigQuery",
+    "English",
+    "Computer Science"
+  ],
+  "nice": [
+    "Kafka",
+    "Terraform",
+    "AWS",
+    "data contracts",
+    "data mesh"
+  ],
+  "never": [
+    "German",
+    "VSOP",
+    "vacation",
+    "learning budget",
+    "Urban Sports Club",
+    "Berlin",
+    "Kelpie",
+    "religion",
+    "off-sites",
+    "home office equipment",
+    "retailers"
+  ],
+  "alternatives": [
+    [
+      "Spark|Apache Spark",
+      "Flink"
+    ],
+    [
+      "Snowflake",
+      "BigQuery"
+    ]
+  ]
+}

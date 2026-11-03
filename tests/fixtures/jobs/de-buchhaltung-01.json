@@ -1,0 +1,25 @@
+{
+  "id": "de-buchhaltung-01",
+  "lang": "de",
+  "ad": "Steuerfachangestellte / Finanzbuchhalter (m/w/d)\nSteuerberatungskanzlei Schuster & Partner mbB · Dresden\n\nIhre Aufgaben:\n- Laufende Finanzbuchhaltung für Mandanten verschiedener Branchen\n- Lohn- und Gehaltsabrechnungen\n- Vorbereitung von Jahresabschlüssen und Steuererklärungen\n\nIhr Profil:\n- Abgeschlossene Ausbildung als Steuerfachangestellte/r oder vergleichbare kaufmännische Ausbildung mit Schwerpunkt Rechnungswesen\n- Mehrjährige Erfahrung in der Finanzbuchhaltung und Lohnbuchhaltung\n- Sehr gute Kenntnisse in DATEV (Kanzlei-Rechnungswesen, LODAS)\n- Sicherer Umgang mit Excel\n- Weiterbildung zum Bilanzbuchhalter wünschenswert\n- Erfahrung mit DATEV Unternehmen online ist ein Plus\n\nUnser Angebot:\n- Gleitzeit ohne Kernzeit, Homeoffice nach Absprache\n- 30 Tage Urlaub\n- Bezahlte Fortbildungen und Jobrad\n- Moderne, papierlose Kanzlei\n\nWir freuen uns auf Ihre Bewerbung an Frau Ines Schuster, karriere@schuster-partner.example.",
+  "must": [
+    "Steuerfachangestellte",
+    "DATEV",
+    "Finanzbuchhaltung",
+    "Lohnbuchhaltung",
+    "Excel"
+  ],
+  "nice": [
+    "Bilanzbuchhalter",
+    "DATEV Unternehmen online"
+  ],
+  "never": [
+    "Gleitzeit",
+    "Homeoffice",
+    "Urlaub",
+    "Fortbildungen",
+    "Dresden",
+    "Schuster & Partner",
+    "Jobrad"
+  ]
+}

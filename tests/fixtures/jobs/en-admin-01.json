@@ -1,0 +1,26 @@
+{
+  "id": "en-admin-01",
+  "lang": "en",
+  "ad": "Office Administrator\nHargrove & Lee LLP · Atlanta, GA\n\nHargrove & Lee is a 30-attorney law firm seeking a friendly, organized Office Administrator.\n\nDuties include\n- Managing the front desk, phones and mail\n- Ordering supplies and coordinating with vendors\n- Scheduling conference rooms and client meetings\n- Supporting billing with data entry\n\nQualifications\n- High school diploma or equivalent; associate degree preferred\n- 2+ years of administrative or office experience\n- Proficient in Microsoft Office, especially Excel and Outlook\n- Excellent organizational skills and attention to detail\n- Experience with QuickBooks a plus\n- Notary Public commission preferred\n\nBenefits\n- Health, dental and vision insurance\n- 15 days PTO plus 10 paid holidays\n- Free parking, annual bonus\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.\nPlease send resume and cover letter to hr@hargrovelee.example",
+  "must": [
+    "Microsoft Office|MS Office",
+    "Excel",
+    "Outlook",
+    "Organizational skills",
+    "Attention to detail"
+  ],
+  "nice": [
+    "QuickBooks",
+    "Notary"
+  ],
+  "never": [
+    "PTO",
+    "health",
+    "dental",
+    "Atlanta",
+    "parking",
+    "Hargrove",
+    "holidays",
+    "bonus"
+  ]
+}

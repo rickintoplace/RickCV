@@ -1,0 +1,28 @@
+{
+  "id": "de-vertrieb-01",
+  "lang": "de",
+  "ad": "Vertriebsmitarbeiter im Außendienst (m/w/d) – Gebiet Baden-Württemberg Süd\nHagemann Befestigungstechnik GmbH · Homebase im Raum Stuttgart / Reutlingen\n\nIhre Aufgaben\n- Betreuung und Ausbau des Kundenstamms aus Fachhandel und Industrie\n- Neukundengewinnung im zugewiesenen Gebiet\n- Durchführung von Produktschulungen beim Kunden\n- Erstellung von Angeboten und Besuchsberichten\n\nIhr Profil\n- Kaufmännische oder technische Ausbildung\n- Mehrjährige Erfahrung im Vertrieb, idealerweise im B2B-Außendienst\n- Führerschein Klasse B\n- Verhandlungsgeschick und Abschlussstärke\n- Reisebereitschaft (Tagestouren, kaum Übernachtungen)\n- Kenntnisse in einem CRM-System, idealerweise Salesforce\n- Erfahrung in der Baubranche von Vorteil\n\nWir bieten\n- Firmenwagen der Mittelklasse, auch zur privaten Nutzung\n- Fixgehalt plus ungedeckelte Provision\n- Laptop und Smartphone\n- 30 Tage Urlaub und Incentive-Reisen\n\nBewerbung an Vertriebsleiter Marc Hagemann, vertrieb@hagemann-befestigung.example",
+  "must": [
+    "Vertrieb",
+    "Außendienst",
+    "Führerschein Klasse B",
+    "Verhandlungsgeschick",
+    "Reisebereitschaft"
+  ],
+  "nice": [
+    "CRM",
+    "Salesforce",
+    "Baubranche"
+  ],
+  "never": [
+    "Firmenwagen",
+    "Provision",
+    "Laptop",
+    "Smartphone",
+    "Urlaub",
+    "Stuttgart",
+    "Fixgehalt",
+    "Incentive-Reisen",
+    "Hagemann"
+  ]
+}

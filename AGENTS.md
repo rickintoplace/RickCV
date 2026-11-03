@@ -123,8 +123,12 @@ Field by field:
 | `settings.page2.sidebar` | `"keep"` (default) or `"none"` — whether sheets after the first keep the sidebar |
 | `settings.page2.repeatHeader` / `repeatContact` / `repeatPhoto` | what a follow-up sheet repeats |
 | `style.pageBottom` | centimetres of free space below the last block, `0.5` by default |
-| `theme.slug` | `clean`, `dynaline`, `icons`, `klassisch`, `kompakt`, `terminal`, `rightrail`, `marginheads`, `banner` |
+| `theme.slug` | `clean`, `dynaline`, `icons`, `klassisch`, `kompakt`, `terminal`, `rightrail`, `marginheads`, `banner`, `einspaltig` (single column), `grossdruck` (large print), `einsteiger` (first job), `akademisch` (academic). For applicant tracking systems, pick `einspaltig` |
 | `theme.css` | a complete CSS theme of your own; `theme.slug` then stays empty |
+| `theme.extra` | CSS *added on top of* the chosen theme (built-in or your own) — the easy way to adjust one detail; the same rules as `theme.css` apply |
+| `style.nameAlign` | `"auto"` (theme decides), `"left"`, `"center"` |
+| `style.headingStyle` | `"auto"`, `"underline"`, `"caps"` — headings in the main column |
+| `job.ad` | the text of the job ad this application answers; RickCV shows, per requirement, whether the resume covers it. Fill it in when you know the ad — never write requirements into the resume that the person did not state |
 | `events[].sectionId` | `"experience"`, `"education"` or `"volunteer"` |
 | `events[].start` / `end` | `"MM/YYYY"` or `"YYYY"`; `present: true` means "to this day" |
 | `events[].dateMode` | `"auto"` (default), `"range"`, `"start"`, `"none"` — for entries without a period |

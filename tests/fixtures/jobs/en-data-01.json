@@ -1,0 +1,43 @@
+{
+  "id": "en-data-01",
+  "lang": "en",
+  "ad": "Data Scientist – Credit Risk\nNordbank N.V. · Amsterdam (hybrid)\n\nYour responsibilities\n- Develop and validate credit risk models\n- Translate business questions into analyses and present results to stakeholders\n- Work with data engineers to productionise models\n\nYour profile\n- MSc or PhD in Statistics, Econometrics, Computer Science or a related quantitative field\n- 2+ years of hands-on experience with Python or R\n- Excellent SQL skills\n- Solid grounding in statistics and machine learning\n- Strong communication skills; you can explain a model to a non-technical audience\n- Experience with Spark or dbt is a plus\n\nWhat we offer\n- Competitive salary, 13th month and annual bonus\n- Hybrid working, laptop of your choice\n- Excellent pension and health benefits, relocation support\n\nNordbank values diversity and is committed to equal opportunity.\nContact: recruitment@nordbank.example",
+  "must": [
+    "MSc",
+    "Python",
+    "R",
+    "SQL",
+    "Statistics",
+    "Machine Learning",
+    "Communication skills"
+  ],
+  "nice": [
+    "Spark",
+    "dbt"
+  ],
+  "never": [
+    "bonus",
+    "hybrid",
+    "pension",
+    "Amsterdam",
+    "health",
+    "Nordbank",
+    "laptop",
+    "Relocation"
+  ],
+  "alternatives": [
+    [
+      "MSc",
+      "PhD"
+    ],
+    [
+      "Python",
+      "R"
+    ],
+    [
+      "Statistics",
+      "Econometrics",
+      "Computer Science"
+    ]
+  ]
+}

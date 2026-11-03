@@ -1,0 +1,33 @@
+{
+  "id": "en-lead-01",
+  "lang": "en",
+  "ad": "Engineering Manager – Payments Platform\nLarkspur Financial · Toronto (hybrid) or remote in Canada\n\nAbout the role\nLead a team of 7 backend engineers who build and run the systems that move $2B a year.\n\nWhat you'll do\n- Coach and grow engineers through regular 1:1s and career plans\n- Partner with product on roadmap and delivery\n- Own hiring for your team\n- Keep our services reliable and our on-call humane\n\nWhat we need\n- 2+ years of people management experience leading software engineers\n- 5+ years as a hands-on software engineer before moving into management\n- Experience hiring and building teams\n- Comfortable running agile teams (Scrum or Kanban)\n- Background in distributed systems\n- Familiarity with Java, Kotlin or AWS is a plus\n\nPerks\n- Salary $190k–$220k CAD plus equity\n- 18 weeks parental leave top-up, $2,000 learning budget, wellness account\n\nLarkspur is committed to employment equity and welcomes applications from women, Indigenous peoples, persons with disabilities and members of visible minorities.",
+  "must": [
+    "People management",
+    "Software engineering",
+    "Hiring",
+    "Agile",
+    "Distributed systems"
+  ],
+  "nice": [
+    "Java",
+    "Kotlin",
+    "AWS"
+  ],
+  "never": [
+    "equity",
+    "remote",
+    "parental leave",
+    "Toronto",
+    "learning budget",
+    "Wellness",
+    "Larkspur",
+    "salary"
+  ],
+  "alternatives": [
+    [
+      "Scrum",
+      "Kanban"
+    ]
+  ]
+}

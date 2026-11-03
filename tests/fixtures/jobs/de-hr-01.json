@@ -1,0 +1,33 @@
+{
+  "id": "de-hr-01",
+  "lang": "de",
+  "ad": "HR Generalist / Personalreferent (m/w/d)\nKurzmann Automotive Systems GmbH · Mannheim · Vollzeit\n\nDeine Aufgaben\n- Ganzheitliche Betreuung der Mitarbeitenden von Eintritt bis Austritt\n- Recruiting für gewerbliche und kaufmännische Positionen\n- Erstellung von Arbeitsverträgen, Zeugnissen und Bescheinigungen\n- Ansprechpartner:in für Führungskräfte in arbeitsrechtlichen Fragen\n- Zusammenarbeit mit dem Betriebsrat\n\nDein Profil\n- Abgeschlossenes Studium mit Schwerpunkt Personalwesen oder Ausbildung mit Weiterbildung zum Personalfachkaufmann (IHK)\n- Mindestens 3 Jahre Berufserfahrung im Personalwesen\n- Fundierte Kenntnisse im Arbeitsrecht\n- Erfahrung im Recruiting\n- Kommunikationsstärke und Diskretion\n- Sicherer Umgang mit MS Office\n- Erfahrung mit Personio oder SAP HCM sowie gute Englischkenntnisse sind von Vorteil\n\nWir bieten\n- Hybrides Arbeiten (bis zu 60 % mobil)\n- 30 Tage Urlaub, Sabbatical möglich\n- Jobrad, betriebliche Altersvorsorge, Fitnessstudio-Zuschuss\n\nBewerbung an Dr. Katrin Moll, Leitung HR, people@kurzmann-as.example",
+  "must": [
+    "Personalwesen",
+    "Arbeitsrecht",
+    "Recruiting",
+    "Kommunikationsstärke",
+    "MS Office"
+  ],
+  "nice": [
+    "Personio",
+    "SAP HCM",
+    "Englisch"
+  ],
+  "never": [
+    "Hybrid",
+    "Urlaub",
+    "Jobrad",
+    "Altersvorsorge",
+    "Mannheim",
+    "Fitness",
+    "Sabbatical",
+    "Kurzmann"
+  ],
+  "alternatives": [
+    [
+      "Personalwesen",
+      "Personalfachkaufmann"
+    ]
+  ]
+}

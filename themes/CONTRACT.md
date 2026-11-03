@@ -22,11 +22,23 @@ accidental.
    author:   somebody
    licence:  CC0-1.0
    contract: 1
+   tags:     serioes, viel
    about:    One sentence about how it looks.
 */
 ```
 
-`name` and `contract` are required. `licence` should be CC0 or MIT — the core of
+`name` and `contract` are required. `tags:` says what a theme is good for, from a fixed
+list that the builder's gallery filters by:
+
+| Tag | Meaning |
+| --- | --- |
+| `viel` | long careers: set tightly |
+| `wenig` | a first résumé: generous spacing |
+| `serioes` | formal, restrained |
+| `auffallen` | colour and shape do part of the work |
+| `lesbar` | large type, strong contrast, black-and-white print |
+
+Unknown tags are dropped. `licence` should be CC0 or MIT — the core of
 RickCV is under the AGPL, but nobody should have to carry that along for a
 look. Add `name-en:` and `about-en:` if you want an English name and
 description next to a German one; the gallery shows whichever fits the
@@ -104,6 +116,33 @@ itself.
 
 The same goes for `--profile-align`: the setting in the editor says "left to the
 theme" until someone picks something else.
+
+## Adding to a theme instead of replacing it
+
+A document carries `theme.extra` next to `theme.slug` / `theme.css`: CSS that is appended to the
+chosen theme in the same cascade layer, so it wins without `!important`. The builder's
+*My adjustments* writes there (ready-made "ingredients" plus free CSS), and the additions survive
+a change of theme. Everything below about stripping applies to it as well.
+
+## Reading order in the PDF
+
+Chromium writes text into the PDF in the order it paints it — first everything without a
+`z-index`, then what carries one. The base styles therefore put `.event .date` and
+`.resume_title` into the same layer as the station boxes (`z-index: 1`). If your theme moves the
+date out of absolute positioning, use `position: relative` rather than `static`: it looks the
+same, but keeps the date next to its station in the text a parser reads. A theme that lays
+everything out as a plain list, without overlapping layers, can instead set the text carriers
+(`.resume_title`, `.timeline`, `.event`, `.event .date`, `.event .content`) to
+`position: static` — then the document order is the paint order.
+
+Parsers with layout analysis group lines into blocks by position. Text with `opacity` ends up
+in a transparency group that pdfminer.six reads after everything else — use an alpha colour
+(`color-mix(in srgb, currentColor 70%, transparent)`) instead. A date column is read as a
+column of its own unless each date is one line, on the title's baseline, at most about one
+letter before it. Three more things split a station: a gap of more than about one letter between date and text, a short title line
+directly above a much wider line (put the employer on the title's line, or keep both similar in
+width), and a heading that reaches sideways into a column of text. `node tools/ats-proof.mjs`
+checks all of this for every bundled theme; `ONLY=<slug>` limits it to one.
 
 ## What a theme may not do
 

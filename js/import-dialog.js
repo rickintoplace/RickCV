@@ -130,7 +130,7 @@
     var input = el("input");
     input.type = "file";
     input.hidden = true;
-    input.accept = ".json,.zip,.csv,.pdf,.docx,.txt,application/json,application/zip,text/csv,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain";
+    input.accept = ".json,.zip,.csv,.pdf,.docx,.txt,.html,.htm,text/html,application/json,application/zip,text/csv,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain";
     input.addEventListener("change", function () {
       if (input.files[0]) readFile(input.files[0]);
       input.value = "";
@@ -265,7 +265,10 @@
     body.appendChild(el("p", "imp-label", t("impMode")));
     var modes = el("div", "imp-modes");
     [
-      { value: "replace", label: "impModeReplace", hint: "impModeReplaceHint" },
+      //  Eine RickCV-Sicherung ersetzt alles, auch das Aussehen – der
+      //  Hinweis darf dann nicht sagen, dass es bleibt.
+      { value: "replace", label: "impModeReplace",
+        hint: parsed.format === "rickcv" ? "impModeReplaceFullHint" : "impModeReplaceHint" },
       { value: "merge", label: "impModeMerge", hint: "impModeMergeHint" },
     ].forEach(function (entry) {
       var option = el("label", "imp-mode");

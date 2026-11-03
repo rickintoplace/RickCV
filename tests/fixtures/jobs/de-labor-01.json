@@ -1,0 +1,35 @@
+{
+  "id": "de-labor-01",
+  "lang": "de",
+  "ad": "Chemielaborant / Pharmakant (m/w/d) Qualitätskontrolle\nVitaPharm Biologics GmbH · Biberach an der Riß\n\nYour responsibilities\n• Durchführung von Freigabe- und Stabilitätsprüfungen nach Arzneibuch\n• Analytik mittels HPLC und UV/VIS\n• Dokumentation nach GMP und Bearbeitung von Abweichungen\n• Pflege von Prüfmitteln und Kalibrierungen\n\nYour profile\n• Abgeschlossene Ausbildung als Chemielaborant/in, CTA oder BTA\n• Praktische Erfahrung mit HPLC\n• Kenntnisse der GMP-Richtlinien sind zwingend erforderlich\n• Gute Englischkenntnisse (SOPs sind teilweise englisch)\n• Sorgfalt und Zuverlässigkeit\n• Erfahrung mit LIMS, Gaschromatographie oder Empower ist ein Plus\n\nWhat we offer\n• Vergütung nach Tarifvertrag Chemie inkl. Schichtzulage\n• 30 Tage Urlaub, betriebliche Altersvorsorge\n• Kantine, Werksarzt und Betriebssport\n\nVitaPharm steht für Chancengleichheit. Wir freuen uns auf Bewerbungen aller Menschen unabhängig von Geschlecht, Herkunft, Religion, Behinderung oder Alter.\nIhre Ansprechpartnerin: Frau Dr. Anja Roth, careers@vitapharm.example",
+  "must": [
+    "Chemielaborant",
+    "HPLC",
+    "GMP",
+    "Englisch",
+    "Sorgfalt"
+  ],
+  "nice": [
+    "LIMS",
+    "Gaschromatographie",
+    "Empower"
+  ],
+  "never": [
+    "Tarifvertrag",
+    "Chemie",
+    "Urlaub",
+    "Kantine",
+    "Werksarzt",
+    "Biberach",
+    "Altersvorsorge",
+    "Schichtzulage",
+    "Vitapharm"
+  ],
+  "alternatives": [
+    [
+      "Chemielaborant",
+      "CTA",
+      "BTA"
+    ]
+  ]
+}

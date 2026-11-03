@@ -1,0 +1,33 @@
+{
+  "id": "de-steuerfachangestellte",
+  "lang": "de",
+  "ad": "STEUERFACHANGESTELLTE*R (VOLLZEIT ODER TEILZEIT, MIN. 30 STD.)\n\nWER WIR SIND\nDie Kanzlei Brandt & Okafor Steuerberatungsgesellschaft mbH betreut mit 25 Mitarbeitenden mittelständische Mandanten in Münster und Umgebung.\n\nIHRE AUFGABEN\nErstellung von Finanz- und Lohnbuchhaltungen, Jahresabschlüssen sowie betrieblichen und privaten Steuererklärungen; Kommunikation mit Mandanten und Finanzamt.\n\nIHR PROFIL\nAbgeschlossene Ausbildung zur/zum Steuerfachangestellten. Mehrjährige Berufserfahrung in einer Steuerkanzlei. Sicherer Umgang mit DATEV (Kanzlei-Rechnungswesen, Lohn und Gehalt) und MS Office, insbesondere Excel. Eine Weiterbildung zum Steuerfachwirt oder Bilanzbuchhalter ist von Vorteil, aber keine Voraussetzung. Kenntnisse in DATEV Unternehmen online sind wünschenswert.\n\nUNSER ANGEBOT\nFlexible Arbeitszeiten und Homeoffice-Option, Kostenübernahme für Fortbildungen, Kita-Zuschuss, moderne Büros am Hafen.\n\nKONTAKT\nBitte senden Sie Ihre Unterlagen mit Gehaltsvorstellung an karriere@brandt-okafor.de. Die Kanzlei steht für Chancengleichheit; Bewerbungen schwerbehinderter Menschen sind willkommen.",
+  "must": [
+    "Steuerfachangestellte",
+    "Berufserfahrung",
+    "Steuerkanzlei",
+    "DATEV",
+    "MS Office",
+    "Excel",
+    "Lohnbuchhaltung",
+    "Jahresabschlüsse",
+    "Steuererklärungen"
+  ],
+  "nice": [
+    "Steuerfachwirt",
+    "Bilanzbuchhalter",
+    "DATEV Unternehmen online"
+  ],
+  "never": [
+    "Homeoffice",
+    "Kita-Zuschuss",
+    "Münster",
+    "Brandt",
+    "Okafor",
+    "Chancengleichheit",
+    "Gehaltsvorstellung",
+    "Hafen",
+    "schwerbehinderter",
+    "Arbeitszeiten"
+  ]
+}

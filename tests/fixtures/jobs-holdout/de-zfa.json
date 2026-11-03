@@ -1,0 +1,29 @@
+{
+  "id": "de-zfa",
+  "lang": "de",
+  "ad": "Unsere Zahnarztpraxis Dr. Lindqvist im Herzen von Lüneburg sucht ab sofort eine Zahnmedizinische Fachangestellte (w/m/d) in Teilzeit oder Vollzeit. Sie assistieren am Behandlungsstuhl, bereiten Instrumente auf und kümmern sich um die Abrechnung nach BEMA und GOZ. Voraussetzung ist eine abgeschlossene Ausbildung als ZFA bzw. Zahnarzthelferin; ohne aktuelle Röntgenbescheinigung (Kenntnisse im Strahlenschutz) geht es leider nicht. Wenn Sie zusätzlich eine Fortbildung zur Prophylaxeassistenz (ZMP) mitbringen oder schon mit Dampsoft gearbeitet haben, freuen wir uns besonders. Wir schätzen einen freundlichen Umgang mit Patienten, Sorgfalt und Organisationstalent. Sie erwartet ein modernes Team, digitale Volumentomographie, keine Samstagsarbeit, ein Jobticket und regelmäßige Teamevents. Wir freuen uns auf Ihre Bewerbung – gerne auch per WhatsApp.",
+  "must": [
+    "ZFA|Zahnmedizinische Fachangestellte",
+    "Röntgenbescheinigung",
+    "Strahlenschutz",
+    "BEMA",
+    "GOZ",
+    "Umgang mit Patienten",
+    "Sorgfalt",
+    "Organisationstalent"
+  ],
+  "nice": [
+    "Prophylaxeassistenz|ZMP",
+    "Dampsoft"
+  ],
+  "never": [
+    "Samstagsarbeit",
+    "Jobticket",
+    "Teamevents",
+    "Lüneburg",
+    "Lindqvist",
+    "Volumentomographie",
+    "WhatsApp",
+    "Teilzeit"
+  ]
+}

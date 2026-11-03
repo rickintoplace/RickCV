@@ -66,6 +66,24 @@ ok(Imp.normDate("Dez 2018") === "12/2018", "deutscher Monatsname");
 ok(Imp.normDate("1930") === "1930", "nur Jahr");
 ok(Imp.normDate("3/2019") === "03/2019", "Schrägstrich");
 
+//  "Als Datei speichern" schreibt eine HTML-Datei mit den Daten als JSON
+//  darin (js/savefile.js). Auf RickCV gezogen, muss daraus wieder genau das
+//  Dokument werden – nicht der Text der gezeichneten Seite.
+console.log("\n— Gespeicherte HTML-Datei —");
+{
+  const original = Model.createExample("de");
+  original.contact.name = "Nora </script> Feldmann";
+  const json = JSON.stringify(original).replace(/</g, "\\u003c");
+  const html = `<!DOCTYPE html><html><head><title>Bewerbung</title></head><body>
+    <div class="document"><h1>Irgendein Text</h1></div>
+    <script type="application/json" id="rickcv-data">${json}</script></body></html>`;
+  const parsed = Imp.parseText(html, "Bewerbung – Nora.html");
+  ok(parsed.format === "rickcv", "als RickCV-Dokument erkannt", parsed.format);
+  const back = Imp.apply(base(), parsed, "replace");
+  ok(back.contact.name === "Nora </script> Feldmann", "Name samt </script> heil zurück", back.contact.name);
+  ok(back.events.length === original.events.length, "alle Stationen zurück", back.events.length);
+}
+
 console.log("\n— JSON Resume herein —");
 const jr = Imp.parseText(fs.readFileSync(fixture("resume.json"), "utf8"), "resume.json");
 ok(jr.format === "jsonresume", "als JSON Resume erkannt", jr.format);
@@ -144,6 +162,41 @@ ok(ts.events[0].company === "Beispiel GmbH" && ts.events[0].place === "München"
 ok(ts.events[0].list.length === 2, "Aufzählungszeichen werden zur Liste");
 ok(ts.skills.items.length === 4 && ts.languages.items.length === 2, "Kenntnisse und Sprachen");
 ok(txt.warnings.includes("draft"), "Entwurf ist als solcher gekennzeichnet");
+
+//  "Zeitraum Titel – Einrichtung, Ort" in einer Zeile, wie tabellarische
+//  Themes es setzen – auch umbrochen hinter dem Komma, mitten im Ortsnamen
+//  ("Bad" / "Wimpeln") und mit dem Strich am Zeilenende.
+{
+  const dashed = Imp.apply(base(), Imp.parseText([
+    "Max Mustermann", "max.mustermann@example.com", "",
+    "Berufserfahrung",
+    "07/2021 – 10/2021 Ferienspaß – Spaß AG, Frankfurt",
+    "Bildungsfahrt mit ein bisschen Freizeit",
+    "05/2023 – heute Soziale Leistungen – Bundesagentur für Arbeit,",
+    "Frankfurt",
+    "Größtenteils als Empfänger",
+    "11/2013 – 09/2015 Angefangene Ausbildung zum Tierpfleger – Zoolino, Bad",
+    "Wimpeln",
+    "Tierpflege im Kontaktbereich",
+    "09/2021 – 05/2023 Nachhaltigkeitsprojekt im Naturschutz –",
+    "Krombacher, Kreuztal-Krombach",
+    "10/2010 – 11/2013 Weiterbildung zum",
+    "Zugbegleiter – Bahnschule, Bad Wimpeln",
+    "09/2015 – 07/2021 Gruppenleitung – Stiftung für",
+    "Jugendarbeit, Frankfurt",
+  ].join("\n"), "lebenslauf.txt"), "replace");
+  const got = dashed.events.map((e) => [e.title, e.company, e.place].join(" | "));
+  ok(JSON.stringify(got) === JSON.stringify([
+    "Ferienspaß | Spaß AG | Frankfurt",
+    "Soziale Leistungen | Bundesagentur für Arbeit | Frankfurt",
+    "Angefangene Ausbildung zum Tierpfleger | Zoolino | Bad Wimpeln",
+    "Nachhaltigkeitsprojekt im Naturschutz | Krombacher | Kreuztal-Krombach",
+    "Weiterbildung zum Zugbegleiter | Bahnschule | Bad Wimpeln",
+    "Gruppenleitung | Stiftung für Jugendarbeit | Frankfurt",
+  ]), "Titel – Einrichtung, Ort in einer Zeile, auch umbrochen", JSON.stringify(got));
+  ok(dashed.events[1].description.join(" ") === "Größtenteils als Empfänger",
+     "der umbrochene Ort wird nicht zur Beschreibung", JSON.stringify(dashed.events[1].description));
+}
 
 console.log("\n— LinkedIn-Export —");
 const zip = fs.readFileSync(fixture("linkedin-export.zip"));

@@ -1,0 +1,35 @@
+{
+  "id": "de-fisi",
+  "lang": "de",
+  "ad": "Fachinformatiker:in für Systemintegration (w/m/d) – 2nd-Level-Support & Infrastruktur\n\nHanse Logistik Services GmbH, Bremen | Vollzeit | hybrid (bis zu 3 Tage Homeoffice) | 52.000–60.000 € p. a.\n\nDarum geht's\nDu betreust rund 400 Arbeitsplätze an vier Standorten, administrierst unsere Windows-Server-Landschaft und hältst das Netzwerk am Laufen.\n\nMuss:\n- Abgeschlossene Ausbildung als Fachinformatiker:in für Systemintegration oder vergleichbare Qualifikation\n- Windows Server und Active Directory\n- Netzwerkgrundlagen (TCP/IP, VLAN, DNS, DHCP)\n- Virtualisierung mit VMware vSphere\n- PowerShell-Skripting\n- Englisch für Herstellerdokumentation\n\nKann:\n- Microsoft 365 / Intune\n- Linux-Kenntnisse\n- Erfahrung mit Fortinet-Firewalls\n- ITIL Foundation\n\nNicht nötig: Programmierkenntnisse in Java oder C#. Ein Studium erwarten wir ausdrücklich nicht.\n\nBenefits: Firmenwagen-Pool, Weiterbildungsbudget, Urban-Sports-Club, Rufbereitschaft wird extra vergütet.",
+  "must": [
+    "Fachinformatiker",
+    "Windows Server",
+    "Active Directory",
+    "TCP/IP",
+    "VLAN",
+    "DNS",
+    "DHCP",
+    "VMware|vSphere",
+    "PowerShell",
+    "Englisch"
+  ],
+  "nice": [
+    "Microsoft 365",
+    "Intune",
+    "Linux",
+    "Fortinet",
+    "ITIL"
+  ],
+  "never": [
+    "Java",
+    "C#",
+    "Studium",
+    "Homeoffice",
+    "Firmenwagen",
+    "Weiterbildungsbudget",
+    "Urban-Sports-Club",
+    "Bremen",
+    "Hanse Logistik"
+  ]
+}

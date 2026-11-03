@@ -1,0 +1,24 @@
+{
+  "id": "en-hospitality-01",
+  "lang": "en",
+  "ad": "Line Cook – Full Time\nEmber & Oak Restaurant · Portland, OR\n\nWe're a wood-fired restaurant serving 250 covers a night. We're looking for a line cook to join our kitchen.\n\nYou'll work grill, sauté or garde manger, prep for service and keep your station clean and organized.\n\nRequirements:\n- 1+ year experience as a line cook in a high-volume kitchen\n- Valid Oregon food handler certification\n- Solid knife skills\n- Thrives in a fast-paced environment\n- Available evenings and weekends\n\nBonus points:\n- Culinary school graduate\n- ServSafe Manager certification\n\nWhat we offer: $21–$24/hr plus share of tips, staff meals every shift, health insurance after 60 days, paid time off, 50% dining discount.\n\nEmber & Oak is an equal opportunity employer. Email chef Dana Wu at kitchen@emberandoak.example",
+  "must": [
+    "Line cook",
+    "Food handler certification",
+    "Knife skills",
+    "Fast-paced environment"
+  ],
+  "nice": [
+    "Culinary school",
+    "ServSafe"
+  ],
+  "never": [
+    "staff meals",
+    "tips",
+    "health insurance",
+    "Portland",
+    "Ember",
+    "paid time off",
+    "dining discount"
+  ]
+}

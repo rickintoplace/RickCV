@@ -4,8 +4,10 @@
 Aufruf:
     python3 tools/make-theme-previews.py
 
-Legt themes/previews/<name>.webp an und schreibt themes/README.md mit der
-Galerie (englisch, wie das README daneben). Gebraucht wird ein Chromium und ein kurzlebiger lokaler Server –
+Legt themes/previews/<name>.webp (englisches Beispiel) und
+themes/previews/<name>.de.webp (deutsches, fuer die deutsche Oberflaeche) an
+und schreibt themes/README.md mit der Galerie (englisch, wie das README
+daneben). Gebraucht wird ein Chromium und ein kurzlebiger lokaler Server –
 ueber file:// laedt die Seite ihre Schriften nicht.
 
 Wozu: ein Theme-Beitrag laesst sich damit ansehen statt lesen. Wer einen
@@ -127,11 +129,15 @@ def main():
     server = serve()
     rows = []
     try:
-        for slug in slugs:
+        #  Je Theme zwei Bilder: das englische fuer README und englische
+        #  Oberflaeche, das deutsche fuer die deutsche.
+        shots = [(slug, locale, suffix) for slug in slugs
+                 for locale, suffix in (("en", ""), ("de", ".de"))]
+        for slug, locale, suffix in shots:
             probe = os.path.join(ROOT, ".theme-preview.html")
-            io.open(probe, "w", encoding="utf-8").write(PAGE % {"slug": slug, "locale": "en"})
-            shot = os.path.join(SHOTS, slug + ".png")
-            target = os.path.join(SHOTS, slug + ".webp")
+            io.open(probe, "w", encoding="utf-8").write(PAGE % {"slug": slug, "locale": locale})
+            shot = os.path.join(SHOTS, slug + suffix + ".png")
+            target = os.path.join(SHOTS, slug + suffix + ".webp")
 
             subprocess.run([
                 chrome, "--headless", "--disable-gpu", "--no-sandbox",
@@ -147,6 +153,9 @@ def main():
                 raise SystemExit("Vorschau fuer %s ist nicht entstanden." % slug)
 
             shrink(shot, target)
+            print("  %-15s %6.1f kB" % (slug + suffix, os.path.getsize(target) / 1024.0))
+            if locale != "en":
+                continue
 
             css = io.open(os.path.join(THEMES, slug + ".css"), encoding="utf-8").read()
             #  Englisch zuerst: die Galerie steht im README neben dem
@@ -155,7 +164,6 @@ def main():
             name = field(css, "name-en") or field(css, "name") or slug
             about = field(css, "about-en") or field(css, "about")
             rows.append((slug, name, about))
-            print("  %-12s %6.1f kB" % (slug, os.path.getsize(target) / 1024.0))
     finally:
         server.shutdown()
 

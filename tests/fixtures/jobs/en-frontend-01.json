@@ -1,0 +1,27 @@
+{
+  "id": "en-frontend-01",
+  "lang": "en",
+  "ad": "Senior Frontend Engineer\nLumen Banking Ltd · London (Hybrid, 2 days in office)\n\nThe role\nYou will own the customer-facing web app used by 400,000 small businesses.\n\nResponsibilities\n• Build accessible, performant UI in React and TypeScript\n• Collaborate with designers on our component library\n• Mentor mid-level engineers\n\nRequirements\n• 5+ years building web applications with JavaScript, at least 2 with TypeScript\n• Deep knowledge of React, including hooks and state management\n• Strong CSS skills (we use CSS Modules)\n• Hands-on experience with web accessibility (WCAG 2.2 AA)\n• No financial services background required\n\nNice to have\n• Next.js\n• React Testing Library or Playwright\n• Experience contributing to design systems\n\nWhat we offer\n• £85,000–£100,000 plus equity\n• 25 days holiday plus bank holidays, pension with 6% employer contribution\n• £1,500 annual learning budget, cycle to work scheme\n• Visa sponsorship available\n\nLumen is committed to building a diverse team and welcomes applicants from all backgrounds.\nQuestions? Contact talent@lumenbank.example",
+  "must": [
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "CSS",
+    "Accessibility"
+  ],
+  "nice": [
+    "Next.js",
+    "Testing Library",
+    "Design systems"
+  ],
+  "never": [
+    "Equity",
+    "Visa sponsorship",
+    "Learning budget",
+    "London",
+    "Hybrid",
+    "Pension",
+    "Cycle to work",
+    "Lumen"
+  ]
+}

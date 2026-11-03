@@ -1,0 +1,39 @@
+{
+  "id": "de-bankkaufmann",
+  "lang": "de",
+  "ad": "Bankkaufmann/-frau (m/w/d) als Privatkundenberater/in in der Filiale Celle\n\nDie Volksbank Aller-Heide eG ist eine regional verwurzelte Genossenschaftsbank mit 22 Filialen.\n\nIhre Aufgaben: Sie beraten unsere Privatkundinnen und -kunden ganzheitlich zu Konten, Geldanlage, Baufinanzierung und Altersvorsorge, akquirieren neue Kunden und betreuen einen eigenen Kundenstamm.\n\nIhre Qualifikation: Eine abgeschlossene Ausbildung als Bankkaufmann/-frau, Sparkassenkaufmann/-frau oder Kaufmann/-frau für Versicherungen und Finanzen. Sie verfügen über die Sachkunde nach WpHG sowie nach § 34i GewO (Immobiliardarlehensvermittlung) oder sind bereit, diese zeitnah zu erwerben. Vertriebsorientierung, ein sicheres Auftreten und Freude am Umgang mit Menschen zeichnen Sie aus. Erste Erfahrung in der Kundenberatung ist wünschenswert; eine Weiterbildung zum Bankfachwirt rundet Ihr Profil ab.\n\nUnser Angebot: Vergütung nach Tarifvertrag der Volksbanken und Raiffeisenbanken (rund 56.000 € p. a. inkl. 13. und 14. Gehalt), 31 Urlaubstage, Bankgeschäfte zu Sonderkonditionen, Jobrad.\n\nWir handeln nach den Grundsätzen des Allgemeinen Gleichbehandlungsgesetzes (AGG). Bewerbungen von Menschen mit Schwerbehinderung werden bei gleicher Eignung bevorzugt berücksichtigt.",
+  "must": [
+    "Bankkaufmann",
+    "Sparkassenkaufmann",
+    "Kaufmann/-frau für Versicherungen und Finanzen",
+    "Sachkunde nach WpHG|WpHG",
+    "§ 34i GewO|34i",
+    "Vertriebsorientierung",
+    "sicheres Auftreten",
+    "Umgang mit Menschen"
+  ],
+  "nice": [
+    "Kundenberatung",
+    "Bankfachwirt"
+  ],
+  "never": [
+    "Jobrad",
+    "Urlaubstage",
+    "Sonderkonditionen",
+    "AGG",
+    "Gleichbehandlungsgesetz",
+    "Schwerbehinderung",
+    "Celle",
+    "Volksbank",
+    "Genossenschaftsbank",
+    "Tarifvertrag",
+    "Raiffeisenbanken"
+  ],
+  "alternatives": [
+    [
+      "Bankkaufmann",
+      "Sparkassenkaufmann",
+      "Kaufmann/-frau für Versicherungen und Finanzen"
+    ]
+  ]
+}

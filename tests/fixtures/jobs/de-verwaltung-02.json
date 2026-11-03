@@ -1,0 +1,29 @@
+{
+  "id": "de-verwaltung-02",
+  "lang": "de",
+  "ad": "Das Landesamt für Finanzen Rheinland-Pfalz sucht für die Dienststelle Mainz zum 1. Februar eine/n\n\nVerwaltungsfachangestellte/n (m/w/d) für die Haushaltssachbearbeitung\nEntgeltgruppe E8 TV-L, Teilzeit oder Vollzeit\n\nIhre Aufgaben im Einzelnen: Bewirtschaftung der Haushaltsmittel des Ressorts, Anordnung und Überwachung von Zahlungen, Mitwirkung bei der Aufstellung des Haushaltsplans sowie die Beantwortung von Anfragen der Rechnungsprüfung.\n\nAnforderungen\n- eine abgeschlossene Ausbildung zur/zum Verwaltungsfachangestellten oder eine vergleichbare Qualifikation im öffentlichen Dienst\n- gute Kenntnisse im Haushaltsrecht des Landes (LHO)\n- sehr gute Deutschkenntnisse und ein sicheres schriftliches Ausdrucksvermögen\n- sicherer Umgang mit MS Office\n- Kenntnisse in SAP sind wünschenswert, Englisch ist von Vorteil\n\nWir bieten\n- Bezahlung nach E8 TV-L zzgl. Jahressonderzahlung und Zusatzversorgung (VBL)\n- 30 Tage Urlaub, Gleitzeit, Telearbeit nach der Einarbeitung\n\nDas Land Rheinland-Pfalz fördert die Gleichstellung; Frauen werden bei gleicher Eignung bevorzugt berücksichtigt, soweit sie unterrepräsentiert sind. Schwerbehinderte Bewerberinnen und Bewerber werden bei gleicher Eignung bevorzugt eingestellt.\n\nAnsprechperson: Frau Gül Demir, Personalreferat, Tel. 06131 555 404, personal@lff-rlp.example",
+  "must": [
+    "Verwaltungsfachangestellte",
+    "Haushaltsrecht",
+    "Deutsch",
+    "MS Office"
+  ],
+  "nice": [
+    "SAP",
+    "Englisch"
+  ],
+  "never": [
+    "TV-L",
+    "E8",
+    "Jahressonderzahlung",
+    "VBL",
+    "Urlaub",
+    "Gleitzeit",
+    "Telearbeit",
+    "Mainz",
+    "Landesamt",
+    "Schwerbehinderte",
+    "Gleichstellung",
+    "Frauen"
+  ]
+}

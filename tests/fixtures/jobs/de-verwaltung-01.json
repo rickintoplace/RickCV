@@ -1,0 +1,36 @@
+{
+  "id": "de-verwaltung-01",
+  "lang": "de",
+  "ad": "Sachbearbeitung (m/w/d) im Fachdienst Bauordnung – Entgeltgruppe 9a TVöD\nLandkreis Osnabrück, Fachbereich Planen und Bauen\n\nBeim Landkreis Osnabrück ist im Fachdienst Bauordnung zum nächstmöglichen Zeitpunkt eine Stelle für die Sachbearbeitung in Vollzeit (39 Wochenstunden) unbefristet zu besetzen; die Stelle ist grundsätzlich teilzeitgeeignet, sofern eine lückenlose Besetzung gewährleistet werden kann.\n\nDas Aufgabengebiet umfasst im Wesentlichen die Bearbeitung von Bauanträgen und Bauvoranfragen einschließlich der Prüfung der bauordnungsrechtlichen Vorschriften, die Beteiligung der Träger öffentlicher Belange sowie die Erteilung von Genehmigungen und Bescheiden.\n\nErwartet wird eine abgeschlossene Ausbildung als Verwaltungsfachangestellte/r oder die erfolgreich abgelegte Prüfung zum Verwaltungsfachwirt (Angestelltenlehrgang II); Bewerberinnen und Bewerber mit vergleichbarer Qualifikation werden ebenfalls berücksichtigt. Gute Kenntnisse im Baurecht, insbesondere der Niedersächsischen Bauordnung, sowie der sichere Umgang mit MS Office werden vorausgesetzt. Sehr gute Deutschkenntnisse in Wort und Schrift sind erforderlich. Der Besitz der Fahrerlaubnis der Klasse B sowie Erfahrungen mit kommunalen Fachverfahren sind wünschenswert.\n\nGeboten werden eine Vergütung nach Entgeltgruppe 9a TVöD, die Jahressonderzahlung, eine betriebliche Zusatzversorgung (VBL), flexible Arbeitszeiten im Rahmen der Gleitzeit, 30 Tage Urlaub sowie ein vergünstigtes Jobticket.\n\nDer Landkreis Osnabrück fördert die Gleichstellung von Frauen und Männern; Bewerbungen von Frauen werden daher ausdrücklich begrüßt. Schwerbehinderte Menschen werden bei gleicher Eignung bevorzugt berücksichtigt.\n\nFür Rückfragen steht Ihnen Herr Hendrik Lammers, Telefon 0541 555 2219, zur Verfügung. Bewerbungen bitte bis zum 30.11. über unser Online-Portal.",
+  "must": [
+    "Verwaltungsfachangestellte",
+    "Verwaltungsfachwirt",
+    "Baurecht",
+    "MS Office",
+    "Deutsch"
+  ],
+  "nice": [
+    "Fahrerlaubnis Klasse B|Führerschein Klasse B",
+    "Fachverfahren"
+  ],
+  "never": [
+    "TVöD",
+    "Entgeltgruppe",
+    "Jahressonderzahlung",
+    "Zusatzversorgung",
+    "Gleitzeit",
+    "Urlaub",
+    "Jobticket",
+    "Schwerbehinderte",
+    "Gleichstellung",
+    "Landkreis",
+    "Osnabrück",
+    "Frauen"
+  ],
+  "alternatives": [
+    [
+      "Verwaltungsfachangestellte",
+      "Verwaltungsfachwirt"
+    ]
+  ]
+}

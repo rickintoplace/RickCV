@@ -1,0 +1,27 @@
+{
+  "id": "en-support-01",
+  "lang": "en",
+  "ad": "IT Help Desk Technician (Tier 1/2)\nDesertline Credit Union · Phoenix, AZ\n\nResponsibilities\n• Respond to tickets, calls and walk-ups from 400 employees\n• Image, deploy and troubleshoot Windows laptops\n• Manage user accounts in Active Directory and Microsoft 365\n• Escalate complex issues to the infrastructure team\n\nRequirements\n• 1+ year of help desk or desktop support experience\n• Solid knowledge of Windows 10/11\n• Experience with Active Directory and Microsoft 365 administration\n• Strong troubleshooting skills\n• Excellent customer service and phone etiquette\n• A college degree is not required\n\nPreferred\n• CompTIA A+ certification\n• ITIL Foundation\n• Experience supporting macOS\n\nBenefits: health, dental, 401(k) with 6% match, 3 weeks PTO, certification reimbursement, paid overtime.\n\nWe are an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.",
+  "must": [
+    "Windows",
+    "Active Directory",
+    "Microsoft 365",
+    "Troubleshooting",
+    "Customer service"
+  ],
+  "nice": [
+    "CompTIA A+",
+    "ITIL",
+    "macOS"
+  ],
+  "never": [
+    "PTO",
+    "Phoenix",
+    "health",
+    "401(k)",
+    "certification reimbursement",
+    "Desertline",
+    "overtime",
+    "degree"
+  ]
+}
