@@ -180,6 +180,10 @@ ok(txt.warnings.includes("draft"), "Entwurf ist als solcher gekennzeichnet");
     "Tierpflege im Kontaktbereich",
     "09/2021 – 05/2023 Nachhaltigkeitsprojekt im Naturschutz –",
     "Krombacher, Kreuztal-Krombach",
+    "10/2010 – 11/2013 Weiterbildung zum",
+    "Zugbegleiter – Bahnschule, Bad Wimpeln",
+    "09/2015 – 07/2021 Gruppenleitung – Stiftung für",
+    "Jugendarbeit, Frankfurt",
   ].join("\n"), "lebenslauf.txt"), "replace");
   const got = dashed.events.map((e) => [e.title, e.company, e.place].join(" | "));
   ok(JSON.stringify(got) === JSON.stringify([
@@ -187,6 +191,8 @@ ok(txt.warnings.includes("draft"), "Entwurf ist als solcher gekennzeichnet");
     "Soziale Leistungen | Bundesagentur für Arbeit | Frankfurt",
     "Angefangene Ausbildung zum Tierpfleger | Zoolino | Bad Wimpeln",
     "Nachhaltigkeitsprojekt im Naturschutz | Krombacher | Kreuztal-Krombach",
+    "Weiterbildung zum Zugbegleiter | Bahnschule | Bad Wimpeln",
+    "Gruppenleitung | Stiftung für Jugendarbeit | Frankfurt",
   ]), "Titel – Einrichtung, Ort in einer Zeile, auch umbrochen", JSON.stringify(got));
   ok(dashed.events[1].description.join(" ") === "Größtenteils als Empfänger",
      "der umbrochene Ort wird nicht zur Beschreibung", JSON.stringify(dashed.events[1].description));

@@ -3243,6 +3243,40 @@
     var value = clean(line).replace(/\t+/g, " ");
     if (!value) return;
 
+    //  "Angefangene Ausbildung zum" / "Tierpfleger – Zoolino, Bad Wimpeln":
+    //  der Rest des Titels und dahinter Einrichtung und Ort.
+    var tailPair = value.match(/^(.{2,60}?)\s+[–—-]\s+(.{2,80})$/);
+    if (event.title && !event.company && raw.indexOf("\t") === -1 && tailPair &&
+        (event.continueTitle || DANGLING.test(event.title)) && !orgLike(tailPair[1])) {
+      event.title = event.title + " " + clean(tailPair[1]);
+      event.continueTitle = false;
+      var tailPlace = tailPair[2].match(/^(.{2,60}),\s+([^,]{2,32})$/);
+      if (tailPlace && placeLike(tailPlace[2])) {
+        event.company = clean(tailPlace[1]);
+        event.place = clean(tailPlace[2]);
+      } else {
+        splitPlace(event, clean(tailPair[2]).replace(/,$/, ""));
+      }
+      return;
+    }
+
+    //  "… – Bundesagentur für" / "Arbeit, Frankfurt": der Arbeitgeber ist
+    //  umgebrochen, der Ort folgt hinter dem Komma.
+    if (event.company && !event.place && DANGLING.test(event.company) && raw.indexOf("\t") === -1 &&
+        !event.list.length && !(event.description || []).length) {
+      var wrapped = value.match(/^([^,]{2,40}),\s+([^,]{2,32})$/);
+      if (wrapped && placeLike(wrapped[2])) {
+        event.company = event.company + " " + clean(wrapped[1]);
+        event.place = clean(wrapped[2]);
+        event.placeNext = false;
+        return;
+      }
+      if (value.length <= 40 && !/[.!?:;]$/.test(value)) {
+        event.company = event.company + " " + value;
+        return;
+      }
+    }
+
     if (event.title && !event.company && raw.indexOf("\t") === -1 && value.length <= 60 &&
         (event.continueTitle || DANGLING.test(event.title) || (DANGLING.test(value) && !/[.,;:]/.test(value)))) {
       event.title = /[A-Za-zÄÖÜäöüß]-$/.test(event.title) && /^[a-zäöüß]/.test(value)
