@@ -2,11 +2,12 @@
   "date": "2026-11-03",
   "chromium": "Chromium 156.0.8078.79 Arch Linux",
   "poppler": "pdftotext version 26.10.0",
-  "pdfminer": false,
+  "pdfminer": true,
   "readers": [
     "pdftotext -raw",
     "pdftotext",
-    "pdf.js"
+    "pdf.js",
+    "pdfminer.six"
   ],
   "results": [
     {
@@ -16,7 +17,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -26,7 +28,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -35,8 +38,19 @@
       "file": [],
       "readers": {
         "pdftotext-raw": [],
-        "pdftotext": [],
-        "pdfjs": []
+        "pdftotext": [
+          "Nachhaltigkeitsprojekt im Naturschutz: Zeitraum nicht bei der Station"
+        ],
+        "pdfjs": [],
+        "pdfminer": [
+          "Abitur: Zeitraum nicht bei der Station",
+          "Praktikum: Zeitraum nicht bei der Station",
+          "Angefangene Ausbildung zum Tierpfleger: Zeitraum nicht bei der Station",
+          "Ferienspaß: Zeitraum nicht bei der Station",
+          "Selbstständigkeit: Zeitraum nicht bei der Station",
+          "Nachhaltigkeitsprojekt im Naturschutz: Zeitraum nicht bei der Station",
+          "Soziale Leistungen: Zeitraum nicht bei der Station"
+        ]
       }
     },
     {
@@ -45,8 +59,20 @@
       "file": [],
       "readers": {
         "pdftotext-raw": [],
-        "pdftotext": [],
-        "pdfjs": []
+        "pdftotext": [
+          "Social security: Zeitraum nicht bei der Station"
+        ],
+        "pdfjs": [],
+        "pdfminer": [
+          "A-levels: Zeitraum nicht bei der Station",
+          "Work experience: Zeitraum nicht bei der Station",
+          "Apprenticeship in animal care (unfinished): Zeitraum nicht bei der Station",
+          "Environmental commitment: Zeitraum nicht bei der Station",
+          "Summer programme: Zeitraum nicht bei der Station",
+          "Self-employment: Zeitraum nicht bei der Station",
+          "Rainforest project: Zeitraum nicht bei der Station",
+          "Social security: Zeitraum nicht bei der Station"
+        ]
       }
     },
     {
@@ -55,8 +81,19 @@
       "file": [],
       "readers": {
         "pdftotext-raw": [],
-        "pdftotext": [],
-        "pdfjs": []
+        "pdftotext": [
+          "Ferienspaß: Zeitraum nicht bei der Station"
+        ],
+        "pdfjs": [],
+        "pdfminer": [
+          "Abitur: Zeitraum nicht bei der Station",
+          "Praktikum: Zeitraum nicht bei der Station",
+          "Angefangene Ausbildung zum Tierpfleger: Zeitraum nicht bei der Station",
+          "Ferienspaß: Zeitraum nicht bei der Station",
+          "Selbstständigkeit: Zeitraum nicht bei der Station",
+          "Nachhaltigkeitsprojekt im Naturschutz: Zeitraum nicht bei der Station",
+          "Soziale Leistungen: Zeitraum nicht bei der Station"
+        ]
       }
     },
     {
@@ -66,7 +103,17 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": [
+          "A-levels: Zeitraum nicht bei der Station",
+          "Work experience: Zeitraum nicht bei der Station",
+          "Apprenticeship in animal care (unfinished): Zeitraum nicht bei der Station",
+          "Environmental commitment: Zeitraum nicht bei der Station",
+          "Summer programme: Zeitraum nicht bei der Station",
+          "Self-employment: Zeitraum nicht bei der Station",
+          "Rainforest project: Zeitraum nicht bei der Station",
+          "Social security: Zeitraum nicht bei der Station"
+        ]
       }
     },
     {
@@ -76,7 +123,17 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": [
+          "Abitur: Zeitraum nicht bei der Station",
+          "Praktikum: Zeitraum nicht bei der Station",
+          "Angefangene Ausbildung zum Tierpfleger: Zeitraum nicht bei der Station",
+          "Umweltengagement: Zeitraum nicht bei der Station",
+          "Ferienspaß: Zeitraum nicht bei der Station",
+          "Selbstständigkeit: Zeitraum nicht bei der Station",
+          "Nachhaltigkeitsprojekt im Naturschutz: Zeitraum nicht bei der Station",
+          "Soziale Leistungen: Zeitraum nicht bei der Station"
+        ]
       }
     },
     {
@@ -85,8 +142,20 @@
       "file": [],
       "readers": {
         "pdftotext-raw": [],
-        "pdftotext": [],
-        "pdfjs": []
+        "pdftotext": [
+          "Rainforest project: Zeitraum nicht bei der Station"
+        ],
+        "pdfjs": [],
+        "pdfminer": [
+          "A-levels: Zeitraum nicht bei der Station",
+          "Work experience: Zeitraum nicht bei der Station",
+          "Apprenticeship in animal care (unfinished): Zeitraum nicht bei der Station",
+          "Environmental commitment: Zeitraum nicht bei der Station",
+          "Summer programme: Zeitraum nicht bei der Station",
+          "Self-employment: Zeitraum nicht bei der Station",
+          "Rainforest project: Zeitraum nicht bei der Station",
+          "Social security: Zeitraum nicht bei der Station"
+        ]
       }
     },
     {
@@ -96,7 +165,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -106,7 +176,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -116,7 +187,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -126,7 +198,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -136,7 +209,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -146,7 +220,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -155,8 +230,19 @@
       "file": [],
       "readers": {
         "pdftotext-raw": [],
-        "pdftotext": [],
-        "pdfjs": []
+        "pdftotext": [
+          "Ferienspaß: Zeitraum nicht bei der Station"
+        ],
+        "pdfjs": [],
+        "pdfminer": [
+          "Abitur: Zeitraum nicht bei der Station",
+          "Praktikum: Zeitraum nicht bei der Station",
+          "Angefangene Ausbildung zum Tierpfleger: Zeitraum nicht bei der Station",
+          "Ferienspaß: Zeitraum nicht bei der Station",
+          "Selbstständigkeit: Zeitraum nicht bei der Station",
+          "Nachhaltigkeitsprojekt im Naturschutz: Zeitraum nicht bei der Station",
+          "Soziale Leistungen: Zeitraum nicht bei der Station"
+        ]
       }
     },
     {
@@ -166,7 +252,17 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": [
+          "A-levels: Zeitraum nicht bei der Station",
+          "Work experience: Zeitraum nicht bei der Station",
+          "Apprenticeship in animal care (unfinished): Zeitraum nicht bei der Station",
+          "Environmental commitment: Zeitraum nicht bei der Station",
+          "Summer programme: Zeitraum nicht bei der Station",
+          "Self-employment: Zeitraum nicht bei der Station",
+          "Rainforest project: Zeitraum nicht bei der Station",
+          "Social security: Zeitraum nicht bei der Station"
+        ]
       }
     },
     {
@@ -176,7 +272,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -186,7 +283,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -196,7 +294,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -206,7 +305,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -216,7 +316,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -226,7 +327,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -236,7 +338,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -246,7 +349,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -256,7 +360,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     },
     {
@@ -266,7 +371,8 @@
       "readers": {
         "pdftotext-raw": [],
         "pdftotext": [],
-        "pdfjs": []
+        "pdfjs": [],
+        "pdfminer": []
       }
     }
   ]

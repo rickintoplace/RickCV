@@ -135,8 +135,11 @@ everything out as a plain list, without overlapping layers, can instead set the 
 (`.resume_title`, `.timeline`, `.event`, `.event .date`, `.event .content`) to
 `position: static` — then the document order is the paint order.
 
-Parsers with layout analysis group lines into blocks by position. Three things split a
-station there: a gap of more than about one letter between date and text, a short title line
+Parsers with layout analysis group lines into blocks by position. Text with `opacity` ends up
+in a transparency group that pdfminer.six reads after everything else — use an alpha colour
+(`color-mix(in srgb, currentColor 70%, transparent)`) instead. A date column is read as a
+column of its own unless each date is one line, on the title's baseline, at most about one
+letter before it. Three more things split a station: a gap of more than about one letter between date and text, a short title line
 directly above a much wider line (put the employer on the title's line, or keep both similar in
 width), and a heading that reaches sideways into a column of text. `node tools/ats-proof.mjs`
 checks all of this for every bundled theme; `ONLY=<slug>` limits it to one.

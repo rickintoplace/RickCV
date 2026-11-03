@@ -390,3 +390,23 @@
 .content h3 {
   font-size: 1.05em;
 }
+
+/*  Der Zeitraum in einer Zeile, auf der Grundlinie des Titels und dicht
+    davor. Zweizeilig oder mit breiter Luecke lasen Textleser mit
+    Layoutanalyse (pdfminer.six, die Grundlage vieler Python-Parser) alle
+    Zeitraeume eines Abschnitts als eigene Spalte, getrennt von ihren
+    Stationen (tools/ats-proof.mjs).  */
+.event {
+  align-items: baseline;
+  column-gap: 0.7em;
+}
+
+.event .date {
+  white-space: nowrap;
+  text-align: right;
+  padding-top: 0;
+}
+
+.event .date br {
+  display: none;
+}

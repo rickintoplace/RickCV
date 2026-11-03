@@ -157,8 +157,20 @@ function checkText(text, data) {
     if (event.company && !window.includes(tight(event.company))) {
       problems.push(`${event.title}: Arbeitgeber nicht dabei`);
     }
-    const year = (event.start || "").slice(-2);
-    if (year && !window.includes(year)) problems.push(`${event.title}: Zeitraum nicht dabei`);
+    //  Der Zeitraum steht direkt bei seiner Station: kurz davor (Datum
+    //  links oder vor dem Titel) oder kurz danach (unter Titel und
+    //  Arbeitgeber). Gesucht wird der Beginn, nicht ein Ende – "– 11/13"
+    //  gehoert zur Station davor. Eine Spalte mit allen Zeitraeumen eines
+    //  Abschnitts faellt so auf, auch wenn die Jahre irgendwo in der Naehe
+    //  vorkommen.
+    const [first, second] = String(event.start || "").split("/");
+    const month = second ? first : "";
+    const year = (second || first || "").slice(-2);
+    if (year) {
+      const near = flat.slice(Math.max(0, at - 40), at + tight(event.title).length + 140);
+      const start = new RegExp(`(?:^|[^–—-])${month ? month + "/" : ""}(?:\\d\\d)?${year}(?!\\d)`);
+      if (!start.test(near)) problems.push(`${event.title}: Zeitraum nicht bei der Station`);
+    }
     const company = event.company ? window.indexOf(tight(event.company)) : -1;
     const local = window.slice(Math.min(160, company === -1 ? 160 : company), 160 + tight(event.title).length);
     const intruder = sidebar.find((word) => local.includes(word));

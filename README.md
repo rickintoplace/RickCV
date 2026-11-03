@@ -67,9 +67,10 @@ upload, no server. Your data stays on your device.
 
 [All thirteen with pictures](themes/README.md). In the builder, a row of needs above the gallery
 filters them (long career, first job, formal, stand out, easy to read). There is no filter for
-applicant tracking systems because there is no theme that fails them: every one, the colourful
-ones included, passes every reader in [`docs/ats-proof.md`](docs/ats-proof.md), and a test
-holds them to it.
+applicant tracking systems because the aim is that no theme fails them. Nine of the thirteen pass
+every reader in [`docs/ats-proof.md`](docs/ats-proof.md), and a test holds them to it. Clean,
+Icons, Banner and Dynaline do not yet: they set the dates at the right edge or beyond the
+timeline, and pdfminer.six reads them as a column of their own.
 
 | Theme | |
 | --- | --- |
@@ -157,15 +158,19 @@ plain-text page you can read and edit. The invisible mode still exists, clearly 
 
 **The proof, repeatable.** `node tools/ats-proof.mjs` prints every theme in German (A4) and
 English (US Letter) with Chromium and lets independent text extractors read it — `pdftotext` in
-stream order and with layout analysis, pdf.js, and in CI pdfminer.six. It checks that name,
-email and phone come out in one piece, that the name precedes the career, that every station
-keeps its title, dates and employer together without sidebar text in between, and that the file
+stream order and with layout analysis, pdf.js, and pdfminer.six (the base of many Python resume
+parsers). It checks that name, email and phone come out in one piece, that the name precedes the
+career, that every station keeps its title and employer together without sidebar text in
+between, that its dates stand right next to it, and that the file
 is tagged, carries its language and embeds its fonts. The result is in
 [`docs/ats-proof.md`](docs/ats-proof.md); CI fails on any new finding. The run found that
 Chromium wrote all dates of a page before all stations, which simple parsers could not match up —
 fixed for every theme without changing a pixel. Layout analysis (`pdftotext` without `-raw`)
 tore employers away from their station when a short title stood above a much longer line, or a
-heading reached into the text column; the themes are set so that this does not happen. Commercial parsers (Textkernel, used by Personio
+heading reached into the text column; the themes are set so that this does not happen.
+pdfminer.six moved text with `opacity` out of the reading order and read every date column as a
+block of its own; the tabular themes now set the dates on one line, on the title's baseline,
+right before it. Commercial parsers (Textkernel, used by Personio
 and SAP SuccessFactors; Workday; Greenhouse) are not freely available and are not part of it.
 
 Generative Engine Optimization (GEO) has no proven, stable effect according to a 2026 survey
