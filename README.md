@@ -63,10 +63,12 @@ upload, no server. Your data stays on your device.
 - **Word in your design.** *Export → Word (.docx)* measures the finished document and rebuilds
   it in Word: columns, colours, typefaces (embedded), icons, photo. It works for every theme,
   your own included. *Word, plain* stays for portals that want one simple column.
-- **Files that carry themselves.** A PDF or Word file exported from RickCV, and a PDF that
-  Word or LibreOffice makes from it, opens again as exactly the same document on another
-  device: the Word file holds it as a data part, both hold it as the link behind the name.
-  Only what is visible travels – no hidden sections, no job-ad notes.
+- **Files that carry themselves.** A Word file exported from RickCV opens again as exactly the
+  same document on another device: it holds it as a data part (customXml), which no text
+  extraction and no applicant tracking system sees. For yourself there is *Export → PDF to keep
+  editing*, which carries it as the link behind the name; the PDF for applications never does.
+  Only what is visible travels – no hidden sections, no job-ad notes. A file edited after export
+  is read from its text, with the look taken from RickCV.
 
 ![RickCV builder](examples/builder.webp)
 

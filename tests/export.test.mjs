@@ -112,8 +112,8 @@ console.log("\n— Word (.docx): Rückweg durch den eigenen Import —");
 
 console.log("\n— Word (.docx): das Dokument reist mit —");
 {
-  //  Wie js/builder.js es mitgibt: der ganze Stand als Datenteil, ein Link
-  //  hinter dem Namen. Zurueck kommt genau dieses Dokument.
+  //  Wie js/builder.js es mitgibt: der ganze Stand als Datenteil. Zurueck
+  //  kommt genau dieses Dokument.
   const original = example("de");
   original.theme = { slug: "banner", name: "", css: "", source: "builtin" };
   original.settings.showCoverLetter = true;
@@ -123,7 +123,7 @@ console.log("\n— Word (.docx): das Dokument reist mit —");
   const link = "https://cv.rickinto.place/#z=" + Buffer.from(packed).toString("base64url");
   const same = (back) => JSON.stringify(box.RickCVModel.migrate(JSON.parse(json))) === JSON.stringify(back);
 
-  const withData = await Docs.docx(original, { json, link });
+  const withData = await Docs.docx(original, { json });
   const readBack = (bytes, name) => new Promise((res, rej) => box.RickCVImport.readFile(
     { name, arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) },
     (error, value) => (error ? rej(error) : res(value))));
@@ -131,16 +131,11 @@ console.log("\n— Word (.docx): das Dokument reist mit —");
   ok(parsed.format === "docx" && parsed.warnings.includes("embedded"), "eingebettetes Dokument erkannt", parsed.format + " " + parsed.warnings);
   ok(parsed.state && same(parsed.state), "Datenteil: verlustfrei, Theme und Anschreiben eingeschlossen");
 
-  //  Ohne Datenteil – etwa, wenn ein anderes Programm ihn verworfen hat –
-  //  traegt der Link hinter dem Namen das Dokument.
-  const linkOnly = await Docs.docx(original, { link });
-  const viaLink = await readBack(linkOnly, "bewerbung.docx");
-  ok(viaLink.warnings.includes("embedded") && viaLink.state.theme.slug === "banner" &&
-     viaLink.state.coverLetter.paragraphs.length === original.coverLetter.paragraphs.length,
-     "nur der Link: ebenso vollständig", viaLink.format + " " + viaLink.warnings);
-
   const files = await box.RickCVImport.readZip(withData.buffer);
-  ok(decode(files["word/document.xml"]).includes('<w:hyperlink r:id="rIdSource">'), "der Name ist der Link");
+  //  Nichts, was ein Bewerbungssystem auslesen koennte: kein Link, kein
+  //  zusaetzlicher Text – der Datenteil liegt neben dem Dokument.
+  ok(!/<w:hyperlink/.test(decode(files["word/document.xml"])) && !decode(files["word/document.xml"]).includes(link.slice(30, 60)),
+     "kein Link und kein Datentext im Dokument selbst");
   ok(decode(files["[Content_Types].xml"]).includes("customXmlProperties"), "Datenteil ordentlich angemeldet");
 
   //  In Word bearbeitet: der Text ist neuer als der Datenteil. Dann zaehlt

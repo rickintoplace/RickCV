@@ -382,8 +382,7 @@
     //  Groesse und Fettung stehen zusaetzlich direkt am Text: viele Leser
     //  (Bewerbungssysteme, auch RickCVs eigener Import) werten die
     //  Formatvorlage nicht aus und erkennen den Namen nur so.
-    var nameRun = run(o.name || doc("cvTitle", o.locale), '<w:b/><w:sz w:val="48"/>');
-    body.push(para(o.link ? '<w:hyperlink r:id="rIdSource">' + nameRun + "</w:hyperlink>" : nameRun, "Title"));
+    body.push(para(run(o.name || doc("cvTitle", o.locale), '<w:b/><w:sz w:val="48"/>'), "Title"));
     if (o.role) body.push(para(run(o.role, '<w:caps/><w:sz w:val="22"/>'), "Subtitle"));
     if (o.contact.length) body.push(para(run(o.contact.join("  ·  "), '<w:color w:val="555555"/>')));
 
@@ -435,11 +434,10 @@
 
   /* ------------------------------------------- Das Dokument in der Datei */
 
-  //  Damit eine exportierte Datei auf einem anderen Geraet wieder genau
+  //  Damit eine exportierte Word-Datei auf einem anderen Geraet wieder genau
   //  dieses Dokument ergibt (js/import.js, fromEmbedded): der ganze Stand
-  //  als Datenteil (customXml – Word behaelt ihn beim Speichern), und ein
-  //  RickCV-Link hinter dem Namen, der auch ein daraus erzeugtes PDF
-  //  ueberlebt. carry = { json, link }, beides optional.
+  //  als Datenteil (customXml). Word behaelt ihn beim Speichern; Textauslese
+  //  und Bewerbungssysteme sehen ihn nicht. carry = { json }.
   function base64Utf8(text) {
     var bytes = new TextEncoder().encode(text);
     var out = "";
@@ -481,7 +479,6 @@
         '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
         '<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
         '<Relationship Id="rIdNumbering" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>' +
-        (carry && carry.link ? '<Relationship Id="rIdSource" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="' + xml(carry.link) + '" TargetMode="External"/>' : "") +
         parts.rel +
         (photo ? '<Relationship Id="rIdFoto" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/foto.jpg"/>' : "") +
         "</Relationships>";
@@ -508,7 +505,7 @@
           "<dc:title>" + xml(title) + "</dc:title><dc:creator>" + xml(o.name) + "</dc:creator>" +
           "<dc:language>" + lang + "</dc:language></cp:coreProperties>" },
         { name: "word/_rels/document.xml.rels", data: rels },
-        { name: "word/document.xml", data: documentXml(Object.assign({ link: carry && carry.link }, o), p, photo) },
+        { name: "word/document.xml", data: documentXml(o, p, photo) },
         { name: "word/styles.xml", data: STYLES(lang, xml(font)) },
         { name: "word/numbering.xml", data: NUMBERING },
       ];
@@ -792,20 +789,8 @@
     return bytes;
   }
 
-  //  Der Name (Absatzvorlage "Title") wird zum Link auf das Dokument.
-  function linkNames(value, link) {
-    if (Array.isArray(value)) { value.forEach(function (item) { linkNames(item, link); }); return; }
-    if (!value || typeof value !== "object") return;
-    if (value.t === "p" && value.heading === "Title") {
-      (value.runs || []).forEach(function (r) { if (r.text !== undefined && !r.href) r.href = link; });
-      return;
-    }
-    Object.keys(value).forEach(function (key) { if (key !== "runs") linkNames(value[key], link); });
-  }
-
   function designedDocx(state, design, carry) {
     if (!design || !design.sheets || !design.sheets.length) return Promise.reject(new Error("design"));
-    if (carry && carry.link) linkNames(design.sheets, carry.link);
     return wordFonts().then(function (bundle) { return buildDesigned(state, design, bundle, carry); });
   }
 

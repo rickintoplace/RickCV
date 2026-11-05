@@ -966,8 +966,8 @@
   //  Die neutrale, bearbeitbare Fassung (js/export-docs.js): was drinsteht,
   //  nicht wie es aussieht.
   /*  Das Dokument reist mit (js/export-docs.js, js/import.js): als
-   *  Datenteil in der Word-Datei und als Link hinter dem Namen in Word und
-   *  PDF. So ergibt eine exportierte Datei auf einem anderen Geraet wieder
+   *  Datenteil in der Word-Datei, und im "PDF zum Weiterbearbeiten" als Link
+   *  hinter dem Namen. So ergibt die Datei auf einem anderen Geraet wieder
    *  genau dieses Dokument. Die Stellenanzeige bleibt weg – mit ihr kaemen
    *  die eigenen Vermerke ("trifft nicht zu") zur Firma, an die man sich
    *  bewirbt. Der Link zeigt immer auf die oeffentliche Seite, auch wenn
@@ -1012,10 +1012,16 @@
     }, function () { return ""; });
   }
 
+  //  Die Word-Datei traegt das Dokument nur als Datenteil: den sieht keine
+  //  Textauslese und kein Bewerbungssystem. Einen Link hinter dem Namen
+  //  bekommt sie nicht – er fiele in Bewerberprofilen und Mailfiltern als
+  //  lange, kryptische Adresse auf.
   function carryAlong() {
-    return sourceLink().then(function (link) {
-      return { json: JSON.stringify(portable(true)), link: link };
-    }, function () { return null; });
+    try {
+      return Promise.resolve({ json: JSON.stringify(portable(true)) });
+    } catch (error) {
+      return Promise.resolve(null);
+    }
   }
 
   //  "Word (.docx)": wie im Design. Die Vorschau vermisst das gezeichnete
@@ -1629,8 +1635,12 @@
     try { return localStorage.getItem(PRINT_GUIDE_KEY) !== "off"; } catch (error) { return true; }
   }
 
-  function printGuide() {
-    if (!wantsPrintGuide()) return printCv();
+  //  carry: das PDF zum Weiterbearbeiten (Exportieren → PDF zum
+  //  Weiterbearbeiten). Nur dann steht das Dokument als Link hinter dem
+  //  Namen – ein PDF fuer Bewerbungen bleibt frei davon.
+  function printGuide(carry) {
+    carry = carry === true;
+    if (!wantsPrintGuide()) return printCv(carry);
 
     //  Papier, Raender und Hintergrund bringt das Dokument selbst mit
     //  (@page in styles.css, print-color-adjust). Einzustellen bleibt das
@@ -1677,7 +1687,7 @@
       if (box.checked) {
         try { localStorage.setItem(PRINT_GUIDE_KEY, "off"); } catch (error) { /* dann eben wieder */ }
       }
-      printCv();
+      printCv(carry);
     });
   }
 
@@ -1703,16 +1713,25 @@
     builderTitle = null;
   }
 
-  function printCv() {
+  function printCv(carry) {
     if (!frame.contentWindow) return;
+    carry = carry === true;
     whenPainted(function () {
       if (builderTitle === null) builderTitle = document.title;
-      document.title = global.RickCVRender.documentTitle(state);
-      //  Hinter dem Namen steht im PDF das ganze Dokument – fuer den
-      //  verlustfreien Import auf einem anderen Geraet.
-      sourceLink().then(function (link) {
-        frame.contentWindow.postMessage({ type: "rickcv:print", source: link }, ORIGIN);
-      });
+      var title = global.RickCVRender.documentTitle(state);
+      //  Das PDF zum Weiterbearbeiten heisst anders, damit es nicht aus
+      //  Versehen in einer Bewerbung landet.
+      if (carry) title += " – " + t("pdfCarryTitle");
+      document.title = title;
+      if (!carry) {
+        frame.contentWindow.postMessage({ type: "rickcv:print" }, ORIGIN);
+      } else {
+        //  Hinter dem Namen steht das ganze Dokument – fuer den
+        //  verlustfreien Import auf einem anderen Geraet.
+        sourceLink().then(function (link) {
+          frame.contentWindow.postMessage({ type: "rickcv:print", source: link, title: title }, ORIGIN);
+        });
+      }
       //  Der Druckdialog haelt das Skript an; danach, oder spaetestens nach
       //  einer Minute, gilt wieder der eigene Titel.
       setTimeout(restoreTitle, 60000);
@@ -1961,6 +1980,8 @@
       //  "Exportieren" sucht, sucht meistens genau das.
       popupMenu(event.currentTarget, [
         { label: t("expPdf"), hint: t("expPdfHint"), icon: "printer", action: printGuide },
+        { label: t("expPdfCarry"), hint: t("expPdfCarryHint"), icon: "printer",
+          action: function () { printGuide(true); } },
         { label: t("expFile"), hint: t("expFileHint"), icon: "save",
           action: function () { saveFile(false); } },
         { label: t("expRickcv"), hint: t("expRickcvHint"), icon: "download", action: exportJson },

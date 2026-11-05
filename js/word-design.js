@@ -440,7 +440,9 @@
         if (px(ns.marginRight) > 1 || px(ns.paddingRight) > 1) out.push({ text: " ", size: px(ns.fontSize) || 10, gap: true });
         return;
       }
-      var link = tag === "A" && /^(https?:|mailto:|tel:)/.test(node.getAttribute("href") || "") ? node.getAttribute("href") : insideLink;
+      //  Der Link aus dem "PDF zum Weiterbearbeiten" gehoert nicht in Word.
+      var link = tag === "A" && !node.classList.contains("rickcv-source") &&
+        /^(https?:|mailto:|tel:)/.test(node.getAttribute("href") || "") ? node.getAttribute("href") : insideLink;
       var before = pseudoText(node, "::before");
       if (before) out.push(Object.assign({ text: before }, runStyle(node, under)));
       Array.prototype.forEach.call(node.childNodes, function (child) { walk(child, link); });
