@@ -1980,8 +1980,6 @@
       //  "Exportieren" sucht, sucht meistens genau das.
       popupMenu(event.currentTarget, [
         { label: t("expPdf"), hint: t("expPdfHint"), icon: "printer", action: printGuide },
-        { label: t("expPdfCarry"), hint: t("expPdfCarryHint"), icon: "printer",
-          action: function () { printGuide(true); } },
         { label: t("expFile"), hint: t("expFileHint"), icon: "save",
           action: function () { saveFile(false); } },
         { label: t("expRickcv"), hint: t("expRickcvHint"), icon: "download", action: exportJson },

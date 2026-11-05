@@ -153,8 +153,7 @@ cover letter, RickCV's own format does.
 * **Give the data back to you**: *Export → JSON Resume*, or *Export → link*,
   which copies exactly the kind of URL described above. A Word file exported
   from RickCV carries the whole document as a data part, so dropping it on
-  RickCV restores it exactly. The PDF for applications carries nothing extra;
-  only *Export → PDF to keep editing* puts the link behind the name.
+  RickCV restores it exactly. The PDF carries nothing beyond what is printed.
 * **Take your answer as text**: *Import → paste the text* accepts your whole
   reply (a sentence, a code fence, the JSON) or a RickCV link.
 * **Its own look**: a theme is a single CSS file. You can write one and ask the

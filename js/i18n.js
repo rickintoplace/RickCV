@@ -202,8 +202,6 @@
 
         expPdf: "Als PDF speichern",
         expPdfHint: "Das fertige Dokument zum Verschicken und Ausdrucken.",
-        expPdfCarry: "PDF zum Weiterbearbeiten",
-        expPdfCarryHint: "Für dich, nicht zum Verschicken: trägt das ganze Dokument in sich und öffnet sich auf einem anderen Gerät wieder in RickCV.",
         pdfCarryTitle: "zum Weiterbearbeiten",
         expRickcv: "RickCV-Sicherung (.json)",
         expDocx: "Word (.docx)",
@@ -893,8 +891,6 @@
 
         expPdf: "Save as PDF",
         expPdfHint: "The finished document, ready to send or print.",
-        expPdfCarry: "PDF to keep editing",
-        expPdfCarryHint: "For you, not for sending: carries the whole document and opens again in RickCV on another device.",
         pdfCarryTitle: "to keep editing",
         expRickcv: "RickCV backup (.json)",
         expDocx: "Word (.docx)",

@@ -240,10 +240,17 @@ if (!browser) {
   setTimeout(function () {
     var sheets = document.querySelectorAll(".resume_wrapper");
     var over = 0;
+    var wide = 0;
     sheets.forEach(function (sheet) {
-      var edge = sheet.getBoundingClientRect().bottom;
+      var box = sheet.getBoundingClientRect();
       sheet.querySelectorAll("*").forEach(function (node) {
-        over = Math.max(over, node.getBoundingClientRect().bottom - edge);
+        var r = node.getBoundingClientRect();
+        if (!r.width && !r.height) return;
+        over = Math.max(over, r.bottom - box.bottom);
+        //  Auch rechts nichts ueber die Kante: ein zu breiter Kasten, selbst
+        //  ein leerer, gibt der Vorschau Scrollleisten und laesst Chrome
+        //  beim Drucken verkleinern – mit Rand, den man nicht abwaehlen kann.
+        wide = Math.max(wide, r.right - box.right, box.left - r.left);
       });
     });
     //  Wie weit eine Sprachstufe ueber das hinausragt, worin sie steht: im
@@ -258,7 +265,7 @@ if (!browser) {
       var box = (outside ? fill.parentNode : fill).getBoundingClientRect();
       clip = Math.max(clip, text.right - box.right, box.left - text.left);
     });
-    document.title = "sheets:" + sheets.length + ":" + Math.round(over) + ":" + Math.round(clip);
+    document.title = "sheets:" + sheets.length + ":" + Math.round(over) + ":" + Math.round(clip) + ":" + Math.round(wide);
   }, 700);
 </script></body></html>`);
 
@@ -268,8 +275,8 @@ if (!browser) {
         "--window-size=900,1300", "--virtual-time-budget=9000",
         "--dump-dom", origin + "/.theme-overflow-probe.html",
       ], { encoding: "utf8", timeout: 90000, maxBuffer: 32 * 1024 * 1024 });
-      const match = stdout.match(/<title>sheets:(\d+):(-?\d+):(-?\d+)<\/title>/);
-      return match ? { sheets: Number(match[1]), over: Number(match[2]), clip: Number(match[3]) } : null;
+      const match = stdout.match(/<title>sheets:(\d+):(-?\d+):(-?\d+):(-?\d+)<\/title>/);
+      return match ? { sheets: Number(match[1]), over: Number(match[2]), clip: Number(match[3]), wide: Number(match[4]) } : null;
     } catch {
       return null;
     } finally {
@@ -291,6 +298,8 @@ if (!browser) {
     //  von Schatten und Rundung.
     ok(measured !== null && measured.over <= 4, `${slug}: nichts steht über`,
        measured === null ? "nicht messbar" : measured.over + " px über der Kante");
+    ok(measured !== null && measured.wide <= 1, `${slug}: nichts ragt seitlich über das Blatt`,
+       measured === null ? "nicht messbar" : measured.wide + " px über der Kante");
     ok(measured !== null && measured.clip <= 0, `${slug}: Sprachstufe „Muttersprache“ ganz lesbar`,
        measured === null ? "nicht messbar" : measured.clip + " px abgeschnitten");
     if (measured !== null) {

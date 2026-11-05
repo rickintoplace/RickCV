@@ -141,23 +141,30 @@
     (tools/ats-proof.mjs). Symbol und Zeitleiste bleiben, wo sie waren; der
     Text bekommt die Breite, die vorher die Datumsspalte rechts belegte.  */
 [data-template] {
+  /*  Der ganze Kasten rueckt nach links, nicht nur sein Inhalt (wie in
+      Clean): sonst ragte er rechts ueber das Blatt. Symbol und Linie
+      gleichen die Verschiebung aus und bleiben, wo sie waren.  */
   .event {
     display: block;
     min-height: 0;
     width: calc(25.5em + 3cm - 30px);
+    margin-left: calc(30px - 3cm);
+  }
+  .event .line {
+    left: calc(13px + var(--offset) / 4 + 3cm - 30px);
   }
   .event::after {
     display: none;
   }
   .event .dot {
     position: absolute;
-    left: -2.9cm;
+    left: calc(0.1cm - 30px);
     top: -2px;
   }
   .event .date {
     position: relative;
     float: left;
-    left: calc(30px - 3cm);
+    left: 0;
     right: auto;
     width: auto;
     display: block;
@@ -172,7 +179,7 @@
     display: none;
   }
   .event .content {
-    left: calc(30px - 3cm);
+    left: 0;
     min-width: 0;
     /*  Sonst deckt der Kasten den Zeitraum zu, der in seiner Flaeche steht. */
     background-color: transparent;

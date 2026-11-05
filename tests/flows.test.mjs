@@ -296,39 +296,17 @@ if (!browser) {
        "… ergänzt das offene Dokument, statt es zu ersetzen", JSON.stringify(linked));
 
     //  Ein PDF fuer Bewerbungen bleibt frei von allem, was ein
-    //  Bewerbungssystem auslesen koennte. Nur "PDF zum Weiterbearbeiten"
-    //  traegt das Dokument als Link hinter dem Namen.
+    //  Bewerbungssystem auslesen koennte: kein Link hinter dem Namen.
     const carried = await E(`(async function () { ${helpers}
       localStorage.setItem("rickcv.ui.printGuide", "off");
       var frame = document.getElementById("preview-frame");
       frame.contentWindow.print = function () {};
-      var link = function () { return frame.contentDocument.querySelector("h1.name a.rickcv-source"); };
       document.getElementById("btn-print").click();
       await wait(1500);
-      var plain = !link();
-      document.getElementById("btn-export").click(); await wait(200);
-      var item = Array.prototype.find.call(document.querySelectorAll(".menu-pop .menu-item"),
-        function (x) { return x.querySelector("strong").textContent === "PDF zum Weiterbearbeiten"; });
-      if (!item) return { plain: plain, missing: "menu" };
-      item.click();
-      var a = null;
-      for (var i = 0; i < 40 && !a; i++) { await wait(100); a = link(); }
-      if (!a) return { plain: plain, missing: "link" };
-      var doc = JSON.parse(await RickCVImport.sourceFromLink(a.href));
-      var here = JSON.parse(localStorage.getItem("rickcv.data.v3"));
-      var fw = frame.contentWindow;
-      return { plain: plain, public: a.href.indexOf("https://cv.rickinto.place/#z=") === 0, name: doc.contact.name === here.contact.name,
-               theme: doc.theme.slug === here.theme.slug, events: doc.events.length === here.events.length,
-               job: doc.job.ad === "", letter: here.settings.showCoverLetter || !doc.coverLetter.paragraphs.length,
-               title: /zum Weiterbearbeiten/.test(frame.contentDocument.title),
-               look: fw.getComputedStyle(a).color === fw.getComputedStyle(a.parentNode).color &&
-               fw.getComputedStyle(a).textDecorationLine === "none" };
+      return { plain: !frame.contentDocument.querySelector("h1.name a"),
+               menu: !Array.prototype.some.call(document.querySelectorAll(".menu-item strong"), function (x) { return /Weiterbearbeiten/.test(x.textContent); }) };
     })()`);
     ok(carried.plain, "„Als PDF speichern“: kein Link hinter dem Namen", JSON.stringify(carried));
-    ok(carried.public && carried.name && carried.theme && carried.events, "„PDF zum Weiterbearbeiten“: das ganze Dokument hinter dem Namen", JSON.stringify(carried));
-    ok(carried.title, "… mit eigenem Dateinamen, damit es nicht in eine Bewerbung rutscht", JSON.stringify(carried));
-    ok(carried.job && carried.letter, "… ohne Stellenanzeige, Vermerke und Ausgeblendetes", JSON.stringify(carried));
-    ok(carried.look, "… und der Name sieht aus wie vorher", JSON.stringify(carried));
 
     const word = await E(`(async function () { ${helpers}
       var captured = null;

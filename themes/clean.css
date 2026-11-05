@@ -116,10 +116,15 @@
     (tools/ats-proof.mjs). Der Text bekommt dafuer die Breite, die vorher
     die Datumsspalte rechts belegte.  */
 [data-template] {
+  /*  Der ganze Kasten rueckt nach links, nicht nur sein Inhalt: ein nach
+      links verschobener Inhalt liess den Kasten rechts ueber das Blatt
+      ragen – Scrollleisten in der Vorschau, und Chrome verkleinerte beim
+      Drucken die Seite.  */
   .event {
     display: block;
     min-height: 0;
     width: calc(26em + 3.1cm - 30px);
+    margin-left: calc(30px - 3.1cm);
   }
   .event .dot,
   .event::after {
@@ -128,7 +133,7 @@
   .event .date {
     position: relative;
     float: left;
-    left: calc(30px - 3.1cm);
+    left: 0;
     right: auto;
     width: auto;
     display: block;
@@ -143,7 +148,7 @@
     display: none;
   }
   .event .content {
-    left: calc(30px - 3.1cm);
+    left: 0;
     min-width: 0;
     /*  Sonst deckt der Kasten den Zeitraum zu, der in seiner Flaeche steht. */
     background-color: transparent;

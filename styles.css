@@ -430,6 +430,12 @@ span {
       und die Vorschau zeigte etwas anderes als das PDF. */
   flex: 0 0 auto;
   min-width: var(--page-width);
+  /*  Nichts darf seitlich ueber das Blatt ragen, auch kein leerer Kasten
+      eines Themes: die Vorschau bekaeme Scrollleisten, und Chrome
+      verkleinert beim Drucken die ganze Seite – mit einem Rand, den man im
+      Druckdialog nicht mehr abwaehlen kann. clip schneidet nur seitlich ab
+      und macht keinen Scrollbereich auf; nach unten bleibt alles sichtbar. */
+  overflow-x: clip;
 }
 
 /*  Mehrere Blaetter stehen als Geschwister im Dokument. Ohne eigene
@@ -1085,6 +1091,7 @@ body.photo-circle .resume_wrapper .resume_left .resume_image {
 /*  Das Blatt traegt die Seitenzahl, die unten im Rand sitzt. */
 .cover-letter_wrapper {
   position: relative;
+  overflow-x: clip;
 }
 
 /*  Folgeblaetter: der Text beginnt oben am Rand, nicht dort, wo auf der
