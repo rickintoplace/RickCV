@@ -235,6 +235,43 @@
     return { text: out.join(" ").replace(/[ ]+/g, " ").trim(), spaced: spaced };
   }
 
+  //  Kapitaelchen setzt Chrome Buchstabe fuer Buchstabe: was im Text ein
+  //  Grossbuchstabe war, in voller Groesse, was klein war, als kleinerer
+  //  Grossbuchstabe. Im PDF steht dann "ZOOLINO". Die Groesse verraet die
+  //  Schreibung: ein Buchstabe, der deutlich kleiner ist als die grossen
+  //  seiner Folge, war klein ("Zoolino", "IGS für Zauberei").
+  function smallCaps(parts) {
+    var out = parts.map(function (item) { return item; });
+    var start = 0;
+    function settle(from, to) {
+      var letters = [];
+      for (var i = from; i < to; i++) {
+        //  "SS" in einem Stueck ist ein einzelnes ß, das Chrome gross setzt.
+        if (/^(\p{Lu}|SS)$/u.test(out[i].str)) letters.push(out[i]);
+      }
+      if (letters.length < 3) return;
+      var big = Math.max.apply(null, letters.map(function (item) { return item.h; }));
+      var small = letters.filter(function (item) { return item.h <= big * 0.9 && item.h >= big * 0.5; });
+      if (!small.length || small.length === letters.length) return;
+      small.forEach(function (item) {
+        var index = out.indexOf(item);
+        out[index] = Object.assign({}, item, { str: item.str === "SS" ? "ß" : item.str.toLowerCase() });
+      });
+    }
+    //  Eine Folge: einzelne Zeichen nacheinander (Buchstaben, Satzzeichen,
+    //  Leerzeichen), ohne grosse Luecke.
+    for (var i = 0; i <= out.length; i++) {
+      var item = out[i];
+      var single = item && !item.ghost && (item.str.length === 1 || item.str === "SS");
+      var near = single && i > start && out[i - 1] &&
+        item.x - (out[i - 1].x + out[i - 1].w) < item.h * 0.8;
+      if (single && (i === start || near)) continue;
+      settle(start, i);
+      start = single ? i : i + 1;
+    }
+    return out;
+  }
+
   //  Eine Zeile ist mehr als ihr Text: Schriftgrad trennt Ueberschrift von
   //  Fliesstext, und ein breiter Abstand mitten in der Zeile ist eine
   //  Spalte (Kenntnisse stehen gern zu zweit nebeneinander). Der Abstand
@@ -261,12 +298,34 @@
     });
 
     return rows.map(function (row) {
-      var parts = row.parts.sort(function (a, b) { return a.x - b.x; });
+      var parts = smallCaps(row.parts.sort(function (a, b) { return a.x - b.x; }));
       var text = "";
       var previous = null;
       var size = 0;
 
       var pendingSpace = false;
+      //  Gesperrte Schrift in Haeppchen ("AU SB IL D UN G", so setzt
+      //  LibreOffice eine gesperrte Ueberschrift): zwischen den Haeppchen
+      //  steht gleichmaessig der Sperrabstand, zwischen den Woertern deutlich
+      //  mehr. Dann entscheidet der Abstand im Vergleich zu den uebrigen,
+      //  nicht die feste Viertel-Zeichenbreite.
+      var spacedGap = null;
+      var real = parts.filter(function (item) { return !item.ghost && item.str.trim(); });
+      if (real.length >= 4 && real.filter(function (item) { return item.str.trim().length <= 3; }).length >= real.length * 0.7) {
+        var gaps = [];
+        for (var g = 1; g < real.length; g++) {
+          var between = real[g].x - (real[g - 1].x + real[g - 1].w);
+          if (between < real[g].h * 2) gaps.push(between);
+        }
+        gaps.sort(function (a, b) { return a - b; });
+        if (gaps.length >= 3) {
+          var median = gaps[Math.floor(gaps.length / 2)];
+          //  Wortgrenzen bringt gesperrte Schrift meist als eigenes
+          //  Leerzeichen-Stueck mit (pendingSpace); ohne es braucht es eine
+          //  deutlich groessere Luecke als die zwischen den Buchstaben.
+          if (median >= 0) spacedGap = Math.max(median * 2.5, real[0].h * 0.5);
+        }
+      }
       //  Wo jede Zelle anfaengt, die ein Tabulator abtrennt: eine
       //  Ueberschrift im Rand steht mit der ersten Station in einer Zeile,
       //  und die Station braucht ihren eigenen Einzug.
@@ -302,6 +361,7 @@
           //  Stueck – es wird doppelt notiert, damit unspace() dort das Wort
           //  beendet, statt "BACKENDENGINEER" daraus zu machen.
           else if (pendingSpace) text += "  ";
+          else if (spacedGap !== null && !item.whole && !previous.whole) { if (gap > spacedGap) text += " "; }
           else if (gap > item.h * 0.25 || item.whole || previous.whole) text += " ";
         }
         pendingSpace = false;
@@ -315,7 +375,8 @@
       });
 
       var cleaned = unspace(text.replace(/[ ]{3,}/g, "  ").trim());
-      var real = parts.filter(function (item) { return !item.ghost; });
+      if (spacedGap !== null) cleaned.spaced = true;
+      real = parts.filter(function (item) { return !item.ghost; });
       var first = real[0] || parts[0];
 
       //  Fett ist die Zeile, wenn der groessere Teil ihrer Zeichen fett
@@ -339,6 +400,9 @@
         bold: total > 0 && heavy / total > 0.6,
         size: size,
         x: first.x,
+        //  Wo die Zeile endet: eine Zeile, die bis an den Rand ihrer Spalte
+        //  reicht, ist umbrochen (js/import.js, joinWrappedRows).
+        right: real.reduce(function (most, item) { return Math.max(most, item.x + (item.w || 0)); }, first.x),
         cells: cells.map(function (cell) {
           return { x: cell.x, size: cell.size, bold: cell.total > 0 && cell.heavy / cell.total > 0.6 };
         }),

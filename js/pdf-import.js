@@ -155,11 +155,27 @@
       var stack = [];
       var matrix = [1, 0, 0, 1, 0, 0];
       var placements = [];
+      //  Die Farben, mit denen geschrieben und gefuellt wird – daraus
+      //  schlaegt der Import eine Akzentfarbe vor (colorsOf, accentOf).
+      var fill = null;
+      var fills = [];
 
       operators.fnArray.forEach(function (op, index) {
         var args = operators.argsArray[index];
-        if (op === OPS.save) stack.push(matrix.slice());
-        else if (op === OPS.restore) matrix = stack.pop() || [1, 0, 0, 1, 0, 0];
+        if (op === OPS.setFillRGBColor) fill = hexOf(args);
+        else if (op === OPS.save) stack.push({ matrix: matrix.slice(), fill: fill });
+        else if (op === OPS.restore) {
+          var saved = stack.pop();
+          matrix = saved ? saved.matrix : [1, 0, 0, 1, 0, 0];
+          fill = saved ? saved.fill : null;
+        }
+        else if (fill && (op === OPS.showText || op === OPS.showSpacedText)) {
+          var glyphs = args && args[0] && args[0].length ? args[0].length : 1;
+          fills.push({ color: fill, weight: glyphs, text: true });
+        }
+        else if (fill && (op === OPS.fill || op === OPS.eoFill || op === OPS.fillStroke || op === OPS.eoFillStroke)) {
+          fills.push({ color: fill, weight: 3, text: false });
+        }
         else if (op === OPS.transform) matrix = multiply(args, matrix);
         else if (op === OPS.paintImageXObject || op === OPS.paintJpegXObject) {
           var placedWidth = Math.abs(matrix[0]) || Math.abs(matrix[1]);
@@ -206,8 +222,21 @@
         });
       });
 
-      return chain.then(function () { return found; });
+      return chain.then(function () { found.fills = fills; return found; });
     }, function () { return []; });
+  }
+
+  function hexOf(args) {
+    var value = args && args.length === 1 ? args[0] : args;
+    if (typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value)) return value.toLowerCase();
+    if (value && value.length >= 3) {
+      var max = Math.max(value[0], value[1], value[2]);
+      var scale = max <= 1 ? 255 : 1;
+      return "#" + [0, 1, 2].map(function (i) {
+        return ("0" + Math.round(Math.max(0, Math.min(255, value[i] * scale))).toString(16)).slice(-2);
+      }).join("");
+    }
+    return null;
   }
 
   /* --------------------------------------------------------------- Seite */
@@ -390,6 +419,7 @@
       var rows = [];
       var images = [];
       var links = [];
+      var fills = [];
       var chain = Promise.resolve();
       for (var number = 1; number <= pdf.numPages; number++) {
         (function (index) {
@@ -400,6 +430,7 @@
               //  einer Textschrift unterscheiden.
               return pageImages(page, index, library).then(function (found) {
                 images = images.concat(found);
+                fills = fills.concat(found.fills || []);
                 return pageText(page, index, counter);
               }).then(function (lines) {
                 rows = rows.concat(lines);
@@ -415,7 +446,7 @@
           });
         })(number);
       }
-      return chain.then(function () { return { rows: rows, images: images, links: links }; });
+      return chain.then(function () { return { rows: rows, images: images, links: links, fills: fills }; });
     }).then(function (result) {
       release();
       var text = result.rows.map(function (row) { return row.text; }).join("\n");
@@ -431,6 +462,7 @@
       return {
         text: text, lines: result.rows, images: result.images, unmapped: counter.unmapped,
         links: result.links,
+        accent: global.RickCVImport && global.RickCVImport.accentOf ? global.RickCVImport.accentOf(result.fills) : null,
       };
     }).then(function (data) {
       //  Ausserhalb der Kette aufgerufen: wirft der Rueckruf selbst, soll er

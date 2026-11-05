@@ -365,6 +365,26 @@ if (!browser) {
     ok(/Nora Feldmann/.test(pasted.answer), "Textfeld: JSON aus einer KI-Antwort", JSON.stringify(pasted));
     ok(/Rasmus Link/.test(pasted.link), "Textfeld: ein RickCV-Link", JSON.stringify(pasted));
 
+    //  Ein PDF hereinziehen: der Dialog fragt, ob die Akzentfarbe mitkommt.
+    const accent = await E(`(async function () { ${helpers}
+      var bytes = await (await fetch("tests/fixtures/deutsch/buero-europass.pdf")).arrayBuffer();
+      var file = new File([bytes], "europass.pdf", { type: "application/pdf" });
+      var transfer = new DataTransfer();
+      transfer.items.add(file);
+      document.dispatchEvent(new DragEvent("drop", { dataTransfer: transfer, bubbles: true, cancelable: true }));
+      var box = null;
+      for (var i = 0; i < 80 && !box; i++) { await wait(150); box = document.querySelector(".imp-accent input"); }
+      if (!box) return { missing: true, text: (document.querySelector(".imp-overlay") || {}).textContent };
+      var color = document.querySelector(".imp-swatch").style.backgroundColor;
+      box.checked = true;
+      document.querySelector(".imp-overlay .btn-primary").click();
+      await wait(900);
+      var doc = JSON.parse(localStorage.getItem("rickcv.data.v3"));
+      return { asked: true, color: color, taken: doc.style.accentColor, own: !!(doc.style.ownColors && doc.style.ownColors.accent) };
+    })()`);
+    ok(accent.asked, "PDF-Import: fragt nach der Akzentfarbe", JSON.stringify(accent));
+    ok(accent.taken === "#1f4e79" && accent.own, "… und übernimmt sie, wenn man zustimmt", JSON.stringify(accent));
+
     //  Alles von diesem Geraet entfernen: danach ist nichts mehr da – kein
     //  Dokument, kein Papierkorb, kein frueherer Stand, kein Schluessel.
     const before = await E(`RickCVStore.listDocs().then(function (d) { return d.length; })`);

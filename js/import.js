@@ -1261,6 +1261,21 @@
     return !/^[A-Za-zÄÖÜäöüß]{3}/.test(value.slice(match[0].length));
   }
 
+  //  Eine gesperrte Ueberschrift, die in Stuecken ankommt ("AU SB ILDUNG",
+  //  so setzt LibreOffice sie): wird sie ohne Leerzeichen zu einer bekannten
+  //  Ueberschrift, steht sie fortan so da – fuer jede spaetere Pruefung,
+  //  nicht nur fuer headingOf.
+  function joinSpacedHeading(text) {
+    if (!/\s/.test(text) || text.length > 40 || text !== text.toUpperCase()) return text;
+    var tight = text.replace(/\s+/g, "");
+    if (tight.length < 4) return text;
+    var value = normalizeHeading(tight);
+    for (var i = 0; i < HEADINGS.length; i++) {
+      if (keywordFits(value, HEADINGS[i].pattern)) return normalizeHeading(text) === value ? text : tight;
+    }
+    return text;
+  }
+
   function headingOf(line) {
     var value = normalizeHeading(line);
     if (!value || value.length > 40) return null;
@@ -2014,7 +2029,10 @@
         if (next.cells[0].x < heads[0].x - tolerance) break;
         //  Ein grosser senkrechter Abstand beendet das Raster: darunter steht
         //  etwas anderes (eine Fusszeile, ein neuer Block).
-        if (lastY && next.y && Math.abs(lastY - next.y) > (next.size || 10) * 2.6) break;
+        //  Gemessen auch am eigenen Zeilenabstand des Rasters: Plaketten mit
+        //  Innenabstand stehen weiter auseinander als Fliesstext.
+        var pitch = j > i + 1 && rows[i + 1].y && row.y ? Math.abs(row.y - rows[i + 1].y) : 0;
+        if (lastY && next.y && Math.abs(lastY - next.y) > Math.max((next.size || 10) * 2.6, pitch * 1.6)) break;
         //  "Mehr dazu im Portfolio:" kuendigt etwas Neues an.
         if (/:\s*$/.test(next.text)) break;
         lastY = next.y;
@@ -2094,6 +2112,57 @@
     return all;
   }
 
+  //  Folgeblaetter wiederholen oft den Kopf: Name, Rolle, Kontakt. Steht am
+  //  Anfang eines spaeteren Blattes nur, was schon oben auf dem ersten stand,
+  //  ist das keine neue Station ("Harald Töpfer" als Titel ohne Datum).
+  function dropRepeatedHeader(rows) {
+    if (!rows.length) return rows;
+    var firstPage = rows[0].page;
+    var key = function (text) { return clean(text).toLowerCase().replace(/\s+/g, " "); };
+    var head = {};
+    rows.filter(function (row) { return row.page === firstPage; }).slice(0, 8).forEach(function (row) {
+      head[key(row.text)] = true;
+    });
+    var out = [];
+    var page = firstPage;
+    var leading = false;
+    rows.forEach(function (row) {
+      if (row.page !== page) { page = row.page; leading = row.page !== firstPage; }
+      if (leading && head[key(row.text)]) return;
+      leading = false;
+      out.push(row);
+    });
+    return out;
+  }
+
+  //  Ein Satz, der im PDF umbricht, kommt als zwei Zeilen an. Klein geht er
+  //  weiter, das erkennt die Auswertung selbst; beginnt die Fortsetzung mit
+  //  einem Hauptwort ("… Privatsammlungen im" / "Homeoffice"), verraet es das
+  //  Wort am Zeilenende: Mit "im", "von", "für" endet kein Satz und kein
+  //  Listenpunkt. Die Zeile darunter muss in derselben Spalte und Schrift
+  //  stehen und darf nichts Eigenes sein (Datum, Ueberschrift, Punkt).
+  var OPEN_END = /\s(?:im|in|am|an|auf|aus|bei|mit|von|vom|zu|zum|zur|f(?:ue|ü)r|und|oder|sowie|der|die|das|den|dem|des|ein|eine|einen|einem|einer|eines|als|nach|über|ueber|unter|durch|gegen|ohne|um|of|for|and|or|the|a|an|with|to|in|on|at|by|from)$/i;
+
+  function joinWrappedRows(rows) {
+    var DATE = /\b\d{1,2}\/\d{2,4}\b|\b(19|20)\d{2}\b/;
+    var out = [];
+    rows.forEach(function (row) {
+      var last = out[out.length - 1];
+      var fits = last && last.page === row.page && OPEN_END.test(last.text) &&
+        Math.abs(last.x - row.x) < 2 && Math.abs((last.size || 0) - (row.size || 0)) < 0.6 &&
+        last.bold === row.bold && !last.spaced && !row.spaced && !row.gap &&
+        last.text.indexOf("\t") === -1 && row.text.indexOf("\t") === -1 &&
+        /^[A-ZÄÖÜ]/.test(row.text) && !DATE.test(row.text) && !headingOf(row.text);
+      if (fits) {
+        last.text = joinLines([last.text, row.text]);
+        last.right = row.right;
+        return;
+      }
+      out.push(row);
+    });
+    return out;
+  }
+
   function fromText(text, lines) {
     var profile = emptyProfile();
 
@@ -2106,9 +2175,10 @@
     var allRows = (lines && lines.length ? lines : textLinesOf(text))
       .map(function (row) {
         return {
-          text: clean(row.text), size: row.size || 0, spaced: !!row.spaced,
+          text: joinSpacedHeading(clean(row.text)), size: row.size || 0,
+          spaced: !!row.spaced || joinSpacedHeading(clean(row.text)) !== clean(row.text),
           bold: !!row.bold, para: row.para, cells: row.cells,
-          x: row.x || 0, y: row.y || 0, page: row.page || 1,
+          x: row.x || 0, y: row.y || 0, page: row.page || 1, right: row.right,
         };
       });
     allRows = liftMarginHeadings(allRows)
@@ -2146,6 +2216,8 @@
         end: letterSpan.end - letterSpan.start,
       };
     }
+
+    rows = joinWrappedRows(dropRepeatedHeader(rows));
 
     //  Der Fliesstext wird je Blatt bestimmt. Vorlagen aus dem Netz legen
     //  dem Lebenslauf gern eine Werbeseite bei, die groesser gesetzt ist –
@@ -4073,6 +4145,31 @@
     return result("text", textProfile, null, text);
   }
 
+  /* ---------------------------------------------------- Die Akzentfarbe */
+
+  //  Aus den Farben eines Dokuments die eine, die es praegt: die
+  //  haeufigste bunte – Schwarz, Grau und Weiss zaehlen nicht, ebenso wenig
+  //  blasse Flaechen. Schrift wiegt mehr als Flaechen (Ueberschriften,
+  //  Namen); bei Flaechen zaehlt jede Fuellung. fills: [{ color, weight }].
+  function accentOf(fills) {
+    var score = {};
+    (fills || []).forEach(function (entry) {
+      var hex = String(entry.color || "").toLowerCase();
+      var m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(hex);
+      if (!m) return;
+      var r = parseInt(m[1], 16) / 255, g = parseInt(m[2], 16) / 255, b = parseInt(m[3], 16) / 255;
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var light = (max + min) / 2;
+      var sat = max === min ? 0 : (max - min) / (1 - Math.abs(2 * light - 1));
+      if (sat < 0.22 || light > 0.82 || light < 0.12) return;
+      var key = "#" + m[1] + m[2] + m[3];
+      score[key] = (score[key] || 0) + (entry.weight || 1);
+    });
+    var best = null;
+    Object.keys(score).forEach(function (key) { if (!best || score[key] > score[best]) best = key; });
+    return best;
+  }
+
   /* ------------------------------------------- Das Dokument in der Datei */
 
   //  Was RickCV exportiert, traegt sich selbst: die Word-Datei als
@@ -4238,6 +4335,7 @@
           if (!parsed) {
             parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
             parsed.format = "docx";
+            parsed.accent = data.accent || null;
           }
           return parsed;
         }).then(function (parsed) { callback(null, parsed); }, function (parseError) { callback(parseError); });
@@ -4254,6 +4352,7 @@
           if (parsed) return parsed;
           parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
           parsed.format = "pdf";
+          parsed.accent = data.accent || null;
           //  Fehlende Zeichenzuordnung betrifft den Text, nicht den Aufbau –
           //  deshalb steht die Warnung hier und nicht in der Auswertung.
           if (data.unmapped && parsed.warnings.indexOf("unmapped") === -1) {
@@ -4291,6 +4390,7 @@
     },
     toJsonResume: toJsonResume,
     sourceFromLink: sourceFromLink,
+    accentOf: accentOf,
     fromEmbedded: fromEmbedded,
     _sameContent: sameContent,
     _stateWords: stateWords,

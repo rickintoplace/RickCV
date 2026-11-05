@@ -2966,3 +2966,20 @@ button.job-term-main:hover {
   background: var(--ui-accent-soft);
   color: var(--ui-text);
 }
+
+/*  Die Frage nach der Akzentfarbe beim Import. */
+.imp-accent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.imp-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--ui-line);
+  flex: none;
+}

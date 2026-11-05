@@ -966,16 +966,12 @@
   //  Die neutrale, bearbeitbare Fassung (js/export-docs.js): was drinsteht,
   //  nicht wie es aussieht.
   /*  Das Dokument reist mit (js/export-docs.js, js/import.js): als
-   *  Datenteil in der Word-Datei, und im "PDF zum Weiterbearbeiten" als Link
-   *  hinter dem Namen. So ergibt die Datei auf einem anderen Geraet wieder
-   *  genau dieses Dokument. Die Stellenanzeige bleibt weg – mit ihr kaemen
+   *  Datenteil in der Word-Datei. So ergibt sie auf einem anderen Geraet
+   *  wieder genau dieses Dokument. Ein PDF traegt nichts ausser dem, was
+   *  gedruckt ist; dort liest der Import den Inhalt aus dem Text. Die Stellenanzeige bleibt weg – mit ihr kaemen
    *  die eigenen Vermerke ("trifft nicht zu") zur Firma, an die man sich
-   *  bewirbt. Der Link zeigt immer auf die oeffentliche Seite, auch wenn
-   *  RickCV gerade per Doppelklick laeuft. Bilder traegt nur der Datenteil;
-   *  fuer den Link waeren sie zu gross, und das PDF bringt sie ohnehin mit.
+   *  bewirbt.
    */
-  var PUBLIC_BASE = "https://cv.rickinto.place/";
-
   //  Nur, was im Dokument zu sehen ist: Ein ausgeblendeter Abschnitt oder
   //  ein Anschreiben, das gerade nicht dabei ist (vielleicht an eine andere
   //  Firma), darf nicht unsichtbar mitreisen.
@@ -1003,13 +999,6 @@
     //  bleibt es.
     if (!withImages && copy.theme && copy.theme.css && copy.theme.css.length > 20000) copy.theme.css = "";
     return copy;
-  }
-
-  function sourceLink() {
-    var json = JSON.stringify(portable(false));
-    return deflateRaw(json).then(function (packed) {
-      return packed ? PUBLIC_BASE + "#z=" + bytesToBase64Url(packed) : PUBLIC_BASE + "#data=" + toBase64Url(json);
-    }, function () { return ""; });
   }
 
   //  Die Word-Datei traegt das Dokument nur als Datenteil: den sieht keine
@@ -1635,12 +1624,8 @@
     try { return localStorage.getItem(PRINT_GUIDE_KEY) !== "off"; } catch (error) { return true; }
   }
 
-  //  carry: das PDF zum Weiterbearbeiten (Exportieren → PDF zum
-  //  Weiterbearbeiten). Nur dann steht das Dokument als Link hinter dem
-  //  Namen – ein PDF fuer Bewerbungen bleibt frei davon.
-  function printGuide(carry) {
-    carry = carry === true;
-    if (!wantsPrintGuide()) return printCv(carry);
+  function printGuide() {
+    if (!wantsPrintGuide()) return printCv();
 
     //  Papier, Raender und Hintergrund bringt das Dokument selbst mit
     //  (@page in styles.css, print-color-adjust). Einzustellen bleibt das
@@ -1687,7 +1672,7 @@
       if (box.checked) {
         try { localStorage.setItem(PRINT_GUIDE_KEY, "off"); } catch (error) { /* dann eben wieder */ }
       }
-      printCv(carry);
+      printCv();
     });
   }
 
@@ -1713,25 +1698,12 @@
     builderTitle = null;
   }
 
-  function printCv(carry) {
+  function printCv() {
     if (!frame.contentWindow) return;
-    carry = carry === true;
     whenPainted(function () {
       if (builderTitle === null) builderTitle = document.title;
-      var title = global.RickCVRender.documentTitle(state);
-      //  Das PDF zum Weiterbearbeiten heisst anders, damit es nicht aus
-      //  Versehen in einer Bewerbung landet.
-      if (carry) title += " – " + t("pdfCarryTitle");
-      document.title = title;
-      if (!carry) {
-        frame.contentWindow.postMessage({ type: "rickcv:print" }, ORIGIN);
-      } else {
-        //  Hinter dem Namen steht das ganze Dokument – fuer den
-        //  verlustfreien Import auf einem anderen Geraet.
-        sourceLink().then(function (link) {
-          frame.contentWindow.postMessage({ type: "rickcv:print", source: link, title: title }, ORIGIN);
-        });
-      }
+      document.title = global.RickCVRender.documentTitle(state);
+      frame.contentWindow.postMessage({ type: "rickcv:print" }, ORIGIN);
       //  Der Druckdialog haelt das Skript an; danach, oder spaetestens nach
       //  einer Minute, gilt wieder der eigene Titel.
       setTimeout(restoreTitle, 60000);

@@ -358,10 +358,6 @@
       paint(message.data);
       scheduleReport();
     } else if (message.type === "rickcv:print") {
-      carrySource(message.source);
-      //  Der Dateiname kommt aus dem Titel; beim naechsten Zeichnen setzt
-      //  render.js ihn zurueck.
-      if (message.source && typeof message.title === "string" && message.title) document.title = message.title;
       window.focus();
       window.print();
     } else if (message.type === "rickcv:snapshot") {
@@ -379,34 +375,6 @@
         function (error) { done(null, String(error && error.message || error)); });
     }
   });
-
-  /*  Nur im "PDF zum Weiterbearbeiten": der Name wird zum Link auf das
-   *  ganze Dokument (js/builder.js, sourceLink). Der Import liest ihn und
-   *  uebernimmt das Dokument verlustfrei. Beim naechsten Zeichnen ist er
-   *  wieder weg – ein PDF fuer Bewerbungen bekommt ihn nie.
-   */
-  //  Nach dem Druck kommt der Link wieder weg: er gehoert in genau diese
-  //  eine Datei, nicht in die Vorschau, nicht in eine spaetere Word-Datei.
-  function dropSource() {
-    Array.prototype.forEach.call(document.querySelectorAll("a.rickcv-source"), function (anchor) {
-      var parent = anchor.parentNode;
-      while (anchor.firstChild) parent.insertBefore(anchor.firstChild, anchor);
-      parent.removeChild(anchor);
-    });
-  }
-  window.addEventListener("afterprint", dropSource);
-
-  function carrySource(link) {
-    if (!/^https:\/\/[^\s"]+#(z|data)=/.test(link || "")) return;
-    Array.prototype.forEach.call(document.querySelectorAll("h1.name"), function (name) {
-      if (name.querySelector("a.rickcv-source") || !name.textContent.trim()) return;
-      var anchor = document.createElement("a");
-      anchor.className = "rickcv-source";
-      anchor.href = link;
-      while (name.firstChild) anchor.appendChild(name.firstChild);
-      name.appendChild(anchor);
-    });
-  }
 
   /*  "Als Datei speichern": das Dokument, wie es dasteht – ohne Skripte,
    *  ohne die Umrandung zum Bearbeiten, ohne Verweise auf Dateien neben

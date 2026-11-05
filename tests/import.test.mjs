@@ -541,7 +541,11 @@ if (!fs.existsSync(pdfLib)) {
   //  Kenntnisse nebeneinander – und hinten dran ein Anschreiben.
   console.log("\n— PDF: eigene Ausgabe —");
   try {
-    const { state: rs } = await readPdf("rickcv-ausgabe.pdf");
+    const { state: rs, data: rd } = await readPdf("rickcv-ausgabe.pdf");
+    //  Die Akzentfarbe schlaegt der Import vor (der Dialog fragt danach).
+    ok(/^#[0-9a-f]{6}$/.test(rd.accent || "") && rd.accent !== "#000000", "Akzentfarbe erkannt", rd.accent);
+    ok(pbox.RickCVImport.accentOf([{ color: "#333333", weight: 50 }, { color: "#f5f5f5", weight: 50 }, { color: "#1f4e79", weight: 5 }]) === "#1f4e79",
+       "Akzentfarbe: Grau, Schwarz und Weiß zählen nicht");
     ok(rs.contact.name === "Harald Töpfer", "Name über den größten Schriftgrad", rs.contact.name);
     ok(rs.contact.role === "ZUGBEGLEITER", "Rolle darunter", rs.contact.role);
     ok(rs.contact.email === "verlinkte@email.com", "E-Mail");
@@ -552,12 +556,14 @@ if (!fs.existsSync(pdfLib)) {
     const tier = rs.events.find((e) => /Tierpfleger/.test(e.title));
     ok(!!tier && tier.start === "11/2013" && tier.end === "09/2015",
        "zweistelliges Jahr am Zeilenende", tier && tier.start + "–" + tier.end);
-    ok(!!tier && tier.company === "ZOOLINO" && tier.place === "Bad Wimpeln",
-       "Firma und Ort aus der Folgezeile");
+    //  In Kapitaelchen gesetzt, im PDF Grossbuchstaben – die Schreibung
+    //  kommt aus der Groesse der Buchstaben zurueck (js/layout.js, smallCaps).
+    ok(!!tier && tier.company === "Zoolino" && tier.place === "Bad Wimpeln",
+       "Firma und Ort aus der Folgezeile, Kapitälchen in ihrer Schreibung", tier && tier.company);
     ok(!!tier && tier.list.length === 2, "Aufzählung unter der Station", tier && tier.list.length);
 
     const heute = rs.events.find((e) => e.present);
-    ok(!!heute && heute.company === "BUNDESAGENTUR FÜR ARBEIT", "'heute' als offenes Ende");
+    ok(!!heute && heute.company === "Bundesagentur für Arbeit", "'heute' als offenes Ende", heute && heute.company);
 
     const roles = rs.events.map((e) => rs.sections.find((s) => s.id === e.sectionId).atsRole);
     ok(roles.filter((r) => r === "education").length === 2, "zwei Ausbildungen");

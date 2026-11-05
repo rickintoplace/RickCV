@@ -285,10 +285,15 @@
     var spacing = style.letterSpacing === "normal" ? 0 : px(style.letterSpacing);
     var deco = style.textDecorationLine || style.textDecoration || "";
     return {
-      font: font.name, generic: font.generic, size: px(style.fontSize),
+      font: font.name, generic: font.generic,
+      size: px(style.fontSize) * (/small-caps/.test(style.fontVariantCaps || style.fontVariant || "") ? 0.92 : 1),
       bold: weight >= 600, italic: style.fontStyle === "italic" || style.fontStyle === "oblique",
       color: hex(style.color, under) || "000000",
-      caps: style.textTransform === "uppercase", smallCaps: /small-caps/.test(style.fontVariantCaps || style.fontVariant || ""),
+      //  Kapitaelchen nicht als Kapitaelchen: Word und LibreOffice schreiben
+      //  sie als Grossbuchstaben ins PDF, und aus "Zoolino" wird beim
+      //  Wiedereinlesen "ZOOLINO". Eine Spur kleiner gesetzt kommt es dem
+      //  Bild nahe, und der Text bleibt, wie er ist.
+      caps: style.textTransform === "uppercase", smallCaps: false,
       spacing: spacing, underline: /underline/.test(deco), strike: /line-through/.test(deco),
       transform: style.textTransform,
     };
@@ -440,9 +445,7 @@
         if (px(ns.marginRight) > 1 || px(ns.paddingRight) > 1) out.push({ text: " ", size: px(ns.fontSize) || 10, gap: true });
         return;
       }
-      //  Der Link aus dem "PDF zum Weiterbearbeiten" gehoert nicht in Word.
-      var link = tag === "A" && !node.classList.contains("rickcv-source") &&
-        /^(https?:|mailto:|tel:)/.test(node.getAttribute("href") || "") ? node.getAttribute("href") : insideLink;
+      var link = tag === "A" && /^(https?:|mailto:|tel:)/.test(node.getAttribute("href") || "") ? node.getAttribute("href") : insideLink;
       var before = pseudoText(node, "::before");
       if (before) out.push(Object.assign({ text: before }, runStyle(node, under)));
       Array.prototype.forEach.call(node.childNodes, function (child) { walk(child, link); });
@@ -510,6 +513,7 @@
     if (single && !runs.some(function (r) { return r.pic && r.h > lineHeight * 2; })) {
       if (p.align === "left" || p.align === "both") p.indR = 0;
       else if (p.align === "right") p.indL = 0;
+      fitLine(p, text || box, frame);
     }
     if (own) {
       var bottom = px(s.borderBottomWidth) && s.borderBottomStyle !== "none" ? hex(s.borderBottomColor, under) : null;
@@ -532,6 +536,32 @@
     }
     return p;
   };
+
+  //  Eine Zeile, die im Browser genau in ihren Platz passt (eine gesperrte
+  //  Randueberschrift wie "BERUFSERFAHRUNG"), bricht in Word um, sobald die
+  //  Schrift dort ein paar Prozent breiter laeuft – und kommt beim
+  //  Wiedereinlesen als zwei Woerter zurueck. Ist die Reserve knapp, wird
+  //  die Sperrung etwas enger; die Schriftgroesse bleibt, ausser bei einem
+  //  einzelnen Wort.
+  function fitLine(p, text, frame) {
+    var room = frame.w - p.indL - p.indR;
+    var need = text.w * 1.07 + 2;
+    if (!(room > 0) || room >= need) return;
+    var chars = 0;
+    p.runs.forEach(function (r) { if (r.text) chars += r.text.length; });
+    if (!chars) return;
+    var cut = (need - room) / chars;
+    p.runs.forEach(function (r) {
+      if (r.spacing > 0) r.spacing -= Math.min(r.spacing, cut);
+    });
+    //  Ein Wort ohne Leerzeichen (eine E-Mail-Adresse) bricht Word mitten
+    //  im Wort um: das darf eine Spur kleiner werden, damit es ganz bleibt.
+    var whole = p.runs.map(function (r) { return r.text || ""; }).join("");
+    if (!/\s/.test(whole.trim()) && (/[@/.]/.test(whole) || whole.length >= 20)) {
+      var scale = Math.max(0.88, room / need);
+      if (scale < 1) p.runs.forEach(function (r) { if (r.size) r.size *= scale; });
+    }
+  }
 
   function alignOf(value) {
     if (value === "center") return "center";

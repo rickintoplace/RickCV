@@ -134,6 +134,7 @@
         dropAnywhere: "Loslassen – RickCV liest die Datei",
         impChoose: "Datei wählen",
         impFormats: "RickCV-Sicherung · JSON Resume · Reactive Resume · LinkedIn-Export (ZIP/CSV) · Word (.docx) · PDF · Text",
+        impAccent: "Auch die Akzentfarbe des Dokuments übernehmen ({color})",
         impPasteLabel: "Oder Text einfügen",
         impPasteHint: "Einen Lebenslauf aus einem anderen Programm, die Antwort deiner KI (JSON-Text, auch mit Erklärung drumherum) oder einen RickCV-Link hier hineinkopieren.",
         noteEmbedded: "Diese Datei trägt das ganze RickCV-Dokument in sich: Es wird vollständig übernommen, samt Aussehen – nicht aus dem Text erraten.",
@@ -202,7 +203,6 @@
 
         expPdf: "Als PDF speichern",
         expPdfHint: "Das fertige Dokument zum Verschicken und Ausdrucken.",
-        pdfCarryTitle: "zum Weiterbearbeiten",
         expRickcv: "RickCV-Sicherung (.json)",
         expDocx: "Word (.docx)",
         expDocxHint: "Sieht aus wie dein Design – zum Weiterbearbeiten in Word oder LibreOffice.",
@@ -823,6 +823,7 @@
         dropAnywhere: "Let go – RickCV will read the file",
         impChoose: "Choose a file",
         impFormats: "RickCV backup · JSON Resume · Reactive Resume · LinkedIn export (ZIP/CSV) · Word (.docx) · PDF · text",
+        impAccent: "Also take the document's accent colour ({color})",
         impPasteLabel: "Or paste text",
         impPasteHint: "Paste a resume from another program, your AI's answer (JSON text, explanation around it is fine) or a RickCV link here.",
         noteEmbedded: "This file carries the whole RickCV document: it is taken over completely, look included – not guessed from the text.",
@@ -891,7 +892,6 @@
 
         expPdf: "Save as PDF",
         expPdfHint: "The finished document, ready to send or print.",
-        pdfCarryTitle: "to keep editing",
         expRickcv: "RickCV backup (.json)",
         expDocx: "Word (.docx)",
         expDocxHint: "Looks like your design – to keep editing in Word or LibreOffice.",

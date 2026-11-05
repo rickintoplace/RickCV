@@ -287,6 +287,23 @@
       body.appendChild(peek);
     }
 
+    //  Die Akzentfarbe des Dokuments, wenn es eine hat und sie anders ist
+    //  als die jetzige: als Frage, nicht still uebernommen.
+    var takeAccent = null;
+    var current = options.state && options.state() && options.state().style;
+    if (parsed.accent && !parsed.state && current &&
+        String(current.accentColor || "").toLowerCase() !== parsed.accent) {
+      var accentRow = el("label", "imp-accent");
+      takeAccent = el("input");
+      takeAccent.type = "checkbox";
+      var swatch = el("span", "imp-swatch");
+      swatch.style.background = parsed.accent;
+      accentRow.appendChild(takeAccent);
+      accentRow.appendChild(swatch);
+      accentRow.appendChild(el("span", null, t("impAccent").replace("{color}", parsed.accent)));
+      body.appendChild(accentRow);
+    }
+
     body.appendChild(el("p", "imp-label", t("impMode")));
     var modes = el("div", "imp-modes");
     [
@@ -322,6 +339,10 @@
     apply.type = "button";
     apply.addEventListener("click", function () {
       var next = Import.apply(options.state(), parsed, mode);
+      if (takeAccent && takeAccent.checked && next.style) {
+        next.style.accentColor = parsed.accent;
+        next.style.ownColors = Object.assign({}, next.style.ownColors, { accent: true });
+      }
       var count = SUMMARY_ROWS.reduce(function (sum, row) {
         return sum + (Number(summary[row.key]) || 0);
       }, (summary.letter ? 1 : 0) + (summary.job ? 1 : 0));

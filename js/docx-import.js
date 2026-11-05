@@ -725,6 +725,24 @@
     };
   }
 
+  //  Die Farben der Schrift und der Schattierungen, gewichtet nach Textmenge
+  //  bzw. Anzahl – daraus schlaegt der Import eine Akzentfarbe vor.
+  function accentOfDocx(files) {
+    var xml = Import.decodeText(files["word/document.xml"]) || "";
+    var fills = [];
+    xml.replace(/<w:r>([\s\S]*?)<\/w:r>/g, function (all, body) {
+      var color = /<w:color w:val="([0-9A-Fa-f]{6})"/.exec(body);
+      var text = /<w:t[^>]*>([^<]*)<\/w:t>/.exec(body);
+      if (color && text) fills.push({ color: "#" + color[1], weight: text[1].length });
+      return all;
+    });
+    xml.replace(/<w:shd [^>]*w:fill="([0-9A-Fa-f]{6})"/g, function (all, fill) {
+      fills.push({ color: "#" + fill, weight: 3 });
+      return all;
+    });
+    return Import.accentOf ? Import.accentOf(fills) : null;
+  }
+
   //  Was RickCV selbst in die Datei legt: das ganze Dokument als
   //  Datenteil, und die Verweise (einer davon traegt es ebenfalls).
   function embedded(files) {
@@ -762,6 +780,7 @@
       }
       result.source = carried.source;
       result.links = carried.links;
+      result.accent = accentOfDocx(files);
       if (carried.source && !result.text.replace(/\s/g, "")) result.text = "";
       if (carried.source) return callback(null, result);
       if (!result.text.replace(/\s/g, "")) throw new Error("noDocxText");
