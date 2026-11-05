@@ -226,6 +226,9 @@ if (!browser) {
   var data = RickCVModel.createExample("de");
   data.settings.showCoverLetter = false;
   data.settings.pageMode = "flow";
+  //  Eine lange Stufe bei voller Fuellung: die muss ganz lesbar sein.
+  data.languages.show = true;
+  data.languages.items[0].level = "Muttersprache";
   data.theme = { slug: ${JSON.stringify(slug)}, name: "", css: "", source: "builtin" };
   RickCVRender.render(document, data);
   //  Noch einmal zeichnen, sobald die Schriften da sind – genau wie cv.html
@@ -243,7 +246,19 @@ if (!browser) {
         over = Math.max(over, node.getBoundingClientRect().bottom - edge);
       });
     });
-    document.title = "sheets:" + sheets.length + ":" + Math.round(over);
+    //  Wie weit eine Sprachstufe ueber das hinausragt, worin sie steht: im
+    //  Balken die Fuellung, dahinter der Balken.
+    var clip = 0;
+    document.querySelectorAll('[data-block="languages"] .language_bar span').forEach(function (fill) {
+      if (!fill.textContent.trim() || !fill.getClientRects().length) return;
+      var range = document.createRange();
+      range.selectNodeContents(fill);
+      var text = range.getBoundingClientRect();
+      var outside = fill.closest(".language_bar").getAttribute("data-level") === "outside";
+      var box = (outside ? fill.parentNode : fill).getBoundingClientRect();
+      clip = Math.max(clip, text.right - box.right, box.left - text.left);
+    });
+    document.title = "sheets:" + sheets.length + ":" + Math.round(over) + ":" + Math.round(clip);
   }, 700);
 </script></body></html>`);
 
@@ -253,8 +268,8 @@ if (!browser) {
         "--window-size=900,1300", "--virtual-time-budget=9000",
         "--dump-dom", origin + "/.theme-overflow-probe.html",
       ], { encoding: "utf8", timeout: 90000, maxBuffer: 32 * 1024 * 1024 });
-      const match = stdout.match(/<title>sheets:(\d+):(-?\d+)<\/title>/);
-      return match ? { sheets: Number(match[1]), over: Number(match[2]) } : null;
+      const match = stdout.match(/<title>sheets:(\d+):(-?\d+):(-?\d+)<\/title>/);
+      return match ? { sheets: Number(match[1]), over: Number(match[2]), clip: Number(match[3]) } : null;
     } catch {
       return null;
     } finally {
@@ -276,6 +291,8 @@ if (!browser) {
     //  von Schatten und Rundung.
     ok(measured !== null && measured.over <= 4, `${slug}: nichts steht über`,
        measured === null ? "nicht messbar" : measured.over + " px über der Kante");
+    ok(measured !== null && measured.clip <= 0, `${slug}: Sprachstufe „Muttersprache“ ganz lesbar`,
+       measured === null ? "nicht messbar" : measured.clip + " px abgeschnitten");
     if (measured !== null) {
       console.log(`       ${slug}: ${measured.sheets} Bogen/Bögen, ${measured.over} px Überstand`);
     }

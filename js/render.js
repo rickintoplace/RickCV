@@ -1623,22 +1623,98 @@
    *  freien Spur des Balkens und in Schriftfarbe: noch im Balken, wie
    *  eingestellt, und ganz lesbar. Themes erkennen das an data-level.
    */
+  //
+  //  Passt sie weder hinein noch dahinter – "Muttersprache" bei voller
+  //  Fuellung in einem schmalen Balken –, werden die Balken des Blocks
+  //  breiter, soweit die Zeile neben dem Sprachnamen Platz hat. Alle gleich
+  //  breit, sonst liessen sich die Stufen nicht mehr vergleichen.
   function fitLanguageLevels(doc) {
-    var fills = doc.querySelectorAll('[data-block="languages"] .language_bar span');
-    Array.prototype.forEach.call(fills, function (fill) {
-      var bar = fill.closest(".language_bar");
-      bar.removeAttribute("data-level");
-      if (!fill.textContent.trim()) return;
-      //  Gemessen am Text selbst: die Fuellung ist ein Flex-Kasten in
-      //  umgekehrter Richtung, dort laeuft Ueberstehendes nach links hinaus,
-      //  und scrollWidth sieht davon nichts.
-      var range = doc.createRange();
-      range.selectNodeContents(fill);
-      var text = range.getBoundingClientRect().width;
-      var room = fill.getBoundingClientRect().width - parseFloat(
-        (doc.defaultView || global).getComputedStyle(fill).textIndent || 0);
-      if (text > room + 0.5) bar.setAttribute("data-level", "outside");
+    var view = doc.defaultView || global;
+    Array.prototype.forEach.call(doc.querySelectorAll('[data-block="languages"]'), function (block) {
+      var fills = Array.prototype.slice.call(block.querySelectorAll(".language_bar span"));
+      if (!fills.length) return;
+      fills.forEach(function (fill) {
+        fill.closest(".language_bar").removeAttribute("data-level");
+        fill.parentNode.style.width = "";
+      });
+
+      //  Allein geoeffnet verkleinert sich cv.html selbst (transform). Was
+      //  getBoundingClientRect misst, ist dann verkleinert, die Breite, die
+      //  hier gesetzt wird, nicht – also in Satz-Pixel zurueckrechnen.
+      var first = fills[0].parentNode;
+      var scale = first.offsetWidth ? first.getBoundingClientRect().width / first.offsetWidth : 1;
+      var size = function (rect) { return rect.width / (scale || 1); };
+
+      var needs = fills.map(function (fill) { return levelFit(doc, view, fill, size); });
+      var wanted = Math.max.apply(null, needs.map(function (need) { return need.width || 0; }));
+      if (wanted > 0) {
+        var room = Math.min.apply(null, fills.map(function (fill) { return widestBar(doc, view, fill, size); }));
+        var width = Math.min(wanted, room);
+        if (width > first.offsetWidth + 0.5) {
+          fills.forEach(function (fill) { fill.parentNode.style.width = width.toFixed(2) + "px"; });
+          needs = fills.map(function (fill) { return levelFit(doc, view, fill, size); });
+        }
+      }
+
+      fills.forEach(function (fill, index) {
+        if (needs[index].outside) fill.closest(".language_bar").setAttribute("data-level", "outside");
+      });
     });
+  }
+
+  //  Fuer eine Stufe: passt sie in die Fuellung, dahinter in die freie Spur,
+  //  oder wie breit muesste der Balken dafuer sein?
+  function levelFit(doc, view, fill, size) {
+    if (!fill.textContent.trim()) return {};
+    //  Gemessen am Text selbst: die Fuellung ist ein Flex-Kasten in
+    //  umgekehrter Richtung, dort laeuft Ueberstehendes nach links hinaus,
+    //  und scrollWidth sieht davon nichts.
+    var range = doc.createRange();
+    range.selectNodeContents(fill);
+    var text = size(range.getBoundingClientRect());
+    var style = view.getComputedStyle(fill);
+    //  Der Innenabstand gehoert dazu: ein Theme, das die Stufe einrueckt
+    //  (Einstieg), hat in der Fuellung so viel weniger Platz.
+    var padding = parseFloat(style.paddingLeft) || 0;
+    var before = padding + (parseFloat(style.textIndent) || 0);
+    //  Rechts so viel Luft wie links, sonst klebt die Stufe am Ende der Fuellung.
+    var after = Math.max(parseFloat(style.paddingRight) || 0, padding, 2);
+    var gap = 0.3 * (parseFloat(style.fontSize) || 10) + 1;
+    var filled = size(fill.getBoundingClientRect());
+    var bar = size(fill.parentNode.getBoundingClientRect());
+    if (!bar) return {};
+    var share = filled / bar;
+
+    if (text <= filled - before - after + 0.5) return {};
+    //  Dahinter steht sie ab der Kante der Fuellung, um den Innenabstand
+    //  und eine kleine Luecke versetzt (styles.css, data-level="outside").
+    if (text <= bar - filled - padding - gap) return { outside: true };
+
+    var inside = share > 0 ? (text + before + after + 1) / share : Infinity;
+    var behind = share < 1 ? (text + padding + gap) / (1 - share) : Infinity;
+    return { width: Math.min(inside, behind) };
+  }
+
+  //  Wie breit der Balken hoechstens werden darf: so breit, wie er ist, plus
+  //  was die Zeile neben dem Namen der Sprache noch frei hat.
+  function widestBar(doc, view, fill, size) {
+    var p = fill.parentNode;
+    var bar = fill.closest(".language_bar");
+    var row = bar.closest(".language_list");
+    var name = row && row.querySelector(".language_left");
+    var now = size(p.getBoundingClientRect());
+    if (!row || !name) return now;
+    var rowStyle = view.getComputedStyle(row);
+    var nameStyle = view.getComputedStyle(name);
+    var range = doc.createRange();
+    range.selectNodeContents(name);
+    var used = size(range.getBoundingClientRect()) +
+      (parseFloat(nameStyle.paddingLeft) || 0) + (parseFloat(nameStyle.paddingRight) || 0) +
+      (parseFloat(nameStyle.marginLeft) || 0) + (parseFloat(nameStyle.marginRight) || 0);
+    var inner = size(row.getBoundingClientRect()) -
+      (parseFloat(rowStyle.paddingLeft) || 0) - (parseFloat(rowStyle.paddingRight) || 0);
+    var extra = size(bar.getBoundingClientRect()) - now;
+    return Math.max(now, inner - used - extra - 1);
   }
 
   function render(doc, data) {

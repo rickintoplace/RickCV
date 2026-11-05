@@ -327,11 +327,11 @@
 
 .resume_wrapper {
   padding-top: 1.5cm;
-  row-gap: 0.35em;
+  row-gap: 0.25em;
 }
 
 .resume_wrapper .resume_item {
-  padding: 0.55em 0;
+  padding: 0.45em 0;
 }
 
 [data-block="namerole"] h1 {
@@ -386,8 +386,16 @@
   grid-column: span 4;
 }
 
+/*  Steht keine Mobilitaet daneben, haben die Plaketten die ganze Breite:
+    in zwei Dritteln brachen schon drei kurze in eine zweite Reihe um, und
+    die schob einen Schuelerlebenslauf auf ein zweites Blatt.  */
+.resume_wrapper [data-block="skills"]:not(:has(+ [data-block="mobility"])) {
+  grid-column: 1 / -1;
+  padding-right: 0;
+}
+
 .event {
-  padding: 0.45em 0;
+  padding: 0.35em 0;
 }
 
 .content h3 {
