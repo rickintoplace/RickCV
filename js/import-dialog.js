@@ -271,7 +271,7 @@
       draft: "warnDraft", skillRanks: "warnSkillRanks", letter: "warnLetter",
       thin: "warnThin", images: "warnImages", noStructure: "warnNoStructure", unmapped: "warnUnmapped",
       newer: "warnNewer", customTheme: "warnCustomTheme", hiddenAts: "warnHiddenAts",
-      embedded: "noteEmbedded",
+      embedded: "noteEmbedded", embeddedEdited: "warnEmbeddedEdited",
     };
     (parsed.warnings || []).forEach(function (key) {
       if (WARNINGS[key]) body.appendChild(el("p", key === "embedded" ? "imp-note imp-good" : "imp-warn", t(WARNINGS[key])));

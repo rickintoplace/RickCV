@@ -226,6 +226,8 @@ if (!chrome || !hasPdfjs) {
     //  Ein PDF aus RickCV traegt das Dokument als Link hinter dem Namen
     //  (js/preview.js, carrySource). Chrome macht daraus einen Verweis im PDF,
     //  der Import liest ihn – und uebernimmt alles, auch das Theme.
+    const carrySlugs = (process.env.ONLY ? slugs : ["dynaline", "terminal", "banner", "marginheads", "einsteiger"]);
+    for (const carrySlug of carrySlugs) {
     fs.writeFileSync(probe, `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
 <link rel="stylesheet" href="fonts/fonts.css"><link rel="stylesheet" href="styles.css"></head>
 <body><div class="document"></div>
@@ -235,7 +237,7 @@ if (!chrome || !hasPdfjs) {
 <script src="js/ats.js"></script><script src="js/render.js"></script>
 <script>
   var data = RickCVModel.createExample("de");
-  data.theme = { slug: "dynaline", name: "", css: "", source: "builtin" };
+  data.theme = { slug: ${JSON.stringify(carrySlug)}, name: "", css: "", source: "builtin" };
   data.settings.showCoverLetter = true;
   data.photo.src = "";
   RickCVRender.render(document, data);
@@ -263,9 +265,10 @@ if (!chrome || !hasPdfjs) {
     }, (error, value) => (error ? rej(error) : res(value))));
     const wantCarried = box.RickCVModel.createExample("de");
     ok(parsedCarried.warnings.includes("embedded") && parsedCarried.state &&
-       parsedCarried.state.theme.slug === "dynaline" && parsedCarried.state.events.length === wantCarried.events.length &&
+       parsedCarried.state.theme.slug === carrySlug && parsedCarried.state.events.length === wantCarried.events.length &&
        JSON.stringify(parsedCarried.state.coverLetter.paragraphs) === JSON.stringify(wantCarried.coverLetter.paragraphs),
-       "PDF mit Link hinter dem Namen: verlustfrei zurück, samt Theme", parsedCarried.format + " " + parsedCarried.warnings);
+       `${carrySlug}: PDF mit Link hinter dem Namen kommt verlustfrei zurück`, parsedCarried.format + " " + parsedCarried.warnings);
+    }
   } finally {
     server.close();
     fs.rmSync(probe, { force: true });

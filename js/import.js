@@ -4118,13 +4118,86 @@
     return next(0);
   }
 
+  //  Steht in der Datei noch, was das mitgereiste Dokument sagt? Wer die
+  //  Word-Datei bearbeitet (oder daraus ein PDF macht), aendert den Text,
+  //  nicht den Datenteil – der waere dann ein alter Stand. Verglichen werden
+  //  Woerter, nicht Zeilen: Umbruch, Silbentrennung und Reihenfolge sind in
+  //  jedem Format anders.
+  function words(text) {
+    return (fold(String(text || "")).match(/[a-z0-9]{3,}/g) || []);
+  }
+
+  function fold(text) {
+    return text.toLowerCase().replace(/[äöüß]/g, function (c) {
+      return { "ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss" }[c];
+    }).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function stateWords(state) {
+    var out = [];
+    (function walk(value, key) {
+      if (typeof value === "string") {
+        if (!/^(src|img|signatureImg|css|extra|icon|set|color|slug|id|sectionId|atsRole|fontFamily|mode|levelMode|dateMode|page|locale|source)$/.test(key || "") &&
+            !/^data:/.test(value)) out = out.concat(words(value));
+        return;
+      }
+      if (Array.isArray(value)) { value.forEach(function (item) { walk(item, key); }); return; }
+      if (value && typeof value === "object") Object.keys(value).forEach(function (k) { if (k !== "job") walk(value[k], k); });
+    })(state, "");
+    return out;
+  }
+
+  //  Was das Dokument selbst dazuschreibt: Ueberschriften der Vorgabe,
+  //  "heute", "Seite 1 von 2", das Datum des Tages.
+  var DOC_KEYS = ["profile", "contact", "education", "experience", "volunteer", "other", "skills", "languages",
+    "interests", "mobility", "projects", "references", "present", "cvTitle", "applicationTitle", "pageOf",
+    "letterTitle", "atsHeading", "atsIntro", "photoAlt", "signatureAlt"];
+  var DOC_MONTHS = "januar februar maerz april mai juni juli august september oktober november dezember january february march may june july october december".split(" ");
+
+  function sameContent(state, text) {
+    var mine = words(text).filter(function (word) { return !/^\d+$/.test(word); });
+    if (!mine.length) return true;
+    var known = {};
+    stateWords(state).forEach(function (word) { known[word] = true; });
+    DOC_MONTHS.forEach(function (word) { known[word] = true; });
+    var I18n = global.RickCVI18n;
+    if (I18n) {
+      ["de", "en"].forEach(function (locale) {
+        DOC_KEYS.forEach(function (key) { words(I18n.t("doc", key, locale)).forEach(function (word) { known[word] = true; }); });
+      });
+    }
+    var keys = Object.keys(known);
+    var seen = {};
+    var strange = mine.filter(function (word) {
+      if (known[word] || seen[word]) return false;
+      seen[word] = true;
+      //  Getrennt am Zeilenende ("Fahrkarten-" / "kontrollen"): ein Stueck
+      //  eines bekannten Wortes zaehlt als bekannt.
+      return !(word.length >= 3 && keys.some(function (k) { return k.indexOf(word) !== -1; }));
+    });
+    //  Ein paar Woerter kommen immer dazu, die nicht im Dokument stehen
+    //  ("Seite 1 von 2", Ueberschriften der Sprache) – mehr nicht.
+    return strange.length <= Math.max(1, Object.keys(seen).length * 0.01);
+  }
+
   //  Aus einem eingebetteten Dokument ein Ergebnis wie aus einer Sicherung.
   //  Bilder, die der Link nicht traegt (zu gross fuer eine Adresse), holt
-  //  das PDF selbst zurueck: Foto und Unterschrift stehen darin.
-  function fromEmbedded(json, format, images) {
+  //  das PDF selbst zurueck: Foto und Unterschrift stehen darin. Wurde der
+  //  Text danach veraendert, kommt der Inhalt aus dem Text und nur das
+  //  Aussehen aus dem mitgereisten Dokument.
+  function fromEmbedded(json, format, images, text, lines) {
     var parsed = parseText(json, "rickcv.json");
     if (parsed.format !== "rickcv" || !parsed.state) return null;
     var state = parsed.state;
+    if (text && !sameContent(state, text)) {
+      var profile = fromText(text, lines);
+      attachImages(profile, images);
+      if (!hasContent(profile)) return null;
+      var edited = result(format, null, applyProfile(state, profile, "replace"));
+      edited.warnings = ["embeddedEdited"];
+      edited.text = text;
+      return edited;
+    }
     if (images && images.length) {
       var found = emptyProfile();
       attachImages(found, images);
@@ -4161,7 +4234,7 @@
         if (error) return callback(error);
         var embedded = data.source ? Promise.resolve(data.source) : firstSource(data.links);
         embedded.then(function (json) {
-          var parsed = json ? fromEmbedded(json, "docx", data.images) : null;
+          var parsed = json ? fromEmbedded(json, "docx", data.images, data.text, data.lines) : null;
           if (!parsed) {
             parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
             parsed.format = "docx";
@@ -4177,7 +4250,7 @@
       global.RickCVPdf.extract(file, function (error, data) {
         if (error) return callback(error);
         firstSource(data.links).then(function (json) {
-          var parsed = json ? fromEmbedded(json, "pdf", data.images) : null;
+          var parsed = json ? fromEmbedded(json, "pdf", data.images, data.text, data.lines) : null;
           if (parsed) return parsed;
           parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
           parsed.format = "pdf";
@@ -4219,6 +4292,8 @@
     toJsonResume: toJsonResume,
     sourceFromLink: sourceFromLink,
     fromEmbedded: fromEmbedded,
+    _sameContent: sameContent,
+    _stateWords: stateWords,
     fromJsonResume: fromJsonResume,
     fromReactiveResume: fromReactiveResume,
     stateToProfile: stateToProfile,

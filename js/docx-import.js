@@ -762,6 +762,7 @@
       }
       result.source = carried.source;
       result.links = carried.links;
+      if (carried.source && !result.text.replace(/\s/g, "")) result.text = "";
       if (carried.source) return callback(null, result);
       if (!result.text.replace(/\s/g, "")) throw new Error("noDocxText");
       callback(null, result);

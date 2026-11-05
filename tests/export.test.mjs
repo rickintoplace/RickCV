@@ -143,6 +143,18 @@ console.log("\n— Word (.docx): das Dokument reist mit —");
   ok(decode(files["word/document.xml"]).includes('<w:hyperlink r:id="rIdSource">'), "der Name ist der Link");
   ok(decode(files["[Content_Types].xml"]).includes("customXmlProperties"), "Datenteil ordentlich angemeldet");
 
+  //  In Word bearbeitet: der Text ist neuer als der Datenteil. Dann zaehlt
+  //  der Text, das Aussehen kommt aus dem Datenteil.
+  const zipped = await box.RickCVImport.readZip(withData.buffer);
+  const edited = Object.assign({}, zipped);
+  edited["word/document.xml"] = new TextEncoder().encode(decode(zipped["word/document.xml"])
+    .replace("Harald Töpfer", "Harald Töpfer-Krause").replace("Zugbegleiter", "Lokführer"));
+  const editedBytes = Docs._zip(Object.keys(edited).map((name) => ({ name, data: edited[name] })));
+  const afterWord = await readBack(editedBytes, "bearbeitet.docx");
+  ok(afterWord.warnings.includes("embeddedEdited") && afterWord.state.contact.name === "Harald Töpfer-Krause" &&
+     afterWord.state.theme.slug === "banner", "in Word geändert: Inhalt aus dem Text, Aussehen aus RickCV",
+     afterWord.warnings + " " + (afterWord.state && afterWord.state.contact.name));
+
   //  Eine fremde Word-Datei bleibt beim Lesen aus dem Text.
   const plain = await readBack(await Docs.docx(original), "fremd.docx");
   ok(!plain.warnings.includes("embedded") && !plain.state, "ohne Datenteil: wie bisher aus dem Text");
