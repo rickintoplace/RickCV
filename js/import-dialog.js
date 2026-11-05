@@ -156,6 +156,20 @@
     readText.addEventListener("click", function () {
       var value = area.value;
       if (!value.trim()) return;
+      //  Ein RickCV-Link ("Als Link kopieren", aus einer KI, aus einer
+      //  Mail): das Dokument steckt darin. Alles andere – Lebenslauf-Text,
+      //  JSON von RickCV oder einer KI, auch mit Erklaerung drumherum –
+      //  liest parseText.
+      var link = value.trim();
+      if (/^\S+[#&](z|data)=[A-Za-z0-9_-]{16,}\S*$/.test(link) && Import.sourceFromLink) {
+        var mine = ++ticket;
+        stepBusy();
+        Import.sourceFromLink(link).then(function (json) {
+          if (!current(mine)) return;
+          handle(function () { return Import.parseText(json || value, json ? "link.json" : "eingefuegt.txt"); }, value);
+        });
+        return;
+      }
       handle(function () { return Import.parseText(value, "eingefuegt.txt"); }, value);
     });
 
@@ -257,9 +271,10 @@
       draft: "warnDraft", skillRanks: "warnSkillRanks", letter: "warnLetter",
       thin: "warnThin", images: "warnImages", noStructure: "warnNoStructure", unmapped: "warnUnmapped",
       newer: "warnNewer", customTheme: "warnCustomTheme", hiddenAts: "warnHiddenAts",
+      embedded: "noteEmbedded",
     };
     (parsed.warnings || []).forEach(function (key) {
-      if (WARNINGS[key]) body.appendChild(el("p", "imp-warn", t(WARNINGS[key])));
+      if (WARNINGS[key]) body.appendChild(el("p", key === "embedded" ? "imp-note imp-good" : "imp-warn", t(WARNINGS[key])));
     });
 
     //  Bei Text und PDF steht der gelesene Text zum Nachsehen daneben –
@@ -278,7 +293,7 @@
       //  Eine RickCV-Sicherung ersetzt alles, auch das Aussehen – der
       //  Hinweis darf dann nicht sagen, dass es bleibt.
       { value: "replace", label: "impModeReplace",
-        hint: parsed.format === "rickcv" ? "impModeReplaceFullHint" : "impModeReplaceHint" },
+        hint: parsed.format === "rickcv" || parsed.state ? "impModeReplaceFullHint" : "impModeReplaceHint" },
       { value: "merge", label: "impModeMerge", hint: "impModeMergeHint" },
     ].forEach(function (entry) {
       var option = el("label", "imp-mode");

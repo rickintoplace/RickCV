@@ -3883,7 +3883,7 @@
       var data = parseLoose(candidate);
       if (data && typeof data === "object" &&
           (data.contact || data.basics || data.settings || data.events || data.coverLetter ||
-           data.work || data.sections)) {
+           data.work || data.sections || data.job)) {
         return JSON.stringify(data);
       }
     }
@@ -4073,6 +4073,71 @@
     return result("text", textProfile, null, text);
   }
 
+  /* ------------------------------------------- Das Dokument in der Datei */
+
+  //  Was RickCV exportiert, traegt sich selbst: die Word-Datei als
+  //  eingebetteten Datenteil (customXml) und als Link hinter dem Namen, das
+  //  PDF als Link hinter dem Namen – auch das PDF, das Word oder LibreOffice
+  //  aus der Word-Datei machen. Findet sich so etwas, wird das Dokument
+  //  ganz uebernommen statt aus dem Text erraten.
+  var SOURCE_LINK = /[#&](z|data)=([A-Za-z0-9_-]{16,})/;
+
+  function base64UrlBytes(value) {
+    var base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) base64 += "=";
+    var binary = global.atob(base64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+
+  //  Ein RickCV-Link → der JSON-Text darin, oder null.
+  function sourceFromLink(url) {
+    var match = SOURCE_LINK.exec(String(url || ""));
+    if (!match) return Promise.resolve(null);
+    try {
+      var bytes = base64UrlBytes(match[2]);
+      if (match[1] === "data") return Promise.resolve(new TextDecoder().decode(bytes));
+      return inflateRaw(bytes, 16 * 1024 * 1024).then(function (raw) {
+        return new TextDecoder().decode(raw);
+      }, function () { return null; });
+    } catch (error) {
+      return Promise.resolve(null);
+    }
+  }
+
+  function firstSource(urls) {
+    var list = (urls || []).filter(function (url) { return SOURCE_LINK.test(url); });
+    function next(index) {
+      if (index >= list.length) return Promise.resolve(null);
+      return sourceFromLink(list[index]).then(function (json) {
+        var data = json && parseLoose(json);
+        return data && typeof data === "object" && !Array.isArray(data) ? json : next(index + 1);
+      });
+    }
+    return next(0);
+  }
+
+  //  Aus einem eingebetteten Dokument ein Ergebnis wie aus einer Sicherung.
+  //  Bilder, die der Link nicht traegt (zu gross fuer eine Adresse), holt
+  //  das PDF selbst zurueck: Foto und Unterschrift stehen darin.
+  function fromEmbedded(json, format, images) {
+    var parsed = parseText(json, "rickcv.json");
+    if (parsed.format !== "rickcv" || !parsed.state) return null;
+    var state = parsed.state;
+    if (images && images.length) {
+      var found = emptyProfile();
+      attachImages(found, images);
+      if (state.photo && state.photo.show && !state.photo.src && found.photo) state.photo.src = found.photo;
+      if (state.coverLetter && !state.coverLetter.signatureImg && found.signature) {
+        state.coverLetter.signatureImg = found.signature;
+      }
+    }
+    var out = result(format, null, state);
+    out.warnings = ["embedded"].concat(parsed.warnings || []);
+    return out;
+  }
+
   //  readFile(file, callback) – callback(error, result)
   function readFile(file, callback) {
     var name = file.name || "";
@@ -4094,12 +4159,15 @@
       if (!global.RickCVDocx) return callback(new Error("noDocxSupport"));
       global.RickCVDocx.read(file, function (error, data) {
         if (error) return callback(error);
-        var parsed;
-        try {
-          parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
-          parsed.format = "docx";
-        } catch (parseError) { return callback(parseError); }
-        callback(null, parsed);
+        var embedded = data.source ? Promise.resolve(data.source) : firstSource(data.links);
+        embedded.then(function (json) {
+          var parsed = json ? fromEmbedded(json, "docx", data.images) : null;
+          if (!parsed) {
+            parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
+            parsed.format = "docx";
+          }
+          return parsed;
+        }).then(function (parsed) { callback(null, parsed); }, function (parseError) { callback(parseError); });
       });
       return;
     }
@@ -4108,8 +4176,9 @@
       if (!global.RickCVPdf) return callback(new Error("noPdfSupport"));
       global.RickCVPdf.extract(file, function (error, data) {
         if (error) return callback(error);
-        var parsed;
-        try {
+        firstSource(data.links).then(function (json) {
+          var parsed = json ? fromEmbedded(json, "pdf", data.images) : null;
+          if (parsed) return parsed;
           parsed = parseText(data.text, "extracted.txt", data.lines, data.images);
           parsed.format = "pdf";
           //  Fehlende Zeichenzuordnung betrifft den Text, nicht den Aufbau –
@@ -4117,8 +4186,8 @@
           if (data.unmapped && parsed.warnings.indexOf("unmapped") === -1) {
             parsed.warnings.push("unmapped");
           }
-        } catch (parseError) { return callback(parseError); }
-        callback(null, parsed);
+          return parsed;
+        }).then(function (parsed) { callback(null, parsed); }, function (parseError) { callback(parseError); });
       });
       return;
     }
@@ -4148,6 +4217,8 @@
       return applyProfile(state, parsed.profile, mode);
     },
     toJsonResume: toJsonResume,
+    sourceFromLink: sourceFromLink,
+    fromEmbedded: fromEmbedded,
     fromJsonResume: fromJsonResume,
     fromReactiveResume: fromReactiveResume,
     stateToProfile: stateToProfile,

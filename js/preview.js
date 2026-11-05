@@ -358,12 +358,41 @@
       paint(message.data);
       scheduleReport();
     } else if (message.type === "rickcv:print") {
+      carrySource(message.source);
       window.focus();
       window.print();
     } else if (message.type === "rickcv:snapshot") {
       tell({ type: "rickcv:snapshot", id: message.id, html: snapshot(), families: families() });
+    } else if (message.type === "rickcv:design") {
+      //  Fuer "Word (.docx)": das gezeichnete Dokument vermessen
+      //  (js/word-design.js). Ohne Bearbeitungsrahmen, der sonst mitkaeme.
+      hideEditHint();
+      var Design = window.RickCVWordDesign;
+      var done = function (design, error) {
+        tell({ type: "rickcv:design", id: message.id, design: design || null, error: error || "" });
+      };
+      if (!Design) done(null, "missing");
+      else Design.capture(document).then(function (design) { done(design); },
+        function (error) { done(null, String(error && error.message || error)); });
     }
   });
+
+  /*  Der Name wird im PDF zum Link auf das ganze Dokument (js/builder.js,
+   *  sourceLink). Sichtbar aendert sich nichts; der Import liest den Link
+   *  und uebernimmt das Dokument verlustfrei. Beim naechsten Zeichnen ist
+   *  er wieder weg – er gehoert nur in den Druck.
+   */
+  function carrySource(link) {
+    if (!/^https:\/\/[^\s"]+#(z|data)=/.test(link || "")) return;
+    Array.prototype.forEach.call(document.querySelectorAll("h1.name"), function (name) {
+      if (name.querySelector("a.rickcv-source") || !name.textContent.trim()) return;
+      var anchor = document.createElement("a");
+      anchor.className = "rickcv-source";
+      anchor.href = link;
+      while (name.firstChild) anchor.appendChild(name.firstChild);
+      name.appendChild(anchor);
+    });
+  }
 
   /*  "Als Datei speichern": das Dokument, wie es dasteht – ohne Skripte,
    *  ohne die Umrandung zum Bearbeiten, ohne Verweise auf Dateien neben

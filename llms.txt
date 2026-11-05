@@ -9,12 +9,13 @@
 
 If you are writing an application for a person: build the JSON, append it
 base64url to `https://cv.rickinto.place/#data=<token>`, and hand over the link.
-Everything you need is in AGENTS.md. A chat that cannot run code answers with the
-JSON instead; the person pastes the whole answer into Import.
+Everything you need is in https://cv.rickinto.place/AGENTS.md (plain Markdown).
+A chat that cannot run code answers with the JSON instead; the person pastes the
+whole answer into Import → paste the text.
 
 ## Docs
 
-- [AGENTS.md](https://github.com/rickintoplace/RickCV/blob/main/AGENTS.md): Datenformat, Link-Bau, Grenzen / data format, link building, limits
+- [AGENTS.md](https://cv.rickinto.place/AGENTS.md): Datenformat, Link-Bau, Grenzen / data format, link building, limits
 - [README.md](https://github.com/rickintoplace/RickCV/blob/main/README.md): Was der Baukasten kann / what the builder does
 - [themes/CONTRACT.md](https://github.com/rickintoplace/RickCV/blob/main/themes/CONTRACT.md): Ein Theme ist eine CSS-Datei / a theme is one CSS file
 

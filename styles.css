@@ -1520,3 +1520,16 @@ body[data-heading-style="caps"] [data-column="main"] .resume_title {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+
+/*  Im Druck steht hinter dem Namen ein Link auf das ganze Dokument
+    (js/preview.js, carrySource) – fuer den verlustfreien Import. Er soll
+    aussehen wie der Name, nicht wie ein Link. */
+a.rickcv-source,
+a.rickcv-source:hover,
+a.rickcv-source:visited {
+  color: inherit;
+  text-decoration: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}

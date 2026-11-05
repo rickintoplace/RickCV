@@ -23,7 +23,7 @@ const ok = (cond, label, extra) => {
 function sandbox(files) {
   const box = {
     console: { log() {}, warn() {}, error() {} }, TextDecoder, TextEncoder, Blob, Response,
-    DecompressionStream, URL, atob, btoa, setTimeout, clearTimeout, queueMicrotask, structuredClone,
+    DecompressionStream, CompressionStream, URL, atob, btoa, crypto, setTimeout, clearTimeout, queueMicrotask, structuredClone,
     Promise, Math, JSON, Date, Uint8Array, Uint32Array, DataView, ArrayBuffer, ReadableStream,
   };
   box.window = box; box.globalThis = box; box.self = box;
@@ -108,6 +108,44 @@ console.log("\n— Word (.docx): Rückweg durch den eigenen Import —");
      back.skills.items.map((item) => item.name).join(", "));
   ok(back.coverLetter.paragraphs.some((text) => text.includes("Zweiter Absatz")), "Anschreiben",
      JSON.stringify(back.coverLetter.paragraphs));
+}
+
+console.log("\n— Word (.docx): das Dokument reist mit —");
+{
+  //  Wie js/builder.js es mitgibt: der ganze Stand als Datenteil, ein Link
+  //  hinter dem Namen. Zurueck kommt genau dieses Dokument.
+  const original = example("de");
+  original.theme = { slug: "banner", name: "", css: "", source: "builtin" };
+  original.settings.showCoverLetter = true;
+  const json = JSON.stringify(original);
+  const packed = new Uint8Array(await new Response(new Blob([json]).stream()
+    .pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer());
+  const link = "https://cv.rickinto.place/#z=" + Buffer.from(packed).toString("base64url");
+  const same = (back) => JSON.stringify(box.RickCVModel.migrate(JSON.parse(json))) === JSON.stringify(back);
+
+  const withData = await Docs.docx(original, { json, link });
+  const readBack = (bytes, name) => new Promise((res, rej) => box.RickCVImport.readFile(
+    { name, arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) },
+    (error, value) => (error ? rej(error) : res(value))));
+  const parsed = await readBack(withData, "bewerbung.docx");
+  ok(parsed.format === "docx" && parsed.warnings.includes("embedded"), "eingebettetes Dokument erkannt", parsed.format + " " + parsed.warnings);
+  ok(parsed.state && same(parsed.state), "Datenteil: verlustfrei, Theme und Anschreiben eingeschlossen");
+
+  //  Ohne Datenteil – etwa, wenn ein anderes Programm ihn verworfen hat –
+  //  traegt der Link hinter dem Namen das Dokument.
+  const linkOnly = await Docs.docx(original, { link });
+  const viaLink = await readBack(linkOnly, "bewerbung.docx");
+  ok(viaLink.warnings.includes("embedded") && viaLink.state.theme.slug === "banner" &&
+     viaLink.state.coverLetter.paragraphs.length === original.coverLetter.paragraphs.length,
+     "nur der Link: ebenso vollständig", viaLink.format + " " + viaLink.warnings);
+
+  const files = await box.RickCVImport.readZip(withData.buffer);
+  ok(decode(files["word/document.xml"]).includes('<w:hyperlink r:id="rIdSource">'), "der Name ist der Link");
+  ok(decode(files["[Content_Types].xml"]).includes("customXmlProperties"), "Datenteil ordentlich angemeldet");
+
+  //  Eine fremde Word-Datei bleibt beim Lesen aus dem Text.
+  const plain = await readBack(await Docs.docx(original), "fremd.docx");
+  ok(!plain.warnings.includes("embedded") && !plain.state, "ohne Datenteil: wie bisher aus dem Text");
 }
 
 console.log(fails ? `\n${fails} Fehler\n` : "\nalles grün\n");

@@ -2953,3 +2953,16 @@ button.job-term-main:hover {
 .theme-filter-hint {
   margin-top: -2px;
 }
+
+/*  Eine Datei, die das ganze Dokument mitbringt (js/import.js,
+    fromEmbedded): eine gute Nachricht, keine Warnung. */
+.imp-good {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  border: 1px solid color-mix(in oklab, var(--ui-accent), transparent 55%);
+  background: var(--ui-accent-soft);
+  color: var(--ui-text);
+}

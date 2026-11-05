@@ -295,6 +295,86 @@ if (!browser) {
     ok(linked.mode === "merge" && linked.name === "Eigene Fassung" && linked.ad === "Ausbildung zur Kauff",
        "… ergänzt das offene Dokument, statt es zu ersetzen", JSON.stringify(linked));
 
+    //  Das Dokument reist mit: im PDF als Link hinter dem Namen, in der
+    //  Word-Datei als Datenteil. Beides ergibt wieder genau dieses Dokument.
+    const carried = await E(`(async function () { ${helpers}
+      localStorage.setItem("rickcv.ui.printGuide", "off");
+      var frame = document.getElementById("preview-frame");
+      frame.contentWindow.print = function () {};
+      document.getElementById("btn-print").click();
+      var a = null;
+      for (var i = 0; i < 40 && !a; i++) { await wait(100); a = frame.contentDocument.querySelector("h1.name a.rickcv-source"); }
+      if (!a) return { missing: true };
+      var doc = JSON.parse(await RickCVImport.sourceFromLink(a.href));
+      //  Was ausgeblendet ist, reist nicht mit.
+      var secret = JSON.parse(localStorage.getItem("rickcv.data.v3"));
+      var here = JSON.parse(localStorage.getItem("rickcv.data.v3"));
+      var fw = frame.contentWindow;
+      return { public: a.href.indexOf("https://cv.rickinto.place/#z=") === 0, name: doc.contact.name === here.contact.name,
+               theme: doc.theme.slug === here.theme.slug, events: doc.events.length === here.events.length,
+               job: doc.job.ad === "", letter: secret.settings.showCoverLetter || !doc.coverLetter.paragraphs.length, look: fw.getComputedStyle(a).color === fw.getComputedStyle(a.parentNode).color &&
+               fw.getComputedStyle(a).textDecorationLine === "none" };
+    })()`);
+    ok(carried.public && carried.name && carried.theme && carried.events, "Druck: hinter dem Namen steht das ganze Dokument", JSON.stringify(carried));
+    ok(carried.job, "… ohne die Stellenanzeige und ihre Vermerke", JSON.stringify(carried));
+    ok(carried.letter, "… und ohne ein ausgeblendetes Anschreiben", JSON.stringify(carried));
+    ok(carried.look, "… und der Name sieht aus wie vorher", JSON.stringify(carried));
+
+    const word = await E(`(async function () { ${helpers}
+      var captured = null;
+      var create = URL.createObjectURL;
+      URL.createObjectURL = function (blob) { captured = blob; return create.call(URL, blob); };
+      HTMLAnchorElement.prototype.click = function () {};
+      document.getElementById("btn-export").click(); await wait(200);
+      var item = Array.prototype.find.call(document.querySelectorAll(".menu-pop .menu-item"),
+        function (x) { return x.querySelector("strong").textContent === "Word (.docx)"; });
+      item.click();
+      for (var i = 0; i < 100 && !captured; i++) await wait(200);
+      URL.createObjectURL = create;
+      if (!captured) return { missing: true, toast: document.getElementById("toast").textContent };
+      var buffer = await captured.arrayBuffer();
+      var files = await RickCVImport.readZip(buffer);
+      var xml = new TextDecoder().decode(files["word/document.xml"]);
+      var parsed = await new Promise(function (resolve, reject) {
+        RickCVImport.readFile({ name: "x.docx", arrayBuffer: function () { return Promise.resolve(buffer.slice(0)); } },
+          function (error, value) { return error ? reject(error) : resolve(value); });
+      });
+      var here = JSON.parse(localStorage.getItem("rickcv.data.v3"));
+      return { tables: (xml.match(/<w:tbl>/g) || []).length, shaded: /w:fill="[0-9A-F]{6}"/.test(xml),
+               fonts: Object.keys(files).filter(function (n) { return /odttf$/.test(n); }).length,
+               embedded: parsed.warnings.indexOf("embedded") !== -1, same: parsed.state && parsed.state.contact.name === here.contact.name &&
+               parsed.state.theme.slug === here.theme.slug && parsed.state.events.length === here.events.length,
+               toast: document.getElementById("toast").textContent };
+    })()`);
+    ok(word.tables > 3 && word.shaded, "Word (.docx) im Design: Spalten und Flächen", JSON.stringify(word));
+    ok(word.fonts >= 1, "… mit eingebetteten Schriften", JSON.stringify(word));
+    ok(word.embedded && word.same, "… und kommt verlustfrei zurück", JSON.stringify(word));
+
+    //  JSON-Text (etwa die Antwort einer KI, mit Satz davor) und ein
+    //  RickCV-Link gehen direkt ins Textfeld des Imports.
+    const pasted = await E(`(async function () { ${helpers}
+      var read = async function (text) {
+        document.getElementById("btn-import").click(); await wait(300);
+        var area = document.querySelector(".imp-textarea");
+        area.value = text;
+        document.querySelector(".imp-paste .btn").click();
+        for (var i = 0; i < 30; i++) { await wait(100); if (document.querySelector(".imp-summary")) break; }
+        var summary = document.querySelector(".imp-summary");
+        var out = summary ? summary.textContent : (document.querySelector(".imp-error") || {}).textContent;
+        RickCVImportDialog.close(); await wait(100);
+        return out || "";
+      };
+      var answer = "Gern, hier ist dein Lebenslauf:\\n\\n\\u0060\\u0060\\u0060json\\n" +
+        JSON.stringify({ contact: { name: "Nora Feldmann", email: "nora@example.org" }, events: [{ sectionId: "experience", title: "Hebamme", company: "Klinikum" }] }, null, 2) +
+        "\\n\\u0060\\u0060\\u0060\\nViel Erfolg!";
+      var json = JSON.stringify({ contact: { name: "Rasmus Link" } });
+      var packed = new Uint8Array(await new Response(new Blob([json]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer());
+      var b64 = btoa(String.fromCharCode.apply(null, packed)).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/, "");
+      return { answer: await read(answer), link: await read("https://cv.rickinto.place/#z=" + b64) };
+    })()`);
+    ok(/Nora Feldmann/.test(pasted.answer), "Textfeld: JSON aus einer KI-Antwort", JSON.stringify(pasted));
+    ok(/Rasmus Link/.test(pasted.link), "Textfeld: ein RickCV-Link", JSON.stringify(pasted));
+
     //  Alles von diesem Geraet entfernen: danach ist nichts mehr da – kein
     //  Dokument, kein Papierkorb, kein frueherer Stand, kein Schluessel.
     const before = await E(`RickCVStore.listDocs().then(function (d) { return d.length; })`);

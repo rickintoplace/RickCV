@@ -965,13 +965,114 @@
   //  anderen Programmen lesen, traegt dafuer kein Aussehen mit sich.
   //  Die neutrale, bearbeitbare Fassung (js/export-docs.js): was drinsteht,
   //  nicht wie es aussieht.
+  /*  Das Dokument reist mit (js/export-docs.js, js/import.js): als
+   *  Datenteil in der Word-Datei und als Link hinter dem Namen in Word und
+   *  PDF. So ergibt eine exportierte Datei auf einem anderen Geraet wieder
+   *  genau dieses Dokument. Die Stellenanzeige bleibt weg – mit ihr kaemen
+   *  die eigenen Vermerke ("trifft nicht zu") zur Firma, an die man sich
+   *  bewirbt. Der Link zeigt immer auf die oeffentliche Seite, auch wenn
+   *  RickCV gerade per Doppelklick laeuft. Bilder traegt nur der Datenteil;
+   *  fuer den Link waeren sie zu gross, und das PDF bringt sie ohnehin mit.
+   */
+  var PUBLIC_BASE = "https://cv.rickinto.place/";
+
+  //  Nur, was im Dokument zu sehen ist: Ein ausgeblendeter Abschnitt oder
+  //  ein Anschreiben, das gerade nicht dabei ist (vielleicht an eine andere
+  //  Firma), darf nicht unsichtbar mitreisen.
+  function visibleOnly(copy) {
+    if (!copy.settings || !copy.settings.showCoverLetter) {
+      copy.coverLetter = Object.assign({}, copy.coverLetter, {
+        recipient: "", subject: "", salutation: "", paragraphs: [], signatureImg: "",
+      });
+    }
+    ["skills", "languages", "interests", "projects", "references", "mobility", "mobilitySB"].forEach(function (key) {
+      if (copy[key] && copy[key].show === false && Array.isArray(copy[key].items)) copy[key].items = [];
+    });
+    if (copy.profile && copy.profile.show === false) copy.profile.text = "";
+    if (copy.photo && !copy.photo.show) copy.photo.src = "";
+    var hidden = (copy.sections || []).filter(function (section) { return section.show === false; })
+      .map(function (section) { return section.id; });
+    copy.events = (copy.events || []).filter(function (event) { return hidden.indexOf(event.sectionId) === -1; });
+    return copy;
+  }
+
+  function portable(withImages) {
+    var copy = visibleOnly(withImages ? JSON.parse(JSON.stringify(state)) : stateWithoutImages());
+    copy.job = { ad: "", dismissed: [], confirmed: [] };
+    //  Ein sehr langes eigenes Theme sprengte die Adresse; im Datenteil
+    //  bleibt es.
+    if (!withImages && copy.theme && copy.theme.css && copy.theme.css.length > 20000) copy.theme.css = "";
+    return copy;
+  }
+
+  function sourceLink() {
+    var json = JSON.stringify(portable(false));
+    return deflateRaw(json).then(function (packed) {
+      return packed ? PUBLIC_BASE + "#z=" + bytesToBase64Url(packed) : PUBLIC_BASE + "#data=" + toBase64Url(json);
+    }, function () { return ""; });
+  }
+
+  function carryAlong() {
+    return sourceLink().then(function (link) {
+      return { json: JSON.stringify(portable(true)), link: link };
+    }, function () { return null; });
+  }
+
+  //  "Word (.docx)": wie im Design. Die Vorschau vermisst das gezeichnete
+  //  Dokument (js/word-design.js), export-docs.js setzt daraus die Datei.
+  //  Klappt das Vermessen nicht, kommt die schlichte Fassung – mit Hinweis.
+  var designWaiting = {};
+  var designCounter = 0;
+
+  function requestDesign() {
+    return new Promise(function (resolve, reject) {
+      if (!frame || !frame.contentWindow) return reject(new Error("frame"));
+      var id = ++designCounter;
+      designWaiting[id] = { resolve: resolve, reject: reject };
+      frame.contentWindow.postMessage({ type: "rickcv:design", id: id }, ORIGIN);
+      setTimeout(function () {
+        if (!designWaiting[id]) return;
+        delete designWaiting[id];
+        reject(new Error("timeout"));
+      }, 20000);
+    });
+  }
+
+  function receiveDesign(message) {
+    var waiting = designWaiting[message.id];
+    if (!waiting) return;
+    delete designWaiting[message.id];
+    if (message.design) waiting.resolve(message.design);
+    else waiting.reject(new Error(message.error || "design"));
+  }
+
   function exportDocx() {
     var Docs = global.RickCVExportDocs;
-    if (!Docs) return;
-    Docs.docx(state).then(function (bytes) {
+    if (!Docs || !Docs.designedDocx) return exportDocxPlain();
+    status(t("exportingDocx"));
+    Promise.all([requestDesign(), carryAlong()]).then(function (parts) {
+      return Docs.designedDocx(state, parts[0], parts[1]);
+    }).then(function (bytes) {
       download(slug(state.contact.name) + ".docx", bytes,
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-      toast(t("exportedDocx"));
+      toast(t("exportedDocxDesign"));
+      showSaveState();
+    }, function (error) {
+      console.warn("DOCX im Design fehlgeschlagen, schlichte Fassung:", error);
+      showSaveState();
+      exportDocxPlain(true);
+    });
+  }
+
+  function exportDocxPlain(fallback) {
+    var Docs = global.RickCVExportDocs;
+    if (!Docs) return;
+    carryAlong().then(function (carry) {
+      return Docs.docx(state, carry);
+    }).then(function (bytes) {
+      download(slug(state.contact.name) + ".docx", bytes,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+      toast(t(fallback === true ? "exportedDocxFallback" : "exportedDocx"));
     }, function (error) {
       console.warn("DOCX-Export fehlgeschlagen:", error);
       toast(t("fileFailed"));
@@ -1607,7 +1708,11 @@
     whenPainted(function () {
       if (builderTitle === null) builderTitle = document.title;
       document.title = global.RickCVRender.documentTitle(state);
-      frame.contentWindow.postMessage({ type: "rickcv:print" }, ORIGIN);
+      //  Hinter dem Namen steht im PDF das ganze Dokument – fuer den
+      //  verlustfreien Import auf einem anderen Geraet.
+      sourceLink().then(function (link) {
+        frame.contentWindow.postMessage({ type: "rickcv:print", source: link }, ORIGIN);
+      });
       //  Der Druckdialog haelt das Skript an; danach, oder spaetestens nach
       //  einer Minute, gilt wieder der eigene Titel.
       setTimeout(restoreTitle, 60000);
@@ -1860,6 +1965,8 @@
           action: function () { saveFile(false); } },
         { label: t("expRickcv"), hint: t("expRickcvHint"), icon: "download", action: exportJson },
         { label: t("expDocx"), hint: t("expDocxHint"), icon: "file-text", action: exportDocx },
+        { label: t("expDocxPlain"), hint: t("expDocxPlainHint"), icon: "file-text",
+          action: function () { exportDocxPlain(false); } },
         { label: t("expMarkdown"), hint: t("expMarkdownHint"), icon: "file-text", action: exportMarkdown },
         { label: t("expJsonResume"), hint: t("expJsonResumeHint"), icon: "braces",
           action: exportJsonResume },
@@ -2319,6 +2426,8 @@
         takeFile(message.file);
       } else if (message.type === "rickcv:snapshot") {
         if (global.RickCVSaveFile) global.RickCVSaveFile.receive(message);
+      } else if (message.type === "rickcv:design") {
+        receiveDesign(message);
       } else if (message.type === "rickcv:edit") {
         revealPath(message.path);
       }

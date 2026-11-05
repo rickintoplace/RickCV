@@ -222,6 +222,50 @@ if (!chrome || !hasPdfjs) {
 
       ok(trouble.length === 0, `${slug}: vollständig zurückgelesen`, trouble.slice(0, 4).join(" · "));
     }
+
+    //  Ein PDF aus RickCV traegt das Dokument als Link hinter dem Namen
+    //  (js/preview.js, carrySource). Chrome macht daraus einen Verweis im PDF,
+    //  der Import liest ihn – und uebernimmt alles, auch das Theme.
+    fs.writeFileSync(probe, `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css"><link rel="stylesheet" href="styles.css"></head>
+<body><div class="document"></div>
+<script src="js/i18n.js"></script><script src="js/icon-data.js"></script>
+<script src="js/icons.js"></script><script src="js/theme-data.js"></script>
+<script src="js/themes.js"></script><script src="js/model.js"></script>
+<script src="js/ats.js"></script><script src="js/render.js"></script>
+<script>
+  var data = RickCVModel.createExample("de");
+  data.theme = { slug: "dynaline", name: "", css: "", source: "builtin" };
+  data.settings.showCoverLetter = true;
+  data.photo.src = "";
+  RickCVRender.render(document, data);
+  var json = JSON.stringify(data);
+  new Response(new Blob([json]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer().then(function (buffer) {
+    var bytes = new Uint8Array(buffer), binary = "";
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    var link = "https://cv.rickinto.place/#z=" + btoa(binary).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/, "");
+    document.querySelectorAll("h1.name").forEach(function (name) {
+      var a = document.createElement("a"); a.className = "rickcv-source"; a.href = link;
+      while (name.firstChild) a.appendChild(name.firstChild);
+      name.appendChild(a);
+    });
+  });
+</script></body></html>`);
+    await run(chrome, [
+      "--headless", "--disable-gpu", "--no-sandbox", "--no-pdf-header-footer",
+      "--virtual-time-budget=12000", `--print-to-pdf=${pdfFile}`,
+      `http://127.0.0.1:${PORT}/.roundtrip-probe.html`,
+    ], { maxBuffer: 64 * 1024 * 1024, timeout: 120000 });
+    const carried = fs.readFileSync(pdfFile);
+    const parsedCarried = await new Promise((res, rej) => box.RickCVImport.readFile({
+      name: "bewerbung.pdf",
+      arrayBuffer: async () => carried.buffer.slice(carried.byteOffset, carried.byteOffset + carried.byteLength),
+    }, (error, value) => (error ? rej(error) : res(value))));
+    const wantCarried = box.RickCVModel.createExample("de");
+    ok(parsedCarried.warnings.includes("embedded") && parsedCarried.state &&
+       parsedCarried.state.theme.slug === "dynaline" && parsedCarried.state.events.length === wantCarried.events.length &&
+       JSON.stringify(parsedCarried.state.coverLetter.paragraphs) === JSON.stringify(wantCarried.coverLetter.paragraphs),
+       "PDF mit Link hinter dem Namen: verlustfrei zurück, samt Theme", parsedCarried.format + " " + parsedCarried.warnings);
   } finally {
     server.close();
     fs.rmSync(probe, { force: true });

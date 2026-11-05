@@ -725,9 +725,44 @@
     };
   }
 
+  //  Was RickCV selbst in die Datei legt: das ganze Dokument als
+  //  Datenteil, und die Verweise (einer davon traegt es ebenfalls).
+  function embedded(files) {
+    var source = null;
+    Object.keys(files).forEach(function (name) {
+      if (source || !/^customXml\/item\d+\.xml$/i.test(name)) return;
+      var text = Import.decodeText(files[name]);
+      var match = /<rickcv\b[^>]*>([\s\S]*?)<\/rickcv>/.exec(text || "");
+      if (!match) return;
+      try {
+        var binary = atob(match[1].replace(/\s+/g, ""));
+        var bytes = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        source = new TextDecoder().decode(bytes);
+      } catch (error) { source = null; }
+    });
+    var links = [];
+    var rels = Import.decodeText(files["word/_rels/document.xml.rels"]) || "";
+    rels.replace(/Target="([^"]+)"/g, function (all, target) {
+      if (/^https?:/.test(target)) links.push(target.replace(/&amp;/g, "&"));
+      return all;
+    });
+    return { source: source, links: links };
+  }
+
   function read(file, callback) {
     file.arrayBuffer().then(Import.readZip).then(function (files) {
-      var result = convert(files);
+      var carried = embedded(files);
+      var result;
+      try {
+        result = convert(files);
+      } catch (error) {
+        if (!carried.source) throw error;
+        result = { text: "", lines: [], images: [] };
+      }
+      result.source = carried.source;
+      result.links = carried.links;
+      if (carried.source) return callback(null, result);
       if (!result.text.replace(/\s/g, "")) throw new Error("noDocxText");
       callback(null, result);
     }).catch(function (error) {

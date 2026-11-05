@@ -389,6 +389,7 @@
       loaded = pdf;
       var rows = [];
       var images = [];
+      var links = [];
       var chain = Promise.resolve();
       for (var number = 1; number <= pdf.numPages; number++) {
         (function (index) {
@@ -402,12 +403,19 @@
                 return pageText(page, index, counter);
               }).then(function (lines) {
                 rows = rows.concat(lines);
+                //  Die Verweise: hinter dem Namen steht bei RickCV das ganze
+                //  Dokument (js/import.js, sourceFromLink).
+                return page.getAnnotations().then(function (annotations) {
+                  (annotations || []).forEach(function (note) {
+                    if (note && note.url) links.push(note.url);
+                  });
+                }, function () { /* ohne Verweise geht es auch */ });
               });
             });
           });
         })(number);
       }
-      return chain.then(function () { return { rows: rows, images: images }; });
+      return chain.then(function () { return { rows: rows, images: images, links: links }; });
     }).then(function (result) {
       release();
       var text = result.rows.map(function (row) { return row.text; }).join("\n");
@@ -422,6 +430,7 @@
       //  statt zu raten.
       return {
         text: text, lines: result.rows, images: result.images, unmapped: counter.unmapped,
+        links: result.links,
       };
     }).then(function (data) {
       //  Ausserhalb der Kette aufgerufen: wirft der Rueckruf selbst, soll er
