@@ -107,22 +107,6 @@
   margin-left: 1.1cm;
 }
 
-/*  Titel und Arbeitgeber in einer Zeile: "A-levels – St Cuthbert's School".
-    Stand ein kurzer Titel allein ueber einer langen Arbeitgeberzeile, hielt
-    pdftotext die beiden fuer verschiedene Bloecke und riss den Arbeitgeber
-    von seiner Station los (tools/ats-proof.mjs).  */
-.event .content h3,
-.event .content h3 + p {
-  display: inline;
-}
-
-.event .content h3 + p::before {
-  content: " – ";
-}
-
-.event .content h3 + p + * {
-  margin-top: 0.15em;
-}
 
 /*  Die anderen Bloecke im Hauptteil stehen auf derselben Kante wie die
     Abschnitte darueber. Bei den Kenntnissen nur die Ueberschrift: die

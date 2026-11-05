@@ -300,6 +300,9 @@
         if (entry[1] && entry[1] !== "auto") body.setAttribute(entry[0], entry[1]);
         else body.removeAttribute(entry[0]);
       });
+    //  Firma / Schule unter dem Titel oder in seiner Zeile – fuer jedes
+    //  Theme gleich, die Regeln stehen in styles.css ausserhalb der Ebenen.
+    body.setAttribute("data-company", style.companyLine === "inline" ? "inline" : "below");
 
     //  Die Fassung des Vertrags, gegen den dieses Markup geschrieben ist.
     //  Ein Theme darf sich daran festhalten – und spaeter daran merken,
@@ -734,8 +737,9 @@
 
       node.style.setProperty("--color", event.color);
       node.style.setProperty("--months-duration", String(durationMonths(event) / span));
-      node.style.setProperty("--offset", (event.hoffset || 0) + "px");
-      node.style.marginTop = (event.voffset || 0) + "px";
+      //  Die Feinjustierung (Einrueckung, Hoehe) gibt es nicht mehr; Themes
+      //  rechnen noch mit der Variable, also steht sie auf null.
+      node.style.setProperty("--offset", "0px");
 
       timeline.appendChild(node);
     });
@@ -772,7 +776,7 @@
 
       var line = doc.createElement("div");
       line.className = "line";
-      line.style.height = event.hideline ? "0" : Math.max(0, end - start) + "px";
+      line.style.height = Math.max(0, end - start) + "px";
       node.appendChild(line);
     });
   }

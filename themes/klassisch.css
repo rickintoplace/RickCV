@@ -144,20 +144,20 @@
   display: none;
 }
 
-/*  Titel und Arbeitgeber in einer Zeile mit dem Zeitraum: "07/21 – 10/21
-    Ferienspaß – Spaß AG, Frankfurt". Stand der Arbeitgeber allein darunter,
-    hielten Textleser ihn fuer einen eigenen Block – und stand daneben in
-    der Seitenspalte zufaellig eine Ueberschrift auf derselben Hoehe, lasen
-    sie diese zwischen Titel und Arbeitgeber (tools/ats-proof.mjs).  */
-.event .content h3,
-.event .content h3 + p {
-  display: inline;
+
+/*  Firma / Schule unter dem Titel (die Vorgabe, einstellbar im Editor):
+    dicht unter dem Titel und in seiner Groesse. pdfminer.six fasst Zeilen
+    nur zu einem Block, wenn sie hoechstens eine halbe Zeilenhoehe
+    auseinanderliegen; mit dem gewohnten Zeilenabstand stand die Titelzeile
+    allein, und eine Ueberschrift der Seitenspalte auf ihrer Hoehe geriet
+    zwischen Titel und Firma (tools/ats-proof.mjs).  */
+[data-template][data-company="below"] .event .content h3 {
+  margin-bottom: 0;
+  line-height: 1.25;
 }
 
-.event .content h3 + p::before {
-  content: " – ";
-}
-
-.event .content h3 + p + * {
-  margin-top: 0.15em;
+[data-template][data-company="below"] .event .content h3 + p {
+  font-size: 1em;
+  margin-top: 0;
+  line-height: 1.25;
 }

@@ -153,17 +153,14 @@
     /*  Sonst deckt der Kasten den Zeitraum zu, der in seiner Flaeche steht. */
     background-color: transparent;
   }
-  /*  Arbeitgeber und Ort in derselben Zeile. Stand ein kurzer Titel
-      ("Abitur") allein ueber einer langen Arbeitgeberzeile, riss
-      pdftotext beide auseinander und las die Seitenspalte dazwischen.  */
-  .event .content h3,
-  .event .content h3 + p {
-    display: inline;
-  }
-  .event .content h3 + p::before {
-    content: " – ";
-  }
-  .event .content h3 + p + * {
-    margin-top: 0.15em;
-  }
+}
+
+/*  Firma / Schule unter dem Titel (die Vorgabe, einstellbar im Editor):
+    in der Groesse des Titels. pdftotext fasst Zeilen gleicher Groesse zu
+    einem Block; die kleinere Firmenzeile wurde ein eigener, und stand auf
+    ihrer Hoehe in der Seitenspalte eine Ueberschrift, las er diese
+    dazwischen und trennte die Firma von ihrer Station
+    (tools/ats-proof.mjs). In Kapitaelchen wirkt sie trotzdem kleiner.  */
+[data-template][data-company="below"] .event .content h3 + p {
+  font-size: 1em;
 }

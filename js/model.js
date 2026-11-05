@@ -68,9 +68,6 @@
       description: [],
       list: [],
       sectionId: sectionId,
-      hideline: false,
-      hoffset: 0,
-      voffset: 0,
     };
   }
 
@@ -161,6 +158,9 @@
         //  Zwei Wuensche, fuer die man sonst CSS schreiben muesste. "auto"
         //  laesst dem Theme die Entscheidung.
         nameAlign: "auto",
+        //  Firma / Schule einer Station: unter dem Titel (Vorgabe) oder in
+        //  seiner Zeile, nach einem Strich ("Abitur – IGS, Bad Wimpeln").
+        companyLine: "below",
         headingStyle: "auto",
         iconSet: "lucide", // Vorgabe fuer neue Symbole
         //  Strichstaerke auf der Lucide-Skala (1 = fein, 3 = fett). Material
@@ -351,7 +351,7 @@
         place: "Bad Wimpeln", sectionId: "education" },
       { title: "Praktikum", start: "07/2013", end: "11/2013", icon: icon("lucide", "gamepad-2"),
         color: "var(--accent-color-shade1)", company: "Bei einem Freund",
-        place: "Frankfurt", sectionId: "experience", hoffset: 20 },
+        place: "Frankfurt", sectionId: "experience" },
       { title: "Angefangene Ausbildung zum Tierpfleger", start: "11/2013", end: "09/2015",
         icon: icon("lucide", "cat"), color: "var(--accent-color-shade3)", company: "Zoolino",
         place: "Bad Wimpeln", description: ["Tierpflege im Kontaktbereich"],
@@ -371,7 +371,7 @@
       { title: "Nachhaltigkeitsprojekt im Naturschutz", start: "09/2021", end: "05/2023",
         icon: icon("lucide", "sprout"), color: "var(--accent-color-shade1)", company: "Krombacher",
         place: "Kreuztal-Krombach", description: ["Unterstützung beim Erhalt von Regenwaldflächen"],
-        sectionId: "volunteer", hoffset: 20 },
+        sectionId: "volunteer" },
       { title: "Soziale Leistungen", start: "05/2023", end: "01/2025", present: true,
         icon: icon("lucide", "wine"), color: "var(--accent-color-shade3)",
         company: "Bundesagentur für Arbeit", place: "Frankfurt",
@@ -467,7 +467,7 @@
         place: "Lower Piddling", sectionId: "education" },
       { title: "Work experience", start: "07/2013", end: "11/2013", icon: icon("lucide", "gamepad-2"),
         color: "var(--accent-color-shade1)", company: "A friend's garage",
-        place: "Manchester", sectionId: "experience", hoffset: 20 },
+        place: "Manchester", sectionId: "experience" },
       { title: "Apprenticeship in animal care (unfinished)", start: "11/2013", end: "09/2015",
         icon: icon("lucide", "cat"), color: "var(--accent-color-shade3)", company: "Zoolino",
         place: "Lower Piddling", description: ["Hands-on care in the petting section"],
@@ -487,7 +487,7 @@
       { title: "Rainforest project", start: "09/2021", end: "05/2023",
         icon: icon("lucide", "sprout"), color: "var(--accent-color-shade1)", company: "A large brewery",
         place: "Burton upon Trent", description: ["Helping preserve rainforest"],
-        sectionId: "volunteer", hoffset: 20 },
+        sectionId: "volunteer" },
       { title: "Social security", start: "05/2023", end: "01/2025", present: true,
         icon: icon("lucide", "wine"), color: "var(--accent-color-shade3)",
         company: "The Jobcentre", place: "Manchester",
@@ -664,6 +664,7 @@
     "style.sidebarMode": ["light", "dark", "custom"],
     "style.profileAlign": ["auto", "left", "center", "justify"],
     "style.nameAlign": ["auto", "left", "center"],
+    "style.companyLine": ["below", "inline"],
     "style.headingStyle": ["auto", "underline", "caps"],
     "style.iconSet": ["lucide", "material"],
     "style.iconColor": ["accent", "text", "custom"],
@@ -859,6 +860,8 @@
         if (!isColor(result.color)) result.color = template.color;
         if (DATE_MODES.indexOf(result.dateMode) === -1) result.dateMode = "auto";
         if (!result.sectionId && data.sections[0]) result.sectionId = data.sections[0].id;
+        //  Die Feinjustierung (Einrueckung, Hoehe, Linie aus) gibt es nicht mehr.
+        delete result.hideline; delete result.hoffset; delete result.voffset;
         return result;
       });
 
@@ -943,7 +946,6 @@
         if (merge[event.sectionId]) event.sectionId = "experience";
         event.icon = upgradeIcon(event.icon);
         event.present = event.present === true || event.present === "1";
-        event.hideline = event.hideline === true || event.hideline === "1";
         delete event.kind; delete event.education; delete event.volunteer;
       });
 

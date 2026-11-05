@@ -143,7 +143,9 @@ ok(hostile.events[0].icon.set === "lucide" && hostile.events[0].icon.name === "c
    "Symbol als Name wird Objekt");
 ok(hostile.events[0].color === "var(--accent-color-shade2)", "Farbe der Station entschärft");
 ok(hostile.events[1].dateMode === "auto", "unbekannter Datumsmodus wird auto");
-ok(hostile.events[1].color && hostile.events[1].hoffset === 0, "fehlende Felder ergänzt");
+ok(hostile.events[1].color && Array.isArray(hostile.events[1].list), "fehlende Felder ergänzt");
+ok(!("hoffset" in hostile.events[1]) && !("voffset" in hostile.events[1]) && !("hideline" in hostile.events[1]),
+   "die alte Feinjustierung fällt weg");
 ok(hostile.events.every((e) => hostile.sections.some((s) => s.id === e.sectionId)),
    "jede Station hat eine Kategorie");
 const ids = hostile.sections.map((s) => s.id);

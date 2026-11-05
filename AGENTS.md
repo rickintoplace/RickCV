@@ -128,6 +128,7 @@ Field by field:
 | `theme.extra` | CSS *added on top of* the chosen theme (built-in or your own) — the easy way to adjust one detail; the same rules as `theme.css` apply |
 | `style.nameAlign` | `"auto"` (theme decides), `"left"`, `"center"` |
 | `style.headingStyle` | `"auto"`, `"underline"`, `"caps"` — headings in the main column |
+| `style.companyLine` | `"below"` (default) or `"inline"` — employer/school under the title or on its line after a dash |
 | `job.ad` | the text of the job ad this application answers; RickCV shows, per requirement, whether the resume covers it. Fill it in when you know the ad — never write requirements into the resume that the person did not state. A document with nothing but `job` is fine too: the import then offers to add the ad to whatever is open instead of replacing it |
 | `events[].sectionId` | `"experience"`, `"education"` or `"volunteer"` |
 | `events[].start` / `end` | `"MM/YYYY"` or `"YYYY"`; `present: true` means "to this day" |

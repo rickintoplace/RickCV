@@ -58,6 +58,7 @@ the same example.
 | `data-template="<name>"` | the active theme, `custom` for your own |
 | `data-icon-set="lucide\|material"` | which icon set is in use |
 | `data-theme-name="…"` | display name of the theme, if set |
+| `data-company="below\|inline"` | where a station's employer/school stands: under the title (default) or on its line after a dash. A setting of the person, applied outside the layers – a theme does not need to set it |
 
 `[data-template]` is enough as a root — only one theme is ever active, so your
 own name does not need to appear in the selector.

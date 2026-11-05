@@ -456,16 +456,6 @@
             F.shadeField(path + ".color", t("color"))
           ));
 
-          var advanced = el("details", "sub-block");
-          advanced.appendChild(el("summary", null, t("fineTuning")));
-          var advancedBody = el("div", "sub-block-body");
-          advancedBody.appendChild(F.toggle(path + ".hideline", t("hideLine")));
-          advancedBody.appendChild(F.row(
-            F.number(path + ".hoffset", t("indent"), -100, 200, 1),
-            F.number(path + ".voffset", t("shiftVertical"), -200, 200, 1)
-          ));
-          advanced.appendChild(advancedBody);
-          container.appendChild(advanced);
         },
       }));
     }
@@ -781,6 +771,10 @@
         { value: "auto", label: t("nameAlignTheme") },
         { value: "left", label: t("nameAlignLeft") },
         { value: "center", label: t("nameAlignCenter") },
+      ]));
+      body.appendChild(F.select("style.companyLine", t("companyLine"), [
+        { value: "below", label: t("companyLineBelow") },
+        { value: "inline", label: t("companyLineInline") },
       ]));
       body.appendChild(F.select("style.headingStyle", t("headingStyle"), [
         { value: "auto", label: t("headingStyleTheme") },

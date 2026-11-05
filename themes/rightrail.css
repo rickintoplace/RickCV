@@ -162,20 +162,14 @@
   display: none;
 }
 
-/*  Titel und Arbeitgeber in einer Zeile mit dem Zeitraum: "07/21 – 10/21
-    Ferienspaß – Spaß AG, Frankfurt". Stand der Arbeitgeber allein darunter,
-    hielten Textleser ihn fuer einen eigenen Block – und stand daneben in
-    der Seitenspalte zufaellig eine Ueberschrift auf derselben Hoehe, lasen
-    sie diese zwischen Titel und Arbeitgeber (tools/ats-proof.mjs).  */
-.event .content h3,
-.event .content h3 + p {
-  display: inline;
-}
 
-.event .content h3 + p::before {
-  content: " – ";
-}
-
-.event .content h3 + p + * {
-  margin-top: 0.15em;
+/*  Firma / Schule unter dem Titel (die Vorgabe, einstellbar im Editor):
+    in der Groesse des Zeitraums. pdftotext fasst Zeilen gleicher Groesse zu
+    einem Block und nimmt fuer eine Zeile die Groesse ihres ersten Wortes –
+    hier des Zeitraums. Eine Firmenzeile in anderer Groesse wurde ein
+    eigener Block, und stand auf ihrer Hoehe in der Seitenspalte etwas, las
+    er das dazwischen und trennte die Firma von ihrer Station
+    (tools/ats-proof.mjs).  */
+[data-template][data-company="below"] .event .content h3 + p {
+  font-size: 0.85em;
 }
