@@ -53,7 +53,17 @@
         }
         if (!db.objectStoreNames.contains("files")) db.createObjectStore("files", { keyPath: "doc" });
       };
-      request.onsuccess = function () { resolve(request.result); };
+      request.onsuccess = function () {
+        var db = request.result;
+        //  Loescht ein anderer Tab alles ("Alles von diesem Geraet
+        //  entfernen"), gibt dieser hier die Datenbank frei – sonst wartete
+        //  das Loeschen, bis er zu ist.
+        db.onversionchange = function () {
+          db.close();
+          opening = Promise.resolve(null);
+        };
+        resolve(db);
+      };
       request.onerror = function () { resolve(null); };
       request.onblocked = function () { resolve(null); };
     });
@@ -195,7 +205,32 @@
     return run("files", "readwrite", function (store) { return store.delete(docId); }, null);
   }
 
+  //  Die ganze Datenbank weg: Dokumente, Papierkorb, fruehere Staende,
+  //  gemerkte Dateien. Danach schreibt dieser Tab nichts mehr hinein.
+  //  Liefert "done", "blocked" (ein anderer Tab haelt sie noch offen; sie
+  //  verschwindet, sobald er zugeht) oder "failed".
+  function wipe() {
+    return open().then(function (db) {
+      if (db) db.close();
+      opening = Promise.resolve(null);
+      return new Promise(function (resolve) {
+        var request;
+        try {
+          request = global.indexedDB.deleteDatabase(NAME);
+        } catch (error) {
+          return resolve(db ? "failed" : "done");
+        }
+        var answered = false;
+        function answer(value) { if (!answered) { answered = true; resolve(value); } }
+        request.onsuccess = function () { answer("done"); };
+        request.onerror = function () { answer("failed"); };
+        request.onblocked = function () { answer("blocked"); };
+      });
+    });
+  }
+
   global.RickCVStore = {
+    wipe: wipe,
     available: available,
     newId: newId,
     putDoc: putDoc,

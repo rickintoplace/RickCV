@@ -2881,7 +2881,8 @@ button.job-term-main:hover {
 
 .job-found .job-term-icon,
 .job-confirmed .job-term-icon,
-.job-alternative .job-term-icon {
+.job-alternative .job-term-icon,
+.job-pending .job-term-icon {
   color: var(--ui-accent);
 }
 
@@ -2890,7 +2891,8 @@ button.job-term-main:hover {
 }
 
 .job-similar .job-term-icon,
-.job-letter .job-term-icon {
+.job-letter .job-term-icon,
+.job-unfinished .job-term-icon {
   color: #a06a00;
   color: light-dark(#a06a00, #e0b04f);
 }
@@ -2899,8 +2901,10 @@ button.job-term-main:hover {
   border-color: color-mix(in oklab, var(--ui-danger), transparent 55%);
 }
 
-/*  Persoenliches, noch nicht gezeigt: keine Luecke, nur ein offener Punkt. */
-.job-open {
+/*  Persoenliches, noch nicht gezeigt, und ein Abschluss, der noch kommt:
+    keine Luecke, nur ein offener Punkt. */
+.job-open,
+.job-pending {
   border-style: dashed;
 }
 

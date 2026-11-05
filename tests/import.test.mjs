@@ -948,5 +948,26 @@ if (!fs.existsSync(pdfLib)) {
   }
 }
 
+console.log("\n— Nur eine Stellenanzeige —");
+{
+  //  So verteilt eine Lehrkraft den Startlink: kein Kontakt, keine Station,
+  //  nur die Anzeige im Reiter "Stelle".
+  const ad = "Ausbildung zur Kauffrau für Büromanagement (m/w/d)\n\nDas bringst du mit\n- Realschulabschluss";
+  const text = JSON.stringify({ version: 5, locale: "de", job: { ad } });
+  ok(Imp.detect("link.json", text) === "rickcv", "ein Dokument mit nur job ist eines von RickCV");
+  const parsed = Imp.parseText(text, "link.json");
+  ok(parsed.summary.job === 1, "die Zusammenfassung nennt die Anzeige");
+  ok(parsed.jobTitle === "Ausbildung zur Kauffrau für Büromanagement (m/w/d)", "… mit ihrer ersten Zeile", parsed.jobTitle);
+  const mine = base();
+  mine.contact.name = "Lina Krause";
+  mine.events.push(Object.assign(Model.emptyEvent("education"), { title: "Oberschule" }));
+  const merged = Imp.apply(mine, parsed, "merge");
+  ok(merged.contact.name === "Lina Krause" && merged.events.length === 1, "Ergänzen lässt den Lebenslauf stehen");
+  ok(merged.job.ad === ad, "… und legt die Anzeige dazu");
+  const replaced = Imp.apply(mine, parsed, "replace");
+  ok(replaced.job.ad === ad && !replaced.contact.name, "Ersetzen bringt ein leeres Dokument mit Anzeige");
+  ok(Imp.detect("x.json", JSON.stringify({ job: "Koch" })) === "json-unknown", "job ohne ad bleibt unbekannt");
+}
+
 console.log(fails ? `\n${fails} Fehler\n` : "\nalles grün\n");
 process.exit(fails ? 1 : 0);

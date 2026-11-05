@@ -169,10 +169,14 @@
   //  der letzten halben Sekunde getippt wurde.
   var saveTimer = null;
   var storageFull = false;
+  //  Nach "Alles von diesem Geraet entfernen" schreibt dieser Tab nichts
+  //  mehr – sonst stuende beim Schliessen alles wieder da.
+  var wiped = false;
 
   function saveNow() {
     clearTimeout(saveTimer);
     saveTimer = null;
+    if (wiped) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       storageFull = false;
@@ -193,6 +197,7 @@
   }
 
   function flushSave() {
+    if (wiped) return;
     if (saveTimer !== null) saveNow();
     if (global.RickCVLibrary) global.RickCVLibrary.flush();
   }
@@ -1758,6 +1763,72 @@
     });
   }
 
+  /*  Alles von diesem Geraet entfernen – fuer Rechner, an denen viele
+   *  sitzen: Schule, Bibliothek, Beratungsstelle. Ein Befehl statt "Neu",
+   *  "Meine Dokumente", "Loeschen", "Papierkorb", "Endgueltig loeschen".
+   *  Weg sind danach: alle Dokumente, der Papierkorb, die frueheren Staende,
+   *  die gemerkten Dateien und die Einstellungen des Baukastens. Was als PDF
+   *  oder Datei gespeichert wurde, liegt ausserhalb des Browsers und bleibt.
+   */
+  var WIPE_PREFIX = "rickcv.";
+
+  function forgetKeys(storage) {
+    try {
+      var keys = [];
+      for (var i = 0; i < storage.length; i++) {
+        var key = storage.key(i);
+        if (key && key.indexOf(WIPE_PREFIX) === 0) keys.push(key);
+      }
+      //  Nur die eigenen Schluessel: unter file:// teilen sich alle lokalen
+      //  Dateien einen Speicher.
+      keys.forEach(function (key) { storage.removeItem(key); });
+    } catch (error) { /* gesperrter Speicher: dann steht dort auch nichts */ }
+  }
+
+  function wipeDevice() {
+    global.RickCVDialog.confirm({
+      title: t("wipeTitle"), message: t("wipeConfirm"),
+      confirm: t("wipeGo"), cancel: t("impCancel"), danger: true,
+    }).then(function (yes) {
+      if (!yes) return;
+      wiped = true;
+      clearTimeout(saveTimer);
+      saveTimer = null;
+      var Store = global.RickCVStore;
+      var gone = Store && Store.wipe ? Store.wipe() : Promise.resolve("done");
+      return gone.then(function (outcome) {
+        forgetKeys(localStorage);
+        forgetKeys(sessionStorage);
+        //  Neu laden: Formular, Rueckgaengig-Verlauf und Vorschau tragen den
+        //  alten Stand noch im Speicher des Tabs.
+        var next = global.location.pathname + global.location.search + "#wiped=" + outcome;
+        global.location.replace(next);
+        global.location.reload();
+      });
+    });
+  }
+
+  //  Hat ein anderer Tab alles entfernt, darf dieser es nicht beim
+  //  Schliessen zurueckschreiben.
+  function watchWipe() {
+    global.addEventListener("storage", function (event) {
+      if (event.key !== STORAGE_KEY || event.newValue !== null || wiped) return;
+      wiped = true;
+      clearTimeout(saveTimer);
+      global.location.reload();
+    });
+  }
+
+  //  Nach dem Neuladen: sagen, dass es geklappt hat – oder was noch fehlt.
+  function reportWipe() {
+    var match = /[#&]wiped=(\w+)/.exec(global.location.hash || "");
+    if (!match) return;
+    try {
+      global.history.replaceState(null, "", global.location.pathname + global.location.search);
+    } catch (error) { /* file:// */ }
+    toast(t(match[1] === "done" ? "wipeDone" : match[1] === "blocked" ? "wipeBlocked" : "wipeFailed"));
+  }
+
   function openTab() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1809,6 +1880,7 @@
         { label: t("example"), hint: t("exampleTitle"), icon: "sparkles", action: loadExample },
         { label: t("aiMenu"), hint: t("aiMenuHint"), icon: "bot", action: openAi },
         { label: t("openTab"), hint: t("openTabTitle"), icon: "external-link", action: openTab },
+        { label: t("wipe"), hint: t("wipeHint"), icon: "trash", action: wipeDevice },
       ]));
     });
     document.getElementById("btn-import").addEventListener("click", function () {
@@ -2271,6 +2343,9 @@
     //  Deutsch, auch in der englischen Oberflaeche.
     status(firstVisit ? t("ready") : t("saved"));
     readHash();
+    //  Ist RickCV schon offen und kommt ein Link in denselben Tab, laedt der
+    //  Browser die Seite nicht neu – er wechselt nur den Anker.
+    global.addEventListener("hashchange", readHash);
     if (global.RickCVSaveFile) {
       global.RickCVSaveFile.init({
         t: function (key) { return t(key); },
@@ -2300,6 +2375,8 @@
       });
     }
     global.addEventListener("pagehide", flushSave);
+    watchWipe();
+    reportWipe();
     global.addEventListener("focus", function () { setTimeout(restoreTitle, 1000); });
     document.addEventListener("visibilitychange", function () {
       if (document.visibilityState === "hidden") flushSave();

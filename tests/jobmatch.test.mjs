@@ -389,5 +389,54 @@ console.log("\n— Abschlüsse auf einer Leiter —");
   ok(!wrong.length, `${ladder.length} Paare aus Anzeige und Lebenslauf`, wrong.join(" · "));
 }
 
+console.log("\n— Bewerbungsteil ohne Überschrift —");
+{
+  const ad = "Ausbildung zur Kauffrau für Büromanagement (m/w/d)\n\nDas bringst du mit\n- Realschulabschluss\n- sicheren Umgang mit Word und Excel\n" +
+    "- Freude am Kontakt mit Menschen\n\nBewerbung bis 31. Januar 2027 als PDF an Frau Petra Hahn, Personalabteilung:\n" +
+    "ausbildung@brandt-haustechnik.example\nBrandt Haustechnik GmbH, Industriestraße 8, 37079 Göttingen";
+  const found = labels(Match.analyse(ad, resume(() => {}), []));
+  const noise = found.filter((label) => /Januar|Hahn|Personal|Brandt|Industrie|Göttingen/.test(label));
+  ok(!noise.length, "Frist, Ansprechperson und Anschrift sind keine Anforderungen", noise.join(", "));
+  ok(found.includes("Word") && found.includes("Excel"), "die Anforderungen davor bleiben", found.join(", "));
+  ok(found.includes("Kontaktfreude") && !found.includes("Kontakt"), "„Freude am Kontakt mit Menschen“ ist Persönliches", found.join(", "));
+  const agg = labels(Match.analyse("Dein Profil\n- SAP\nBewerbungen von Menschen mit Schwerbehinderung sind willkommen.\nDein Profil\n- Excel",
+    resume(() => {}), []));
+  ok(agg.includes("Excel"), "der AGG-Satz öffnet keinen Bewerbungsteil", agg.join(", "));
+}
+
+console.log("\n— Abschluss in Arbeit —");
+{
+  const pupil = resume((s) => {
+    s.events = [{ title: "Oberschule, zurzeit 10. Klasse", company: "Oberschule am Rosengarten", sectionId: "education",
+                  start: "08/2020", present: true, description: [],
+                  list: ["Angestrebter Abschluss: Realschulabschluss im Sommer 2027"] }];
+  });
+  const status = (ad, state = pupil) => (all(Match.analyse(ad, state, [])).find((t) => t.kind === "degree") || {}).status;
+  ok(status("Dein Profil\n- Realschulabschluss (oder du machst ihn gerade)") === "pending",
+     "„oder du machst ihn gerade“: kommt noch, keine Lücke");
+  ok(status("Dein Profil\n- voraussichtlicher Realschulabschluss bis zum Ausbildungsbeginn") === "pending",
+     "„voraussichtlich … bis zum Ausbildungsbeginn“");
+  ok(status("Ausbildung zum Elektroniker (m/w/d)\n\nDein Profil\n- Mittlere Reife") === "pending",
+     "Ausbildungsstelle: der Schulabschluss darf noch kommen");
+  ok(status("Sachbearbeitung (m/w/d)\n\nDein Profil\n- Realschulabschluss") === "unfinished",
+     "sonst angestrebt, aber nicht erreicht");
+  ok(status("Sachbearbeitung (m/w/d)\n\nDein Profil\n- Abgeschlossene Ausbildung zur Kauffrau, Realschulabschluss") !== "pending",
+     "„Abgeschlossene Ausbildung zur …“ ist keine Ausbildungsstelle");
+  ok(status("Dein Profil\n- Abitur (oder du machst es gerade)") === "missing",
+     "ein höherer Abschluss als der angestrebte fehlt weiter");
+  const dropped = resume((s) => {
+    s.events = [{ title: "Realschule, abgebrochen", company: "", sectionId: "education", start: "2019", present: false,
+                  description: [], list: [] }];
+  });
+  ok(status("Dein Profil\n- Realschulabschluss (oder du machst ihn gerade)", dropped) === "missing",
+     "abgebrochen ist nicht in Arbeit");
+  const trainee = resume((s) => {
+    s.events = [{ title: "Ausbildung zur Kauffrau für Büromanagement", company: "Stadtwerke", sectionId: "education",
+                  start: "08/2024", end: "07/2099", present: false, description: [], list: [] }];
+  });
+  ok(status("Dein Profil\n- Abgeschlossene kaufmännische Ausbildung oder kurz vor dem Abschluss", trainee) === "pending",
+     "eine Ausbildung kurz vor dem Abschluss");
+}
+
 console.log(fails ? `\n${fails} Fehler\n` : "\nalles grün\n");
 process.exit(fails ? 1 : 0);

@@ -1470,6 +1470,8 @@
         letter: { icon: "✉", key: "jobLetter" },
         missing: { icon: "✗", key: "jobMissing" },
         alternative: { icon: "✓", key: "jobAlternative" },
+        pending: { icon: "◐", key: "jobPending" },
+        unfinished: { icon: "◐", key: "jobUnfinished" },
         dismissed: { icon: "–", key: "jobDismissed" },
         confirmed: { icon: "✓", key: "jobConfirmed" },
         open: { icon: "·", key: "jobOpen" },
@@ -1549,7 +1551,7 @@
           action(t("jobNotMe"), function () { setDismissed(term.label, true); });
         } else if (term.status === "confirmed") {
           action(t("undo"), function () { unconfirm(term.label); });
-        } else if (term.status === "similar") {
+        } else if (term.status === "similar" || term.status === "unfinished") {
           action(t("jobNotMe"), function () { setDismissed(term.label, true); });
         } else if (term.status === "dismissed") {
           action(t("jobShow"), function () { setDismissed(term.label, false); });
@@ -1576,7 +1578,7 @@
             if (term.status === "missing" && req.level === "must") gaps.must++;
             if (term.status === "missing" && req.level === "nice") gaps.nice++;
             if ((req.level === "must" || req.level === "nice") &&
-                (term.status === "similar" || term.status === "letter")) gaps.similar++;
+                (term.status === "similar" || term.status === "letter" || term.status === "unfinished")) gaps.similar++;
           });
         });
         var summary = !gaps.must && !gaps.nice && !gaps.similar ? t("jobAllCovered")

@@ -45,6 +45,9 @@ upload, no server. Your data stays on your device.
   and English, every way of gendering, offline, no AI and deliberately no score.
 - **My documents.** Several applications side by side, a copy per job, a bin for 30 days, and
   earlier versions — kept automatically before every import and every 15 minutes of work.
+- **Shared computers.** *More → Remove everything from this device* deletes every document,
+  earlier version, the bin and the settings in one step — for schools, libraries and advice
+  centres.
 - **Works with your AI.** No model built in, but RickCV writes a ready brief for a chat or an
   agent, and the answer goes back in through the normal import.
 - **German and English** for interface and document. Light and dark mode.

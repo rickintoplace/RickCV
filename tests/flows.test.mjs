@@ -87,9 +87,9 @@ async function open(browser) {
   };
   await send("Page.enable");
   await send("Runtime.enable");
-  const load = async () => {
+  const load = async (hash = "") => {
     events.length = 0;
-    await send("Page.navigate", { url: `http://127.0.0.1:${server.address().port}/index.html` });
+    await send("Page.navigate", { url: `http://127.0.0.1:${server.address().port}/index.html${hash}` });
     for (let i = 0; i < 100 && !events.some((e) => e.method === "Page.loadEventFired"); i++) await sleep(100);
     await sleep(1500);
   };
@@ -270,6 +270,55 @@ if (!browser) {
     ok(fitted.full === "8/2" && fitted.short === "5/0" && fitted.back === "8/2",
        "„example: short“: das Beispiel passt sich dem Theme an", JSON.stringify(fitted));
     ok(fitted.own === "8/2", "eigener Inhalt bleibt beim Themewechsel unverändert", JSON.stringify(fitted));
+
+    //  Der Startlink einer Lehrkraft: nur die Anzeige. Er wird erkannt, nennt
+    //  die Anzeige und legt sich zum angefangenen Lebenslauf, statt ihn zu
+    //  ersetzen.
+    const adOnly = Buffer.from(JSON.stringify({ version: 5, locale: "de",
+      job: { ad: "Ausbildung zur Kauffrau für Büromanagement (m/w/d)\n\nDas bringst du mit\n- Realschulabschluss" } }))
+      .toString("base64url");
+    await b.load("#data=" + adOnly);
+    await sleep(800);
+    const linked = await E(`(async function () { ${helpers}
+      var dialog = document.querySelector(".imp-overlay:not([hidden])");
+      var text = dialog ? dialog.textContent : "";
+      var mode = document.querySelector('input[name="imp-mode"]:checked');
+      var mode = mode ? mode.value : "";
+      var apply = dialog && dialog.querySelector(".btn-primary");
+      if (apply) apply.click();
+      await wait(800);
+      var doc = JSON.parse(localStorage.getItem("rickcv.data.v3"));
+      return { shown: /Stellenanzeige/.test(text) && /Ausbildung zur Kauffrau für Büromanagement/.test(text), mode: mode,
+               name: doc.contact.name, ad: doc.job.ad.slice(0, 20), text: text.slice(0, 300) };
+    })()`);
+    ok(linked.shown, "Link mit nur einer Anzeige: der Dialog nennt sie", JSON.stringify(linked));
+    ok(linked.mode === "merge" && linked.name === "Eigene Fassung" && linked.ad === "Ausbildung zur Kauff",
+       "… ergänzt das offene Dokument, statt es zu ersetzen", JSON.stringify(linked));
+
+    //  Alles von diesem Geraet entfernen: danach ist nichts mehr da – kein
+    //  Dokument, kein Papierkorb, kein frueherer Stand, kein Schluessel.
+    const before = await E(`RickCVStore.listDocs().then(function (d) { return d.length; })`);
+    await E(`(async function () { ${helpers}
+      menu("Alles von diesem Gerät entfernen"); await wait(250);
+      var go = document.querySelector(".rc-dialog-confirm .btn-primary"); if (go) go.click();
+    })()`);
+    await sleep(3000);
+    const wiped = await E(`(async function () {
+      var docs = await RickCVStore.listDocs();
+      var all = docs.map(function (d) { return d.data; }).join(" ");
+      var versions = 0;
+      for (var i = 0; i < docs.length; i++) versions += (await RickCVStore.listVersions(docs[i].id)).length;
+      var keys = Object.keys(localStorage).filter(function (k) { return k.indexOf("rickcv.") === 0; });
+      var name = document.querySelector('[data-section="person"] input');
+      return { docs: docs.length, leftover: /Fassung|Harald/.test(all + " " + (localStorage.getItem("rickcv.data.v3") || "")),
+               versions: versions, keys: keys, name: name ? name.value : "",
+               toast: (document.getElementById("toast") || {}).textContent || "" };
+    })()`);
+    //  Danach beginnt RickCV wie beim ersten Besuch: ein neues Dokument mit
+    //  dem Beispiel hinter der Begruessung. Vom alten Stand ist nichts da.
+    ok(before >= 2 && wiped.docs <= 1 && !wiped.leftover && wiped.versions <= 1,
+       "„Alles von diesem Gerät entfernen“: keine Dokumente, Stände oder Reste mehr", JSON.stringify({ before, ...wiped }));
+    ok(/Alles entfernt|Everything removed/.test(wiped.toast), "… und sagt es", JSON.stringify(wiped));
 
     ok(b.errors().length === 0, "keine Skriptfehler", b.errors().join(" | "));
   } finally {

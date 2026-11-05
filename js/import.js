@@ -130,6 +130,7 @@
       photo: "",       // Bewerbungsfoto als Datenadresse
       signature: "",   // Unterschrift aus dem Anschreiben
       letter: null,    // das Anschreiben selbst, falls eines dabei war
+      job: null,       // die Stellenanzeige ({ ad }), nur aus RickCVs eigenem Format
       images: 0,       // wieviele Bilder insgesamt gefunden wurden
       warnings: [],
     };
@@ -714,6 +715,8 @@
         closing: clean(letter.closing),
       };
     }
+
+    if (state.job && clean(state.job.ad)) profile.job = { ad: String(state.job.ad) };
 
     return profile;
   }
@@ -3738,6 +3741,14 @@
       }
     }
 
+    //  Die Stellenanzeige. Beim Ergaenzen ersetzt sie eine vorhandene: wer
+    //  eine Anzeige hereinholt, will gegen diese abgleichen. Der Dialog hat
+    //  vorher gesagt, dass eine kommt.
+    if (profile.job && clean(profile.job.ad)) {
+      var same = target.job && clean(target.job.ad) === clean(profile.job.ad);
+      if (!same) target.job = { ad: String(profile.job.ad), dismissed: [], confirmed: [] };
+    }
+
     if (profile.links && profile.links.length) {
       var footer = target.footers.right;
       profile.links.slice(0, 4).forEach(function (link) {
@@ -3916,8 +3927,10 @@
       //  AGENTS.md sagt: alles ist optional, die Fassung eingeschlossen. Ein
       //  Dokument, das nur Kontaktdaten traegt – so schreibt es ein Chat
       //  gern –, ist trotzdem eines von RickCV.
+      //  Ein Link, der nur die Stellenanzeige bringt – so verteilt ihn eine
+      //  Lehrkraft an die Klasse –, ist ebenso eines.
       if (isObject(data.contact) || Array.isArray(data.events) || isObject(data.coverLetter) ||
-          isObject(data.profile)) return "rickcv";
+          isObject(data.profile) || (isObject(data.job) && typeof data.job.ad === "string")) return "rickcv";
       return "json-unknown";
     }
     return "text";
@@ -3944,9 +3957,20 @@
       references: profile.references.length,
       links: profile.links.length,
       letter: profile.letter && profile.letter.paragraphs.length ? 1 : 0,
+      job: profile.job && clean(profile.job.ad) ? 1 : 0,
       images: (profile.photo ? 1 : 0) + (profile.signature ? 1 : 0) +
         profile.projects.filter(function (project) { return clean(project.img); }).length,
     };
+  }
+
+  //  Fuer die Bestaetigung: die erste Zeile der Anzeige, gekuerzt.
+  function jobTitle(state) {
+    var ad = state && state.job ? clean(state.job.ad) : "";
+    if (!ad) return "";
+    //  So, wie sie dasteht – RickCVJobMatch.titleOf entgendert, und aus
+    //  "zur Kauffrau / zum Kaufmann" wuerde "zur Kaufmann".
+    var first = ad.split("\n")[0].trim();
+    return first.length > 70 ? first.slice(0, 68).replace(/\s+\S*$/, "") + " …" : first;
   }
 
   function result(format, profile, state, text) {
@@ -3955,6 +3979,7 @@
       profile: profile || null,
       state: state || null,
       summary: profile ? summarize(profile) : summarize(stateToProfile(state)),
+      jobTitle: jobTitle(state),
       warnings: (profile && profile.warnings) || [],
       //  Bei Text und PDF steht daneben, was gelesen wurde: findet die
       //  Heuristik wenig, kann man immer noch selbst zuordnen.

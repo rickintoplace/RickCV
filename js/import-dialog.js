@@ -218,6 +218,12 @@
     clear(overlay.foot);
 
     var summary = parsed.summary;
+    //  Bringt die Datei nichts als eine Stellenanzeige (der Startlink einer
+    //  Lehrkraft), soll sie den angefangenen Lebenslauf nicht ersetzen,
+    //  sondern sich dazulegen.
+    var jobOnly = summary.job && !summary.name && !summary.profileText && !summary.letter &&
+      SUMMARY_ROWS.every(function (row) { return !summary[row.key]; });
+    if (jobOnly) mode = "merge";
 
     body.appendChild(el("p", "imp-format",
       t("impFoundIn").replace("{format}", t(FORMAT_LABEL[parsed.format] || "fmtText"))));
@@ -234,6 +240,10 @@
     if (summary.letter) {
       list.appendChild(el("dt", null, t("sumLetter")));
       list.appendChild(el("dd", null, "✓"));
+    }
+    if (summary.job) {
+      list.appendChild(el("dt", null, t("sumJob")));
+      list.appendChild(el("dd", null, parsed.jobTitle || "✓"));
     }
     SUMMARY_ROWS.forEach(function (row) {
       var value = summary[row.key];
@@ -299,7 +309,7 @@
       var next = Import.apply(options.state(), parsed, mode);
       var count = SUMMARY_ROWS.reduce(function (sum, row) {
         return sum + (Number(summary[row.key]) || 0);
-      }, summary.letter ? 1 : 0);
+      }, (summary.letter ? 1 : 0) + (summary.job ? 1 : 0));
       //  hide() raeumt `parsed` weg – was gemeldet werden soll, muss
       //  vorher festgehalten werden.
       var info = { count: count, format: parsed.format, mode: mode };

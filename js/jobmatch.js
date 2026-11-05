@@ -425,7 +425,18 @@
   //  Zeilen, die in keiner Anzeige eine Anforderung sind – wichtig vor
   //  allem ohne Gliederung, wo sonst Urlaub und Ansprechpartner mitzaehlen.
   var OFFER_LINE = /\b(urlaub|urlaubstage|jobrad|jobticket|deutschlandticket|verguetung|gehalt|tarif|tvoed|tv l|tv-l|entgeltgruppe|eg \d|jahressonderzahlung|weihnachtsgeld|altersvorsorge|zusatzversorgung|gleitzeit|homeoffice|mobiles arbeiten|firmenwagen|dienstwagen|zuschuss|zuschuesse|zulage|fitness|kantine|kita|kinderbetreuung|benefits?|salary|compensation|pto|paid time off|401 ?k|dental|vision insurance|health insurance|stock options|equity|holiday|vacation|bonus scheme|remote friendly|relocation|wir bieten|we offer|sie erwartet|freuen sie sich|freu dich|weekly pay|overtime|per hour|hourly|paid training|we (can )?(train|certify) you|we provide|what you get|sign on bonus|tuition|employee discount|uniforms? provided|bezahlte einarbeitung|einarbeitung|wir zahlen|tarifliche|bezahlung|zuschlaege|sonn und feiertag|probezeit|uebernahme|unbefristet|befristet|minijob|\d+ ?% bonus|annual bonus|quarterly incentives|pension|healthcare|cycle to work|bank holidays|days holiday|wochenstunden)\b|\$\s?\d|\d\s?(€|eur|euro)\b|\/hr\b/;
-  var CONTACT_LINE = /@|https?:|www\.|\bruf (uns |einfach |gern )*an\b|\bcall us\b|\b(tel|telefon|phone|ansprechpartner|ansprechpartnerin|kontakt|bewerbung (bitte |an |ueber )|bewerben sie sich|bewirb dich|apply (now|online|via|at)|send (your|us)|richten sie|fragen beantwortet|rueckfragen|stellen-?id|referenznummer|kennziffer|bewerbungsfrist|bewerbungsschluss)\b/;
+  var CONTACT_LINE = /@|https?:|www\.|^kontakt\b|\bkontakt\s*:|\bkontakt (zu uns|aufnehmen)\b|\bruf (uns |einfach |gern )*an\b|\bcall us\b|\b(tel|telefon|phone|ansprechpartner|ansprechpartnerin|kontaktdaten|kontaktiere|kontaktieren|bewerbung (bitte |an |ueber )|personalabteilung|personalbuero|zu haenden|z hd|bewerben sie sich|bewirb dich|apply (now|online|via|at)|send (your|us)|richten sie|fragen beantwortet|rueckfragen|stellen-?id|referenznummer|kennziffer|bewerbungsfrist|bewerbungsschluss)\b/;
+  //  "Freude am Kontakt mit Menschen" ist eine Anforderung – nur "Kontakt:"
+  //  und "Kontakt aufnehmen" sind es nicht (oben).
+  //  Eine Postanschrift ist nie eine Anforderung: "Industriestraße 8",
+  //  "37079 Göttingen".
+  var ADDRESS_LINE = /\b\d{5}\s+[a-z]{3,}(?! ?(euro|eur)\b)|\b[a-z]+(strasse|str|weg|platz|allee|ring|gasse|damm|ufer|chaussee)\.?\s+\d+[a-z]?\b|\bpostfach\s+\d/;
+  //  Wo der Bewerbungsteil ohne eigene Ueberschrift beginnt: "Bewerbung bis
+  //  31. Januar als PDF an …", "Bitte sende deine Unterlagen an …". Alles
+  //  danach bis zur naechsten Ueberschrift ist Anschrift und Frist, keine
+  //  Anforderung.
+  var APPLY_START = /^(deine |ihre |eure |die )?bewerbung(en|sunterlagen|sschluss|sfrist)?\b(?! ?(management|prozess))(?! (von|aller|schwerbehinderter|behinderter)\b)|^(bitte )?(schick|sende|richte|reiche|send|submit|mail)[a-z]* (uns |sie |du )?(bitte |gern |gerne )?(deine|ihre|eure|your|us|an)\b|^(to apply|how to apply|applications? (should|must|can|close|by|to|are due))\b|^(bewirb dich|bewerben sie sich|apply (by|before|via|at|online|now))\b/;
+
   //  "Interessiert?", "Dann freuen wir uns über deine Bewerbung!"
   var APPLY_LINE = /^(interessiert|neugierig|lust bekommen|klingt gut|ueberzeugt|bereit fuer|haben wir dein interesse|bist du dabei)\b[^.]{0,30}\??$|freuen (uns|wir uns) (auf|ueber) (deine|ihre|eure|dich|sie)|\b(dann )?bewirb dich|jetzt bewerben|apply today|apply now|we d love to hear from you|we look forward to (your|hearing)/;
   //  "Ordnung, Sicherheit und Servicequalität sind uns sehr wichtig" – was
@@ -537,6 +548,12 @@
     var all = linesOf(text);
     all.forEach(function (line, index) {
       if (all.bullet[index]) { current.lines.push(line); return; }
+      if (current.kind !== "apply" && APPLY_START.test(fold(stripDecor(line)))) {
+        var words = line.split(/\s+/);
+        current = { kind: "apply", heading: words.slice(0, 4).join(" ") + (words.length > 4 ? " …" : ""), lines: [] };
+        sections.push(current);
+        return;
+      }
       //  "Das bringst du mit: Führerschein Klasse D, Deutsch C1" – die
       //  Ueberschrift steht vor dem Doppelpunkt, der Inhalt dahinter.
       var inline = line.match(/^([^:：]{3,45})[:：]\s+(.{3,})$/);
@@ -648,6 +665,7 @@
     { label: "Höflichkeit", en: "Courtesy", re: /hoeflich|\bcourteous/ },
     { label: "Hilfsbereitschaft", en: "Helpfulness", re: /hilfsbereit/ },
     { label: "Sicheres Auftreten", en: "Confident manner", re: /(sicheres|souveraenes|selbstbewusstes|verbindliches|professionelles) auftreten|souveraen (auftreten|auftrittst|moderierst)|moderierst souveraen|moderieren souveraen/ },
+    { label: "Kontaktfreude", en: "Enjoys working with people", re: /kontaktfreud|freude (am|an dem) (kontakt|umgang) mit (menschen|kunden|kundinnen|leuten|gaesten|patienten)|(gehst|gehen) (gern |gerne )?(offen )?auf (menschen|leute) zu|offen (auf|fuer) (menschen|leute)|enjoy (working with|meeting|talking to) people|people person/ },
     { label: "Zahlenaffinität", en: "Numeracy", re: /zahlenaffin|gespuer fuer zahlen|zahlenverstaendnis|affinitaet (zu|fuer) zahlen|freude an zahlen/ },
   ];
 
@@ -662,7 +680,7 @@
 
   //  Die Woerter, an denen eine Eigenschaft hing, sind danach verbraucht –
   //  sonst kaeme "Teamfähigkeit" ein zweites Mal als Kenntnis herein.
-  var SOFT_WORDS = /\b(kommunikativ\w*|kommunikations\w*|team(faehig|geist|player|orientiert|work|arbeit)\w*|zuverlaessig\w*|verlaesslich\w*|puenktlich\w*|belastbar\w*|stressresisten\w*|verantwortungsbewusst\w*|selbststaendig\w*|eigenverantwortlich\w*|eigeninitiative|sorgfalt\w*|sorgfaeltig\w*|gruendlich\w*|genauigkeit|strukturiert\w*|organisationstalent|organisiert\w*|freundlich\w*|kundenorientier\w*|serviceorientier\w*|flexib\w*|einfuehlungsvermoegen|empathi\w*|einfuehlsam\w*|geduld\w*|loesungsorientier\w*|analytisch\w*|lernbereit\w*|durchsetzungs\w*|konfliktfaehig\w*|motiviert\w*|engagiert\w*|hoeflich\w*|hilfsbereit\w*|ruhe|humor|denkvermoegen|arbeitsweise|teamwork|reliab\w*|punctual\w*|communication|empath\w*|patience|independen\w*|friendly|motivated|fingerspitzengefuehl|auftreten|zahlenaffin\w*)\b/g;
+  var SOFT_WORDS = /\b(kommunikativ\w*|kommunikations\w*|team(faehig|geist|player|orientiert|work|arbeit)\w*|zuverlaessig\w*|verlaesslich\w*|puenktlich\w*|belastbar\w*|stressresisten\w*|verantwortungsbewusst\w*|selbststaendig\w*|eigenverantwortlich\w*|eigeninitiative|sorgfalt\w*|sorgfaeltig\w*|gruendlich\w*|genauigkeit|strukturiert\w*|organisationstalent|organisiert\w*|freundlich\w*|kundenorientier\w*|serviceorientier\w*|flexib\w*|einfuehlungsvermoegen|empathi\w*|einfuehlsam\w*|geduld\w*|loesungsorientier\w*|analytisch\w*|lernbereit\w*|durchsetzungs\w*|konfliktfaehig\w*|motiviert\w*|engagiert\w*|hoeflich\w*|hilfsbereit\w*|ruhe|humor|denkvermoegen|arbeitsweise|teamwork|reliab\w*|punctual\w*|communication|empath\w*|patience|independen\w*|friendly|motivated|fingerspitzengefuehl|auftreten|zahlenaffin\w*|kontaktfreud\w*|kontakt)\b/g;
 
   //  Abschluesse. Schulabschluesse und akademische Grade stehen auf einer
   //  Leiter: wer Abitur hat, hat "mindestens einen Hauptschulabschluss".
@@ -701,14 +719,58 @@
   //  Was der Lebenslauf an Abschluessen hat: die hoechste Stufe der Leiter,
   //  ob eine Ausbildung abgeschlossen ist, und woran man es sieht.
   var UNFINISHED = /angefangen|abgebrochen|ohne abschluss|nicht abgeschlossen|unfinished|incomplete|in progress|laufend|ongoing/;
+  //  Ein Abschluss, den jemand gerade macht: "Angestrebter Abschluss:
+  //  Realschulabschluss im Sommer 2027", eine Schule "bis heute", ein Ende
+  //  in der Zukunft. Er zaehlt nicht als erreicht – aber dort, wo die
+  //  Anzeige das zulaesst, auch nicht als Luecke.
+  var ABANDONED = /angefangen|abgebrochen|ohne abschluss|nicht abgeschlossen|unfinished|incomplete/;
+  var PENDING_CV = /angestrebt|voraussichtlich|zurzeit|derzeit|aktuell|laufend|in progress|ongoing|expected|anticipated|currently/;
+  //  "Realschulabschluss (oder du machst ihn gerade)", "voraussichtlicher
+  //  Abschluss", "bis zum Ausbildungsbeginn", "expected graduation".
+  var PENDING_OK = /\b(du machst|sie machen|ihr macht|du erwirbst|sie erwerben) (ihn|sie|es|diesen|diese|das|den abschluss)? ?(gerade|derzeit|zurzeit|aktuell|noch|bald|demnaechst|in kuerze)\b|\b(angestrebt\w*|voraussichtlich\w*|bevorstehend\w*|in kuerze|kurz vor (dem|deinem|ihrem|seinem|eurem) abschluss|bis (zum )?(ausbildungs|studien|arbeits|dienst)?beginn|zum ausbildungsbeginn|erwartete[nr]? abschluss|im abschlussjahr|abschlussklasse|schulabgaenger\w*|expected|pending|in progress|currently (pursuing|enrolled|completing)|working towards|about to (graduate|complete|finish)|final year)\b/;
+  //  Eine Anzeige fuer eine Ausbildung richtet sich an Leute, die noch zur
+  //  Schule gehen: der Schulabschluss kommt vor dem Beginn, auch wenn sie
+  //  das nicht eigens sagt. "Abgeschlossene Ausbildung zur …" ist dagegen
+  //  eine Forderung, keine Ausbildungsstelle.
+  var TRAINING_AD = /(?<!abgeschlossene[nrs]? )(?<!erfolgreiche[nrs]? )\bausbildung (zum|zur|als)\b|\bausbildungsplatz|\bauszubildende|\bazubi|\bduales studium|\bdualen studium|\bausbildungsbeginn|\bausbildungsstart|\bapprenticeship\b/;
+
+  function endsLater(value) {
+    var match = /^(?:(\d{1,2})\/)?(\d{4})$/.exec(String(value || "").trim());
+    if (!match) return false;
+    var now = new Date();
+    var year = Number(match[2]);
+    var month = match[1] ? Number(match[1]) : 12;
+    return year > now.getFullYear() || (year === now.getFullYear() && month > now.getMonth() + 1);
+  }
   var COMPLETED_VOC = /ausbildung|gesellenbrief|gesellenpruefung|ausgebildet|\blehre\b|lehrabschluss|facharbeiter|\befz\b|faehigkeitszeugnis|apprenticeship|staatlich anerkannt|staatlich gepruef|examen|examiniert/;
 
   function degreesOf(state) {
     var found = { level: 0, voc: false, text: "", path: null, vocText: "", vocPath: null, titles: "",
-                  advanced: false, advancedText: "", advancedPath: null };
+                  advanced: false, advancedText: "", advancedPath: null, pending: null, pendingVoc: null };
     (state && state.events || []).forEach(function (event, index) {
       var text = fold(ungender([event.title, event.company].concat(event.description || []).join(" ")))
         .replace(/[^a-z0-9+#]+/g, " ");
+      if (event.sectionId === "education" && !ABANDONED.test(text)) {
+        //  Was jemand gerade macht, steht oft in den Stichpunkten.
+        var pieces = [event.title].concat(event.description || [], event.list || []);
+        var whole = fold(ungender(pieces.join(" "))).replace(/[^a-z0-9+#]+/g, " ");
+        if (event.present || endsLater(event.end) || PENDING_CV.test(whole)) {
+          var mark = function (level, voc) {
+            var shown = pieces.filter(function (piece) {
+              var one = fold(ungender(piece)).replace(/[^a-z0-9+#]+/g, " ");
+              return DEGREES.some(function (entry) { return entry.re.test(one); }) || (voc && COMPLETED_VOC.test(one));
+            })[0] || String(event.title || "");
+            var entry = { level: level, text: shown, path: "events." + index };
+            if (voc) { if (!found.pendingVoc) found.pendingVoc = entry; }
+            else if (!found.pending || level > found.pending.level) found.pending = entry;
+          };
+          DEGREES.forEach(function (entry) {
+            if (entry.level && !entry.advanced && entry.re.test(whole)) mark(entry.level, false);
+          });
+          if (COMPLETED_VOC.test(whole)) mark(0, true);
+          return;
+        }
+      }
       if (UNFINISHED.test(text)) return;
       //  Ein Studium, das noch laeuft, ist kein Abschluss.
       if (event.sectionId === "education" && event.present) return;
@@ -790,6 +852,19 @@
     //  Meister, Techniker, Fachwirt: "oder vergleichbare Qualifikation".
     if (comparable && cv.advanced && entry.level <= 5) return { status: "found", path: cv.advancedPath, evidence: cv.advancedText };
     return null;
+  }
+
+  //  Noch nicht erreicht, aber unterwegs: "pending", wo die Anzeige das
+  //  zulaesst, sonst "unfinished" – dann gehoert ins Anschreiben, wann der
+  //  Abschluss kommt.
+  function pendingStatus(entry, cv, allowed) {
+    var at = null;
+    if (entry.voc || entry.field) {
+      if (cv.pendingVoc && (!entry.field || entry.field.test(fold(cv.pendingVoc.text)))) at = cv.pendingVoc;
+    } else if (entry.level && cv.pending && cv.pending.level >= entry.level) {
+      at = cv.pending;
+    }
+    return at ? { status: allowed ? "pending" : "unfinished", path: at.path, evidence: at.text } : null;
   }
 
   //  Bedingungen, die als Wortgruppe kommen: "Ability to lift up to 50 lbs",
@@ -1393,6 +1468,7 @@
   function analyse(adText, state, dismissed, confirmed) {
     var lang = language(adText);
     var cvDegrees = degreesOf(state);
+    var training = TRAINING_AD.test(fold(ungender(adText)).replace(/[^a-z0-9+#]+/g, " "));
     var sure = asSet((confirmed || []).map(function (label) { return compact(label); }));
     var sections = segment(adText);
     var structured = sections.some(function (section) {
@@ -1441,7 +1517,8 @@
         //  English/Spanish (+$1.50/hr)") macht die Zeile nicht zum Angebot.
         var bare = folded.replace(/\([^)]*\)/g, " ");
         var plain = spaced(line).trim();
-        if (OFFER_LINE.test(bare) || CONTACT_LINE.test(bare) || ABOUT_LINE.test(folded) || APPLY_LINE.test(plain)) return;
+        if (OFFER_LINE.test(bare) || CONTACT_LINE.test(bare) || ADDRESS_LINE.test(bare) ||
+            ABOUT_LINE.test(folded) || APPLY_LINE.test(plain)) return;
         //  Ohne Gliederung: Saetze ohne Anforderungsmerkmal sind Taetigkeiten.
         var cue = !byCue || REQUIREMENT_CUE.test(folded);
         var level = section.kind === "tasks" || !cue ? "task" : section.kind === "nice" ? "nice" : "must";
@@ -1483,8 +1560,10 @@
         if (level !== "task") {
           var degrees = degreesIn(line, lang);
           var together = degrees.length > 1 && /\s(oder|or|bzw)\s/.test(spaced(line));
+          var pendingOk = PENDING_OK.test(fold(ungender(line)).replace(/[^a-z0-9+#]+/g, " "));
           degrees.forEach(function (one, index) {
-            var at = degreeStatus(one.entry, cvDegrees, one.comparable);
+            var at = degreeStatus(one.entry, cvDegrees, one.comparable) ||
+              pendingStatus(one.entry, cvDegrees, pendingOk || (training && one.entry.level > 0 && one.entry.level <= 4));
             special.push(finish({ label: one.label, group: 1000 + (together ? 0 : index), kind: "degree" },
               at, at ? at.status : "missing"));
           });
