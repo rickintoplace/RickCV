@@ -954,6 +954,31 @@ if (!fs.existsSync(pdfLib)) {
   }
 }
 
+console.log("\n— Antwort einer KI: JSON Resume plus Anschreiben als Text —");
+{
+  //  So antwortet ein Chat auf "Lebenslauf als JSON Resume, Anschreiben als
+  //  Text": Erklaerung, Codeblock, Markdown, das Anschreiben davor oder
+  //  danach. Beides kommt aus einem einzigen Einfuegen.
+  for (const [file, name, salutation, paragraphs] of [
+    ["ki-antwort-de.txt", "Nora Feldmann", "Sehr geehrte Frau Dr. Beispiel,", 3],
+    ["ki-antwort-en.txt", "Sam Taylor", "Dear Ms. Rivera,", 2],
+  ]) {
+    const parsed = Imp.parseText(fs.readFileSync(fixture(file), "utf8"), "eingefuegt.txt");
+    const back = Imp.apply(base(), parsed, "replace");
+    ok(parsed.format === "jsonresume" && back.contact.name === name && back.events.length > 0,
+       `${file}: der Lebenslauf aus dem JSON`, parsed.format + " " + back.contact.name);
+    ok(back.coverLetter.salutation === salutation && back.coverLetter.paragraphs.length === paragraphs &&
+       back.settings.showCoverLetter, `${file}: das Anschreiben aus dem Text daneben`,
+       JSON.stringify([back.coverLetter.salutation, back.coverLetter.paragraphs.length]));
+  }
+  const de = Imp.apply(base(), Imp.parseText(fs.readFileSync(fixture("ki-antwort-de.txt"), "utf8"), "x.txt"), "replace");
+  ok(de.coverLetter.recipient === "Klinikum Süd\nFrau Dr. Beispiel\nSüdstraße 3\n12345 Berlin" &&
+     de.coverLetter.subject === "Bewerbung als Hebamme", "Empfänger und Betreff trotz Markdown", JSON.stringify([de.coverLetter.recipient, de.coverLetter.subject]));
+  //  Ohne Anschreiben daneben bleibt alles wie bisher.
+  const only = Imp.parseText('```json\n{"basics":{"name":"Ada"},"work":[{"name":"X","position":"Y"}]}\n```', "x.txt");
+  ok(!only.summary.letter, "nur JSON: kein Anschreiben erfunden");
+}
+
 console.log("\n— Nur eine Stellenanzeige —");
 {
   //  So verteilt eine Lehrkraft den Startlink: kein Kontakt, keine Station,

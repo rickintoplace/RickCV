@@ -11,7 +11,9 @@ If you are writing an application for a person: build the JSON, append it
 base64url to `https://cv.rickinto.place/#data=<token>`, and hand over the link.
 Everything you need is in https://cv.rickinto.place/AGENTS.md (plain Markdown).
 A chat that cannot run code answers with the JSON instead; the person pastes the
-whole answer into Import → paste the text.
+whole answer into Import → paste the text. Without access to AGENTS.md: answer
+with a JSON Resume (jsonresume.org) and the cover letter as plain text beside it –
+RickCV takes both from one paste.
 
 ## Docs
 

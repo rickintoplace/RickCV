@@ -1,0 +1,18 @@
+Here is your resume in JSON Resume format:
+
+```json
+{"basics":{"name":"Sam Taylor","label":"Line Cook","email":"sam@example.com","phone":"+1 555 0100","location":{"city":"Portland","region":"OR"}},
+ "work":[{"name":"Blue Fern Bistro","position":"Line Cook","startDate":"2021-03","highlights":["Grill and sauté stations","Prep for 120 covers"]}],
+ "skills":[{"name":"Knife skills"},{"name":"ServSafe"}]}
+```
+
+And your cover letter:
+
+Dear Ms. Rivera,
+
+I have spent three years on the line at Blue Fern Bistro, and I would love to bring that experience to your kitchen.
+
+Thank you for considering my application.
+
+Sincerely,
+Sam Taylor

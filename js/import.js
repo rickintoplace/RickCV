@@ -4071,11 +4071,37 @@
     return match ? match[1].trim() : null;
   }
 
+  //  Was um ein JSON herum steht. Eine KI antwortet gern mit dem Lebenslauf
+  //  als JSON (RickCV-Format oder JSON Resume) und schreibt das Anschreiben
+  //  als gewoehnlichen Text dazu – JSON Resume kennt keines.
+  function besideJson(original, json) {
+    if (!original || original === json) return "";
+    var rest = String(original).replace(/```[a-zA-Z]*[ \t]*\n?[\s\S]*?```/g, function (block) {
+      return /\{/.test(block) ? "\n" : block;
+    });
+    var first = rest.indexOf("{");
+    var last = rest.lastIndexOf("}");
+    if (first !== -1 && last > first && /"\s*:/.test(rest.slice(first, last))) {
+      rest = rest.slice(0, first) + "\n" + rest.slice(last + 1);
+    }
+    return rest.trim();
+  }
+
+  //  Ein Anschreiben im Text daneben, als Profil-Brief (siehe readLetter).
+  function letterBeside(rest) {
+    if (!rest || rest.length < 80) return null;
+    var found = fromText(rest);
+    return found.letter && found.letter.paragraphs && found.letter.paragraphs.length ? found.letter : null;
+  }
+
   function parseText(text, name, lines, images) {
     var saved = !lines && unwrapSavedFile(text);
     if (saved) { text = saved; name = "rickcv.json"; }
+    var original = text;
     if (!lines) text = unwrapJson(text);
     var format = detect(name, text);
+    var beside = !lines && !saved && /^(rickcv|jsonresume|reactive)$/.test(format)
+      ? letterBeside(besideJson(original, text)) : null;
 
     if (format === "json-broken") throw new Error("brokenJson");
 
@@ -4086,6 +4112,15 @@
         var newer = Number(data.version) > Model.VERSION;
         var migrated = Model.migrate(data);
         if (!migrated) throw new Error("unreadable");
+        //  Ein Anschreiben neben dem JSON, wenn das Dokument selbst keines hat.
+        if (beside && !(migrated.coverLetter.paragraphs || []).some(function (line) { return clean(line); })) {
+          migrated.coverLetter.recipient = clean(beside.recipient).replace(/[ \t]*\n[ \t]*/g, "\n");
+          migrated.coverLetter.subject = clean(beside.subject);
+          migrated.coverLetter.salutation = clean(beside.salutation);
+          migrated.coverLetter.paragraphs = beside.paragraphs.map(clean).filter(Boolean);
+          if (clean(beside.closing)) migrated.coverLetter.closing = clean(beside.closing);
+          migrated.settings.showCoverLetter = true;
+        }
         var own = result("rickcv", null, migrated);
         //  Was das Dokument ausser Inhalt noch mitbringt, steht in der
         //  Bestaetigung – nicht erst hinterher im Editor.
@@ -4104,9 +4139,12 @@
       if (format === "reactive") {
         var reactive = fromReactiveResume(data);
         if (!hasContent(reactive)) throw new Error("unknownJson");
+        if (beside && !reactive.letter) reactive.letter = beside;
         return result("reactive", reactive);
       }
-      return result("jsonresume", fromJsonResume(data));
+      var resume = fromJsonResume(data);
+      if (beside && !resume.letter) resume.letter = beside;
+      return result("jsonresume", resume);
     }
 
     if (format === "linkedin-csv") {

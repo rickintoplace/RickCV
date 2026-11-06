@@ -1,0 +1,53 @@
+Hier zuerst das Anschreiben:
+
+## 2. Anschreiben
+
+**Nora Feldmann**
+Lindenstraße 7, 10969 Berlin
+
+**Klinikum Süd**
+Frau Dr. Beispiel
+Südstraße 3
+12345 Berlin
+
+Berlin, 6. November 2026
+
+**Betreff: Bewerbung als Hebamme**
+
+Sehr geehrte Frau Dr. Beispiel,
+
+seit zwölf Jahren begleite ich Frauen durch die Geburt – zuletzt im Klinikum Mitte, wo ich rund 200 Geburten im Jahr betreue.
+
+Besonders reizt mich an Ihrem Haus das Konzept der hebammengeleiteten Geburt.
+
+Ich freue mich darauf, Sie in einem persönlichen Gespräch kennenzulernen.
+
+Mit freundlichen Grüßen
+
+Nora Feldmann
+
+---
+
+
+Und hier der Lebenslauf:
+
+```json
+{
+  "basics": {
+    "name": "Nora Feldmann",
+    "label": "Hebamme",
+    "email": "nora.feldmann@example.org",
+    "phone": "+49 30 5551234",
+    "location": { "address": "Lindenstraße 7", "postalCode": "10969", "city": "Berlin" }
+  },
+  "work": [
+    { "name": "Klinikum Mitte", "position": "Hebamme", "location": "Berlin", "startDate": "2019-04",
+      "highlights": ["Begleitung von rund 200 Geburten im Jahr", "Kreißsaal und Wochenbett"] }
+  ],
+  "education": [
+    { "institution": "Hochschule für Gesundheit", "area": "Hebammenkunde", "studyType": "B.Sc.", "startDate": "2013-10", "endDate": "2016-09" }
+  ],
+  "skills": [ { "name": "Geburtsbegleitung" }, { "name": "Notfallmanagement" } ],
+  "languages": [ { "language": "Deutsch", "fluency": "Muttersprache" } ]
+}
+```
