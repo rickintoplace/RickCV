@@ -979,6 +979,41 @@ console.log("\n— Antwort einer KI: JSON Resume plus Anschreiben als Text —")
   ok(!only.summary.letter, "nur JSON: kein Anschreiben erfunden");
 }
 
+console.log("\n— Antwort von ChatGPT, so wie sie kam —");
+{
+  //  Zwei Antworten aus einem echten Chat: ein JSON Resume, das mit "{"
+  //  beginnt, und das Anschreiben als Text. Eingefuegt hintereinander, in
+  //  einem einzigen Codeblock oder andersherum – jedes Mal dasselbe Ergebnis.
+  const json = fs.readFileSync(fixture("ki-chatgpt-lebenslauf.txt"), "utf8").trim();
+  const letter = fs.readFileSync(fixture("ki-chatgpt-anschreiben.txt"), "utf8").trim();
+  for (const [label, text] of [
+    ["hintereinander", json + "\n\n" + letter],
+    ["ohne Leerzeile dazwischen", json + "\n" + letter],
+    ["in einem Codeblock", "```json\n" + json + "\n\n" + letter + "\n```"],
+    ["Anschreiben zuerst", letter + "\n\n" + json],
+  ]) {
+    const parsed = Imp.parseText(text, "eingefuegt.txt");
+    const back = Imp.apply(base(), parsed, "replace");
+    const strings = [];
+    (function walk(v) { if (typeof v === "string") strings.push(v); else if (v && typeof v === "object") Object.values(v).forEach(walk); })(
+      [back.contact, back.profile, back.events, back.skills.items, back.languages.items, back.interests.items, back.coverLetter]);
+    ok(parsed.format === "jsonresume" && back.contact.name === "Max Mustermann" && back.events.length === 4,
+       `${label}: Lebenslauf mit vier Stationen`, parsed.format + " " + back.contact.name + " " + back.events.length);
+    ok(back.coverLetter.paragraphs.length === 5 && back.coverLetter.salutation === "Sehr geehrte Damen und Herren," &&
+       back.coverLetter.recipient === "Deutsche Bahn AG\nPersonalabteilung\nHannover" &&
+       back.coverLetter.closing === "Mit freundlichen Grüßen" && back.settings.showCoverLetter,
+       `${label}: Anschreiben mit Empfänger, fünf Absätzen und Gruß`, JSON.stringify([back.coverLetter.recipient, back.coverLetter.paragraphs.length]));
+    ok(back.contact.address === "Musterstraße 12" && back.contact.city === "30159 Hannover",
+       `${label}: Anschrift aus dem Briefkopf`, back.contact.address + " / " + back.contact.city);
+    ok(!strings.some((x) => /[{}]/.test(x) && !/^var\(/.test(x)), `${label}: keine Klammern im Text`,
+       strings.filter((x) => /[{}]/.test(x)).slice(0, 2).join(" | "));
+  }
+  const back = Imp.apply(base(), Imp.parseText(json, "x.txt"), "replace");
+  ok(back.languages.items.map((l) => l.level).join(",") === "Muttersprache,Gut",
+     "englische Stufen in einem deutschen Lebenslauf auf Deutsch", back.languages.items.map((l) => l.level).join(","));
+  ok(!back.events.some((e) => e.list.includes("Abgeschlossen")), "„Abgeschlossen“ als Note fällt weg");
+}
+
 console.log("\n— Nur eine Stellenanzeige —");
 {
   //  So verteilt eine Lehrkraft den Startlink: kein Kontakt, keine Station,

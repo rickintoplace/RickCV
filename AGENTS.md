@@ -147,8 +147,10 @@ Reactive Resume; RickCV recognises both by their contents. Neither of them has a
 cover letter: write it as plain text next to the JSON (recipient, subject,
 salutation, paragraphs, closing). When the person pastes your whole answer into
 *Import → paste the text*, RickCV takes the resume from the JSON and the letter
-from the text around it. **If you cannot open this page, that is the simplest
-route:** a JSON Resume plus the letter as text.
+from the text around it – before or after the JSON, inside the same code block
+or outside. Put both in **one** code block so the person copies once. **If you
+cannot open this page, that is the simplest route:** a JSON Resume plus the
+letter as text.
 
 ## What RickCV can do if you hand it over
 

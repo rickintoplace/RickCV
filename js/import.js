@@ -156,6 +156,7 @@
   //  https://jsonresume.org/schema – die Feldnamen stehen bewusst
   //  ausgeschrieben da, damit man den Abgleich nachlesen kann.
   function fromJsonResume(source) {
+    var german = writtenInGerman(source || {});
     var profile = emptyProfile();
     var basics = source.basics || {};
     var location = basics.location || {};
@@ -208,7 +209,11 @@
     (source.education || []).forEach(function (entry) {
       var title = [clean(entry.studyType), clean(entry.area)].filter(Boolean).join(", ");
       var event = station("education", entry, title || clean(entry.institution), entry.institution);
-      if (clean(entry.score)) event.list.push(clean(entry.score));
+      //  Eine Note ist eine Angabe; "Abgeschlossen" sagt der Zeitraum schon.
+      var score = clean(entry.score);
+      if (score && !/^(abgeschlossen|completed?|finished|bestanden|passed|erfolgreich( abgeschlossen)?)\.?$/i.test(score)) {
+        event.list.push(/^[\d.,\s/]+$/.test(score) ? "Note: " + score : score);
+      }
       (entry.courses || []).forEach(function (course) {
         if (clean(course)) event.list.push(clean(course));
       });
@@ -257,7 +262,7 @@
       if (!name) return;
       profile.languages.push({
         name: name,
-        level: clean(entry.fluency),
+        level: fluencyFor(entry.fluency, german),
         percentage: fluencyToPercent(entry.fluency),
       });
     });
@@ -309,7 +314,35 @@
     "verhandlungssicher": 90, "professional working proficiency": 75,
     "full professional proficiency": 90, "limited working proficiency": 55,
     "elementary proficiency": 30, "grundkenntnisse": 30, "basic": 30,
+    //  Was Chats in JSON Resume schreiben, auch fuer deutsche Lebenslaeufe.
+    "advanced": 80, "upper intermediate": 70, "intermediate": 60, "conversational": 55,
+    "elementary": 30, "beginner": 20, "sehr gut": 85, "gut": 65, "fortgeschritten": 70,
+    "gute kenntnisse": 65, "sehr gute kenntnisse": 85, "mittel": 55, "anfänger": 20, "anfaenger": 20,
   };
+
+  //  Englische Stufen in einem deutschen Dokument: so, wie sie im deutschen
+  //  Lebenslauf stehen. Eine KI schreibt die Werte von JSON Resume gern auf
+  //  Englisch, auch wenn alles andere deutsch ist.
+  var FLUENCY_DE = {
+    "native speaker": "Muttersprache", "native": "Muttersprache", "mother tongue": "Muttersprache",
+    "fluent": "Fließend", "full professional proficiency": "Verhandlungssicher",
+    "professional working proficiency": "Sehr gut", "advanced": "Sehr gut",
+    "upper intermediate": "Gut", "intermediate": "Gut", "conversational": "Gut",
+    "limited working proficiency": "Grundkenntnisse", "elementary proficiency": "Grundkenntnisse",
+    "elementary": "Grundkenntnisse", "basic": "Grundkenntnisse", "beginner": "Grundkenntnisse",
+  };
+
+  function fluencyFor(value, german) {
+    var level = clean(value);
+    return german ? FLUENCY_DE[level.toLowerCase()] || level : level;
+  }
+
+  //  Ist der Lebenslauf deutsch geschrieben? Dann gehoeren auch die Stufen
+  //  ins Deutsche – ein englisches Dokument behaelt seine.
+  function writtenInGerman(source) {
+    var text = JSON.stringify([source.basics && source.basics.summary, source.work, source.education, source.volunteer]);
+    return /[äöüß]/i.test(text) || (text.match(/\b(und|der|die|das|mit|für|von|im)\b/gi) || []).length >= 3;
+  }
 
   function fluencyToPercent(value) {
     var key = clean(value).toLowerCase();
@@ -3937,30 +3970,53 @@
   //  Herausgeloest wird nur, was sich danach als JSON lesen laesst und nach
   //  einem Lebenslauf aussieht; ein Lebenslauf mit geschweiften Klammern im
   //  Text bleibt Text.
+  //  Ein Lebenslauf-Objekt im Text finden, auch wenn davor oder danach noch
+  //  etwas steht (das Anschreiben, eine Erklaerung des Chats). Gezaehlt
+  //  werden die Klammern, Zeichenketten bleiben aussen vor – eine Klammer im
+  //  Profiltext beendet nichts.
+  var RESUME_KEYS = ["contact", "basics", "settings", "events", "coverLetter", "work", "sections", "job"];
+
+  function findJsonSpan(value) {
+    var text = String(value || "");
+    var from = 0;
+    for (var tries = 0; tries < 20; tries++) {
+      var start = text.indexOf("{", from);
+      if (start === -1) return null;
+      var depth = 0, inString = false, escaped = false, end = -1;
+      for (var i = start; i < text.length; i++) {
+        var ch = text.charAt(i);
+        if (inString) {
+          if (escaped) escaped = false;
+          else if (ch === "\\") escaped = true;
+          else if (ch === '"') inString = false;
+          continue;
+        }
+        if (ch === '"') inString = true;
+        else if (ch === "{") depth++;
+        else if (ch === "}") { depth--; if (depth === 0) { end = i + 1; break; } }
+      }
+      if (end === -1) return null;
+      var data = parseLoose(text.slice(start, end));
+      if (data && typeof data === "object" && !Array.isArray(data) &&
+          RESUME_KEYS.some(function (key) { return data[key]; })) {
+        return { start: start, end: end, data: data };
+      }
+      from = start + 1;
+    }
+    return null;
+  }
+
   function unwrapJson(text) {
     var value = String(text || "").replace(/^\uFEFF/, "").trim();
-    if (value.charAt(0) === "{") return value;
-
-    var candidates = [];
-    var fence = /```[a-zA-Z]*[ \t]*\n?([\s\S]*?)```/g;
-    var match;
-    while ((match = fence.exec(value)) !== null) candidates.push(match[1].trim());
-    var first = value.indexOf("{");
-    var last = value.lastIndexOf("}");
-    if (first !== -1 && last > first) candidates.push(value.slice(first, last + 1));
-
-    for (var i = 0; i < candidates.length; i++) {
-      var candidate = candidates[i];
-      if (candidate.charAt(0) !== "{") continue;
-      var data = parseLoose(candidate);
-      if (data && typeof data === "object" &&
-          (data.contact || data.basics || data.settings || data.events || data.coverLetter ||
-           data.work || data.sections || data.job)) {
-        return JSON.stringify(data);
-      }
+    //  Ganz und gar JSON – oder kaputtes JSON, das die Pruefung danach als
+    //  solches meldet.
+    if (value.charAt(0) === "{" && (parseLoose(value) || value.charAt(value.length - 1) === "}" && !findJsonSpan(value))) {
+      return value;
     }
-    return value;
+    var span = findJsonSpan(value.replace(/```[a-zA-Z]*[ \t]*$/gm, ""));
+    return span ? JSON.stringify(span.data) : value;
   }
+
 
   //  JSON, wie Menschen und Modelle es schreiben: ein Komma vor der
   //  schliessenden Klammer ist kein Grund, ein ganzes Dokument abzulehnen.
@@ -4076,22 +4132,33 @@
   //  als gewoehnlichen Text dazu – JSON Resume kennt keines.
   function besideJson(original, json) {
     if (!original || original === json) return "";
-    var rest = String(original).replace(/```[a-zA-Z]*[ \t]*\n?[\s\S]*?```/g, function (block) {
-      return /\{/.test(block) ? "\n" : block;
-    });
-    var first = rest.indexOf("{");
-    var last = rest.lastIndexOf("}");
-    if (first !== -1 && last > first && /"\s*:/.test(rest.slice(first, last))) {
-      rest = rest.slice(0, first) + "\n" + rest.slice(last + 1);
-    }
+    //  Nur die Zaeune der Codebloecke weg, ihr Inhalt bleibt: steht das
+    //  Anschreiben mit im selben Block, gehoert es dazu.
+    var rest = String(original).replace(/```[a-zA-Z]*[ \t]*$/gm, "");
+    var span = findJsonSpan(rest);
+    if (span) rest = rest.slice(0, span.start) + "\n" + rest.slice(span.end);
     return rest.trim();
   }
 
   //  Ein Anschreiben im Text daneben, als Profil-Brief (siehe readLetter).
+  //  Sein Briefkopf traegt oft, was dem JSON fehlt: die Anschrift.
   function letterBeside(rest) {
     if (!rest || rest.length < 80) return null;
     var found = fromText(rest);
-    return found.letter && found.letter.paragraphs && found.letter.paragraphs.length ? found.letter : null;
+    if (!(found.letter && found.letter.paragraphs && found.letter.paragraphs.length)) return null;
+    found.letter.sender = found.contact;
+    return found.letter;
+  }
+
+  function fillContact(contact, sender) {
+    if (!contact || !sender) return;
+    ["address", "city", "email", "phone"].forEach(function (key) {
+      if (!clean(contact[key]) && clean(sender[key])) contact[key] = clean(sender[key]);
+    });
+    //  "Hannover" aus dem JSON, "30159 Hannover" aus dem Briefkopf: die
+    //  vollstaendigere Angabe gewinnt, wenn sie dieselbe Stadt meint.
+    var city = clean(contact.city), full = clean(sender.city);
+    if (city && full && full !== city && full.indexOf(city) !== -1) contact.city = full;
   }
 
   function parseText(text, name, lines, images) {
@@ -4113,6 +4180,7 @@
         var migrated = Model.migrate(data);
         if (!migrated) throw new Error("unreadable");
         //  Ein Anschreiben neben dem JSON, wenn das Dokument selbst keines hat.
+        if (beside) fillContact(migrated.contact, beside.sender);
         if (beside && !(migrated.coverLetter.paragraphs || []).some(function (line) { return clean(line); })) {
           migrated.coverLetter.recipient = clean(beside.recipient).replace(/[ \t]*\n[ \t]*/g, "\n");
           migrated.coverLetter.subject = clean(beside.subject);
@@ -4139,11 +4207,11 @@
       if (format === "reactive") {
         var reactive = fromReactiveResume(data);
         if (!hasContent(reactive)) throw new Error("unknownJson");
-        if (beside && !reactive.letter) reactive.letter = beside;
+        if (beside && !reactive.letter) { reactive.letter = beside; fillContact(reactive.contact, beside.sender); }
         return result("reactive", reactive);
       }
       var resume = fromJsonResume(data);
-      if (beside && !resume.letter) resume.letter = beside;
+      if (beside && !resume.letter) { resume.letter = beside; fillContact(resume.contact, beside.sender); }
       return result("jsonresume", resume);
     }
 

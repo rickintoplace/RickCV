@@ -1,0 +1,76 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "Max Mustermann",
+    "label": "Bewerber als Zugbegleiter",
+    "email": "max.mustermann@example.com",
+    "phone": "+49 151 12345678",
+    "location": {
+      "city": "Hannover",
+      "countryCode": "DE"
+    },
+    "summary": "Serviceorientierter und zuverlässiger Bewerber mit mehrjähriger Erfahrung im direkten Kundenkontakt. Freundliches Auftreten, ausgeprägte Kommunikationsfähigkeit und Freude am Umgang mit Menschen. Motiviert, mich beruflich neu zu orientieren und als Zugbegleiter bei der Deutschen Bahn tätig zu werden."
+  },
+  "work": [
+    {
+      "name": "Muster Handels GmbH",
+      "location": "Hannover",
+      "position": "Mitarbeiter im Kundenservice",
+      "startDate": "2022-03",
+      "endDate": "2026-10",
+      "summary": "Betreuung und Beratung von Kunden im täglichen Geschäft.",
+      "highlights": [
+        "Freundliche und lösungsorientierte Kundenberatung",
+        "Bearbeitung von Kundenanfragen und Reklamationen",
+        "Eigenständiges Arbeiten auch bei hohem Kundenaufkommen",
+        "Zusammenarbeit im Team und Unterstützung der Kollegen"
+      ]
+    },
+    {
+      "name": "Beispiel Einzelhandel GmbH",
+      "location": "Hannover",
+      "position": "Auszubildender zum Kaufmann im Einzelhandel",
+      "startDate": "2019-08",
+      "endDate": "2022-02",
+      "summary": "Abgeschlossene Berufsausbildung mit Schwerpunkt Kundenberatung und Warenwirtschaft.",
+      "highlights": [
+        "Beratung und Betreuung von Kunden",
+        "Kassentätigkeiten und Abwicklung von Zahlungsvorgängen",
+        "Organisation und Präsentation von Waren"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Berufsbildende Schule Hannover",
+      "area": "Kaufmännischer Bereich",
+      "studyType": "Berufsausbildung",
+      "startDate": "2019-08",
+      "endDate": "2022-02",
+      "score": "Abgeschlossen"
+    },
+    {
+      "institution": "Muster-Realschule Hannover",
+      "area": "Allgemeinbildung",
+      "studyType": "Realschulabschluss",
+      "startDate": "2013-08",
+      "endDate": "2019-06"
+    }
+  ],
+  "skills": [
+    { "name": "Kundenorientierung", "level": "Fortgeschritten" },
+    { "name": "Kommunikation", "level": "Fortgeschritten" },
+    { "name": "Teamfähigkeit", "level": "Fortgeschritten" },
+    { "name": "Konfliktfähigkeit", "level": "Fortgeschritten" },
+    { "name": "Zuverlässigkeit", "level": "Fortgeschritten" },
+    { "name": "Selbstständiges Arbeiten", "level": "Fortgeschritten" }
+  ],
+  "languages": [
+    { "language": "Deutsch", "fluency": "Native speaker" },
+    { "language": "Englisch", "fluency": "Intermediate" }
+  ],
+  "interests": [
+    { "name": "Bahnverkehr und Mobilität" },
+    { "name": "Kontakt mit Menschen" }
+  ]
+}
